@@ -143,7 +143,7 @@ describe('Admin test case', () => {
         chai.request(appServer)
             .post('/api/admin/profile-update')
             .set('auth', adminToken)
-            .field({ email : adminDetails.email})
+            // .field({ email : adminDetails.email})
             .attach('profile', adminDetails.profile)
             .end((err, res) => {
                 if (res.body.status == 200) {

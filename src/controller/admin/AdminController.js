@@ -47,7 +47,7 @@ export const adminLogin = async (req, res) => {
 
 export const adminEditProfile = async (req, res) => {
     try {
-        const findData = await getSingleData({ _id: req.admin, email: req.body.email }, Admin);
+        const findData = await getSingleData({ _id: req.admin }, Admin);
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
         }
