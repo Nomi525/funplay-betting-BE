@@ -11,8 +11,8 @@ const ResponseMessage = {
     PLEASE_USE_VALID_PASSWORD: "Please enter valid password",
     USER_LOGOUT: "User logout",
     ADMIN_LOGOUT: "Admin logout",
-    USER_NOT_EXIST: "User Not exist",
-    ADMIN_NOT_EXIST: "User Not exist",
+    USER_NOT_EXIST: "User not exist",
+    ADMIN_NOT_EXIST: "Admin not exist",
     USER_LIST: "Users list fetched",
     USER_UPDATED: "User updated",
     ADMIN_UPDATED: "Admin updated",
@@ -23,7 +23,9 @@ const ResponseMessage = {
     ACCOUNT_NOT_EXIST: "Account not exist",
     VERIFICATION_COMPLETED: "OTP has been verified",
     INVALID_OTP: "Invalid otp",
+    INVALID_PASSWORD: "Invalid password",
     OTP_NOT_VERIFY: "Otp not verify",
+    USER_NOT_VERIFY: "User not verify",
     PASSWORD_CHANGED: "Password has been changed",
     OLD_PASSWORD_SAME: "Old and new password should not be same",
     SINGLE_USER: "Single user fetched",
@@ -36,7 +38,12 @@ const ResponseMessage = {
     PASSWORD_AND_CONFIRM_PASSWORD: "Password and confirm password not match",
     DATA_NOT_FOUND: "Data not found",
     SENT_OTP_ON_YOUR_MOBILE : "Sent otp on your mobile",
-    THIS_USER_IS_DEACTIVATED : "This user is deactivated"
+    SENT_OTP_ON_YOUR_EMAIL : "Sent otp on your email",
+    THIS_USER_IS_DEACTIVATED : "This user is deactivated",
+    MPIN_ALREADY_USE : "MPIN already use",
+    OLD_MPIN_WRONG : "Old MPIN worng",
+    INVALID_MPIN : "Invalid MPIN",
+    DATA_GET : "Get data"
 }
 
 export { ResponseMessage }

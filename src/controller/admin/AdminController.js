@@ -1,4 +1,4 @@
-import { ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt } from "./../../index.js";
+import { ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User } from "./../../index.js";
 
 
 // export const adminRegister = async (req, res) => {
@@ -23,7 +23,6 @@ import { ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, se
 export const adminLogin = async (req, res) => {
     try {
         const findAdmin = await getSingleData({ email: req.body.email, is_deleted: 0 }, Admin);
-        // console.log('findUser',findUser);
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
@@ -52,9 +51,9 @@ export const adminEditProfile = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
         }
         req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-        const userData = await dataUpdated({ _id: req.admin, is_deleted: 0 }, req.body, Admin);
-        if (userData) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_UPDATED, userData);
+        const adminData = await dataUpdated({ _id: req.admin, is_deleted: 0 }, req.body, Admin);
+        if (adminData) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_UPDATED, adminData);
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DATA_NOT_FOUND, []);
         }
@@ -65,9 +64,9 @@ export const adminEditProfile = async (req, res) => {
 
 // export const getAllUsers = async (req, res) => {
 //     try {
-//         const userData = await getAllData({ is_deleted: 0 }, User);
-//         if (userData.length) {
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, userData);
+//         const adminData = await getAllData({ is_deleted: 0 }, User);
+//         if (adminData.length) {
+//             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, adminData);
 //         } else {
 //             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
 //         }
@@ -101,12 +100,12 @@ export const adminChangePassword = async (req, res) => {
 export const adminForgetPassword = async (req, res) => {
     try {
         const { email } = req.body
-        const userData = await getSingleData({ email: email, is_deleted: 0 }, Admin);
-        if (userData) {
-            // const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+        const adminData = await getSingleData({ email: email, is_deleted: 0 }, Admin);
+        if (adminData) {
+            // const otp = generateOtp();
             const otp = 4444;
             let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp });
-            const updateOtp = await dataUpdated({ _id: userData._id }, { otp }, Admin);
+            const updateOtp = await dataUpdated({ _id: adminData._id }, { otp }, Admin);
             await sendMail(updateOtp.email, "Forgot Password", mailInfo)
                 .then((data) => {
                     if (data == 0) {
@@ -131,7 +130,7 @@ export const adminVerifyOtp = async (req, res) => {
             if (admin?.otp == otp) {
                 admin.otp = null;
                 await admin.save();
-                const updateAdmin = await dataUpdated({ _id: admin._id }, { resetPasswordAllow: true , otp: null }, Admin);
+                const updateAdmin = await dataUpdated({ _id: admin._id }, { resetPasswordAllow: true, otp: null }, Admin);
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateAdmin);
             } else {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
@@ -197,6 +196,19 @@ export const adminLogout = async (req, res) => {
         }
         else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const findUsers = await getAllData({ is_deleted: 0 }, User);
+        if (findUsers.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUsers);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
         return createError(res, error);

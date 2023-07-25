@@ -1,144 +1,127 @@
-import { ResponseMessage, genrateToken, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt } from "./../../index.js";
+import { ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail } from "./../../index.js";
 
-export const userSignupSignin = async (req, res) => {
-    let { mobileNumber } = req.body;
+export const userSignUpSignInOtp = async (req, res) => {
     try {
-        const otp = generateOtp(); // for generate OTP
-        const existingUser = await getSingleData({ mobileNumber, is_deleted: 0 }, User);
+        let { email } = req.body;
+        const otp = 4444; // for generate OTP
+        // const otp = generateOtp(); // for generate OTP
+        const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
         if (existingUser) {
-            if (existingUser.isActive == true) {
-                const updateOtp = await dataUpdated({ mobileNumber }, { otp }, User)
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.SENT_OTP_ON_YOUR_MOBILE, updateOtp);
-            } else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.THIS_USER_IS_DEACTIVATED, []);
-            }
-
+            const updateOtp = await dataUpdated({ email }, { otp }, User)
+            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+            await sendMail(existingUser.email, "Verify Otp", mailInfo)
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.SENT_OTP_ON_YOUR_EMAIL, updateOtp);
         } else {
-            const userData = await dataCreate({ mobileNumber, otp }, User)
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.SENT_OTP_ON_YOUR_MOBILE, userData);
+            let referCode = referralCode(8);
+            let findReferralUser = null;
+            // For Referral Code
+            if (req.query.referralCode) {
+                findReferralUser = await User.findOne({
+                    referralCode: req.query.referralCode,
+                });
+                if (!findReferralUser) {
+                    return res.status(404).json({
+                        status: 404,
+                        message: "Reerral code not found",
+                    });
+                }
+            }
+            const userData = await dataCreate({ email, otp, referralCode: referCode, referralByCode: req.query.referralCode ? req.query.referralCode : null }, User)
+            if (findReferralUser) {
+                findReferralUser.useReferralCodeUsers.push(userData._id);
+                await findReferralUser.save();
+            }
+            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+            await sendMail(userData.email, "Verify Otp", mailInfo)
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.SENT_OTP_ON_YOUR_EMAIL, userData);
         }
-
     } catch (error) {
         return createError(res, error);
     }
 }
 
+export const resendOtp = async (req, res) => {
+    try {
+        let { userId } = req.body;
+        const otp = 4444;
+        // const otp = generateOtp();
+        const findUser = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        if (findUser) {
+            const updateOtp = await dataUpdated({ _id: userId }, { otp }, User)
+            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+            await sendMail(findUser.email, "Verify Otp", mailInfo);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.SENT_OTP_ON_YOUR_EMAIL, updateOtp);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+
 export const verifyOtp = async (req, res) => {
     try {
-        let { otp, id } = req.body;
-        let user = await getSingleData({ _id: id, is_deleted: 0 }, User);
+        let { userId, otp } = req.body;
+        let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
             if (user.otp != otp) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             } else {
-                if (user.steps <= 1) {
-                    const userUpdate = await dataUpdated({ _id: id }, { steps: 1, isVerified: true, isActive : true }, User)
-                    const payload = {
-                        user: {
-                            id: userUpdate._id,
-                        },
-                    };
-                    const token = await genrateToken({
-                        payload,
-                        ExpiratioTime: "1d",
-                    });
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, { ...userUpdate._doc, token });
-                } else {
-
-                    const userUpdate = await dataUpdated({ _id: id }, { isVerified: true, otp: null }, User)
-                    const payload = {
-                        user: {
-                            id: userUpdate._id,
-                        },
-                    };
-                    const token = await genrateToken({
-                        payload,
-                        ExpiratioTime: "1d",
-                    });
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, { ...userUpdate._doc, token });
-                }
+                const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
+                const payload = {
+                    user: {
+                        id: userUpdate._id,
+                    },
+                };
+                const token = await genrateToken({ payload });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, { ...userUpdate._doc, token });
             }
         } else {
-            console.log("steps update");
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
         return createError(res, error);
     }
 };
 
-
-export const register = async (req, res) => {
+export const userSignInMpin = async (req, res) => {
+    let { email } = req.body;
     try {
-        const otp = generateOtp(); // for generate OTP
-        const findUser = await getSingleData({ mobile: req.body.mobile, is_deleted: 0 }, User);
-        if (findUser) {
-            return sendResponse(res, StatusCodes.CONFLICT, ResponseMessage.USER_ALREADY_EXIST, []);
-        } else {
-            req.body.password = await passwordHash(req.body.password);
-            const saveUser = await dataCreate(req.body, User);
-            if (saveUser) {
-                return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_CREATED, saveUser);
-            } else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.FAILED_TO_CREATED, []);
+        const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
+        if (existingUser) {
+            if (!existingUser.isVerified) {
+                return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_NOT_VERIFY, []);
             }
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, existingUser);
+        } else {
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_NOT_EXIST, []);
         }
-
     } catch (error) {
         return createError(res, error);
     }
 }
 
-
-export const sendOtp = async (req, res) => {
+export const loginFromMpin = async (req, res) => {
     try {
-        const findUser = await getSingleData({ mobileNumber: req.body.mobileNumber, is_deleted: 0 }, User);
-        // console.log('findUser',findUser);
-        if (findUser) {
-            const otp = 4444;
-            // findUser.isLogin = true;
-            // await findUser.save();
-            // const comparePassword = await passwordCompare(req.body.password, findUser.password);
-            // if (comparePassword) {
-            //     let token = jwt.sign({ user: { id: findUser._id } }, process.env.JWT_SECRET_KEY);
-            //     return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...findUser._doc, token });
-            // }
-            // else {
-            //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
-            // }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_SEND, otp);
-        }
-        else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        let { userId, mPin } = req.body;
+        let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        if (user) {
+            if (user.mPin !== mPin) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.INVALID_MPIN, []);
+            }
+            const payload = {
+                user: {
+                    id: user._id,
+                },
+            };
+            const token = await genrateToken({ payload });
+            const userUpdate = await dataUpdated({ _id: user._id }, { isLogin: true }, User)
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...userUpdate._doc, token });
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        console.log('error', error);
-        return createError(res, error);
-    }
-}
-
-export const login = async (req, res) => {
-    try {
-        const findUser = await getSingleData({ mobileNumber: req.body.mobileNumber, is_deleted: 0 }, User);
-        // console.log('findUser',findUser);
-        if (findUser) {
-            const otp = 4444;
-            // findUser.isLogin = true;
-            // await findUser.save();
-            // const comparePassword = await passwordCompare(req.body.password, findUser.password);
-            // if (comparePassword) {
-            //     let token = jwt.sign({ user: { id: findUser._id } }, process.env.JWT_SECRET_KEY);
-            //     return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...findUser._doc, token });
-            // }
-            // else {
-            //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
-            // }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_SEND, otp);
-        }
-        else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        console.log('error', error);
         return createError(res, error);
     }
 }
@@ -149,6 +132,15 @@ export const editProfile = async (req, res) => {
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
+
+        // For MPIN
+        if (req.body.mPin) {
+            const findUser = await getSingleData({ mPin: req.body.mPin }, User);
+            if (findUser) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
+            }
+        }
+
         req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
         const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
 
@@ -157,6 +149,7 @@ export const editProfile = async (req, res) => {
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
+
     } catch (error) {
         return createError(res, error);
     }
@@ -177,36 +170,15 @@ export const logout = async (req, res) => {
     }
 }
 
-export const changePassword = async (req, res) => {
-    try {
-        const { oldPassword, newPassword } = req.body
-        const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
-        if (user) {
-            const comparePassword = await passwordCompare(oldPassword, user.password);
-            if (comparePassword) {
-                user.password = await passwordHash(newPassword);
-                user.resetPassword = true
-                await user.save();
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
-            } else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.YOU_ENTER_WRONG_PASSWORD, []);
-            }
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return createError(res, error);
-    }
-}
-
-export const forgetPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body
         const userData = await getSingleData({ email: email, is_deleted: 0 }, User);
         if (userData) {
-            const otp = `${Math.floor(1000 + Math.random() * 9000)}`
-            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp });
-            const updateOtp = await dataUpdated({ _id: userData._id }, { otp }, User);
+            const forgotOtp = 4444
+            // const forgotOtp = generateOtp();
+            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { forgotOtp });
+            const updateOtp = await dataUpdated({ _id: userData._id }, { forgotOtp }, User);
             await sendMail(userData.email, "Forgot Password", mailInfo)
                 .then((data) => {
                     if (data == 0) {
@@ -223,79 +195,100 @@ export const forgetPassword = async (req, res) => {
     }
 }
 
-// export const verifyOtp = async (req, res) => {
-//     try {
-//         let { id, otp } = req.body;
-//         const user = await getSingleData({ _id: id, is_deleted: 0 }, User);
-//         if (user) {
-//             if (user?.otp == otp) {
-//                 user.otp = null;
-//                 await user.save();
-//                 const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
-//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
-//             } else {
-//                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
-//             }
-//         } else {
-//             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-//         }
-//     } catch (error) {
-//         return createError(res, error);
-//     }
-// }
-
-export const resetPassword = async (req, res) => {
+export const verifyForgotOtp = async (req, res) => {
     try {
-        let { userId, password, confirm_password } = req.body;
-        if (password != confirm_password) {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PASSWORD_AND_CONFIRM_PASSWORD, []);
-        } else {
-            const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
-            if (!user) {
-                return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-            }
-            if (!user.resetPasswordAllow) {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OTP_NOT_VERIFY, []);
-            }
-            const matchOldPassword = await passwordCompare(password, user.password);
-            if (matchOldPassword) {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OLD_PASSWORD_SAME, []);
-            }
-            let encryptPassword = await passwordHash(password);
-            const upadteUser = await dataUpdated({ _id: user._id }, { password: encryptPassword, resetPasswordAllow: false }, User);
-            if (upadteUser) {
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.RESET_PASSWORD, upadteUser);
+        let { userId, forgotOtp } = req.body;
+        const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        if (user) {
+            if (user?.forgotOtp == forgotOtp) {
+                user.forgotOtp = null;
+                await user.save();
+                const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
             } else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SOMETHING_WENT_WRONG, []);
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             }
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
         return createError(res, error);
     }
 }
 
-// export const getProfile = async (req, res) => {
-//     try {
-//         let findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
-//         if (findUser) {
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.SINGLE_USER, findUser);
-//         } else {
-//             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-//         }
-//     } catch (error) {
-//         return createError(res, error);
-//     }
-// }
+export const resetPassword = async (req, res) => {
+    try {
+        let { userId, mPin } = req.body;
 
-// export const getAllUsers = async (req, res) => {
-//     try {
-//         const userData = await getAllData({ is_deleted: 0 }, User);
-//         if (userData.length) {
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, userData);
-//         } else {
-//             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-//         }
-//     } catch (error) {
-//         return createError(res, error);
-//     }
-// }
+        const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        if (!user) {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+
+        const findMpin = await getSingleData({ mPin, is_deleted: 0 }, User);
+        if (findMpin) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.MPIN_ALREADY_USE, []);
+        }
+
+        if (!user.resetPasswordAllow) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OTP_NOT_VERIFY, []);
+        }
+
+        const upadteUser = await dataUpdated({ _id: user._id }, { mPin, resetPasswordAllow: false }, User);
+        if (upadteUser) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.RESET_PASSWORD, upadteUser);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SOMETHING_WENT_WRONG, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body
+        const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
+        if (user) {
+            if (user.mPin != oldPassword) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.OLD_MPIN_WRONG, []);
+            }
+
+            const findMpin = await getSingleData({ mPin: newPassword }, User);
+            if (findMpin) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.MPIN_ALREADY_USE, []);
+            }
+            user.mPin = newPassword
+            await user.save();
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
+
+            // const comparePassword = await passwordCompare(oldPassword, user.password);
+            // if (comparePassword) {
+            //     user.password = await passwordHash(newPassword);
+            //     user.resetPassword = true
+            //     await user.save();
+            //     return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
+            // } else {
+            //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.YOU_ENTER_WRONG_PASSWORD, []);
+            // }
+
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const getProfile = async (req, res) => {
+    try {
+        let findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
+        if (findUser) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.SINGLE_USER, findUser);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
