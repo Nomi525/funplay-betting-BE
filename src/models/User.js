@@ -14,33 +14,60 @@ const userSchema = new mongoose.Schema(
             type: Number,
             Unique: true,
         },
-        // password: {
-        //     type: String,
-        //     required: true,
-        // },
+        referralCode: {
+            type: String,
+            required: false,
+        },
+        referralByCode : {
+            type: String,
+            required: false
+        },
+        useReferralCodeUsers : [
+            {
+                type : mongoose.Schema.Types.ObjectId,
+                ref : "User",
+                required : false
+            }
+        ],
+        mPin: {
+            type: Number,
+            required: false,
+        },
+        password: {
+            type: String,
+            required: false,
+        },
         isLogin: {
             type: Boolean,
-            default: true,
+            default: false
+        },
+        isVerified: {
+            type: Boolean,
+            default: false
         },
         resetPasswordAllow: {
             type: Boolean,
             default: false,
         },
         otp: {
-            type: String,
+            type: Number,
+            default: null,
+        },
+        forgotOtp: {
+            type: Number,
             default: null,
         },
         profile: {
             type: String,
             required: false,
         },
+        address: {
+            type: String,
+            required: false,
+        },
         isActive: {
             type: Boolean,
             default: false
-        },
-        steps: {
-            type: Number,
-            default: 0,
         },
         is_deleted: {
             type: Number,

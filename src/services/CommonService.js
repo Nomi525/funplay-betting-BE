@@ -1,4 +1,4 @@
-import { bcryptjs, StatusCodes, ResponseMessage,jwt } from "../index.js";
+import { bcryptjs, StatusCodes, ResponseMessage, jwt } from "../index.js";
 
 export const createError = async (res, error) => {
     return res.status(500).json({
@@ -21,14 +21,33 @@ export const passwordCompare = async (plainPassword, hashPassword) => {
     return await bcryptjs.compare(plainPassword, hashPassword);
 }
 
-export const genrateToken = ({ payload, ExpiratioTime }) => {
-    return jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-        expiresIn: ExpiratioTime,
-    });
+export const genrateToken = ({ payload }) => {
+    return jwt.sign(payload, process.env.JWT_SECRET_KEY);
 };
 
 export const generateOtp = () => {
     let otp = Math.floor(1000 + Math.random() * 9000);
-    // console.log("otp inside func", otp)
     return otp;
+}
+
+export const genString = (length) => {
+    let result = '';
+    const characters = '0123456789';
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters.charAt(randomIndex);
+    }
+    return result;
+}
+
+export const referralCode = (length) => {
+    const codeLength = length;
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let code = "";
+    for (let i = 0; i < codeLength; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        code += chars.charAt(randomIndex);
+    }
+    return code;
 }
