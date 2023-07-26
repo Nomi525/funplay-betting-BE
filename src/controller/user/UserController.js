@@ -1,5 +1,5 @@
 import { ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail } from "./../../index.js";
-
+import fs from "fs"
 export const userSignUpSignInOtp = async (req, res) => {
     try {
         let { email } = req.body;
@@ -197,24 +197,57 @@ export const forgotPassword = async (req, res) => {
 
 export const verifyForgotOtp = async (req, res) => {
     try {
-        let { userId, forgotOtp } = req.body;
+        let { userId, forgotOtp, otp, email, mobileNumber, flag } = req.body;
         const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
-        if (user) {
-            if (user?.forgotOtp == forgotOtp) {
-                user.forgotOtp = null;
-                await user.save();
-                const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
-            } else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
+
+        if (flag == 1 && userId) {
+            if (!email && !mobileNumber) {
+                return res.status(400).json({
+                    status: 400,
+                    message: "Something went wrong",
+                    data: ["please enter email and mobile"],
+                });
+            } if (user.otp !== otp) {
+                return res.status(200).json({
+                    status: StatusCodes.OK,
+                    message: ResponseMessage.INVALID_OTP,
+                    data: updatedUser,
+                });
             }
+            let updatedUser = await User.findByIdAndUpdate(
+                { _id: userId },
+                { $set: { email, mobileNumber, otp: null } },
+                { new: true }
+            );
+            return res.status(200).json({
+                status: StatusCodes.OK,
+                message: ResponseMessage.VERIFICATION_COMPLETED,
+                data: updatedUser,
+            });
         } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+            if (user) {
+                if (user?.forgotOtp == forgotOtp) {
+                    user.forgotOtp = null;
+                    await user.save();
+                    const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
+                } else {
+                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
+                }
+            } else {
+                return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+            }
         }
     } catch (error) {
-        return createError(res, error);
+        console.log(error, "dadadad")
+        return res.status(500).json({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            message: ResponseMessage.INTERNAL_SERVER_ERROR,
+            data: [error],
+        });
     }
 }
+
 
 export const resetPassword = async (req, res) => {
     try {
@@ -292,3 +325,99 @@ export const getProfile = async (req, res) => {
         return createError(res, error);
     }
 }
+
+
+export const userEditProfile = async (req, res) => {
+    try {
+        console.log(req.files, "data");
+        const Id = req.user;
+
+        let { fullName, mobileNumber, email } = req.body;
+        let otp = 4444;
+
+        const user = await User.findById(Id);
+
+        if (req.files.profile) {
+            fs.unlink("./public/uploads/" + user.profile, () => { });
+        } else if (req.body.removeProfileUrl) {
+            fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
+            user.profile = "";
+            await user.save();
+        } else {
+            req.profileUrl = user.profile;
+        }
+
+        if (user.email == email && user.mobileNumber == mobileNumber) {
+            const updatedData = await User.findByIdAndUpdate(
+                Id,
+                {
+                    $set: {
+                        fullName,
+                        [req.profileUrl == "" ? "" : "profile"]: req.profileUrl,
+                    },
+                },
+                { new: true, useFindAndModify: false }
+            );
+            return res.status(200).json({
+                status: StatusCodes.OK,
+                message: ResponseMessage.USER_UPDATED,
+                data: [{ user: updatedData, flag: 0 }],
+            });
+        } else if (user.email !== email && user.mobileNumber == mobileNumber) {
+            user.otp = otp;
+            user.profile = req.profileUrl
+            user.fullName = fullName
+            await user.save();
+
+            //otp sent code 
+            return res.status(200).json({
+                status: StatusCodes.OK,
+                message: ResponseMessage.OTP_SENT_TO_BOTH,
+                data: [{ user, flag: 1 }],
+            });
+        } else if (user.email == email && user.mobileNumber != mobileNumber) {
+
+            user.fullName = fullName
+            user.profile = req.profileUrl
+            user.otp = otp;
+            await user.save();
+            //otp sent code 
+
+
+
+            res.status(200).json({
+                status: StatusCodes.OK,
+                message: ResponseMessage.OTP_SENT_TO_BOTH,
+                data: [{ user, flag: 1 }],
+            });
+
+        }
+    }
+    catch (err) {
+        return res.status(500).json({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            message: ResponseMessage.INTERNAL_SERVER_ERROR,
+            data: [err],
+        });
+    }
+};
+
+
+export const accountDeactivate = async (req, res) => {
+    try {
+const user = await User.findByIdAndUpdate(req.user, { $set: { is_deleted: 1 } }, { new: true });
+            res.status(200).json({
+                status: StatusCodes.OK,
+                message: ResponseMessage.USER_DEACTIVATED,
+            
+            });
+    } catch (err){
+        console.log(err)
+        return res.status(500).json({
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            message: ResponseMessage.INTERNAL_SERVER_ERROR,
+            data: [err],
+        });
+    }
+
+} 

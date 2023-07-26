@@ -1,7 +1,7 @@
 import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
-    resendOtp, changePassword,getProfile
+    resendOtp, changePassword,getProfile, userEditProfile, accountDeactivate
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -17,6 +17,8 @@ userRoutes.post('/profile-update', Auth, Upload, editProfile);
 userRoutes.get('/profile', Auth, getProfile);
 userRoutes.post('/change-mpin', Auth, changePassword);
 userRoutes.post('/logout', Auth, logout);
+userRoutes.post("/userEdit",Auth, Upload ,userEditProfile )
+userRoutes.post("/deactivate-user",  Auth , accountDeactivate)
 
 
 export { userRoutes }
