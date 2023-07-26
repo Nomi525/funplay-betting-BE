@@ -22,7 +22,7 @@ import { userRoutes } from "./routes/UserRoutes.js";
 import { dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById } from "./services/QueryService.js";
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
-    adminResetPassword, adminVerifyOtp, getAllUsers
+    adminResetPassword, adminVerifyOtp, getAllUsers ,getwithdrwalcheck,adminDashboardCount
 } from "./controller/admin/AdminController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
 import {
@@ -50,5 +50,5 @@ export {
     createError, sendResponse, passwordHash, passwordCompare,
     dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById,
     genrateToken, generateOtp, genString, referralCode,
-    addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail,userEditProfile,accountDeactivate
+    addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail,userEditProfile,accountDeactivate ,getwithdrwalcheck ,adminDashboardCount
 }

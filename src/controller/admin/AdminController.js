@@ -62,18 +62,32 @@ export const adminEditProfile = async (req, res) => {
     }
 }
 
-// export const getAllUsers = async (req, res) => {
-//     try {
-//         const adminData = await getAllData({ is_deleted: 0 }, User);
-//         if (adminData.length) {
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, adminData);
-//         } else {
-//             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-//         }
-//     } catch (error) {
-//         return createError(res, error);
-//     }
-// }
+export const getwithdrwalcheck =  (req, res) => {
+    try {
+        let userBankDetails =
+          [ { "bankName": "YES Bank", "AccountNo": 65656565656565, "IFSCCode": "YES0987" }]
+        
+
+        let walletDetails = {
+            walletName: "paytm",
+            walletAmount: 5000,
+            DebitAmount: 45000
+        };
+
+        let fundDetails ={
+            mode : "credit"
+        } 
+        
+
+        // Combining all the details into one array
+        let userDetailsArray ={ userBankDetails : userBankDetails, walletDetails :walletDetails, fundDetails :fundDetails}
+
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_WALLET_DETAIL, userDetailsArray);
+    } catch (error) {
+        return createError(res, error);
+    }
+};
+
 
 export const adminChangePassword = async (req, res) => {
     try {
@@ -214,3 +228,41 @@ export const getAllUsers = async (req, res) => {
         return createError(res, error);
     }
 }
+
+
+
+export  const adminDashboardCount = async (req, res) => {
+    try {
+    //   let totalUsers = (await User.find({ deletedStatus: 0 })).length;
+    //   let totalActiveRoom = (
+    //     await Room.find({ isActive: true, deletedStatus: 0 })
+    //   ).length;
+    //   let totalRefferedUser = (await User.find({ registerType: 1 })).length;
+    //   let totalRoom = (await Room.find({ deletedStatus: 0 })).length;
+    //   let totalUsersOnline = totalActiveRoom * 2;
+    let totalUers = 1500
+   let  totalActiveUsers  =  150
+   let  totalNewLoginUsersIn24Hours  = 255
+   let  totalDeactivatedUsers = 50
+    let totalZeroBalancetransactionUsers  = 120
+  let   totalZeroBalanceusersin24Hours = 25
+      return res.status(200).json({
+        status: StatusCodes.OK,
+        message: ResponseMessage.DATA_FETCHED,
+        data: {
+            totalUers : totalUers,
+             totalActiveUsers  :  totalActiveUsers,
+             totalNewLoginUsersIn24Hours  :totalNewLoginUsersIn24Hours,
+             totalDeactivatedUsers :totalDeactivatedUsers,
+             totalZeroBalancetransactionUsers :totalZeroBalancetransactionUsers,
+             totalZeroBalanceusersin24Hours:totalZeroBalanceusersin24Hours,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: ResponseMessage.INTERNAL_SERVER_ERROR,
+        data: [err.message],
+      });
+    }
+  };

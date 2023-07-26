@@ -1,6 +1,6 @@
 import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
-    adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail
+    adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck, adminDashboardCount
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -19,5 +19,8 @@ adminRoutes.post('/cms/add-edit-privacy-policy', Auth, addEditPrivacyPolicy)
 adminRoutes.post('/cms/about-us', Auth, addEditAboutUs)
 adminRoutes.post('/cms/terms-and-condition', Auth, addEditTermsAndCondition)
 adminRoutes.get('/cms', Auth, getCMSDetail)
+
+adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
+adminRoutes.get("/dashboard", Auth, adminDashboardCount)
 
 export { adminRoutes }

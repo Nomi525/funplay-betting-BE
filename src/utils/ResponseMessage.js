@@ -14,6 +14,7 @@ const ResponseMessage = {
     USER_NOT_EXIST: "User not exist",
     ADMIN_NOT_EXIST: "Admin not exist",
     USER_LIST: "Users list fetched",
+    USER_WALLET_DETAIL : "Wallet detail fetched",
     USER_UPDATED: "User updated",
     ADMIN_UPDATED: "Admin updated",
     OTP_SEND: "Otp send",
@@ -49,7 +50,8 @@ const ResponseMessage = {
     OTP_SENT_TO_BOTH : "Otp sent successfully",
     MOBILENUMBER_ALREADY_EXIST : "Mobile number already exist ",
     PROVIDED_DATA_ALREADY_EXIST : "Provided data already exist ",
-    USER_DEACTIVATED : "User deactivate successfully "
+    USER_DEACTIVATED : "User deactivate successfully ",
+    DATA_FETCHED : "Dashboard data fetched "
 }
 
 export { ResponseMessage }
