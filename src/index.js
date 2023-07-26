@@ -16,7 +16,7 @@ import { dbConnection } from "./config/Db.config.js";
 import { ResponseMessage } from "./utils/ResponseMessage.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin,
-    forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile
+    forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile , userEditProfile, accountDeactivate
 } from "./controller/user/UserController.js";
 import { userRoutes } from "./routes/UserRoutes.js";
 import { dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById } from "./services/QueryService.js";
@@ -50,5 +50,5 @@ export {
     createError, sendResponse, passwordHash, passwordCompare,
     dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById,
     genrateToken, generateOtp, genString, referralCode,
-    addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail
+    addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail,userEditProfile,accountDeactivate
 }

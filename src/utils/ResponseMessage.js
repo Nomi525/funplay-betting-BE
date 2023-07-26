@@ -43,7 +43,13 @@ const ResponseMessage = {
     MPIN_ALREADY_USE : "MPIN already use",
     OLD_MPIN_WRONG : "Old MPIN worng",
     INVALID_MPIN : "Invalid MPIN",
-    DATA_GET : "Get data"
+    DATA_GET : "Get data",
+    SOME_ERROR_OCCUR : "Some error occur",
+    EMAIL_ALREADY_EXIST : "Email already exist", 
+    OTP_SENT_TO_BOTH : "Otp sent successfully",
+    MOBILENUMBER_ALREADY_EXIST : "Mobile number already exist ",
+    PROVIDED_DATA_ALREADY_EXIST : "Provided data already exist ",
+    USER_DEACTIVATED : "User deactivate successfully "
 }
 
 export { ResponseMessage }
