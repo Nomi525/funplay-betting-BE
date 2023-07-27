@@ -1,3 +1,5 @@
+import { Transaction } from "../../models/Wallet.js";
+import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import { ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail } from "./../../index.js";
 import fs from "fs"
 export const userSignUpSignInOtp = async (req, res) => {
@@ -126,6 +128,53 @@ export const loginFromMpin = async (req, res) => {
     }
 }
 
+export const userGuestLogin = (req, res) => {
+    try {
+        const dummyData =
+        {
+            images: [
+                "1690357406723oljak.png",
+                "1690357406723oljak.png",
+                "1690357406723oljak.png"
+            ],
+            banners: [
+                "1690357406723oljak.png",
+                "1690357406723oljak.png",
+            ],
+            games: [
+                "Football",
+                "Number change",
+                "Tass",
+            ],
+            liveBettingList: [
+                {
+                    name: "rohit",
+                    bet: 50,
+                },
+                {
+                    name: "chetan",
+                    bet: 20,
+                },
+                {
+                    name: "sachin",
+                    bet: 60,
+                },
+            ],
+            previousGamesWinners: [
+                {
+                    name: "chetan"
+                },
+                {
+                    name: "kapil"
+                }
+            ]
+        }
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.GUEST_LOGIN, dummyData);
+    } catch (error) {
+
+    }
+}
+
 export const editProfile = async (req, res) => {
     try {
         const findData = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
@@ -205,7 +254,7 @@ export const verifyForgotOtp = async (req, res) => {
                 return res.status(400).json({
                     status: 400,
                     message: "Something went wrong",
-                    data: ["please enter email and mobile"],
+                    data: "please enter email and mobile",
                 });
             } if (user.otp !== otp) {
                 return res.status(200).json({
@@ -239,12 +288,7 @@ export const verifyForgotOtp = async (req, res) => {
             }
         }
     } catch (error) {
-        console.log(error, "dadadad")
-        return res.status(500).json({
-            status: StatusCodes.INTERNAL_SERVER_ERROR,
-            message: ResponseMessage.INTERNAL_SERVER_ERROR,
-            data: [error],
-        });
+        return createError(res, error);
     }
 }
 
@@ -329,9 +373,7 @@ export const getProfile = async (req, res) => {
 
 export const userEditProfile = async (req, res) => {
     try {
-        console.log(req.files, "data");
         const Id = req.user;
-
         let { fullName, mobileNumber, email } = req.body;
         let otp = 4444;
 
@@ -383,15 +425,14 @@ export const userEditProfile = async (req, res) => {
             await user.save();
             //otp sent code 
 
-
-
-            res.status(200).json({
+            return res.status(200).json({
                 status: StatusCodes.OK,
                 message: ResponseMessage.OTP_SENT_TO_BOTH,
                 data: [{ user, flag: 1 }],
             });
 
         }
+        return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
     }
     catch (err) {
         return res.status(500).json({
@@ -405,13 +446,13 @@ export const userEditProfile = async (req, res) => {
 
 export const accountDeactivate = async (req, res) => {
     try {
-const user = await User.findByIdAndUpdate(req.user, { $set: { is_deleted: 1 } }, { new: true });
-            res.status(200).json({
-                status: StatusCodes.OK,
-                message: ResponseMessage.USER_DEACTIVATED,
-            
-            });
-    } catch (err){
+        const user = await User.findByIdAndUpdate(req.user, { $set: { is_deleted: 1 } }, { new: true });
+        res.status(200).json({
+            status: StatusCodes.OK,
+            message: ResponseMessage.USER_DEACTIVATED,
+
+        });
+    } catch (err) {
         console.log(err)
         return res.status(500).json({
             status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -420,4 +461,23 @@ const user = await User.findByIdAndUpdate(req.user, { $set: { is_deleted: 1 } },
         });
     }
 
-} 
+}
+
+export const transactionHistory = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        let transactionHistory = []
+        if (userId) {
+            transactionHistory = transactionHistoryDummy.filter(user => user.userId == userId);
+        } else {
+            transactionHistory = transactionHistoryDummy;
+        }
+        if (transactionHistory.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, transactionHistory);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}

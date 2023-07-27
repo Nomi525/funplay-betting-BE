@@ -1,5 +1,12 @@
-import { ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User } from "./../../index.js";
+import { Transaction } from "../../models/Wallet.js";
+import {
+    ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
+    getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting, Referral_Work
+} from "./../../index.js";
 
+
+
+import { referralWorkDummy } from "../../utils/DummyData.js";
 
 // export const adminRegister = async (req, res) => {
 //     try {
@@ -62,11 +69,11 @@ export const adminEditProfile = async (req, res) => {
     }
 }
 
-export const getwithdrwalcheck =  (req, res) => {
+export const getwithdrwalcheck = (req, res) => {
     try {
         let userBankDetails =
-          [ { "bankName": "YES Bank", "AccountNo": 65656565656565, "IFSCCode": "YES0987" }]
-        
+            [{ "bankName": "YES Bank", "AccountNo": 65656565656565, "IFSCCode": "YES0987" }]
+
 
         let walletDetails = {
             walletName: "paytm",
@@ -74,14 +81,13 @@ export const getwithdrwalcheck =  (req, res) => {
             DebitAmount: 45000
         };
 
-        let fundDetails ={
-            mode : "credit"
-        } 
-        
+        let fundDetails = {
+            mode: "credit"
+        }
+
 
         // Combining all the details into one array
-        let userDetailsArray ={ userBankDetails : userBankDetails, walletDetails :walletDetails, fundDetails :fundDetails}
-
+        let userDetailsArray = { userBankDetails: userBankDetails, walletDetails: walletDetails, fundDetails: fundDetails }
         return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_WALLET_DETAIL, userDetailsArray);
     } catch (error) {
         return createError(res, error);
@@ -231,38 +237,119 @@ export const getAllUsers = async (req, res) => {
 
 
 
-export  const adminDashboardCount = async (req, res) => {
+export const adminDashboardCount = async (req, res) => {
     try {
-    //   let totalUsers = (await User.find({ deletedStatus: 0 })).length;
-    //   let totalActiveRoom = (
-    //     await Room.find({ isActive: true, deletedStatus: 0 })
-    //   ).length;
-    //   let totalRefferedUser = (await User.find({ registerType: 1 })).length;
-    //   let totalRoom = (await Room.find({ deletedStatus: 0 })).length;
-    //   let totalUsersOnline = totalActiveRoom * 2;
-    let totalUers = 1500
-   let  totalActiveUsers  =  150
-   let  totalNewLoginUsersIn24Hours  = 255
-   let  totalDeactivatedUsers = 50
-    let totalZeroBalancetransactionUsers  = 120
-  let   totalZeroBalanceusersin24Hours = 25
-      return res.status(200).json({
-        status: StatusCodes.OK,
-        message: ResponseMessage.DATA_FETCHED,
-        data: {
-            totalUers : totalUers,
-             totalActiveUsers  :  totalActiveUsers,
-             totalNewLoginUsersIn24Hours  :totalNewLoginUsersIn24Hours,
-             totalDeactivatedUsers :totalDeactivatedUsers,
-             totalZeroBalancetransactionUsers :totalZeroBalancetransactionUsers,
-             totalZeroBalanceusersin24Hours:totalZeroBalanceusersin24Hours,
-        },
-      });
+        let totalUsers = 1500
+        let totalActiveUsers = 150
+        let totalNewLoginUsersIn24Hours = 255
+        let totalDeactivatedUsers = 55
+        let totalZeroBalancetransactionUsers = 120
+        let totalZeroBalanceusersin24Hours = 250
+        return res.status(200).json({
+            status: StatusCodes.OK,
+            message: ResponseMessage.DATA_FETCHED,
+            data: {
+                totalUsers: totalUsers,
+                totalActiveUsers: totalActiveUsers,
+                totalNewLoginUsersIn24Hours: totalNewLoginUsersIn24Hours,
+                totalDeactivatedUsers: totalDeactivatedUsers,
+                totalZeroBalancetransactionUsers: totalZeroBalancetransactionUsers,
+                totalZeroBalanceusersin24Hours: totalZeroBalanceusersin24Hours,
+            },
+        });
     } catch (err) {
-      return res.status(500).json({
-        status: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: ResponseMessage.INTERNAL_SERVER_ERROR,
-        data: [err.message],
-      });
+        return createError(res, error);
     }
-  };
+};
+
+export const adminSetting = async (req, res) => {
+    try {
+        const findSetting = await AdminSetting.findOne();
+        if (findSetting) {
+            const settingUpdated = await dataUpdated(findSetting._id, req.body, AdminSetting);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, settingUpdated);
+        } else {
+            const createSetting = await dataCreate(req.body, AdminSetting);
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.DATA_CREATED, createSetting);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const adminWithdrawalRequest = async (req, res) => {
+    try {
+        const { transactionId, requestType } = req.body;
+        const updateWithdraral = await dataUpdated({ _id: transactionId }, { isRequest: requestType }, Transaction)
+        if (updateWithdraral) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updateWithdraral);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const getTransactionList = async (req, res) => {
+    try {
+        const { type } = req.body;
+        if (type) {
+            const findTranscation = await getAllData({ type }, Transaction)
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findTranscation);
+        }
+        const findAllTranscation = await getAllData({}, Transaction)
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findAllTranscation);
+
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const hwoToReferralWork = async (req, res) => {
+    try {
+        const { referralWork } = req.body
+        const findReferralWork = await getSingleData({}, Referral_Work);
+        if (findReferralWork) {
+            findReferralWork.referralWork = referralWork
+            await findReferralWork.save();
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.HOW_TO_WORK_REFERRAL, findReferralWork);
+        } else {
+            const createWork = await dataCreate({ referralWork }, Referral_Work)
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.HOW_TO_WORK_REFERRAL, createWork);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const adminEditUser = async (req, res) => {
+    try {
+        const { userId, fullName, userName, email } = req.body;
+        const findUser = await getSingleData({ _id: userId }, User)
+        if (findUser) {
+            const updateUser = await dataUpdated({ _id: userId }, { fullName, userName, email }, User);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updateUser);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const adminDeleteUser = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const findUser = await getSingleData({ _id: userId }, User)
+        if (findUser) {
+            findUser.is_deleted = 1;
+            await findUser.save();
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_DELETED, []);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
