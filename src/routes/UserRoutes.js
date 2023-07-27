@@ -1,7 +1,7 @@
 import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
-    resendOtp, changePassword,getProfile, userEditProfile, accountDeactivate
+    resendOtp, changePassword,getProfile, userEditProfile, accountDeactivate,userGuestLogin,transactionHistory
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -10,6 +10,7 @@ userRoutes.post('/verify-otp', verifyOtp);
 userRoutes.post('/resend-otp', resendOtp);
 userRoutes.post('/mpin-signin', userSignInMpin);
 userRoutes.post('/login-mpin', loginFromMpin);
+userRoutes.get('/guest-login', userGuestLogin);
 userRoutes.post('/forgot-password', forgotPassword);
 userRoutes.post('/verify-forgot-otp', verifyForgotOtp);
 userRoutes.post('/reset-password', resetPassword);
@@ -19,6 +20,9 @@ userRoutes.post('/change-mpin', Auth, changePassword);
 userRoutes.post('/logout', Auth, logout);
 userRoutes.post("/userEdit",Auth, Upload ,userEditProfile )
 userRoutes.post("/deactivate-user",  Auth , accountDeactivate)
+
+// Transaction History
+userRoutes.get("/transaction-history",  Auth , transactionHistory)
 
 
 export { userRoutes }

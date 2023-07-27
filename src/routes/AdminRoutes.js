@@ -1,6 +1,8 @@
 import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
-    adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail
+    adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
+    adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork, adminEditUser,
+    adminDeleteUser
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -19,5 +21,18 @@ adminRoutes.post('/cms/add-edit-privacy-policy', Auth, addEditPrivacyPolicy)
 adminRoutes.post('/cms/about-us', Auth, addEditAboutUs)
 adminRoutes.post('/cms/terms-and-condition', Auth, addEditTermsAndCondition)
 adminRoutes.get('/cms', Auth, getCMSDetail)
+
+adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
+adminRoutes.get("/dashboard", Auth, adminDashboardCount)
+adminRoutes.post("/transaction", Auth, getTransactionList)
+adminRoutes.post("/how-referral-work", Auth, hwoToReferralWork)
+
+// -------- Setting -------- //
+adminRoutes.post("/setting", Auth, adminSetting)
+adminRoutes.post("/withdrawal-request", Auth, adminWithdrawalRequest)
+
+// ------ User 
+adminRoutes.post('/user-edit', Auth, adminEditUser);
+adminRoutes.post('/user-delete', Auth, adminDeleteUser);
 
 export { adminRoutes }
