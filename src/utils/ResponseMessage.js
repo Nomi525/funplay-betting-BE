@@ -66,7 +66,8 @@ const ResponseMessage = {
     RULE_UPDATE : "Rule update",
     TERMS_ADDED : "Rule added",
     TERMS_UPDATED : "Rule update",
-    CMS_DETAILS : "Cms details"
+    CMS_DETAILS : "Cms details",
+    UNAUTHORIZED : "Uuauthorized",
 }
 
 export { ResponseMessage }

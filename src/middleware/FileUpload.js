@@ -25,6 +25,10 @@ var upload = multer({ storage }).fields([
     {
         name: "profile",
         maxCount: 1,
+    },
+    {
+        name: "image",
+        maxCount: 1,
     }
 ]);
 
@@ -40,6 +44,9 @@ export default function (req, res, next) {
             if (req.files) {
                 var profile = req.files.profile ? req.files.profile[0].filename : "";
                 req.profileUrl = profile;
+
+                var image = req.files.image ? req.files.image[0].filename : "";
+                req.imageUrl = image;
                 next();
             } else {
                 next();

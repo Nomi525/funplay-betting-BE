@@ -28,6 +28,7 @@ import {
     getTransactionList, hwoToReferralWork,adminEditUser,adminDeleteUser
 } from "./controller/admin/AdminController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
+import { addEditBanner,deleteBanner,allBannerGet } from "./controller/common/CommonController.js";
 import {
     createError, sendResponse, passwordHash, passwordCompare, genrateToken, generateOtp,
     genString, referralCode
@@ -35,6 +36,7 @@ import {
 import { Admin } from "./models/Admin.js";
 import { User } from "./models/User.js";
 import { adminRoutes } from "./routes/AdminRoutes.js";
+import { commonRoutes } from "./routes/CommonRoutes.js";
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
 import Upload from "./middleware/FileUpload.js";
@@ -42,19 +44,21 @@ import { appServer } from "../server.js";
 import { CMS_Model } from "./models/CMS.js";
 import { AdminSetting } from "./models/AdminSetting.js";
 import { Referral_Work } from "./models/Referral_Work.js";
+import { BannerModel } from "./models/Banner.js";
 dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work,BannerModel,
     dbConnection,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,
     adminEditUser,adminDeleteUser,
     editProfile, logout, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, forgotPassword, resetPassword, verifyForgotOtp,
-    userRoutes, adminRoutes, resendOtp, changePassword, getProfile, userGuestLogin, transactionHistory,
+    userRoutes, adminRoutes,commonRoutes, resendOtp, changePassword, getProfile, userGuestLogin, transactionHistory,
     createError, sendResponse, passwordHash, passwordCompare,
+    addEditBanner,deleteBanner,allBannerGet,
     dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById,
     genrateToken, generateOtp, genString, referralCode,
     addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck, adminDashboardCount
