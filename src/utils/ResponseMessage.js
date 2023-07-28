@@ -57,7 +57,16 @@ const ResponseMessage = {
     DATA_DELETED : "Data deleted ",
     GUEST_LOGIN : "Guest logged in",
     TRANSCATION_DATA_GET : "Transcation data get",
-    HOW_TO_WORK_REFERRAL : "How to work referral code",
+    HOW_TO_WORK_REFERRAL_CREATED : "How to work referral code created",
+    HOW_TO_WORK_REFERRAL_UPDATED : "How to work referral code updated",
+    PRIVACY_POLICY_UPDATED : "Privacy policy updated",
+    PRICAY_NOT_FOUND : "Privacy policy not found",
+    PRIVACY_POLICY_ADDED : "Privacy policy added",
+    RULE_ADDED : "Rule added",
+    RULE_UPDATE : "Rule update",
+    TERMS_ADDED : "Rule added",
+    TERMS_UPDATED : "Rule update",
+    CMS_DETAILS : "Cms details"
 }
 
 export { ResponseMessage }
