@@ -26,28 +26,13 @@ export const addEditPrivacyPolicy = async (req, res) => {
                 let data = await privacyPolicy.save();
                 let privacyPolicyData = await CMS_Model.find({ deletedStatus: 0 });
                 if (privacyPolicyData) {
-                    // return res.status(201).json({
-                    //     status: StatusCodes.CREATED,
-                    //     message: responseMessage.PRIVACY_POLICY_ADDED,
-                    //     data: privacyPolicyData,
-                    // });
                     return sendResponse(res, StatusCodes.CREATED, ResponseMessage.PRIVACY_POLICY_ADDED, privacyPolicyData);
 
                 } else {
-                    // return res.status(400).json({
-                    //     status: StatusCodes.BAD_REQUEST,
-                    //     message: responseMessage.BAD_REQUEST,
-                    //     data: [],
-                    // });
-                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
+                    return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
                 }
             }
         } else {
-            // return res.status(400).json({
-            //     status: StatusCodes.BAD_REQUEST,
-            //     message: responseMessage.ADMIN_NOT_EXIST,
-            //     data: [],
-            // });
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
@@ -70,11 +55,6 @@ export const addEditAboutUs = async (req, res) => {
                     });
                     let updatedData = await CMS_Model.find({ deletedStatus: 0 });
                     if (updateContactUs) {
-                        // return res.status(200).json({
-                        //     status: StatusCodes.OK,
-                        //     message: responseMessage.RULE_UPDATE,
-                        //     data: updatedData,
-                        // });
                         return sendResponse(res, StatusCodes.OK, ResponseMessage.RULE_UPDATE, updatedData);
                     }
                 }
@@ -85,28 +65,13 @@ export const addEditAboutUs = async (req, res) => {
                 let data = await gamesRules.save();
                 let contactUsData = await CMS_Model.find({ deletedStatus: 0 });
                 if (data) {
-                    // return res.status(201).json({
-                    //     status: StatusCodes.CREATED,
-                    //     message: responseMessage.RULE_ADDED,
-                    //     data: contactUsData,
-                    // });
                     return sendResponse(res, StatusCodes.CREATED, ResponseMessage.RULE_ADDED, contactUsData);
                 } else {
-                    // return res.status(400).json({
-                    //     status: StatusCodes.BAD_REQUEST,
-                    //     message: responseMessage.BAD_REQUEST,
-                    //     data: [],
-                    // });
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
             }
         } else {
-            // return res.status(400).json({
-            //     status: StatusCodes.BAD_REQUEST,
-            //     message: responseMessage.ADMIN_NOT_EXIST,
-            //     data: [],
-            // });
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_EXIST, []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
         return createError(res, error);
@@ -130,18 +95,8 @@ export const addEditTermsAndCondition = async (req, res) => {
                     });
                     let updatedData = await CMS_Model.find({ deletedStatus: 0 });
                     if (updateTermsandCondition) {
-                        // return res.status(200).json({
-                        //     status: StatusCodes.OK,
-                        //     message: responseMessage.TERMS_UPDATED,
-                        //     data: updatedData,
-                        // });
                         return sendResponse(res, StatusCodes.OK, ResponseMessage.TERMS_UPDATED, updatedData);
                     } else {
-                        // return res.status(400).json({
-                        //     status: StatusCodes.BAD_REQUEST,
-                        //     message: responseMessage.BAD_REQUEST,
-                        //     data: [],
-                        // });
                         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                     }
                 }
@@ -151,28 +106,13 @@ export const addEditTermsAndCondition = async (req, res) => {
                 }).save();
                 let result = await CMS_Model.find({ deletedStatus: 0 });
                 if (termsAndCondition) {
-                    // return res.status(201).json({
-                    //     status: StatusCodes.CREATED,
-                    //     message: responseMessage.TERMS_ADDED,
-                    //     data: result,
-                    // });
                     return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TERMS_ADDED, result);
                 } else {
-                    // return res.status(400).json({
-                    //     status: StatusCodes.BAD_REQUEST,
-                    //     message: responseMessage.BAD_REQUEST,
-                    //     data: [],
-                    // });
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
             }
         } else {
-            // return res.status(400).json({
-            //     status: StatusCodes.BAD_REQUEST,
-            //     message: responseMessage.ADMIN_NOT_EXIST,
-            //     data: [],
-            // });
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_EXIST, []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
         return createError(res, error);
@@ -185,7 +125,7 @@ export const addEditTermsAndCondition = async (req, res) => {
 export const getCMSDetail = async (req, res) => {
     try {
         const CMSData = await CMS_Model.findOne();
-        res.status(200).json({
+        return res.status(200).json({
             status: StatusCodes.OK,
             message: ResponseMessage.CMS_DETAILS,
             data: CMSData,

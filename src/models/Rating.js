@@ -1,0 +1,21 @@
+import { mongoose } from '../index.js';
+
+const ratingSchema = new mongoose.Schema({
+    gameId: {
+        type: String,
+        required: false
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false
+    },
+    rating: {
+        type: Number,
+        required: false
+    },
+}, { timestamps: true });
+
+const Rating = mongoose.model('Rating', ratingSchema);
+
+export { Rating };

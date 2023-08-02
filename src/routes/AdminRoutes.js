@@ -2,7 +2,7 @@ import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork, adminEditUser,
-    adminDeleteUser
+    adminDeleteUser, getAllQuery, showRating
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -34,5 +34,11 @@ adminRoutes.post("/withdrawal-request", Auth, adminWithdrawalRequest)
 // ------ User 
 adminRoutes.post('/user-edit', Auth, adminEditUser);
 adminRoutes.post('/user-delete', Auth, adminDeleteUser);
+
+// User Query
+adminRoutes.get('/queries', Auth, getAllQuery);
+
+// Rating
+adminRoutes.get('/game/ratings', Auth, showRating)
 
 export { adminRoutes }

@@ -22,15 +22,15 @@
 //     //  *********  User signup signin *********** //    
 //     it('**** User user-signup-signin ****', (done) => {
 //         chai.request(appServer)
-//             .post('/api/user/user-signup-signin')
-//             .send({ mobileNumber: userDetails.mobileNumber })
+//             .post('/api/user/signup-signin-otp')
+//             .send({ email: userDetails.email })
 //             .end((err, res) => {
 //                 userId = res.body.data._id;
 //                 // userToken = res.body.data.token;
 //                 if (res.body.status == 200) {
 //                     userOtp = res.body.data.otp;
 //                     res.body.should.have.status(200)
-//                     res.body.should.have.property("message").eql(ResponseMessage.SENT_OTP_ON_YOUR_MOBILE);
+//                     res.body.should.have.property("message").eql(ResponseMessage.SENT_OTP_ON_YOUR_EMAIL);
 //                 } else if (res.body.status == 400) {
 //                     res.body.should.have.status(400)
 //                     res.body.should.have.property("message").eql(ResponseMessage.THIS_USER_IS_DEACTIVATED);
@@ -70,9 +70,10 @@
 
 //     //  *********  User Verify Otp *********** //
 //     it('**** User verify otp ****', (done) => {
+//         console.log('userOtp2222',userOtp);
 //         chai.request(appServer)
 //             .post('/api/user/verify-otp')
-//             .send({ id: userId, otp: userOtp })
+//             .send({ userId, otp: userOtp })
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {
 //                     userToken = res.body.data.token;
@@ -80,7 +81,7 @@
 //                     res.body.should.have.property("message").eql(ResponseMessage.VERIFICATION_COMPLETED);
 //                 } else if (res.body.status == 400) {
 //                     res.body.should.have.status(400)
-//                     res.body.should.have.property("message").eql(ResponseMessage.INVALID_OTP);
+//                     res.body.should.have.property("message").eql(ResponseMessage.USER_NOT_FOUND);
 //                 } else if (res.body.status == 404) {
 //                     res.body.should.have.status(404)
 //                     res.body.should.have.property("message").eql(ResponseMessage.DATA_NOT_FOUND);

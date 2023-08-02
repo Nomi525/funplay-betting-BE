@@ -1,5 +1,5 @@
 
-import { express, cors, dbConnection, adminRoutes, userRoutes } from "./src/index.js";
+import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes } from "./src/index.js";
 const app = express();
 // const admin = require("./src/routes/AdminRoutes");
 // const user = require("./src/routes/UserRoutes");
@@ -24,7 +24,7 @@ app.use(function (req, res, next) {
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
-// app.use("/api/common", common);
+app.use("/api/common", commonRoutes);
 
 // error handler
 app.use(function (err, req, res, next) {

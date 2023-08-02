@@ -97,7 +97,7 @@ export const userSignInMpin = async (req, res) => {
             }
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, existingUser);
         } else {
-            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_NOT_EXIST, []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
         return createError(res, error);
@@ -161,6 +161,7 @@ export const userGuestLogin = (req, res) => {
                 },
             ],
             previousGamesWinners: [
+
                 {
                     name: "chetan"
                 },
@@ -226,7 +227,7 @@ export const forgotPassword = async (req, res) => {
         if (userData) {
             const forgotOtp = 4444
             // const forgotOtp = generateOtp();
-            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { forgotOtp });
+            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp: forgotOtp });
             const updateOtp = await dataUpdated({ _id: userData._id }, { forgotOtp }, User);
             await sendMail(userData.email, "Forgot Password", mailInfo)
                 .then((data) => {
@@ -253,8 +254,8 @@ export const verifyForgotOtp = async (req, res) => {
             if (!email && !mobileNumber) {
                 return res.status(400).json({
                     status: 400,
-                    message: "Something went wrong",
-                    data: "please enter email and mobile",
+                    message: ResponseMessage.SOMETHING_WENT_WRONG,
+                    data: ResponseMessage.ENTER_EMAIL_PASSWORD
                 });
             } if (user.otp !== otp) {
                 return res.status(200).json({
@@ -330,7 +331,6 @@ export const changePassword = async (req, res) => {
             if (user.mPin != oldPassword) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.OLD_MPIN_WRONG, []);
             }
-
             const findMpin = await getSingleData({ mPin: newPassword }, User);
             if (findMpin) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.MPIN_ALREADY_USE, []);
@@ -338,17 +338,6 @@ export const changePassword = async (req, res) => {
             user.mPin = newPassword
             await user.save();
             return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
-
-            // const comparePassword = await passwordCompare(oldPassword, user.password);
-            // if (comparePassword) {
-            //     user.password = await passwordHash(newPassword);
-            //     user.resetPassword = true
-            //     await user.save();
-            //     return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
-            // } else {
-            //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.YOU_ENTER_WRONG_PASSWORD, []);
-            // }
-
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
@@ -370,15 +359,12 @@ export const getProfile = async (req, res) => {
     }
 }
 
-
 export const userEditProfile = async (req, res) => {
     try {
         const Id = req.user;
         let { fullName, mobileNumber, email } = req.body;
         let otp = 4444;
-
         const user = await User.findById(Id);
-
         if (req.files.profile) {
             fs.unlink("./public/uploads/" + user.profile, () => { });
         } else if (req.body.removeProfileUrl) {
@@ -388,7 +374,6 @@ export const userEditProfile = async (req, res) => {
         } else {
             req.profileUrl = user.profile;
         }
-
         if (user.email == email && user.mobileNumber == mobileNumber) {
             const updatedData = await User.findByIdAndUpdate(
                 Id,
@@ -400,65 +385,61 @@ export const userEditProfile = async (req, res) => {
                 },
                 { new: true, useFindAndModify: false }
             );
-            return res.status(200).json({
-                status: StatusCodes.OK,
-                message: ResponseMessage.USER_UPDATED,
-                data: [{ user: updatedData, flag: 0 }],
-            });
+            // return res.status(200).json({
+            //     status: StatusCodes.OK,
+            //     message: ResponseMessage.USER_UPDATED,
+            //     data: [{ user: updatedData, flag: 0 }],
+            // });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, [{ user: updatedData, flag: 0 }]);
         } else if (user.email !== email && user.mobileNumber == mobileNumber) {
             user.otp = otp;
             user.profile = req.profileUrl
             user.fullName = fullName
             await user.save();
-
             //otp sent code 
-            return res.status(200).json({
-                status: StatusCodes.OK,
-                message: ResponseMessage.OTP_SENT_TO_BOTH,
-                data: [{ user, flag: 1 }],
-            });
+            // const otp = generateOtp();
+            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp: otp });
+            await sendMail(user.email, "Forgot Password", mailInfo);
+            // return res.status(200).json({
+            //     status: StatusCodes.OK,
+            //     message: ResponseMessage.OTP_SENT_TO_BOTH,
+            //     data: [{ user, flag: 1 }]
+            // });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_SENT_TO_BOTH, [{ user, flag: 1 }]);
         } else if (user.email == email && user.mobileNumber != mobileNumber) {
-
             user.fullName = fullName
             user.profile = req.profileUrl
             user.otp = otp;
             await user.save();
             //otp sent code 
-
-            return res.status(200).json({
-                status: StatusCodes.OK,
-                message: ResponseMessage.OTP_SENT_TO_BOTH,
-                data: [{ user, flag: 1 }],
-            });
-
+            // const otp = generateOtp();
+            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp: otp });
+            await sendMail(user.email, "Forgot Password", mailInfo);
+            // return res.status(200).json({
+            //     status: StatusCodes.OK,
+            //     message: ResponseMessage.OTP_SENT_TO_BOTH,
+            //     data: [{ user, flag: 1 }]
+            // });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_SENT_TO_BOTH, [{ user, flag: 1 }]);
         }
         return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
     }
-    catch (err) {
-        return res.status(500).json({
-            status: StatusCodes.INTERNAL_SERVER_ERROR,
-            message: ResponseMessage.INTERNAL_SERVER_ERROR,
-            data: [err],
-        });
+    catch (error) {
+        return createError(res, error);
     }
 };
 
 
 export const accountDeactivate = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.user, { $set: { is_deleted: 1 } }, { new: true });
-        res.status(200).json({
-            status: StatusCodes.OK,
-            message: ResponseMessage.USER_DEACTIVATED,
-
-        });
-    } catch (err) {
-        console.log(err)
-        return res.status(500).json({
-            status: StatusCodes.INTERNAL_SERVER_ERROR,
-            message: ResponseMessage.INTERNAL_SERVER_ERROR,
-            data: [err],
-        });
+        const upadteUser = await dataUpdated({ _id: req.user },  {is_deleted: 1}, User);
+        if(upadteUser){
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_DEACTIVATED, []);
+        }else{
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
     }
 
 }
