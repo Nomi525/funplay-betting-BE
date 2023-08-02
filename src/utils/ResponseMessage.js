@@ -9,6 +9,7 @@ const ResponseMessage = {
     USER_LOGGED_IN: "You are loggedIn",
     ADMIN_LOGGED_IN: "Admin loggedIn",
     PLEASE_USE_VALID_PASSWORD: "Please enter valid password",
+    ENTER_EMAIL_PASSWORD: "Please enter email and mobile",
     USER_LOGOUT: "User logout",
     ADMIN_LOGOUT: "Admin logout",
     USER_NOT_EXIST: "User not exist",
@@ -52,6 +53,7 @@ const ResponseMessage = {
     PROVIDED_DATA_ALREADY_EXIST : "Provided data already exist ",
     USER_DEACTIVATED : "User deactivate successfully ",
     DATA_FETCHED : "Dashboard data fetched ",
+    DATA_NOT_CREATED : "Data not created ",
     DATA_CREATED : "Data created ",
     DATA_UPDATED : "Data updated ",
     DATA_DELETED : "Data deleted ",
@@ -68,6 +70,8 @@ const ResponseMessage = {
     TERMS_UPDATED : "Rule update",
     CMS_DETAILS : "Cms details",
     UNAUTHORIZED : "Uuauthorized",
+    GET_ALL_QUERY : "All queries",
+    GAME_RATING_AVERAGE : "Game rating"
 }
 
 export { ResponseMessage }

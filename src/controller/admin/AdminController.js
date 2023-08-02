@@ -1,7 +1,7 @@
 import { Transaction } from "../../models/Wallet.js";
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
-    getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting, Referral_Work
+    getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting, Referral_Work, Rating
 } from "./../../index.js";
 
 
@@ -347,6 +347,21 @@ export const adminDeleteUser = async (req, res) => {
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
         }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const showRating = async (req, res) => {
+    try {
+        const ratings = await getAllData({}, Rating);
+        const twoDigitGameId = '64c9ffac7ea983a6405655cv';
+        const footbalGameId = '64c9ffac7ea983a6405655fv';
+
+        const twoDigitGame = ratings.filter(rating => rating.gameId == twoDigitGameId)
+        const footbalGame = ratings.filter(rating => rating.gameId == footbalGameId)
+
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, { twoDigitGame, footbalGame });
     } catch (error) {
         return createError(res, error);
     }
