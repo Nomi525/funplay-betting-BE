@@ -6,22 +6,19 @@ chai.use(chaiHttp);
 let queryId;
 let data;
 // let userToken;
-let queryDetails = {
-    userName: "UserTes",
-    email: "UserTest@gmail.com",
-    mobileNumber: 8965231470,
-    description: "Tes case demo",
+let ratingDetails = {
+    rating: 4.5,
+    gameId: "64c9ffac7ea983a6405655fv"
 };
 
-describe('Query test case', () => {
-    it("Add query", (done) => {
+describe('Rating test case', () => {
+    it("Add rating", (done) => {
         chai.request(appServer)
-            .post('/api/user/query/add-edit')
+            .post('/api/user/game/rating/add-edit')
             .set('auth', userToken)
-            .send(queryDetails)
+            .send(ratingDetails)
             .end((err, res) => {
                 if (res.body.status == 201) {
-                    queryId = res.body.data._id
                     expect(res.body.status).to.be.equal(201);
                 } else if (res.body.status == 200) {
                     expect(res.body.status).to.be.equal(200);
@@ -35,11 +32,11 @@ describe('Query test case', () => {
             })
     });
 
-    it("Update query", (done) => {
+    it("Average rating", (done) => {
         chai.request(appServer)
-            .post(`/api/user/query/add-edit?queryId=${queryId}`)
+            .post(`/api/user/game/rating/average`)
             .set('auth', userToken)
-            .send({description:"Update query"})
+            .send({ gameId: ratingDetails.gameId })
             .end((err, res) => {
                 if (res.body.status == 201) {
                     queryId = res.body.data._id
@@ -55,4 +52,4 @@ describe('Query test case', () => {
                 done();
             })
     });
-})
+});
