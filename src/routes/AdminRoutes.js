@@ -2,7 +2,7 @@ import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork, adminEditUser,
-    adminDeleteUser, getAllQuery, showRating
+    adminDeleteUser, getAllQuery, showRating, getWithdrawalList
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -40,5 +40,8 @@ adminRoutes.get('/queries', Auth, getAllQuery);
 
 // Rating
 adminRoutes.get('/game/ratings', Auth, showRating)
+
+// getWithdrwalList
+adminRoutes.get('/withdrawal-list', Auth, getWithdrawalList)
 
 export { adminRoutes }

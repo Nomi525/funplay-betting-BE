@@ -1,7 +1,8 @@
 import { Transaction } from "../../models/Wallet.js";
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
-    getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting, Referral_Work, Rating
+    getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting,
+    Referral_Work, Rating, Wallet
 } from "./../../index.js";
 
 
@@ -362,6 +363,19 @@ export const showRating = async (req, res) => {
         const footbalGame = ratings.filter(rating => rating.gameId == footbalGameId)
 
         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, { twoDigitGame, footbalGame });
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const getWithdrawalList = async (req, res) => {
+    try {
+        const withdrwal = await getAllData({}, Transaction);
+        if (withdrwal.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, withdrwal);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+        }
     } catch (error) {
         return createError(res, error);
     }

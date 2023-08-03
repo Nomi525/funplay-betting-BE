@@ -20,7 +20,7 @@ import { dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, de
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
-    getTransactionList, hwoToReferralWork, adminEditUser, adminDeleteUser,showRating
+    getTransactionList, hwoToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
 } from "./controller/admin/AdminController.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin,
@@ -32,7 +32,7 @@ import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSD
 import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/CommonController.js";
 import { addEditQuery, deleteQuery } from "./controller/user/QuerySectionController.js";
 import { getAllQuery } from "./controller/admin/QuerySectionController.js";
-import { addEditRating,gameRatingAverage } from "./controller/user/RatingController.js";
+import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 
 
 // Routes
@@ -50,6 +50,7 @@ import { Referral_Work } from "./models/Referral_Work.js";
 import { BannerModel } from "./models/Banner.js";
 import { Query } from "./models/Query.js";
 import { Rating } from "./models/Rating.js";
+import { Wallet } from "./models/Wallet.js";
 
 
 // Services
@@ -62,19 +63,20 @@ import {
     genString, referralCode
 } from "./services/CommonService.js";
 
+
 dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet,
     dbConnection,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,
-    adminEditUser, adminDeleteUser, showRating,
+    adminEditUser, adminDeleteUser, showRating, getWithdrawalList,
     getAllQuery,
     editProfile, logout, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, forgotPassword, resetPassword, verifyForgotOtp,
-    userRoutes, adminRoutes, commonRoutes, resendOtp, changePassword, getProfile, userGuestLogin, transactionHistory,gameRatingAverage,
+    userRoutes, adminRoutes, commonRoutes, resendOtp, changePassword, getProfile, userGuestLogin, transactionHistory, gameRatingAverage,
     addEditQuery, deleteQuery,
     createError, sendResponse, passwordHash, passwordCompare,
     addEditBanner, deleteBanner, allBannerGet,
