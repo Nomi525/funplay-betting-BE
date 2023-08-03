@@ -22,10 +22,10 @@
 //                 if (res.body.status == 201) {
 //                     queryId = res.body.data._id
 //                     expect(res.body.status).to.be.equal(201);
+//                 } else if (res.body.status == 200) {
+//                     expect(res.body.status).to.be.equal(200);
 //                 } else if (res.body.status == 404) {
 //                     expect(res.body.status).to.be.equal(404);
-//                 } else if (res.body.status == 401) {
-//                     expect(res.body.status).to.be.equal(401);
 //                 } else {
 //                     expect(res.body.status).to.be.equal(500);
 //                 }
