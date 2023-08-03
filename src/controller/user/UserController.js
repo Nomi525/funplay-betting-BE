@@ -1,18 +1,21 @@
 import { Transaction } from "../../models/Wallet.js";
 import { transactionHistoryDummy } from "../../utils/DummyData.js";
-import { ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail } from "./../../index.js";
-import fs from "fs"
+import {
+    ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate,
+    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs
+} from "./../../index.js";
+
 export const userSignUpSignInOtp = async (req, res) => {
     try {
         let { email } = req.body;
-        const otp = 4444; // for generate OTP
+        const otp = 4444;
         // const otp = generateOtp(); // for generate OTP
         const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
         if (existingUser) {
             const updateOtp = await dataUpdated({ email }, { otp }, User)
             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
             await sendMail(existingUser.email, "Verify Otp", mailInfo)
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.SENT_OTP_ON_YOUR_EMAIL, updateOtp);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL, updateOtp);
         } else {
             let referCode = referralCode(8);
             let findReferralUser = null;
@@ -24,7 +27,7 @@ export const userSignUpSignInOtp = async (req, res) => {
                 if (!findReferralUser) {
                     return res.status(404).json({
                         status: 404,
-                        message: "Reerral code not found",
+                        message: ResponseMessage.REFERRAL_CODE_NOT_FOUND,
                     });
                 }
             }
@@ -35,7 +38,7 @@ export const userSignUpSignInOtp = async (req, res) => {
             }
             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
             await sendMail(userData.email, "Verify Otp", mailInfo)
-            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.SENT_OTP_ON_YOUR_EMAIL, userData);
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL, userData);
         }
     } catch (error) {
         return createError(res, error);
@@ -52,7 +55,7 @@ export const resendOtp = async (req, res) => {
             const updateOtp = await dataUpdated({ _id: userId }, { otp }, User)
             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
             await sendMail(findUser.email, "Verify Otp", mailInfo);
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.SENT_OTP_ON_YOUR_EMAIL, updateOtp);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_RESEND, updateOtp);
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
@@ -60,7 +63,6 @@ export const resendOtp = async (req, res) => {
         return createError(res, error);
     }
 }
-
 
 export const verifyOtp = async (req, res) => {
     try {
@@ -432,10 +434,10 @@ export const userEditProfile = async (req, res) => {
 
 export const accountDeactivate = async (req, res) => {
     try {
-        const upadteUser = await dataUpdated({ _id: req.user },  {is_deleted: 1}, User);
-        if(upadteUser){
+        const upadteUser = await dataUpdated({ _id: req.user }, { is_deleted: 1 }, User);
+        if (upadteUser) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_DEACTIVATED, []);
-        }else{
+        } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
         }
     } catch (error) {
