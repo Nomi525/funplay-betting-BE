@@ -20,9 +20,9 @@ export const userSignUpSignInOtp = async (req, res) => {
             let referCode = referralCode(8);
             let findReferralUser = null;
             // For Referral Code
-            if (req.query.referralCode) {
+            if (req.body.referralByCode) {
                 findReferralUser = await User.findOne({
-                    referralCode: req.query.referralCode,
+                    referralCode: req.body.referralByCode,
                 });
                 if (!findReferralUser) {
                     return res.status(404).json({
@@ -31,7 +31,7 @@ export const userSignUpSignInOtp = async (req, res) => {
                     });
                 }
             }
-            const userData = await dataCreate({ email, otp, referralCode: referCode, referralByCode: req.query.referralCode ? req.query.referralCode : null }, User)
+            const userData = await dataCreate({ email, otp, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User)
             if (findReferralUser) {
                 findReferralUser.useReferralCodeUsers.push(userData._id);
                 await findReferralUser.save();
