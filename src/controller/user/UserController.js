@@ -79,7 +79,7 @@ export const verifyOtp = async (req, res) => {
                     },
                 };
                 const token = await genrateToken({ payload });
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, { ...userUpdate._doc, token });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
             }
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
