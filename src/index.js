@@ -23,10 +23,10 @@ import {
     getTransactionList, hwoToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
 } from "./controller/admin/AdminController.js";
 import {
-    logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin,
+    logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
     userGuestLogin,
-    transactionHistory
+    transactionHistory, singInFromEmailPassword
 } from "./controller/user/UserController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
 import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/CommonController.js";
@@ -73,7 +73,7 @@ export {
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,
-    adminEditUser, adminDeleteUser, showRating, getWithdrawalList,
+    adminEditUser, adminDeleteUser, showRating, getWithdrawalList, singupFromEmailPassword, singInFromEmailPassword,
     getAllQuery,
     editProfile, logout, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, forgotPassword, resetPassword, verifyForgotOtp,
     userRoutes, adminRoutes, commonRoutes, resendOtp, changePassword, getProfile, userGuestLogin, transactionHistory, gameRatingAverage,

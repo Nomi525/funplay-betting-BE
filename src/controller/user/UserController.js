@@ -106,6 +106,77 @@ export const userSignInMpin = async (req, res) => {
     }
 }
 
+
+export const singupFromEmailPassword = async (req, res) => {
+    try {
+        let { email, password } = req.body;
+        let userFind = await getSingleData({ email, is_deleted: 0 }, User);
+        if (userFind) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
+        } else {
+            if (!password) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PASSWORD_REQUIRED, []);
+            }
+            let referCode = referralCode(8);
+            let findReferralUser = null;
+            // For Referral Code
+            if (req.body.referralByCode) {
+                findReferralUser = await User.findOne({
+                    referralCode: req.body.referralByCode,
+                });
+                if (!findReferralUser) {
+                    return res.status(404).json({
+                        status: 404,
+                        message: ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+                    });
+                }
+            }
+            password = await passwordHash(password);
+            const createUser = await dataCreate({ email, password, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User);
+            if (findReferralUser) {
+                findReferralUser.useReferralCodeUsers.push(createUser._id);
+                await findReferralUser.save();
+            }
+            const payload = {
+                user: {
+                    id: createUser._id,
+                },
+            };
+            const token = await genrateToken({ payload });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...createUser._doc, token });
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const singInFromEmailPassword = async (req, res) => {
+    try {
+        let { email, password } = req.body;
+        let userFind = await getSingleData({ email, is_deleted: 0 }, User);
+        if (userFind) {
+            let verifyPassword = await passwordCompare(password, userFind.password);
+            if (verifyPassword) {
+                const payload = {
+                    user: {
+                        id: userFind._id,
+                    },
+                };
+                userFind.isLogin = true;
+                await userFind.save();
+                const token = await genrateToken({ payload });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...userFind._doc, token });
+            } else {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_PASSWORD, []);
+            }
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
 export const loginFromMpin = async (req, res) => {
     try {
         let { userId, mPin } = req.body;
