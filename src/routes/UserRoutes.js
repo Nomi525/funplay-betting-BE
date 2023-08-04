@@ -2,13 +2,15 @@ import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
-    deleteQuery, addEditRating, gameRatingAverage
+    deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword
 } from "./../index.js";
 const userRoutes = express.Router();
 
 userRoutes.post('/signup-signin-otp', userSignUpSignInOtp);
 userRoutes.post('/verify-otp', verifyOtp);
 userRoutes.post('/resend-otp', resendOtp);
+userRoutes.post('/signup-password', singupFromEmailPassword);
+userRoutes.post('/signin-password', singInFromEmailPassword);
 userRoutes.post('/mpin-signin', userSignInMpin);
 userRoutes.post('/login-mpin', loginFromMpin);
 userRoutes.get('/guest-login', userGuestLogin);
