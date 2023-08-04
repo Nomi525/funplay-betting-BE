@@ -112,7 +112,20 @@ export const singupFromEmailPassword = async (req, res) => {
         let { email, password } = req.body;
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
+            let verifyPassword = await passwordCompare(password, userFind.password);
+            if (verifyPassword) {
+                const payload = {
+                    user: {
+                        id: userFind._id,
+                    },
+                };
+                userFind.isLogin = true;
+                await userFind.save();
+                const token = await genrateToken({ payload });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...userFind._doc, token });
+            } else {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_PASSWORD, []);
+            }
         } else {
             if (!password) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PASSWORD_REQUIRED, []);
