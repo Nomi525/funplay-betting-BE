@@ -7,9 +7,16 @@ const CMS_Schema = new mongoose.Schema(
                 type: String,
                 require: false,
             },
+            title: {
+                type: String,
+                require: false,
+            },
         },
         contactUs: {
             description: {
+                type: String,
+                require: false,
+            }, title: {
                 type: String,
                 require: false,
             },
@@ -18,10 +25,16 @@ const CMS_Schema = new mongoose.Schema(
             description: {
                 type: String,
                 require: false,
+            }, title: {
+                type: String,
+                require: false,
             },
         },
         termsAndCondition: {
             description: {
+                type: String,
+                require: false,
+            }, title: {
                 type: String,
                 require: false,
             },

@@ -10,6 +10,8 @@ export const addEditPrivacyPolicy = async (req, res) => {
                     const updatePrivacyPolicy = await CMS_Model.updateOne({
                         $set: {
                             "privacyPolicy.description": req.body.description,
+                            "privacyPolicy.title": req.body.title,
+                            
                         },
                     });
                     let updatedData = await CMS_Model.find({ deletedStatus: 0 });
@@ -22,6 +24,7 @@ export const addEditPrivacyPolicy = async (req, res) => {
             } else {
                 let privacyPolicy = new CMS_Model({
                     "privacyPolicy.description": req.body.description,
+                    "privacyPolicy.title": req.body.title,
                 });
                 let data = await privacyPolicy.save();
                 let privacyPolicyData = await CMS_Model.find({ deletedStatus: 0 });
@@ -51,6 +54,7 @@ export const addEditAboutUs = async (req, res) => {
                     const updateContactUs = await CMS_Model.updateOne({
                         $set: {
                             "aboutUs.description": req.body.description,
+                            "aboutUs.title": req.body.title,
                         },
                     });
                     let updatedData = await CMS_Model.find({ deletedStatus: 0 });
@@ -61,6 +65,7 @@ export const addEditAboutUs = async (req, res) => {
             } else {
                 let gamesRules = new CMS_Model({
                     "aboutUs.description": req.body.description,
+                    "aboutUs.title": req.body.title,
                 });
                 let data = await gamesRules.save();
                 let contactUsData = await CMS_Model.find({ deletedStatus: 0 });
@@ -91,6 +96,7 @@ export const addEditTermsAndCondition = async (req, res) => {
                     const updateTermsandCondition = await CMS_Model.updateOne({
                         $set: {
                             "termsAndCondition.description": req.body.description,
+                            "termsAndCondition.title": req.body.title,
                         },
                     });
                     let updatedData = await CMS_Model.find({ deletedStatus: 0 });
@@ -103,6 +109,7 @@ export const addEditTermsAndCondition = async (req, res) => {
             } else {
                 let termsAndCondition = new CMS_Model({
                     "termsAndCondition.description": req.body.description,
+                    "termsAndCondition.title": req.body.title,
                 }).save();
                 let result = await CMS_Model.find({ deletedStatus: 0 });
                 if (termsAndCondition) {
