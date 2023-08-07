@@ -33,6 +33,7 @@ import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/C
 import { addEditQuery, deleteQuery } from "./controller/user/QuerySectionController.js";
 import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
+import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
 
 
 // Routes
@@ -51,6 +52,7 @@ import { BannerModel } from "./models/Banner.js";
 import { Query } from "./models/Query.js";
 import { Rating } from "./models/Rating.js";
 import { Wallet } from "./models/Wallet.js";
+import { WalletLogin } from "./models/WalletLogin.js";
 
 
 // Services
@@ -68,7 +70,7 @@ dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin,
     dbConnection,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
@@ -83,5 +85,7 @@ export {
     dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById,
     genrateToken, generateOtp, genString, referralCode,
     addEditRating,
-    addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck, adminDashboardCount
+    addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck,
+    adminDashboardCount,
+    walletCreate, disconnectWallet
 }
