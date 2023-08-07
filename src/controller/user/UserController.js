@@ -69,29 +69,17 @@ export const verifyOtp = async (req, res) => {
         let { userId, otp, forgotOtp } = req.body;
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
-            if (!forgotOtp) {
-                if (user.otp != otp) {
-                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
-                } else {
-                    const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
-                    const payload = {
-                        user: {
-                            id: userUpdate._id,
-                        },
-                    };
-                    const token = await genrateToken({ payload });
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
-                }
+            if (user.otp != otp) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             } else {
-                if (user?.forgotOtp == forgotOtp) {
-                    user.forgotOtp = null;
-                    user.resetPasswordAllow = true;
-                    await user.save();
-                    // const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, user);
-                } else {
-                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
-                }
+                const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
+                const payload = {
+                    user: {
+                        id: userUpdate._id,
+                    },
+                };
+                const token = await genrateToken({ payload });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
             }
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
