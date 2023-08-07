@@ -66,20 +66,32 @@ export const resendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
     try {
-        let { userId, otp } = req.body;
+        let { userId, otp, forgotOtp } = req.body;
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
-            if (user.otp != otp) {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
+            if (!forgotOtp) {
+                if (user.otp != otp) {
+                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
+                } else {
+                    const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
+                    const payload = {
+                        user: {
+                            id: userUpdate._id,
+                        },
+                    };
+                    const token = await genrateToken({ payload });
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
+                }
             } else {
-                const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
-                const payload = {
-                    user: {
-                        id: userUpdate._id,
-                    },
-                };
-                const token = await genrateToken({ payload });
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
+                if (user?.forgotOtp == forgotOtp) {
+                    user.forgotOtp = null;
+                    user.resetPasswordAllow = true;
+                    await user.save();
+                    // const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, user);
+                } else {
+                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
+                }
             }
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
@@ -379,8 +391,31 @@ export const verifyForgotOtp = async (req, res) => {
     }
 }
 
-
 export const resetPassword = async (req, res) => {
+    try {
+        let { userId, password } = req.body;
+
+        const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        if (!user) {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+
+        if (!user.resetPasswordAllow) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OTP_NOT_VERIFY, []);
+        }
+        password = await passwordHash(password);
+        const upadteUser = await dataUpdated({ _id: user._id }, { password, resetPasswordAllow: false }, User);
+        if (upadteUser) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.RESET_PASSWORD, upadteUser);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SOMETHING_WENT_WRONG, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const resetMpinPassword = async (req, res) => {
     try {
         let { userId, mPin } = req.body;
 

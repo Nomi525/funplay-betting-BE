@@ -76,7 +76,8 @@ const ResponseMessage = {
     CMS_DETAILS : "Cms details fetched",
     UNAUTHORIZED : "Uuauthorized",
     GET_ALL_QUERY : "All queries fetched",
-    GAME_RATING_AVERAGE : "Game rating fetched"
+    GAME_RATING_AVERAGE : "Game rating fetched",
+    WALLET_DISCONNECTED : "Wallet Disconnected"
 }
 
 export { ResponseMessage }

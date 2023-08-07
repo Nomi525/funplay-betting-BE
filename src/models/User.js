@@ -22,15 +22,15 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        referralByCode : {
+        referralByCode: {
             type: String,
             required: false
         },
-        useReferralCodeUsers : [
+        useReferralCodeUsers: [
             {
-                type : mongoose.Schema.Types.ObjectId,
-                ref : "User",
-                required : false
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                required: false
             }
         ],
         mPin: {
@@ -66,6 +66,10 @@ const userSchema = new mongoose.Schema(
             required: false,
         },
         address: {
+            type: String,
+            required: false,
+        },
+        walletAddress: {
             type: String,
             required: false,
         },

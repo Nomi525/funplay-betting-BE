@@ -2,7 +2,7 @@ import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
-    deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword
+    deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,disconnectWallet
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -34,6 +34,10 @@ userRoutes.post('/query/delete', Auth, deleteQuery);
 // Rating Routes
 userRoutes.post('/game/rating/add-edit', Auth, addEditRating);
 userRoutes.post('/game/rating/average', Auth, gameRatingAverage);
+
+// Wallet login
+userRoutes.post('/walletLogin/login',walletCreate);
+userRoutes.post('/walletLogin/disconnect',disconnectWallet);
 
 
 export { userRoutes }
