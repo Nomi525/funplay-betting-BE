@@ -66,20 +66,27 @@ export const resendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
     try {
-        let { userId, otp, forgotOtp } = req.body;
+        let { userId, otp, type } = req.body;
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
             if (user.otp != otp) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             } else {
-                const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
-                const payload = {
-                    user: {
-                        id: userUpdate._id,
-                    },
-                };
-                const token = await genrateToken({ payload });
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
+                if (type == "login") {
+                    const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
+                    const payload = {
+                        user: {
+                            id: userUpdate._id,
+                        },
+                    };
+                    const token = await genrateToken({ payload });
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
+                } else {
+                    user.otp = null;
+                    await user.save();
+                    const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
+                }
             }
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
@@ -311,10 +318,10 @@ export const forgotPassword = async (req, res) => {
         const { email } = req.body
         const userData = await getSingleData({ email: email, is_deleted: 0 }, User);
         if (userData) {
-            const forgotOtp = 4444
-            // const forgotOtp = generateOtp();
-            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp: forgotOtp });
-            const updateOtp = await dataUpdated({ _id: userData._id }, { forgotOtp }, User);
+            const otp = 4444
+            // const otp = generateOtp();
+            let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp });
+            const updateOtp = await dataUpdated({ _id: userData._id }, { otp }, User);
             await sendMail(userData.email, "Forgot Password", mailInfo)
                 .then((data) => {
                     if (data == 0) {
@@ -362,8 +369,8 @@ export const verifyForgotOtp = async (req, res) => {
             });
         } else {
             if (user) {
-                if (user?.forgotOtp == forgotOtp) {
-                    user.forgotOtp = null;
+                if (user?.otp == otp) {
+                    user.otp = null;
                     await user.save();
                     const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
                     return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
