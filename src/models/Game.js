@@ -9,6 +9,10 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    gameDuration : {
+        type: Number,
+        required: false
+    },
     is_deleted: {
         type: Number,
         default : 0 
