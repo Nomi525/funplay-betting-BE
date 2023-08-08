@@ -7,7 +7,7 @@ import {
 
 export const userSignUpSignInOtp = async (req, res) => {
     try {
-        let { email } = req.body;
+        let { email, currency } = req.body;
         const otp = 4444;
         // const otp = generateOtp(); // for generate OTP
         const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
@@ -31,7 +31,7 @@ export const userSignUpSignInOtp = async (req, res) => {
                     });
                 }
             }
-            const userData = await dataCreate({ email, otp, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User)
+            const userData = await dataCreate({ email, currency, otp, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User)
             if (findReferralUser) {
                 findReferralUser.useReferralCodeUsers.push(userData._id);
                 await findReferralUser.save();
@@ -80,12 +80,12 @@ export const verifyOtp = async (req, res) => {
                         },
                     };
                     const token = await genrateToken({ payload });
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token });
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token, type: "login" });
                 } else {
                     user.otp = null;
                     await user.save();
                     const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updateUser);
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, {...updateUser._doc,type: "forgotPassword"});
                 }
             }
         } else {
@@ -116,7 +116,7 @@ export const userSignInMpin = async (req, res) => {
 
 export const singupFromEmailPassword = async (req, res) => {
     try {
-        let { email, password } = req.body;
+        let { email, password, currency } = req.body;
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
             let verifyPassword = await passwordCompare(password, userFind.password);
@@ -152,7 +152,7 @@ export const singupFromEmailPassword = async (req, res) => {
                 }
             }
             password = await passwordHash(password);
-            const createUser = await dataCreate({ email, password, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User);
+            const createUser = await dataCreate({ email, currency, password, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User);
             if (findReferralUser) {
                 findReferralUser.useReferralCodeUsers.push(createUser._id);
                 await findReferralUser.save();

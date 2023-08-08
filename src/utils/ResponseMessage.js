@@ -77,7 +77,9 @@ const ResponseMessage = {
     UNAUTHORIZED : "Uuauthorized",
     GET_ALL_QUERY : "All queries fetched",
     GAME_RATING_AVERAGE : "Game rating fetched",
-    WALLET_DISCONNECTED : "Wallet Disconnected"
+    WALLET_DISCONNECTED : "Wallet Disconnected",
+    GAME_ADDED : "Game created successfully", 
+    GAME_EXIST : "Game already exist", 
 }
 
 export { ResponseMessage }

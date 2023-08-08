@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        currency : {
+            type: Number,
+            required: false
+        },
         isActive: {
             type: Boolean,
             default: false
