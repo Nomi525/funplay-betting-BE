@@ -74,7 +74,7 @@ const userSchema = new mongoose.Schema(
             required: false,
         },
         currency : {
-            type: Number,
+            type: String,
             required: false
         },
         isActive: {
