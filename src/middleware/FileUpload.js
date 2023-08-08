@@ -29,6 +29,10 @@ var upload = multer({ storage }).fields([
     {
         name: "image",
         maxCount: 1,
+    },
+    {
+        name: "gameImage",
+        maxCount: 1,
     }
 ]);
 
@@ -47,6 +51,10 @@ export default function (req, res, next) {
 
                 var image = req.files.image ? req.files.image[0].filename : "";
                 req.imageUrl = image;
+
+                var gameImage = req.files.gameImage ? req.files.gameImage[0].filename : "";
+                req.gameImageUrl = gameImage;
+                
                 next();
             } else {
                 next();

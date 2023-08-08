@@ -12,9 +12,12 @@ import { StatusCodes } from "http-status-codes";
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import path from 'path';
+import Joi from "joi";
 import { dbConnection } from "./config/Db.config.js";
 import { ResponseMessage } from "./utils/ResponseMessage.js";
 import { dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById } from "./services/QueryService.js";
+import { validatorRequest } from "./utils/Validator.js";
+// import  validator  from "./utils/Validator.js";
 
 // Controllers
 import {
@@ -22,6 +25,7 @@ import {
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
     getTransactionList, hwoToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
 } from "./controller/admin/AdminController.js";
+import { validatorMiddlware } from "./middleware/Validation.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
@@ -34,7 +38,7 @@ import { addEditQuery, deleteQuery } from "./controller/user/QuerySectionControl
 import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
-
+import { addEditGame,gameDelete } from "./controller/admin/GameController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -53,24 +57,24 @@ import { Query } from "./models/Query.js";
 import { Rating } from "./models/Rating.js";
 import { Wallet } from "./models/Wallet.js";
 import { WalletLogin } from "./models/WalletLogin.js";
-
+import { Game } from "./models/Game.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
 import Upload from "./middleware/FileUpload.js";
 import { appServer } from "../server.js";
+
 import {
     createError, sendResponse, passwordHash, passwordCompare, genrateToken, generateOtp,
     genString, referralCode
 } from "./services/CommonService.js";
 
-
 dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi,Game,
     dbConnection,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
@@ -87,5 +91,6 @@ export {
     addEditRating,
     addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck,
     adminDashboardCount,
-    walletCreate, disconnectWallet
+    walletCreate, disconnectWallet,
+    validatorRequest, validatorMiddlware,addEditGame,gameDelete
 }

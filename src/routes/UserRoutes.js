@@ -2,14 +2,15 @@ import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
-    deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,disconnectWallet
+    deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
+    disconnectWallet, validatorMiddlware
 } from "./../index.js";
 const userRoutes = express.Router();
 
 userRoutes.post('/signup-signin-otp', userSignUpSignInOtp);
 userRoutes.post('/verify-otp', verifyOtp);
 userRoutes.post('/resend-otp', resendOtp);
-userRoutes.post('/signup-password', singupFromEmailPassword);
+userRoutes.post('/signup-password', [validatorMiddlware("signupValidator")], singupFromEmailPassword);
 userRoutes.post('/signin-password', singInFromEmailPassword);
 userRoutes.post('/mpin-signin', userSignInMpin);
 userRoutes.post('/login-mpin', loginFromMpin);
@@ -36,8 +37,8 @@ userRoutes.post('/game/rating/add-edit', Auth, addEditRating);
 userRoutes.post('/game/rating/average', Auth, gameRatingAverage);
 
 // Wallet login
-userRoutes.post('/walletLogin/login',walletCreate);
-userRoutes.post('/walletLogin/disconnect',disconnectWallet);
+userRoutes.post('/walletLogin/login', walletCreate);
+userRoutes.post('/walletLogin/disconnect', disconnectWallet);
 
 
 export { userRoutes }
