@@ -9,7 +9,7 @@ const signupValidator = Joi.object().keys({
         .regex(/[ -~]*[0-9][ -~]*/)
         .min(8)
         .required(),
-    currency: Joi.number().required()
+    currency: Joi.string().optional()
 })
 
 export const validatorRequest = {
