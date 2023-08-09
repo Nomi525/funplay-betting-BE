@@ -80,6 +80,8 @@ const ResponseMessage = {
     WALLET_DISCONNECTED : "Wallet Disconnected",
     GAME_ADDED : "Game created successfully", 
     GAME_EXIST : "Game already exist", 
+    EMAIL_PASSWORD_VERIFY : "Please verify otp to update profile ", 
+    PROFILE_UPDATED : "Profile updated successfully", 
 }
 
 export { ResponseMessage }

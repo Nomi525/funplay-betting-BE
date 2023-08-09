@@ -3,9 +3,9 @@ import { Game, sendResponse, StatusCodes, createError, ResponseMessage, getSingl
 export const addEditGame = async (req, res) => {
 
     try {
-        const { gameName, gameDuration } = req.body;
+        const { gameName, gameDuration,gameId } = req.body;
         const findGame = await getSingleData({ gameName: gameName, is_deleted: 0 }, Game);
-        if (!req.query.gameId) {
+        if (!gameId) {
             if (findGame) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_EXIST, [])
             }
@@ -15,7 +15,7 @@ export const addEditGame = async (req, res) => {
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.GAME_ADDED, createGame);
         } else {
             const gameImage = req.gameImageUrl ? req.gameImageUrl : findGame?.gameImage;
-            const updateGame = await dataUpdated({ _id: req.query.gameId }, { gameName, gameImage, gameDuration }, Game)
+            const updateGame = await dataUpdated({ _id : gameId }, { gameName, gameImage, gameDuration }, Game)
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updateGame);
         }
 

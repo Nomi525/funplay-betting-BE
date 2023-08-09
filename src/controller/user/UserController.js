@@ -66,7 +66,7 @@ export const resendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
     try {
-        let { userId, otp, type } = req.body;
+        let { userId, otp, type, email, mobileNumber, address } = req.body;
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
             if (user.otp != otp) {
@@ -81,11 +81,21 @@ export const verifyOtp = async (req, res) => {
                     };
                     const token = await genrateToken({ payload });
                     return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token, type: "login" });
-                } else {
+                } else if (type == "forgotPassword") {
                     user.otp = null;
                     await user.save();
                     const updateUser = await dataUpdated({ _id: user._id }, { resetPasswordAllow: true }, User);
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, {...updateUser._doc,type: "forgotPassword"});
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, { ...updateUser._doc, type: "forgotPassword" });
+                } else if (type == "mPin") {
+                    //mpin set code 
+                } else if (type == "emailVerify") {
+                    if (!email && !mobileNumber) {
+                        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ENTER_EMAIL_PASSWORD, []);
+                    }
+                    const updateUser = await dataUpdated({ _id: userId, is_deleted: 0 }, { email, mobileNumber, address, otp: null }, User);
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.PROFILE_UPDATED, updateUser);
+                } else {
+                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
                 }
             }
         } else {
@@ -203,7 +213,7 @@ export const loginFromMpin = async (req, res) => {
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
             if (user.mPin !== mPin) {
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.INVALID_MPIN, []);
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_MPIN, []);
             }
             const payload = {
                 user: {
@@ -275,23 +285,43 @@ export const editProfile = async (req, res) => {
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
+        // const otp = generateOtp();
+        const otp = 4444;
+        if (findData.email != req.body.email || findData.mobileNumber != req.body.mobileNumber) {
+            // console.log('email mobile not eqaul');
+            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp: otp });
+            await sendMail(findData.email, "Forgot Password", mailInfo);
+            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, {otp: otp}, User);
 
-        // For MPIN
-        if (req.body.mPin) {
-            const findUser = await getSingleData({ mPin: req.body.mPin }, User);
-            if (findUser) {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, { type: "emailVerify" });
+        } else {
+            // console.log('email mobile eqaul');
+            req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
+
+            if (userData) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
+            } else {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
             }
         }
 
-        req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-        const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
+        // For MPIN
+        // if (req.body.mPin) {
+        //     const findUser = await getSingleData({ mPin: req.body.mPin }, User);
+        //     if (findUser) {
+        //         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
+        //     }
+        // }
 
-        if (userData) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
-        } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
-        }
+        // req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+        // const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
+
+        // if (userData) {
+        //     return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
+        // } else {
+        //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        // }
 
     } catch (error) {
         return createError(res, error);
@@ -340,7 +370,7 @@ export const forgotPassword = async (req, res) => {
 
 export const verifyForgotOtp = async (req, res) => {
     try {
-        let { userId, forgotOtp, otp, email, mobileNumber, flag } = req.body;
+        let { userId, otp, email, mobileNumber, flag } = req.body;
         const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
 
         if (flag == 1 && userId) {
@@ -501,11 +531,7 @@ export const userEditProfile = async (req, res) => {
                 },
                 { new: true, useFindAndModify: false }
             );
-            // return res.status(200).json({
-            //     status: StatusCodes.OK,
-            //     message: ResponseMessage.USER_UPDATED,
-            //     data: [{ user: updatedData, flag: 0 }],
-            // });
+
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, [{ user: updatedData, flag: 0 }]);
         } else if (user.email !== email && user.mobileNumber == mobileNumber) {
             user.otp = otp;
@@ -516,11 +542,7 @@ export const userEditProfile = async (req, res) => {
             // const otp = generateOtp();
             let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp: otp });
             await sendMail(user.email, "Forgot Password", mailInfo);
-            // return res.status(200).json({
-            //     status: StatusCodes.OK,
-            //     message: ResponseMessage.OTP_SENT_TO_BOTH,
-            //     data: [{ user, flag: 1 }]
-            // });
+
             return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_SENT_TO_BOTH, [{ user, flag: 1 }]);
         } else if (user.email == email && user.mobileNumber != mobileNumber) {
             user.fullName = fullName
@@ -531,11 +553,7 @@ export const userEditProfile = async (req, res) => {
             // const otp = generateOtp();
             let mailInfo = await ejs.renderFile("src/views/ForgotPassword.ejs", { otp: otp });
             await sendMail(user.email, "Forgot Password", mailInfo);
-            // return res.status(200).json({
-            //     status: StatusCodes.OK,
-            //     message: ResponseMessage.OTP_SENT_TO_BOTH,
-            //     data: [{ user, flag: 1 }]
-            // });
+
             return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_SENT_TO_BOTH, [{ user, flag: 1 }]);
         }
         return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
