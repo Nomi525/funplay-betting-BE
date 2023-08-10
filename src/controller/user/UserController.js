@@ -7,12 +7,16 @@ import {
 
 export const userSignUpSignInOtp = async (req, res) => {
     try {
-        let { email, currency,referralByCode } = req.body;
+        let { email, currency, referralByCode } = req.body;
         const otp = 4444;
         email = email ? email.toLowerCase() : null
         // const otp = generateOtp(); // for generate OTP
-        const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
+        // const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
+        const existingUser = await getSingleData({ email }, User);
         if (existingUser) {
+            if (existingUser.is_deleted != 0) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             const updateOtp = await dataUpdated({ email }, { otp }, User)
             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
             await sendMail(existingUser.email, "Verify Otp", mailInfo)
@@ -22,14 +26,9 @@ export const userSignUpSignInOtp = async (req, res) => {
             let findReferralUser = null;
             // For Referral Code
             if (referralByCode) {
-                findReferralUser = await User.findOne({
-                    referralCode: referralByCode,
-                });
+                findReferralUser = await User.findOne({ referralCode: referralByCode });
                 if (!findReferralUser) {
-                    return res.status(404).json({
-                        status: 404,
-                        message: ResponseMessage.REFERRAL_CODE_NOT_FOUND,
-                    });
+                    return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
                 }
             }
             const userData = await dataCreate({ email, currency, otp, referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User)
@@ -130,13 +129,13 @@ export const userSignInMpin = async (req, res) => {
 
 export const singupFromEmailPassword = async (req, res) => {
     try {
-        let { email, password, currency,referralByCode } = req.body;
+        let { email, password, currency, referralByCode } = req.body;
         email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
-          
-            if(userFind.password == null){
-                console.log(userFind,"hgdhs")
+
+            if (userFind.password == null) {
+                console.log(userFind, "hgdhs")
                 return sendResponse(res, StatusCodes.BAD_REQUEST, "Password not set", []);
             }
             let verifyPassword = await passwordCompare(password, userFind.password);
@@ -300,11 +299,11 @@ export const editProfile = async (req, res) => {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
             let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { userId: findData._id, email: req.body.email });
             await sendMail(req.body.email, "Verify Email", mailInfo);
-            await dataUpdated({ _id: findData._id,  is_deleted: 0 }, { isVerified: false, profile: req.body.profile }, User);
+            await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false, profile: req.body.profile, fullName: req.body.fullName }, User);
             return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, []);
         } else {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, { profile: req.body.profile }, User);
+            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, { profile: req.body.profile, fullName: req.body.fullName }, User);
             if (userData) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
             } else {
@@ -326,11 +325,11 @@ export const emailVerify = async (req, res) => {
         }
 
         let checkEmailExist = await getSingleData({ email: email }, User)
-        if(checkEmailExist){
+        if (checkEmailExist) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.EMAIL_ALREADY_EXIST, []);
         }
         const findUser = await getSingleData({ _id: userId }, User)
-        if (!findUser){
+        if (!findUser) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
         findUser.email = email;
@@ -508,6 +507,49 @@ export const resetPassword = async (req, res) => {
     }
 }
 
+export const changePassword = async (req, res) => {
+    try {
+        let { oldPassword, newPassword } = req.body
+        const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
+        if (user) {
+            const verifyOldPassword = await passwordCompare(oldPassword, user.password);
+            if (!verifyOldPassword) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OLD_PASSWORD_WORNG, []);
+            }
+            user.password = await passwordHash(newPassword)
+            await user.save();
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
+export const setMpin = async (req, res) => {
+    try {
+        const { mPin } = req.body;
+        const findUser = await getSingleData({ _id: req.user }, User);
+        if (findUser) {
+            if (req.body.mPin) {
+                const findMpin = await getSingleData({ mPin: req.body.mPin }, User);
+                if (findMpin) {
+                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
+                }
+                const setMpin = await dataUpdated({ _id: findUser._id }, { mPin }, User);
+                return sendResponse(res, StatusCodes.BAD_REQUEST, "MPIN is required", setMpin);
+            } else {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, "MPIN required", []);
+            }
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
 export const resetMpinPassword = async (req, res) => {
     try {
         let { userId, mPin } = req.body;
@@ -537,19 +579,19 @@ export const resetMpinPassword = async (req, res) => {
     }
 }
 
-export const changePassword = async (req, res) => {
+export const changeMpin = async (req, res) => {
     try {
-        let { oldPassword, newPassword } = req.body
+        let { oldMpin, newMpin } = req.body
         const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (user) {
-            if (user.mPin != oldPassword) {
+            if (user.mPin != oldMpin) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.OLD_MPIN_WRONG, []);
             }
-            const findMpin = await getSingleData({ mPin: newPassword }, User);
+            const findMpin = await getSingleData({ mPin: newMpin }, User);
             if (findMpin) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.MPIN_ALREADY_USE, []);
             }
-            user.mPin = newPassword
+            user.mPin = newMpin
             await user.save();
             return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
         } else {

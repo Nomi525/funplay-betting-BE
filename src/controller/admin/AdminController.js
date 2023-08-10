@@ -327,7 +327,8 @@ export const adminEditUser = async (req, res) => {
         const { userId, fullName, userName, email } = req.body;
         const findUser = await getSingleData({ _id: userId }, User)
         if (findUser) {
-            const updateUser = await dataUpdated({ _id: userId }, { fullName, userName, email }, User);
+            const profile = req.profileUrl ? req.profileUrl : findUser.profile;
+            const updateUser = await dataUpdated({ _id: userId }, { fullName, userName, email, profile }, User);
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updateUser);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);

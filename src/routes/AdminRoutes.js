@@ -32,7 +32,7 @@ adminRoutes.post("/setting", Auth, adminSetting)
 adminRoutes.post("/withdrawal-request", Auth, adminWithdrawalRequest)
 
 // ------ User 
-adminRoutes.post('/user-edit', Auth, adminEditUser);
+adminRoutes.post('/user-edit', Auth, Upload, adminEditUser);
 adminRoutes.post('/user-delete', Auth, adminDeleteUser);
 
 // User Query

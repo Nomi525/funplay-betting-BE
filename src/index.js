@@ -30,7 +30,7 @@ import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
     userGuestLogin,
-    transactionHistory, singInFromEmailPassword
+    transactionHistory, singInFromEmailPassword, setMpin,changeMpin, emailVerify
 } from "./controller/user/UserController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
 import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/CommonController.js";
@@ -75,7 +75,7 @@ dotenv.config();
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
     Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game,
-    dbConnection,
+    dbConnection, setMpin,changeMpin,emailVerify,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,
