@@ -1,10 +1,9 @@
-import { emailVerify } from "../controller/user/UserController.js";
 import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
     deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
-    disconnectWallet, validatorMiddlware
+    disconnectWallet, validatorMiddlware,setMpin,changeMpin,emailVerify
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -15,13 +14,15 @@ userRoutes.post('/signup-password', [validatorMiddlware("signupValidator")], sin
 userRoutes.post('/signin-password', singInFromEmailPassword);
 userRoutes.post('/mpin-signin', userSignInMpin);
 userRoutes.post('/login-mpin', loginFromMpin);
+userRoutes.post('/set-mpin', setMpin);
 userRoutes.get('/guest-login', userGuestLogin);
 userRoutes.post('/forgot-password', forgotPassword);
 userRoutes.post('/verify-forgot-otp', verifyForgotOtp);
 userRoutes.post('/reset-password', resetPassword);
 userRoutes.post('/profile-update', Auth, Upload, editProfile);
 userRoutes.get('/profile', Auth, getProfile);
-userRoutes.post('/change-mpin', Auth, changePassword);
+userRoutes.post('/change-mpin', Auth, changeMpin);
+userRoutes.post('/change-password', Auth, changePassword);
 userRoutes.post('/logout', Auth, logout);
 userRoutes.post("/userEdit", Auth, Upload, userEditProfile);
 userRoutes.post("/deactivate-user", Auth, accountDeactivate);
