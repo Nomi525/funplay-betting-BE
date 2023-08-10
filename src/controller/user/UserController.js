@@ -7,8 +7,9 @@ import {
 
 export const userSignUpSignInOtp = async (req, res) => {
     try {
-        let { email, currency } = req.body;
+        let { email, currency,referralByCode } = req.body;
         const otp = 4444;
+        email = email ? email.toLowerCase() : null
         // const otp = generateOtp(); // for generate OTP
         const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
         if (existingUser) {
@@ -20,9 +21,9 @@ export const userSignUpSignInOtp = async (req, res) => {
             let referCode = referralCode(8);
             let findReferralUser = null;
             // For Referral Code
-            if (req.body.referralByCode) {
+            if (referralByCode) {
                 findReferralUser = await User.findOne({
-                    referralCode: req.body.referralByCode,
+                    referralCode: referralByCode,
                 });
                 if (!findReferralUser) {
                     return res.status(404).json({
@@ -31,7 +32,7 @@ export const userSignUpSignInOtp = async (req, res) => {
                     });
                 }
             }
-            const userData = await dataCreate({ email, currency, otp, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User)
+            const userData = await dataCreate({ email, currency, otp, referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User)
             if (findReferralUser) {
                 findReferralUser.useReferralCodeUsers.push(userData._id);
                 await findReferralUser.save();
@@ -41,6 +42,7 @@ export const userSignUpSignInOtp = async (req, res) => {
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL, userData);
         }
     } catch (error) {
+        console.log(error);
         return createError(res, error);
     }
 }
@@ -67,6 +69,7 @@ export const resendOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
     try {
         let { userId, otp, type, email, mobileNumber, address } = req.body;
+        email = email ? email.toLowerCase() : null
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
             if (user.otp != otp) {
@@ -108,6 +111,7 @@ export const verifyOtp = async (req, res) => {
 
 export const userSignInMpin = async (req, res) => {
     let { email } = req.body;
+    email = email ? email.toLowerCase() : null
     try {
         const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
         if (existingUser) {
@@ -126,9 +130,15 @@ export const userSignInMpin = async (req, res) => {
 
 export const singupFromEmailPassword = async (req, res) => {
     try {
-        let { email, password, currency } = req.body;
+        let { email, password, currency,referralByCode } = req.body;
+        email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
+          
+            if(userFind.password == null){
+                console.log(userFind,"hgdhs")
+                return sendResponse(res, StatusCodes.BAD_REQUEST, "Password not set", []);
+            }
             let verifyPassword = await passwordCompare(password, userFind.password);
             if (verifyPassword) {
                 const payload = {
@@ -150,9 +160,9 @@ export const singupFromEmailPassword = async (req, res) => {
             let referCode = referralCode(8);
             let findReferralUser = null;
             // For Referral Code
-            if (req.body.referralByCode) {
+            if (referralByCode) {
                 findReferralUser = await User.findOne({
-                    referralCode: req.body.referralByCode,
+                    referralCode: referralByCode,
                 });
                 if (!findReferralUser) {
                     return res.status(404).json({
@@ -162,7 +172,7 @@ export const singupFromEmailPassword = async (req, res) => {
                 }
             }
             password = await passwordHash(password);
-            const createUser = await dataCreate({ email, currency, password, referralCode: referCode, referralByCode: req.body.referralByCode ? req.body.referralByCode : null }, User);
+            const createUser = await dataCreate({ email, currency, password, referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User);
             if (findReferralUser) {
                 findReferralUser.useReferralCodeUsers.push(createUser._id);
                 await findReferralUser.save();
@@ -183,6 +193,7 @@ export const singupFromEmailPassword = async (req, res) => {
 export const singInFromEmailPassword = async (req, res) => {
     try {
         let { email, password } = req.body;
+        email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
             let verifyPassword = await passwordCompare(password, userFind.password);
@@ -285,20 +296,15 @@ export const editProfile = async (req, res) => {
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
-        // const otp = generateOtp();
-        const otp = 4444;
-        if (findData.email != req.body.email || findData.mobileNumber != req.body.mobileNumber) {
-            // console.log('email mobile not eqaul');
-            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp: otp });
-            await sendMail(findData.email, "Forgot Password", mailInfo);
-            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, {otp: otp}, User);
-
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, { type: "emailVerify" });
-        } else {
-            // console.log('email mobile eqaul');
+        if (findData.email != req.body.email) {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
-
+            let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { userId: findData._id, email: req.body.email });
+            await sendMail(req.body.email, "Verify Email", mailInfo);
+            await dataUpdated({ _id: findData._id,  is_deleted: 0 }, { isVerified: false, profile: req.body.profile }, User);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, []);
+        } else {
+            req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, { profile: req.body.profile }, User);
             if (userData) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
             } else {
@@ -306,27 +312,87 @@ export const editProfile = async (req, res) => {
             }
         }
 
-        // For MPIN
-        // if (req.body.mPin) {
-        //     const findUser = await getSingleData({ mPin: req.body.mPin }, User);
-        //     if (findUser) {
-        //         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
-        //     }
-        // }
-
-        // req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-        // const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
-
-        // if (userData) {
-        //     return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
-        // } else {
-        //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
-        // }
-
     } catch (error) {
         return createError(res, error);
     }
 }
+
+export const emailVerify = async (req, res) => {
+    try {
+        let { userId, email } = req.query;
+        email = email ? email.toLowerCase() : null
+        if (!email) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Email not found", []);
+        }
+
+        let checkEmailExist = await getSingleData({ email: email }, User)
+        if(checkEmailExist){
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.EMAIL_ALREADY_EXIST, []);
+        }
+        const findUser = await getSingleData({ _id: userId }, User)
+        if (!findUser){
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        }
+        findUser.email = email;
+        findUser.isVerified = true;
+        findUser.isLogin = false;
+        await findUser.save();
+        return res.redirect('http:127.0.0.1:3032/api/user/login')
+        // await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false }, User);
+    } catch (error) {
+        console.log(error);
+        return createError(res, error);
+    }
+}
+
+// export const editProfile = async (req, res) => {
+//     try {
+//         const findData = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
+//         if (!findData) {
+//             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+//         }
+//         // const otp = generateOtp();
+//         const otp = 4444;
+//         if (findData.email != req.body.email || findData.mobileNumber != req.body.mobileNumber) {
+//             // console.log('email mobile not eqaul');
+//             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp: otp });
+//             await sendMail(findData.email, "Forgot Password", mailInfo);
+//             const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, {otp: otp}, User);
+
+//             return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, { type: "emailVerify" });
+//         } else {
+//             // console.log('email mobile eqaul');
+//             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+//             const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
+
+//             if (userData) {
+//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
+//             } else {
+//                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+//             }
+//         }
+
+//         // For MPIN
+//         // if (req.body.mPin) {
+//         //     const findUser = await getSingleData({ mPin: req.body.mPin }, User);
+//         //     if (findUser) {
+//         //         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
+//         //     }
+//         // }
+
+//         // req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+//         // const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
+
+//         // if (userData) {
+//         //     return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
+//         // } else {
+//         //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+//         // }
+
+//     } catch (error) {
+//         return createError(res, error);
+//     }
+// }
 
 export const logout = async (req, res) => {
     try {
@@ -346,6 +412,7 @@ export const logout = async (req, res) => {
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body
+        email = email ? email.toLowerCase() : null
         const userData = await getSingleData({ email: email, is_deleted: 0 }, User);
         if (userData) {
             const otp = 4444
@@ -371,6 +438,7 @@ export const forgotPassword = async (req, res) => {
 export const verifyForgotOtp = async (req, res) => {
     try {
         let { userId, otp, email, mobileNumber, flag } = req.body;
+        email = email ? email.toLowerCase() : null
         const user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
 
         if (flag == 1 && userId) {
@@ -509,6 +577,7 @@ export const userEditProfile = async (req, res) => {
     try {
         const Id = req.user;
         let { fullName, mobileNumber, email } = req.body;
+        email = email ? email.toLowerCase() : null
         let otp = 4444;
         const user = await User.findById(Id);
         if (req.files.profile) {

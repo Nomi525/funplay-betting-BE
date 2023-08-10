@@ -1,3 +1,4 @@
+import { emailVerify } from "../controller/user/UserController.js";
 import {
     express, logout, editProfile, Upload, userSignUpSignInOtp,
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
@@ -24,6 +25,9 @@ userRoutes.post('/change-mpin', Auth, changePassword);
 userRoutes.post('/logout', Auth, logout);
 userRoutes.post("/userEdit", Auth, Upload, userEditProfile);
 userRoutes.post("/deactivate-user", Auth, accountDeactivate);
+
+// Email Verify
+userRoutes.get("/verify-email", emailVerify);
 
 // Transaction History Routes
 userRoutes.get("/transaction-history", Auth, transactionHistory);

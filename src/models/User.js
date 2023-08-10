@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            Unique: true,
+            unique: true,
+            lowercase: true, 
+            required: false,
         },
         userName: {
             type: String,
@@ -40,6 +42,7 @@ const userSchema = new mongoose.Schema(
         password: {
             type: String,
             required: false,
+            default : null
         },
         isLogin: {
             type: Boolean,

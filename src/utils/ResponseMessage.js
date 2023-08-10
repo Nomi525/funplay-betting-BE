@@ -82,6 +82,7 @@ const ResponseMessage = {
     GAME_EXIST : "Game already exist", 
     EMAIL_PASSWORD_VERIFY : "Please verify otp to update profile ", 
     PROFILE_UPDATED : "Profile updated successfully", 
+    EMAIL_ALREADY_EXIST : "Email is already in use please use another"
 }
 
 export { ResponseMessage }

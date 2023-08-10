@@ -7,6 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/images', express.static('./public/uploads'));
 
 //SET HEADER
 app.use(function (req, res, next) {
