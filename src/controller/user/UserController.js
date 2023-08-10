@@ -411,7 +411,7 @@ export const logout = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
     try {
-        const { email } = req.body
+        let { email } = req.body
         email = email ? email.toLowerCase() : null
         const userData = await getSingleData({ email: email, is_deleted: 0 }, User);
         if (userData) {
@@ -539,7 +539,7 @@ export const resetMpinPassword = async (req, res) => {
 
 export const changePassword = async (req, res) => {
     try {
-        const { oldPassword, newPassword } = req.body
+        let { oldPassword, newPassword } = req.body
         const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (user) {
             if (user.mPin != oldPassword) {
