@@ -3,7 +3,7 @@ import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendRespo
 export const addEditBanner = async (req, res) => {
     try {
         if (req.admin || req.user) {
-            if (!req.query.bannerId) {
+            if (!req.body.bannerId) {
                 req.body.bannerImage = req.imageUrl;
                 req.body.type = req.user ? 'user' : 'admin';
                 req.body.createdBy = req.user ? req.user : req.admin;
@@ -13,7 +13,7 @@ export const addEditBanner = async (req, res) => {
                 const findBanner = await getSingleData({ _id: req.query.bannerId }, BannerModel)
                 if (findBanner) {
                     req.body.bannerImage = req.imageUrl ? req.imageUrl : findBanner.bannerImage;
-                    const updatedBanner = await dataUpdated({ _id: req.query.bannerId }, req.body, BannerModel)
+                    const updatedBanner = await dataUpdated({ _id: req.body.bannerId }, req.body, BannerModel)
                     return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updatedBanner);
                 } else {
                     return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
