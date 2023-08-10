@@ -10,7 +10,7 @@ export const addEditBanner = async (req, res) => {
                 const createBanner = await dataCreate(req.body, BannerModel);
                 return sendResponse(res, StatusCodes.CREATED, ResponseMessage.DATA_CREATED, createBanner);
             } else {
-                const findBanner = await getSingleData({ _id: req.query.bannerId }, BannerModel)
+                const findBanner = await getSingleData({ _id: req.body.bannerId }, BannerModel)
                 if (findBanner) {
                     req.body.bannerImage = req.imageUrl ? req.imageUrl : findBanner.bannerImage;
                     const updatedBanner = await dataUpdated({ _id: req.body.bannerId }, req.body, BannerModel)
