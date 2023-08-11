@@ -86,6 +86,7 @@ const ResponseMessage = {
     PROFILE_UPDATED : "Profile updated successfully", 
     EMAIL_ALREADY_EXIST : "Email is already in use please use another",
     SET_PASSWORD : "Password set successfully",
+    SET_NOT_PASSWORD : "Password not set",
 }
 
 export { ResponseMessage }
