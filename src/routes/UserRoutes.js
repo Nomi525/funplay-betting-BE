@@ -3,7 +3,7 @@ import {
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
     deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
-    disconnectWallet, validatorMiddlware,setMpin,changeMpin,emailVerify
+    disconnectWallet, validatorMiddlware,setMpin,changeMpin,emailVerify,setPassword
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -26,6 +26,7 @@ userRoutes.post('/change-password', Auth, changePassword);
 userRoutes.post('/logout', Auth, logout);
 userRoutes.post("/userEdit", Auth, Upload, userEditProfile);
 userRoutes.post("/deactivate-user", Auth, accountDeactivate);
+userRoutes.post('/set-password',Auth, setPassword);
 
 // Email Verify
 userRoutes.get("/verify-email", emailVerify);
