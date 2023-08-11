@@ -13,11 +13,13 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import path from 'path';
 import Joi from "joi";
+
+// Common
 import { dbConnection } from "./config/Db.config.js";
 import { ResponseMessage } from "./utils/ResponseMessage.js";
 import { dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById } from "./services/QueryService.js";
 import { validatorRequest } from "./utils/Validator.js";
-// import  validator  from "./utils/Validator.js";
+import { validatorMiddlware } from "./middleware/Validation.js";
 
 // Controllers
 import {
@@ -25,11 +27,10 @@ import {
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
     getTransactionList, hwoToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
 } from "./controller/admin/AdminController.js";
-import { validatorMiddlware } from "./middleware/Validation.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
-    userGuestLogin,
+    userGuestLogin,setPassword,
     transactionHistory, singInFromEmailPassword, setMpin,changeMpin, emailVerify
 } from "./controller/user/UserController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
@@ -75,7 +76,7 @@ dotenv.config();
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
     Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game,
-    dbConnection, setMpin,changeMpin,emailVerify,
+    dbConnection, setMpin,changeMpin,emailVerify,setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,

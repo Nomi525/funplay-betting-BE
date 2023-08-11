@@ -135,7 +135,6 @@ export const singupFromEmailPassword = async (req, res) => {
         if (userFind) {
 
             if (userFind.password == null) {
-                console.log(userFind, "hgdhs")
                 return sendResponse(res, StatusCodes.BAD_REQUEST, "Password not set", []);
             }
             let verifyPassword = await passwordCompare(password, userFind.password);
@@ -160,14 +159,9 @@ export const singupFromEmailPassword = async (req, res) => {
             let findReferralUser = null;
             // For Referral Code
             if (referralByCode) {
-                findReferralUser = await User.findOne({
-                    referralCode: referralByCode,
-                });
+                findReferralUser = await getSingleData({ referralCode: referralByCode, is_deleted: 0 }, User)
                 if (!findReferralUser) {
-                    return res.status(404).json({
-                        status: 404,
-                        message: ResponseMessage.REFERRAL_CODE_NOT_FOUND,
-                    });
+                    return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
                 }
             }
             password = await passwordHash(password);
@@ -336,7 +330,7 @@ export const emailVerify = async (req, res) => {
         findUser.isVerified = true;
         findUser.isLogin = false;
         await findUser.save();
-        return res.redirect('http:127.0.0.1:3032/api/user/login')
+        return res.redirect('http://betting.appworkdemo.com/user')
         // await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false }, User);
     } catch (error) {
         console.log(error);
@@ -434,6 +428,22 @@ export const forgotPassword = async (req, res) => {
     }
 }
 
+export const setPassword = async (req, res) => {
+    try {
+        let { password } = req.body;
+        const findUser = await getSingleData({ _id: req.user }, User);
+        if (findUser) {
+            findUser.password = await passwordHash(password);
+            await findUser.save();
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.SET_PASSWORD, findUser);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return createError(res, error);
+    }
+}
+
 export const verifyForgotOtp = async (req, res) => {
     try {
         let { userId, otp, email, mobileNumber, flag } = req.body;
@@ -442,28 +452,12 @@ export const verifyForgotOtp = async (req, res) => {
 
         if (flag == 1 && userId) {
             if (!email && !mobileNumber) {
-                return res.status(400).json({
-                    status: 400,
-                    message: ResponseMessage.SOMETHING_WENT_WRONG,
-                    data: ResponseMessage.ENTER_EMAIL_PASSWORD
-                });
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ENTER_EMAIL_PASSWORD, []);
             } if (user.otp !== otp) {
-                return res.status(200).json({
-                    status: StatusCodes.OK,
-                    message: ResponseMessage.INVALID_OTP,
-                    data: updatedUser,
-                });
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             }
-            let updatedUser = await User.findByIdAndUpdate(
-                { _id: userId },
-                { $set: { email, mobileNumber, otp: null } },
-                { new: true }
-            );
-            return res.status(200).json({
-                status: StatusCodes.OK,
-                message: ResponseMessage.VERIFICATION_COMPLETED,
-                data: updatedUser,
-            });
+            const updatedUser = await dataUpdated({ _id: userId }, { email, mobileNumber, otp: null }, User);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.VERIFICATION_COMPLETED, updatedUser);
         } else {
             if (user) {
                 if (user?.otp == otp) {
@@ -559,8 +553,8 @@ export const resetMpinPassword = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
 
-        const findMpin = await getSingleData({ mPin, is_deleted: 0 }, User);
-        if (findMpin) {
+        const checkMpinExists = await getSingleData({ mPin, is_deleted: 0 }, User);
+        if (checkMpinExists) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.MPIN_ALREADY_USE, []);
         }
 

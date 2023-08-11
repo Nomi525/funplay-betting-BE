@@ -48,9 +48,9 @@ const ResponseMessage = {
     USER_CREATE_SENT_OTP_ON_YOUR_EMAIL : "Account has been created. OTP sent to your email address.",
     ALREADY_REGISTER_VERIFY_EMAIL : "OTP has been sent to your email. Please verify the OTP to log in",
     THIS_USER_IS_DEACTIVATED : "This user is deactivated",
-    DEACTIVATED_USER : "Your account has been deactivated.To Activate  your account please contact to admin",
-    MPIN_ALREADY_USE : "MPIN already use",
-    OLD_MPIN_WRONG : "Old MPIN worng",
+    DEACTIVATED_USER : "Your account has been deactivated.To Activate your account please contact to admin",
+    MPIN_ALREADY_USE : "MPIN is already in use",
+    OLD_MPIN_WRONG : "Please use valid old Mpin",
     INVALID_MPIN : "Invalid MPIN",
     DATA_GET : "Get data",
     SOME_ERROR_OCCUR : "Some error occur",
@@ -84,7 +84,8 @@ const ResponseMessage = {
     GAME_EXIST : "Game already exist", 
     EMAIL_PASSWORD_VERIFY : "Please verify otp to update profile ", 
     PROFILE_UPDATED : "Profile updated successfully", 
-    EMAIL_ALREADY_EXIST : "Email is already in use please use another"
+    EMAIL_ALREADY_EXIST : "Email is already in use please use another",
+    SET_PASSWORD : "Password set successfully",
 }
 
 export { ResponseMessage }
