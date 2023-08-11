@@ -506,6 +506,9 @@ export const changePassword = async (req, res) => {
         let { oldPassword, newPassword } = req.body
         const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (user) {
+            if(user.password == null){
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SET_NOT_PASSWORD, []); 
+            }
             const verifyOldPassword = await passwordCompare(oldPassword, user.password);
             if (!verifyOldPassword) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OLD_PASSWORD_WORNG, []);
