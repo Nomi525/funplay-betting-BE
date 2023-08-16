@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, createError, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating
+    getSingleData, getAllData, Rating,handleErrorResponse
 } from "../../index.js";
 
 export const addEditRating = async (req, res) => {
@@ -9,13 +9,13 @@ export const addEditRating = async (req, res) => {
         const findRating = await getSingleData({ userId: req.user, gameId }, Rating);
         if (findRating) {
             const updateRating = await dataUpdated({ userId: req.user, gameId }, { rating }, Rating);
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updateRating);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.RATING_UPDATED, updateRating);
         } else {
             const createRating = await dataCreate({ userId: req.user, gameId, rating }, Rating);
-            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.DATA_CREATED, createRating);
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.RATING_CREATED, createRating);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -28,9 +28,9 @@ export const gameRatingAverage = async (req, res) => {
             const averageScore = totalScore / ratings.length;
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RATING_AVERAGE, averageScore);
         } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.RATING_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }

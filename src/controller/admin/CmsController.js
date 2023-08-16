@@ -1,4 +1,4 @@
-import { createError, sendResponse, CMS_Model, Admin, StatusCodes, ResponseMessage } from "../../index.js";
+import { createError, sendResponse, CMS_Model, Admin, StatusCodes, ResponseMessage,handleErrorResponse } from "../../index.js";
 
 export const addEditPrivacyPolicy = async (req, res) => {
     try {
@@ -39,7 +39,7 @@ export const addEditPrivacyPolicy = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 };
 //#endregion
@@ -79,7 +79,7 @@ export const addEditAboutUs = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 };
 //#endregion
@@ -122,7 +122,7 @@ export const addEditTermsAndCondition = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 };
 
@@ -138,7 +138,7 @@ export const getCMSDetail = async (req, res) => {
             data: CMSData,
         });
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 };
   //#endregion
