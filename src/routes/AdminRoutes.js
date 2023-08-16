@@ -48,12 +48,12 @@ adminRoutes.get('/withdrawal-list', Auth, getWithdrawalList)
 // game Routes 
 adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);
 adminRoutes.get("/games", Auth, getAllGame);
-adminRoutes.get("/game/:gameId", Auth, getSingleGame);
+adminRoutes.post("/single-game", Auth, getSingleGame);
 adminRoutes.post("/game/delete", Auth, gameDelete);
 
 // Game Rules Routes
 adminRoutes.get("/game-rules", Auth, getGameRules);
-adminRoutes.get("/game-rules/:gameRuleId", Auth, getSingleGameRules);
+adminRoutes.post("/single-game-rules", Auth, getSingleGameRules);
 adminRoutes.post("/game-rules/add-edit", Auth, addEditGameRule);
 adminRoutes.post("/game-rules/delete", Auth, gameRuleDelete);
 

@@ -50,7 +50,7 @@ export const getAllGame = async (req, res) => {
 
 export const getSingleGame = async (req, res) => {
     try {
-        const { gameId } = req.params;
+        const { gameId } = req.body;
         const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
         if (findGame) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, findGame);
@@ -97,7 +97,7 @@ export const getGameRules = async (req, res) => {
 
 export const getSingleGameRules = async (req, res) => {
     try {
-        const { gameRuleId } = req.params;
+        const { gameRuleId } = req.body;
         const findGameRule = await getSingleData({ _id: gameRuleId, is_deleted: 0 }, GameRules);
         if (findGameRule) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RULES_GET, findGameRule);
