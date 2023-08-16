@@ -2,7 +2,7 @@ import { Transaction } from "../../models/Wallet.js";
 import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import {
     ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate,
-    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs
+    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject
 } from "./../../index.js";
 
 export const userSignUpSignInOtp = async (req, res) => {
@@ -291,7 +291,8 @@ export const editProfile = async (req, res) => {
         }
         if (findData.email != req.body.email) {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-            let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { userId: findData._id, email: req.body.email });
+            const objectEncrtypt = await encryptObject({ userId: findData._id, email: req.body.email });
+            let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { objectEncrtypt });
             await sendMail(req.body.email, "Verify Email", mailInfo);
             await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false, profile: req.body.profile, fullName: req.body.fullName }, User);
             return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, []);
@@ -306,34 +307,41 @@ export const editProfile = async (req, res) => {
         }
 
     } catch (error) {
+        console.log(error);
         return createError(res, error);
     }
 }
 
 export const emailVerify = async (req, res) => {
     try {
-        let { userId, email } = req.query;
-        email = email ? email.toLowerCase() : null
-        if (!email) {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, "Email not found", []);
+        // let { userId, email } = req.query;
+        let { key } = req.query;
+        const objectEecrypt = await decryptObject(key);
+        if(objectEecrypt === false){
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.VERIFY_LINK_EXPIRE, []);
+        }
+        objectEecrypt.email = objectEecrypt.email ? objectEecrypt.email.toLowerCase() : null
+        if (!objectEecrypt.email) {
+            // return res.redirect('http://betting.appworkdemo.com/user')
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
 
-        let checkEmailExist = await getSingleData({ email: email }, User)
+        let checkEmailExist = await getSingleData({ email: objectEecrypt.email }, User)
         if (checkEmailExist) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.EMAIL_ALREADY_EXIST, []);
         }
-        const findUser = await getSingleData({ _id: userId }, User)
+        const findUser = await getSingleData({ _id: objectEecrypt.userId }, User)
         if (!findUser) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
-        findUser.email = email;
+        findUser.email = objectEecrypt.email;
         findUser.isVerified = true;
         findUser.isLogin = false;
         await findUser.save();
         return res.redirect('http://betting.appworkdemo.com/user')
         // await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false }, User);
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return createError(res, error);
     }
 }
@@ -433,6 +441,9 @@ export const setPassword = async (req, res) => {
         let { password } = req.body;
         const findUser = await getSingleData({ _id: req.user }, User);
         if (findUser) {
+            if (findUser.password != null) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.SET_PASSWORD_ALREADY, []);
+            }
             findUser.password = await passwordHash(password);
             await findUser.save();
             return sendResponse(res, StatusCodes.OK, ResponseMessage.SET_PASSWORD, findUser);
@@ -506,8 +517,8 @@ export const changePassword = async (req, res) => {
         let { oldPassword, newPassword } = req.body
         const user = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (user) {
-            if(user.password == null){
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SET_NOT_PASSWORD, []); 
+            if (user.password == null) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SET_NOT_PASSWORD, []);
             }
             const verifyOldPassword = await passwordCompare(oldPassword, user.password);
             if (!verifyOldPassword) {

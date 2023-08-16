@@ -2,7 +2,8 @@ import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork, adminEditUser,
-    adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame
+    adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
+    getSingleGame, getSingleGameRules, gameRuleDelete
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -41,12 +42,19 @@ adminRoutes.get('/queries', Auth, getAllQuery);
 // Rating
 adminRoutes.get('/game/ratings', Auth, showRating)
 
-// getWithdrwalList
+// Get WithdrwalList
 adminRoutes.get('/withdrawal-list', Auth, getWithdrawalList)
 
 // game Routes 
-adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame)
-adminRoutes.get("/games", Auth, getAllGame)
-adminRoutes.post("/game/delete", Auth, gameDelete)
+adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);
+adminRoutes.get("/games", Auth, getAllGame);
+adminRoutes.post("/single-game", Auth, getSingleGame);
+adminRoutes.post("/game/delete", Auth, gameDelete);
+
+// Game Rules Routes
+adminRoutes.get("/game-rules", Auth, getGameRules);
+adminRoutes.post("/single-game-rules", Auth, getSingleGameRules);
+adminRoutes.post("/game-rules/add-edit", Auth, addEditGameRule);
+adminRoutes.post("/game-rules/delete", Auth, gameRuleDelete);
 
 export { adminRoutes }

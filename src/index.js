@@ -13,6 +13,7 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import path from 'path';
 import Joi from "joi";
+import crypto from "crypto";
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -30,8 +31,8 @@ import {
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
-    userGuestLogin,setPassword,
-    transactionHistory, singInFromEmailPassword, setMpin,changeMpin, emailVerify
+    userGuestLogin, setPassword,
+    transactionHistory, singInFromEmailPassword, setMpin, changeMpin, emailVerify
 } from "./controller/user/UserController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
 import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/CommonController.js";
@@ -39,7 +40,7 @@ import { addEditQuery, deleteQuery } from "./controller/user/QuerySectionControl
 import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
-import { addEditGame, gameDelete, getAllGame } from "./controller/admin/GameController.js";
+import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -59,6 +60,7 @@ import { Rating } from "./models/Rating.js";
 import { Wallet } from "./models/Wallet.js";
 import { WalletLogin } from "./models/WalletLogin.js";
 import { Game } from "./models/Game.js";
+import { GameRules } from "./models/GameRules.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -68,15 +70,15 @@ import { appServer } from "../server.js";
 
 import {
     createError, sendResponse, passwordHash, passwordCompare, genrateToken, generateOtp,
-    genString, referralCode
+    genString, referralCode, encryptObject, decryptObject
 } from "./services/CommonService.js";
 
 dotenv.config();
 
 export {
-    express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game,
-    dbConnection, setMpin,changeMpin,emailVerify,setPassword,
+    express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game, GameRules,
+    dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,
@@ -88,10 +90,11 @@ export {
     createError, sendResponse, passwordHash, passwordCompare,
     addEditBanner, deleteBanner, allBannerGet,
     dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById,
-    genrateToken, generateOtp, genString, referralCode,
+    genrateToken, generateOtp, genString, referralCode, encryptObject, decryptObject,
     addEditRating,
     addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck,
     adminDashboardCount,
     walletCreate, disconnectWallet,
-    validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame
+    validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
+    gameRuleDelete, getSingleGame
 }

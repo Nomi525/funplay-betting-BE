@@ -1,4 +1,7 @@
-import { bcryptjs, StatusCodes, ResponseMessage, jwt } from "../index.js";
+import { bcryptjs, StatusCodes, ResponseMessage, jwt, crypto } from "../index.js";
+var key = "a6dfc106fadd4849e8b23759afea1b86c6c4c4b782c2cf08335c61dc4610fae5efe05ee361a4850f56ddb9457a96bbe01d2820d5106851db64cf210f70ec5e98";
+var secretCryptoKey = crypto.createHash("sha256").update(String(key)).digest("base64").slice(0, 32);
+var iv = crypto.randomBytes(16);
 
 export const createError = async (res, error) => {
     return res.status(500).json({
@@ -42,12 +45,31 @@ export const genString = (length) => {
 
 export const referralCode = (length) => {
     const codeLength = length;
-    const chars =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let code = "";
     for (let i = 0; i < codeLength; i++) {
         const randomIndex = Math.floor(Math.random() * chars.length);
         code += chars.charAt(randomIndex);
     }
     return code;
+}
+
+// Encryption function
+export const encryptObject = (object) => {
+    const cipher = crypto.createCipheriv('aes-256-cbc', secretCryptoKey, iv);
+    let encrypted = cipher.update(JSON.stringify(object), 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+}
+
+// Decryption function
+export const decryptObject = (encryptedString) => {
+    try {
+        const decipher = crypto.createDecipheriv('aes-256-cbc', secretCryptoKey, iv);
+        let decrypted = decipher.update(encryptedString, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return JSON.parse(decrypted);
+    } catch (error) {
+        return false;
+    }
 }
