@@ -70,7 +70,7 @@ export const addEditGameRule = async (req, res) => {
         const findGameRule = await getSingleData({ gameId }, GameRules);
         if (!findGameRule) {
             const createGameRule = await dataCreate({ gameId, gameRules }, GameRules);
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RULES_CREATED, createGameRule);
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.GAME_RULES_CREATED, createGameRule);
         } else {
             findGameRule.gameRules = gameRules;
             await findGameRule.save();

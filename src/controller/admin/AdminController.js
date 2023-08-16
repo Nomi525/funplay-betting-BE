@@ -36,7 +36,7 @@ export const adminLogin = async (req, res) => {
             await findAdmin.save();
             const comparePassword = await passwordCompare(req.body.password, findAdmin.password);
             if (comparePassword) {
-                let token = jwt.sign({ admin: { id: findAdmin._id } }, { expiresIn: '24h' }, process.env.JWT_SECRET_KEY);
+                let token = jwt.sign({ admin: { id: findAdmin._id } }, process.env.JWT_SECRET_KEY,{ expiresIn: '24h' });
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_LOGGED_IN, { ...findAdmin._doc, token });
             }
             else {
