@@ -1,4 +1,4 @@
-import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData } from "./../../index.js";
+import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData,handleErrorResponse } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -23,7 +23,7 @@ export const addEditBanner = async (req, res) => {
             return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -41,7 +41,7 @@ export const allBannerGet = async (req, res) => {
             return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -60,6 +60,6 @@ export const deleteBanner = async (req, res) => {
             return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }

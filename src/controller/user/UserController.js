@@ -2,7 +2,7 @@ import { Transaction } from "../../models/Wallet.js";
 import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import {
     ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate,
-    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject
+    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject, hashedPassword, handleErrorResponse
 } from "./../../index.js";
 
 export const userSignUpSignInOtp = async (req, res) => {
@@ -41,8 +41,7 @@ export const userSignUpSignInOtp = async (req, res) => {
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL, userData);
         }
     } catch (error) {
-        console.log(error);
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -61,7 +60,7 @@ export const resendOtp = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -104,7 +103,7 @@ export const verifyOtp = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 };
 
@@ -122,7 +121,7 @@ export const userSignInMpin = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -164,7 +163,7 @@ export const singupFromEmailPassword = async (req, res) => {
                     return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
                 }
             }
-            password = await passwordHash(password);
+            password = await hashedPassword(password);
             const createUser = await dataCreate({ email, currency, password, referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User);
             if (findReferralUser) {
                 findReferralUser.useReferralCodeUsers.push(createUser._id);
@@ -179,7 +178,7 @@ export const singupFromEmailPassword = async (req, res) => {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...createUser._doc, token });
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -207,7 +206,7 @@ export const singInFromEmailPassword = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -231,7 +230,7 @@ export const loginFromMpin = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -308,7 +307,7 @@ export const editProfile = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -342,7 +341,7 @@ export const emailVerify = async (req, res) => {
         // await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false }, User);
     } catch (error) {
         // console.log(error);
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -391,7 +390,7 @@ export const emailVerify = async (req, res) => {
 //         // }
 
 //     } catch (error) {
-//         return createError(res, error);
+//         return handleErrorResponse(res, error);
 //     }
 // }
 
@@ -406,7 +405,7 @@ export const logout = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -432,7 +431,7 @@ export const forgotPassword = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ACCOUNT_NOT_EXIST, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -444,14 +443,14 @@ export const setPassword = async (req, res) => {
             if (findUser.password != null) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.SET_PASSWORD_ALREADY, []);
             }
-            findUser.password = await passwordHash(password);
+            findUser.password = await hashedPassword(password);
             await findUser.save();
             return sendResponse(res, StatusCodes.OK, ResponseMessage.SET_PASSWORD, findUser);
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -484,7 +483,7 @@ export const verifyForgotOtp = async (req, res) => {
             }
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -500,7 +499,7 @@ export const resetPassword = async (req, res) => {
         if (!user.resetPasswordAllow) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OTP_NOT_VERIFY, []);
         }
-        password = await passwordHash(password);
+        password = await hashedPassword(password);
         const upadteUser = await dataUpdated({ _id: user._id }, { password, resetPasswordAllow: false }, User);
         if (upadteUser) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.RESET_PASSWORD, upadteUser);
@@ -508,7 +507,7 @@ export const resetPassword = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SOMETHING_WENT_WRONG, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -524,14 +523,14 @@ export const changePassword = async (req, res) => {
             if (!verifyOldPassword) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.OLD_PASSWORD_WORNG, []);
             }
-            user.password = await passwordHash(newPassword)
+            user.password = await hashedPassword(newPassword)
             await user.save();
             return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_CHANGED, user);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -554,7 +553,7 @@ export const setMpin = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -583,7 +582,7 @@ export const resetMpinPassword = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SOMETHING_WENT_WRONG, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -606,7 +605,7 @@ export const changeMpin = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -619,7 +618,7 @@ export const getProfile = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -678,10 +677,9 @@ export const userEditProfile = async (req, res) => {
         return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
     }
     catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 };
-
 
 export const accountDeactivate = async (req, res) => {
     try {
@@ -692,7 +690,7 @@ export const accountDeactivate = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 
 }
@@ -712,6 +710,6 @@ export const transactionHistory = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
         }
     } catch (error) {
-        return createError(res, error);
+        return handleErrorResponse(res, error);
     }
 }

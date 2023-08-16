@@ -1,7 +1,7 @@
 import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
-    adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork, adminEditUser,
+    adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
     getSingleGame, getSingleGameRules, gameRuleDelete
 } from "./../index.js";
@@ -26,7 +26,7 @@ adminRoutes.get('/cms', Auth, getCMSDetail)
 adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
 adminRoutes.get("/dashboard", Auth, adminDashboardCount)
 adminRoutes.post("/transaction", Auth, getTransactionList)
-adminRoutes.post("/how-referral-work", Auth, hwoToReferralWork)
+adminRoutes.post("/how-referral-work", Auth, howToReferralWork)
 
 // -------- Setting -------- //
 adminRoutes.post("/setting", Auth, adminSetting)

@@ -26,7 +26,7 @@ import { validatorMiddlware } from "./middleware/Validation.js";
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
-    getTransactionList, hwoToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
+    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
 } from "./controller/admin/AdminController.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
@@ -70,7 +70,7 @@ import { appServer } from "../server.js";
 
 import {
     createError, sendResponse, passwordHash, passwordCompare, genrateToken, generateOtp,
-    genString, referralCode, encryptObject, decryptObject
+    genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword
 } from "./services/CommonService.js";
 
 dotenv.config();
@@ -81,7 +81,7 @@ export {
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
-    adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, hwoToReferralWork,
+    adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork,
     adminEditUser, adminDeleteUser, showRating, getWithdrawalList, singupFromEmailPassword, singInFromEmailPassword,
     getAllQuery,
     editProfile, logout, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, forgotPassword, resetPassword, verifyForgotOtp,
@@ -90,7 +90,7 @@ export {
     createError, sendResponse, passwordHash, passwordCompare,
     addEditBanner, deleteBanner, allBannerGet,
     dataCreate, dataUpdated, getSingleData, getAllData, getAllDataCount, deleteById,
-    genrateToken, generateOtp, genString, referralCode, encryptObject, decryptObject,
+    genrateToken, generateOtp, genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword,
     addEditRating,
     addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck,
     adminDashboardCount,

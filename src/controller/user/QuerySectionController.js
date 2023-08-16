@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, createError, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Query
+    getSingleData, getAllData, Query,handleErrorResponse
 } from "../../index.js";
 
 export const addEditQuery = async (req, res) => {
@@ -18,7 +18,7 @@ export const addEditQuery = async (req, res) => {
             }
         }
     } catch (error) {
-        createError(res, error)
+        handleErrorResponse(res, error)
     }
 }
 
@@ -28,7 +28,7 @@ export const deleteQuery = async (req, res) => {
         await dataUpdated({ _id: queryId }, { is_deleted: 1 }, Query);
         return sendResponse(res, StatusCodes.OK, ResponseMessage.QUERY_DELETED, []);
     } catch (error) {
-        createError(res, error)
+        handleErrorResponse(res, error)
     }
 }
 

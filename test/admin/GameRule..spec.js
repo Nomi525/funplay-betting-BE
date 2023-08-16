@@ -2,30 +2,34 @@
 // import { adminToken } from "./Admin.spec.js";
 
 // chai.use(chaiHttp);
-// // const should = chai.should();
-// // let gameId;
-// let data;
+// // let gameRuleId;
+// // let data;
 // // let userToken;
 
-// let gameDetails = {
-//     gameId: null,
-//     gameName: "footbal",
-//     gameImage: path.join(path.resolve(), 'test/image/profile.jpg'),
-//     gameDuration: 8965231470
+// let gameRuleDetails = {
+//     gameRuleId: null,
+//     gameId: "64d37e2cbe22139624ec7102",
+//     gameRules: [
+//         "Only use two digit1",
+//         "Only use two digit2",
+//         "Only use two digit3",
+//         "Only use two digit4",
+//         "Only use two digit5"
+//     ]
 // };
-
 // describe('Admin test case', () => {
-//     //  *********  Game Api *********** //
-//     it('**** Game Add Edit ****', (done) => {
+//     // *********  Game rules Api *********** //
+//     it('**** Game rule add ****', (done) => {
 //         chai.request(appServer)
-//             .post('/api/admin/game/add-edit')
+//             .post('/api/admin/game-rules/add-edit')
 //             .set('auth', adminToken)
-//             .send(gameDetails)
+//             .send(gameRuleDetails)
 //             .end((err, res) => {
 //                 if (res.body.status == 201) {
-//                     gameDetails.gameId = res.body.data._id
+//                     gameRuleDetails.gameRuleId = res.body.data._id
 //                     expect(res.body.status).to.be.equal(201);
 //                 } else if (res.body.status == 200) {
+//                     gameRuleDetails.gameRuleId = res.body.data._id
 //                     expect(res.body.status).to.be.equal(200);
 //                 } else if (res.body.status == 400) {
 //                     expect(res.body.status).to.be.equal(400);
@@ -39,36 +43,13 @@
 //             });
 //     });
 
-//     // ------ Game add edit  ------- //
-//     it('**** Game ****', (done) => {
-//         gameDetails.gameName = "lodo"
+//     // ------ Game rules add edit  ------- //
+//     it('**** Game Rules Edit ****', (done) => {
+//         gameRuleDetails.gameRules[4] = "Only use two digit updated rule"
 //         chai.request(appServer)
-//             .post('/api/admin/game/add-edit')
+//             .post('/api/admin/game-rules/add-edit')
 //             .set('auth', adminToken)
-//             .send(gameDetails)
-//             .end((err, res) => {
-//                 if (res.body.status == 201) {
-//                     expect(res.body.status).to.be.equal(201);
-//                 } else if (res.body.status == 200) {
-//                     expect(res.body.status).to.be.equal(200);
-//                 } else if (res.body.status == 400) {
-//                     expect(res.body.status).to.be.equal(400);
-//                 } else if (res.body.status == 404) {
-//                     expect(res.body.status).to.be.equal(404);
-//                 } else {
-//                     expect(res.body.status).to.be.equal(500);
-//                 }
-//                 expect(res.body).to.have.all.keys('status', 'message', 'data')
-//                 done();
-//             });
-//     });
-
-//     // Game delete
-//     it('**** Game delete ****', (done) => {
-//         chai.request(appServer)
-//             .post('/api/admin/game/delete')
-//             .set('auth', adminToken)
-//             .send({ gameId : gameDetails.gameId })
+//             .send(gameRuleDetails)
 //             .end((err, res) => {
 //                 if (res.body.status == 201) {
 //                     expect(res.body.status).to.be.equal(201);
@@ -86,10 +67,10 @@
 //             });
 //     });
 
-//     // Get game
+//     // Get All game rules
 //     it('**** Game details ****', (done) => {
 //         chai.request(appServer)
-//             .get('/api/admin/games')
+//             .get('/api/admin/game-rules')
 //             .set('auth', adminToken)
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {
@@ -102,6 +83,46 @@
 //             });
 //     });
 
+//     // Get game rules
+//     it('**** Game single details ****', (done) => {
+//         console.log(gameRuleDetails.gameRuleId,'kkk');
+//         chai.request(appServer)
+//             .post('/api/admin/single-game-rules')
+//             .set('auth', adminToken)
+//             .send({ gameRuleId: gameRuleDetails.gameRuleId })
+//             .end((err, res) => {
+//                 if (res.body.status == 200) {
+//                     expect(res.body.status).to.be.equal(200);
+//                 } else {
+//                     expect(res.body.status).to.be.equal(500);
+//                 }
+//                 expect(res.body).to.have.all.keys('status', 'message', 'data')
+//                 done();
+//             });
+//     });
+
+//     // Game rule delete
+//     it('**** Game delete ****', (done) => {
+//         chai.request(appServer)
+//             .post('/api/admin/game-rules/delete')
+//             .set('auth', adminToken)
+//             .send({ gameRuleId: gameRuleDetails.gameRuleId })
+//             .end((err, res) => {
+//                 if (res.body.status == 201) {
+//                     expect(res.body.status).to.be.equal(201);
+//                 } else if (res.body.status == 200) {
+//                     expect(res.body.status).to.be.equal(200);
+//                 } else if (res.body.status == 400) {
+//                     expect(res.body.status).to.be.equal(400);
+//                 } else if (res.body.status == 404) {
+//                     expect(res.body.status).to.be.equal(404);
+//                 } else {
+//                     expect(res.body.status).to.be.equal(500);
+//                 }
+//                 expect(res.body).to.have.all.keys('status', 'message', 'data')
+//                 done();
+//             });
+//     });
 
 
 // });
