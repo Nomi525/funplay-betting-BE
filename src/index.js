@@ -40,7 +40,7 @@ import { addEditQuery, deleteQuery } from "./controller/user/QuerySectionControl
 import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
-import { addEditGame, gameDelete, getAllGame } from "./controller/admin/GameController.js";
+import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -60,6 +60,7 @@ import { Rating } from "./models/Rating.js";
 import { Wallet } from "./models/Wallet.js";
 import { WalletLogin } from "./models/WalletLogin.js";
 import { Game } from "./models/Game.js";
+import { GameRules } from "./models/GameRules.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -76,7 +77,7 @@ dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game, GameRules,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
@@ -94,5 +95,6 @@ export {
     addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck,
     adminDashboardCount,
     walletCreate, disconnectWallet,
-    validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame
+    validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
+    gameRuleDelete, getSingleGame
 }

@@ -89,6 +89,16 @@ const ResponseMessage = {
     SET_PASSWORD_ALREADY : "Password already set",
     SET_NOT_PASSWORD : "Password not set",
     VERIFY_LINK_EXPIRE : "Tisk link has been expired",
+    QUERY_CREATED : "Query created successfully",
+    QUERY_UPDATED : "Query updated successfully",
+    QUERY_DELETED : "Query deleted successfully",
+    QUERY_NOT_FOUND : "Query deleted successfully",
+    GAME_RULES_CREATED : "Game rules created successfully",
+    GAME_RULES_GET : "Game rules get successfully",
+    GAME_RULES_GET_ALL : "Game rules all get successfully",
+    GAME_RULES_UPDATED : "Game rules updated successfully",
+    GAME_RULES_DELETED : "Game rules deleted successfully",
+    GAME_RULES_NOT_FOUND : "Game rules not found successfully",
 }
 
 export { ResponseMessage }

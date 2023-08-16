@@ -1,5 +1,5 @@
 
-import { StatusCodes, ResponseMessage, multer, fs } from '../index.js';
+import { StatusCodes, ResponseMessage, multer, fs, sendResponse } from '../index.js';
 
 var storage = multer.diskStorage({
     destination: function (request, file, callback) {
@@ -39,11 +39,12 @@ var upload = multer({ storage }).fields([
 export default function (req, res, next) {
     upload(req, res, (err) => {
         if (err) {
-            return res.status(400).json({
-                status: StatusCodes.BAD_REQUEST,
-                message: ResponseMessage.SOMETHING_WENT_WRONG,
-                data: [err.message],
-            });
+            // return res.status(400).json({
+            //     status: StatusCodes.BAD_REQUEST,
+            //     message: ResponseMessage.SOMETHING_WENT_WRONG,
+            //     data: [err.message],
+            // });
+            return sendResponse(res, StatusCodes.BAD_REQUEST, err.message, [])
         } else {
             if (req.files) {
                 var profile = req.files.profile ? req.files.profile[0].filename : "";
@@ -54,7 +55,7 @@ export default function (req, res, next) {
 
                 var gameImage = req.files.gameImage ? req.files.gameImage[0].filename : "";
                 req.gameImageUrl = gameImage;
-                
+
                 next();
             } else {
                 next();
