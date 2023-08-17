@@ -1,8 +1,8 @@
-import { Transaction } from "../../models/Wallet.js";
 import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import {
-    ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate,
-    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject, hashedPassword, handleErrorResponse
+    ResponseMessage, genrateToken, referralCode, StatusCodes, User, sendResponse, dataCreate,
+    dataUpdated, getSingleData, getAllData, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject, 
+    hashedPassword, handleErrorResponse
 } from "./../../index.js";
 
 export const userSignUpSignInOtp = async (req, res) => {
@@ -124,7 +124,6 @@ export const userSignInMpin = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
-
 
 export const singupFromEmailPassword = async (req, res) => {
     try {
@@ -698,10 +697,10 @@ export const accountDeactivate = async (req, res) => {
 
 export const transactionHistory = async (req, res) => {
     try {
-        const { userId } = req.body;
+        // const { userId } = req.body;
         let transactionHistory = []
-        if (userId) {
-            transactionHistory = transactionHistoryDummy.filter(user => user.userId == userId);
+        if (req.user) {
+            transactionHistory = transactionHistoryDummy.filter(user => user.userId == req.user);
         } else {
             transactionHistory = transactionHistoryDummy;
         }

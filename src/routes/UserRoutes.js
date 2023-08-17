@@ -3,7 +3,7 @@ import {
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
     deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
-    disconnectWallet, validatorMiddlware,setMpin,changeMpin,emailVerify,setPassword
+    disconnectWallet, validatorMiddlware, setMpin, changeMpin, emailVerify, setPassword, addTransaction, getUserTransaction, userDashboard
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -26,7 +26,7 @@ userRoutes.post('/change-password', Auth, changePassword);
 userRoutes.post('/logout', Auth, logout);
 userRoutes.post("/userEdit", Auth, Upload, userEditProfile);
 userRoutes.post("/deactivate-user", Auth, accountDeactivate);
-userRoutes.post('/set-password',Auth, setPassword);
+userRoutes.post('/set-password', Auth, setPassword);
 
 // Email Verify
 userRoutes.get("/verify-email", emailVerify);
@@ -45,6 +45,13 @@ userRoutes.post('/game/rating/average', Auth, gameRatingAverage);
 // Wallet login
 userRoutes.post('/walletLogin/login', walletCreate);
 userRoutes.post('/walletLogin/disconnect', disconnectWallet);
+
+// Transction Routes
+userRoutes.get('/transctions', Auth, getUserTransaction);
+userRoutes.post('/transction/add', Auth, addTransaction);
+
+//Dashboard
+userRoutes.get('/dashboard', Auth, userDashboard)
 
 
 export { userRoutes }

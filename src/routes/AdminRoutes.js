@@ -3,7 +3,7 @@ import {
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
-    getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers
+    getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers,getAdminProfile, adminDashboard
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -14,6 +14,7 @@ adminRoutes.post('/forgot-password', adminForgetPassword);
 adminRoutes.post('/verify-otp', adminVerifyOtp);
 adminRoutes.post('/reset-password', adminResetPassword);
 adminRoutes.post('/change-password', Auth, adminChangePassword);
+adminRoutes.get('/profile', Auth, getAdminProfile);
 adminRoutes.post('/profile-update', Auth, Upload, adminEditProfile);
 adminRoutes.post('/logout', Auth, adminLogout);
 
@@ -24,7 +25,8 @@ adminRoutes.post('/cms/terms-and-condition', Auth, addEditTermsAndCondition)
 adminRoutes.get('/cms', Auth, getCMSDetail)
 
 adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
-adminRoutes.get("/dashboard", Auth, adminDashboardCount)
+// adminRoutes.get("/dashboard", Auth, adminDashboardCount)
+adminRoutes.get('/dashboard',Auth,adminDashboard);
 adminRoutes.post("/transaction", Auth, getTransactionList)
 adminRoutes.post("/how-referral-work", Auth, howToReferralWork)
 
@@ -57,5 +59,8 @@ adminRoutes.get("/game-rules", Auth, getGameRules);
 adminRoutes.post("/single-game-rules", Auth, getSingleGameRules);
 adminRoutes.post("/game-rules/add-edit", Auth, addEditGameRule);
 adminRoutes.post("/game-rules/delete", Auth, gameRuleDelete);
+
+// Dashboard
+// adminRoutes.get('/dashboard',Auth,adminDashboard);
 
 export { adminRoutes }
