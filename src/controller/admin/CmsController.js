@@ -1,20 +1,20 @@
-import { createError, sendResponse, CMS_Model, Admin, StatusCodes, ResponseMessage,handleErrorResponse } from "../../index.js";
+import { createError, sendResponse, CMS, Admin, StatusCodes, ResponseMessage,handleErrorResponse } from "../../index.js";
 
 export const addEditPrivacyPolicy = async (req, res) => {
     try {
         let checkAdmin = await Admin.findById({ _id: req.admin });
         if (checkAdmin) {
-            let exist = await CMS_Model.findOne();
+            let exist = await CMS.findOne();
             if (exist) {
                 if (exist.privacyPolicy !== null) {
-                    const updatePrivacyPolicy = await CMS_Model.updateOne({
+                    const updatePrivacyPolicy = await CMS.updateOne({
                         $set: {
                             "privacyPolicy.description": req.body.description,
                             "privacyPolicy.title": req.body.title,
                             
                         },
                     });
-                    let updatedData = await CMS_Model.find({ deletedStatus: 0 });
+                    let updatedData = await CMS.find({ deletedStatus: 0 });
                     if (updatePrivacyPolicy) {
                         return sendResponse(res, StatusCodes.OK, ResponseMessage.PRIVACY_POLICY_UPDATED, updatedData);
                     } else {
@@ -22,12 +22,12 @@ export const addEditPrivacyPolicy = async (req, res) => {
                     }
                 }
             } else {
-                let privacyPolicy = new CMS_Model({
+                let privacyPolicy = new CMS({
                     "privacyPolicy.description": req.body.description,
                     "privacyPolicy.title": req.body.title,
                 });
-                let data = await privacyPolicy.save();
-                let privacyPolicyData = await CMS_Model.find({ deletedStatus: 0 });
+                let privacyPolicyData = await privacyPolicy.save();
+                // let privacyPolicyData = await CMS.find({ deletedStatus: 0 });
                 if (privacyPolicyData) {
                     return sendResponse(res, StatusCodes.CREATED, ResponseMessage.PRIVACY_POLICY_ADDED, privacyPolicyData);
 
@@ -48,29 +48,29 @@ export const addEditAboutUs = async (req, res) => {
     try {
         let checkAdmin = await Admin.findById({ _id: req.admin });
         if (checkAdmin) {
-            let exist = await CMS_Model.findOne();
+            let exist = await CMS.findOne();
             if (exist) {
-                if (exist.contactUs !== null) {
-                    const updateContactUs = await CMS_Model.updateOne({
+                if (exist.aboutUs !== null) {
+                    const updateAboutUs = await CMS.updateOne({
                         $set: {
                             "aboutUs.description": req.body.description,
                             "aboutUs.title": req.body.title,
                         },
                     });
-                    let updatedData = await CMS_Model.find({ deletedStatus: 0 });
-                    if (updateContactUs) {
+                    let updatedData = await CMS.find({ deletedStatus: 0 });
+                    if (updateAboutUs) {
                         return sendResponse(res, StatusCodes.OK, ResponseMessage.RULE_UPDATE, updatedData);
                     }
                 }
             } else {
-                let gamesRules = new CMS_Model({
+                let aboutUs = new CMS({
                     "aboutUs.description": req.body.description,
                     "aboutUs.title": req.body.title,
                 });
-                let data = await gamesRules.save();
-                let contactUsData = await CMS_Model.find({ deletedStatus: 0 });
+                let aboutUsData = await aboutUs.save();
+                // let aboutUsData = await CMS.find({ deletedStatus: 0 });
                 if (data) {
-                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.RULE_ADDED, contactUsData);
+                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.RULE_ADDED, aboutUsData);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
@@ -90,16 +90,16 @@ export const addEditTermsAndCondition = async (req, res) => {
     try {
         let checkAdmin = await Admin.findById({ _id: req.admin });
         if (checkAdmin) {
-            let exist = await CMS_Model.findOne();
+            let exist = await CMS.findOne();
             if (exist) {
                 if (exist.termsAndCondition !== null) {
-                    const updateTermsandCondition = await CMS_Model.updateOne({
+                    const updateTermsandCondition = await CMS.updateOne({
                         $set: {
                             "termsAndCondition.description": req.body.description,
                             "termsAndCondition.title": req.body.title,
                         },
                     });
-                    let updatedData = await CMS_Model.find({ deletedStatus: 0 });
+                    let updatedData = await CMS.find({ deletedStatus: 0 });
                     if (updateTermsandCondition) {
                         return sendResponse(res, StatusCodes.OK, ResponseMessage.TERMS_UPDATED, updatedData);
                     } else {
@@ -107,13 +107,13 @@ export const addEditTermsAndCondition = async (req, res) => {
                     }
                 }
             } else {
-                let termsAndCondition = new CMS_Model({
+                let termsAndCondition = new CMS({
                     "termsAndCondition.description": req.body.description,
                     "termsAndCondition.title": req.body.title,
                 }).save();
-                let result = await CMS_Model.find({ deletedStatus: 0 });
+                // let result = await CMS.find({ deletedStatus: 0 });
                 if (termsAndCondition) {
-                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TERMS_ADDED, result);
+                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TERMS_ADDED, termsAndCondition);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
@@ -131,7 +131,7 @@ export const addEditTermsAndCondition = async (req, res) => {
 //#region getCMS
 export const getCMSDetail = async (req, res) => {
     try {
-        const CMSData = await CMS_Model.findOne();
+        const CMSData = await CMS.findOne();
         return res.status(200).json({
             status: StatusCodes.OK,
             message: ResponseMessage.CMS_DETAILS,

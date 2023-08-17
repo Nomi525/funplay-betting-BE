@@ -1,6 +1,6 @@
 import { mongoose } from '../index.js';
 
-const CMS_Schema = new mongoose.Schema(
+const cmsSchema = new mongoose.Schema(
     {
         privacyPolicy: {
             description: {
@@ -47,5 +47,5 @@ const CMS_Schema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-const CMS_Model = mongoose.model("CMS", CMS_Schema);
-export { CMS_Model };
+const CMS = mongoose.model("CMS", cmsSchema);
+export { CMS };
