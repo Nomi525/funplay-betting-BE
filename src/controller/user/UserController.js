@@ -278,7 +278,7 @@ export const userGuestLogin = (req, res) => {
         }
         return sendResponse(res, StatusCodes.OK, ResponseMessage.GUEST_LOGIN, dummyData);
     } catch (error) {
-
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -317,12 +317,13 @@ export const emailVerify = async (req, res) => {
         let { key } = req.query;
         const objectEecrypt = await decryptObject(key);
         if(objectEecrypt === false){
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.VERIFY_LINK_EXPIRE, []);
+            return res.redirect('http://betting.appworkdemo.com/user')
+            // return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.VERIFY_LINK_EXPIRE, []);
         }
         objectEecrypt.email = objectEecrypt.email ? objectEecrypt.email.toLowerCase() : null
         if (!objectEecrypt.email) {
-            // return res.redirect('http://betting.appworkdemo.com/user')
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+            return res.redirect('http://betting.appworkdemo.com/user')
+            // return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
 
         let checkEmailExist = await getSingleData({ email: objectEecrypt.email }, User)
