@@ -2,7 +2,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting,
-    Referral_Work, Rating, Wallet, hashedPassword, handleErrorResponse
+    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {
@@ -205,6 +205,20 @@ export const getAllUsers = async (req, res) => {
     }
 }
 
+export const getAdminSingleUser = async (req, res) => {
+    try {
+        const { userId } = req.body
+        const findUser = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        if (findUser) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUser);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
 
 
 export const adminDashboardCount = async (req, res) => {
@@ -279,13 +293,13 @@ export const getTransactionList = async (req, res) => {
 export const howToReferralWork = async (req, res) => {
     try {
         const { referralWork } = req.body
-        const findReferralWork = await getSingleData({}, Referral_Work);
+        const findReferralWork = await getSingleData({}, ReferralWork);
         if (findReferralWork) {
             findReferralWork.referralWork = referralWork
             await findReferralWork.save();
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.HOW_TO_WORK_REFERRAL_CREATED, findReferralWork);
         } else {
-            const createWork = await dataCreate({ referralWork }, Referral_Work)
+            const createWork = await dataCreate({ referralWork }, ReferralWork)
             return sendResponse(res, StatusCodes.OK, ResponseMessage.HOW_TO_WORK_REFERRAL_UPDATED, createWork);
         }
     } catch (error) {
