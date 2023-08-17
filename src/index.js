@@ -41,7 +41,7 @@ import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
 import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
-import { addTransaction, getUserTransaction } from "./controller/user/TransactionController.js";
+import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
 
@@ -65,6 +65,7 @@ import { WalletLogin } from "./models/WalletLogin.js";
 import { Game } from "./models/Game.js";
 import { GameRules } from "./models/GameRules.js";
 import { Transaction } from "./models/Transaction.js";
+import { NewTransaction } from "./models/NewTransaction.js";
 
 
 // Services
@@ -82,7 +83,7 @@ dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS, AdminSetting, ReferralWork, BannerModel, Query, Rating, Wallet, WalletLogin, Joi,
+    Admin, User, CMS, AdminSetting, ReferralWork, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, NewTransaction,
     Game, GameRules, Transaction,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
@@ -104,5 +105,5 @@ export {
     validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
-    userDashboard, adminDashboard
+    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction
 }
