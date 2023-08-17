@@ -2,9 +2,21 @@ import { mongoose } from '../index.js';
 
 const adminSchema = new mongoose.Schema(
     {
+        firsName: {
+            type: String,
+            required: false,
+        },
+        lastName: {
+            type: String,
+            required: false,
+        },
         email: {
             type: String,
             Unique: true,
+        },
+        mobileNumber: {
+            type: Number,
+            required: false,
         },
         password: {
             type: String,
@@ -23,6 +35,10 @@ const adminSchema = new mongoose.Schema(
             default: null,
         },
         profile: {
+            type: String,
+            required: false,
+        },
+        address: {
             type: String,
             required: false,
         },
