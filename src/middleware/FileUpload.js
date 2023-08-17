@@ -39,11 +39,6 @@ var upload = multer({ storage }).fields([
 export default function (req, res, next) {
     upload(req, res, (err) => {
         if (err) {
-            // return res.status(400).json({
-            //     status: StatusCodes.BAD_REQUEST,
-            //     message: ResponseMessage.SOMETHING_WENT_WRONG,
-            //     data: [err.message],
-            // });
             return sendResponse(res, StatusCodes.BAD_REQUEST, err.message, [])
         } else {
             if (req.files) {
@@ -55,7 +50,6 @@ export default function (req, res, next) {
 
                 var gameImage = req.files.gameImage ? req.files.gameImage[0].filename : "";
                 req.gameImageUrl = gameImage;
-
                 next();
             } else {
                 next();

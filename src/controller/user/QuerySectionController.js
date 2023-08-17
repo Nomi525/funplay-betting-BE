@@ -1,5 +1,5 @@
 import {
-    ResponseMessage, StatusCodes, createError, sendResponse, dataCreate, dataUpdated,
+    ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
     getSingleData, getAllData, Query,handleErrorResponse
 } from "../../index.js";
 

@@ -1,6 +1,5 @@
 import { validatorRequest } from "../index.js";
 export const validatorMiddlware = function (validator) {
-    // console.log('hiiii',validator);
   return async function (req, res, next) {
     try {
       const validated = await validatorRequest[validator].validateAsync(req.body)

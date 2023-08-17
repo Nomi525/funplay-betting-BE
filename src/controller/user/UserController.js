@@ -1,8 +1,8 @@
-import { Transaction } from "../../models/Wallet.js";
 import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import {
-    ResponseMessage, genrateToken, genString, referralCode, generateOtp, StatusCodes, User, createError, sendResponse, dataCreate,
-    dataUpdated, getSingleData, getAllData, passwordHash, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject, hashedPassword, handleErrorResponse
+    ResponseMessage, genrateToken, referralCode, StatusCodes, User, sendResponse, dataCreate,
+    dataUpdated, getSingleData, getAllData, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject, 
+    hashedPassword, handleErrorResponse
 } from "./../../index.js";
 
 export const userSignUpSignInOtp = async (req, res) => {
@@ -124,7 +124,6 @@ export const userSignInMpin = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
-
 
 export const singupFromEmailPassword = async (req, res) => {
     try {
@@ -278,7 +277,7 @@ export const userGuestLogin = (req, res) => {
         }
         return sendResponse(res, StatusCodes.OK, ResponseMessage.GUEST_LOGIN, dummyData);
     } catch (error) {
-
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -317,12 +316,13 @@ export const emailVerify = async (req, res) => {
         let { key } = req.query;
         const objectEecrypt = await decryptObject(key);
         if(objectEecrypt === false){
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.VERIFY_LINK_EXPIRE, []);
+            return res.redirect('http://betting.appworkdemo.com/user')
+            // return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.VERIFY_LINK_EXPIRE, []);
         }
         objectEecrypt.email = objectEecrypt.email ? objectEecrypt.email.toLowerCase() : null
         if (!objectEecrypt.email) {
-            // return res.redirect('http://betting.appworkdemo.com/user')
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+            return res.redirect('http://betting.appworkdemo.com/user')
+            // return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
         }
 
         let checkEmailExist = await getSingleData({ email: objectEecrypt.email }, User)
@@ -697,10 +697,10 @@ export const accountDeactivate = async (req, res) => {
 
 export const transactionHistory = async (req, res) => {
     try {
-        const { userId } = req.body;
+        // const { userId } = req.body;
         let transactionHistory = []
-        if (userId) {
-            transactionHistory = transactionHistoryDummy.filter(user => user.userId == userId);
+        if (req.user) {
+            transactionHistory = transactionHistoryDummy.filter(user => user.userId == req.user);
         } else {
             transactionHistory = transactionHistoryDummy;
         }

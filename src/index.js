@@ -26,7 +26,7 @@ import { validatorMiddlware } from "./middleware/Validation.js";
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
-    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList
+    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList, getAdminProfile
 } from "./controller/admin/AdminController.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
@@ -41,6 +41,9 @@ import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
 import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
+import { addTransaction,getUserTransaction } from "./controller/user/TransactionController.js";
+import { adminDashboard } from "./controller/admin/DashboardController.js";
+import { userDashboard } from "./controller/user/DashboardController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -61,6 +64,7 @@ import { Wallet } from "./models/Wallet.js";
 import { WalletLogin } from "./models/WalletLogin.js";
 import { Game } from "./models/Game.js";
 import { GameRules } from "./models/GameRules.js";
+import { Transaction } from "./models/Transaction.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -77,10 +81,11 @@ dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
-    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, Game, GameRules,
+    Admin, User, CMS_Model, AdminSetting, Referral_Work, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, 
+    Game, GameRules,Transaction,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
-    adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,
+    adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword,getAdminProfile,
     adminVerifyOtp, getAllUsers, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork,
     adminEditUser, adminDeleteUser, showRating, getWithdrawalList, singupFromEmailPassword, singInFromEmailPassword,
     getAllQuery,
@@ -96,5 +101,7 @@ export {
     adminDashboardCount,
     walletCreate, disconnectWallet,
     validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
-    gameRuleDelete, getSingleGame
+    gameRuleDelete, getSingleGame,
+    addTransaction,getUserTransaction,
+    userDashboard,adminDashboard
 }

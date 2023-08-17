@@ -18,6 +18,7 @@ const transactionSchema = new mongoose.Schema({
 );
 
 const Wallet = mongoose.model('Wallet', walletSchema);
-const Transaction = mongoose.model('Transaction', transactionSchema);
+// const Transaction = mongoose.model('Transaction', transactionSchema);
 
-export { Wallet, Transaction }
+// export { Wallet, Transaction }
+export { Wallet }

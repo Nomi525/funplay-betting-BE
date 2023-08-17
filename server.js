@@ -1,9 +1,6 @@
 
 import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes } from "./src/index.js";
 const app = express();
-// const admin = require("./src/routes/AdminRoutes");
-// const user = require("./src/routes/UserRoutes");
-// const common = require("./src/routes/CommonRoutes");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
