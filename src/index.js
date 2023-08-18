@@ -45,6 +45,7 @@ import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, get
 import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
+import { getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -80,6 +81,7 @@ import {
     genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword
 } from "./services/CommonService.js";
 
+
 dotenv.config();
 
 export {
@@ -106,5 +108,5 @@ export {
     validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
-    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction
+    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction,getUserReferralBySignIn
 }

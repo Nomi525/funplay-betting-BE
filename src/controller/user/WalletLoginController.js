@@ -19,15 +19,15 @@ export const walletCreate = async (req, res) => {
 
 export const disconnectWallet = async (req, res) => {
     try {
-        const findUser = await getSingleData({ _id: req.body.userId },User);
+        const findUser = await getSingleData({ _id: req.body.userId }, User);
         if (!findUser) {
-            return sendResponse(res, StatusCodes.NOT_FOUND,ResponseMessage.USER_NOT_EXIST, []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
         }
         findUser.walletAddress = null;
         await findUser.save();
         return sendResponse(res, StatusCodes.OK, ResponseMessage.WALLET_DISCONNECTED);
     } catch (error) {
-       return handleErrorResponse(res, error)
+        return handleErrorResponse(res, error)
     }
 
 }

@@ -129,6 +129,7 @@ const ResponseMessage = {
     TRANSCTION_DELETED : "Transction deleted successfully",
     TRANSCTION_GET : "Transction get successfully",
     TRANSCTION_NOT_FOUND : "Transction not found",
+    RAFERRAL_NOT_FOUND : "Referral not found",
 }
 
 export { ResponseMessage }

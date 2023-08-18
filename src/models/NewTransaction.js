@@ -10,21 +10,67 @@ const newTransactionSchema = new mongoose.Schema({
         type: String, 
         required: false 
     },
+    bitcoinWalletAddress : {
+        type: Array, 
+        required: false 
+    },
+    ethereumWalletAddress : {
+        type: Array, 
+        required: false 
+    },
     networkChainId : { 
         type: String, 
         required: false 
     },
-    tokenName: { 
-        type: String,
+    tokenBitcoin: { 
+        type: Number,
         required: false 
     },
-    tokenAmount: {
-        type: Number, 
+    // tokenEthereum: { 
+    //     type: String,
+    //     required: false 
+    // },
+    tokenTether: { 
+        type: Number,
         required: false 
     },
+    tokenBNB: { 
+        type: Number,
+        required: false 
+    },
+    tokenPolygon: {
+        type: Number,
+        required: false 
+    },
+    // tokenBitcoinAmount: { 
+    //     type: Number,
+    //     required: false,
+    //     default: 0,
+    // },
+    // tokenEthereumAmount: { 
+    //     type: Number,
+    //     required: false,
+    //     default: 0,
+    // },
+    // tokenTetherAmount: { 
+    //     type: Number,
+    //     required: false,
+    //     default: 0,
+    // },
+    // tokenBNBAmount: { 
+    //     type: Number, 
+    //     required: false,
+    //     default: 0,
+    // },
+    // tokenPolygonAmount: {
+    //     type: Number,
+    //     required: false,
+    //     default: 0,
+    // },
     tokenDollorValue: {
         type: Number,
-        required: false
+        required: false,
+        default: 0,
     },
     is_deleted: {
         type: Number,
