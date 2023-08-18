@@ -1,6 +1,7 @@
+import CoinGecko from "coingecko-api";
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction
+    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction, axios
 } from "../../index.js";
 
 export const addTransaction = async (req, res) => {
@@ -28,8 +29,17 @@ export const getUserTransaction = async (req, res) => {
 
 export const addNewTransaction = async (req, res) => {
     try {
-        const { walletAddress,networkChainId, tokenAmount, tokenDollorValue } = req.body;
-        const createTransction = await dataCreate({ userId: req.user, walletAddress,networkChainId, tokenAmount, tokenDollorValue }, NewTransaction);
+        const { walletAddress, networkChainId, tokenAmount, tokenName } = req.body;
+        const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
+        const dataNew = USDTPrice.data.data
+        let valueUsd;
+        dataNew.map((item) => {
+            if (item.name == tokenName) {
+                valueUsd = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
+
+            }
+        });
+        const createTransction = await dataCreate({ userId: req.user, walletAddress, networkChainId, tokenAmount, tokenDollorValue: valueUsd }, NewTransaction);
         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
     } catch (error) {
         return handleErrorResponse(res, error);

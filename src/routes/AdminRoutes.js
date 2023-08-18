@@ -26,7 +26,6 @@ adminRoutes.get('/cms', Auth, getCMSDetail)
 
 adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
 // adminRoutes.get("/dashboard", Auth, adminDashboardCount)
-adminRoutes.get('/dashboard',Auth,adminDashboard);
 adminRoutes.post("/transaction", Auth, getTransactionList)
 adminRoutes.post("/how-referral-work", Auth, howToReferralWork)
 
@@ -62,6 +61,6 @@ adminRoutes.post("/game-rules/add-edit", Auth, addEditGameRule);
 adminRoutes.post("/game-rules/delete", Auth, gameRuleDelete);
 
 // Dashboard
-// adminRoutes.get('/dashboard',Auth,adminDashboard);
+adminRoutes.get('/dashboard',Auth,adminDashboard);
 
 export { adminRoutes }
