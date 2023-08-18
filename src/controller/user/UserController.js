@@ -699,11 +699,13 @@ export const transactionHistory = async (req, res) => {
     try {
         // const { userId } = req.body;
         let transactionHistory = []
-        if (req.user) {
-            transactionHistory = transactionHistoryDummy.filter(user => user.userId == req.user);
-        } else {
-            transactionHistory = transactionHistoryDummy;
-        }
+        // console.log(req.user);
+        // if (req.user) {
+        //     transactionHistory = transactionHistoryDummy.filter(user => req.user == req.user);
+        // } else {
+        //     transactionHistory = transactionHistoryDummy;
+        // }
+        transactionHistory = transactionHistoryDummy;
         if (transactionHistory.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, transactionHistory);
         } else {
