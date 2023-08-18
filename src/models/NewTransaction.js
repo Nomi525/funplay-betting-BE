@@ -14,12 +14,16 @@ const newTransactionSchema = new mongoose.Schema({
         type: String, 
         required: false 
     },
-    tokenAmount: { 
+    tokenName: { 
+        type: String,
+        required: false 
+    },
+    tokenAmount: {
         type: Number, 
         required: false 
     },
     tokenDollorValue: {
-        type: String,
+        type: Number,
         required: false
     },
     is_deleted: {

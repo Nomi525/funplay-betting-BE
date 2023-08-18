@@ -1,8 +1,7 @@
-// import { Transaction } from "../../models/Wallet.js";
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
-    getAllData, getAllDataCount, deleteById, passwordHash, passwordCompare, jwt, generateOtp, User, AdminSetting,
-    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse
+    getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
+    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse,DummyTransaction
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {
@@ -80,8 +79,7 @@ export const getwithdrwalcheck = (req, res) => {
     } catch (error) {
         return handleErrorResponse(res, error);
     }
-};
-
+}
 
 export const adminChangePassword = async (req, res) => {
     try {
@@ -219,8 +217,6 @@ export const getAdminSingleUser = async (req, res) => {
     }
 }
 
-
-
 export const adminDashboardCount = async (req, res) => {
     try {
         let totalUsers = 1500
@@ -244,7 +240,7 @@ export const adminDashboardCount = async (req, res) => {
     } catch (error) {
         return handleErrorResponse(res, error);
     }
-};
+}
 
 export const adminSetting = async (req, res) => {
     try {
@@ -279,10 +275,10 @@ export const getTransactionList = async (req, res) => {
     try {
         const { type } = req.body;
         if (type) {
-            const findTranscation = await getAllData({ type }, Transaction)
+            const findTranscation = await getAllData({ type }, DummyTransaction)
             return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findTranscation);
         }
-        const findAllTranscation = await getAllData({}, Transaction)
+        const findAllTranscation = await getAllData({}, DummyTransaction)
         return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findAllTranscation);
 
     } catch (error) {
@@ -356,7 +352,7 @@ export const showRating = async (req, res) => {
 
 export const getWithdrawalList = async (req, res) => {
     try {
-        const withdrwal = await getAllData({}, Transaction);
+        const withdrwal = await getAllData({}, DummyTransaction);
         if (withdrwal.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_WITHDRAWAL, withdrwal);
         } else {

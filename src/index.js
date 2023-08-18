@@ -14,6 +14,7 @@ import chaiHttp from 'chai-http';
 import path from 'path';
 import Joi from "joi";
 import crypto from "crypto";
+import axios from "axios";
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -60,7 +61,7 @@ import { ReferralWork } from "./models/Referral_Work.js";
 import { BannerModel } from "./models/Banner.js";
 import { Query } from "./models/Query.js";
 import { Rating } from "./models/Rating.js";
-import { Wallet } from "./models/Wallet.js";
+import { DummyTransaction, Wallet } from "./models/Wallet.js";
 import { WalletLogin } from "./models/WalletLogin.js";
 import { Game } from "./models/Game.js";
 import { GameRules } from "./models/GameRules.js";
@@ -82,9 +83,9 @@ import {
 dotenv.config();
 
 export {
-    express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
+    express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, axios, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
     Admin, User, CMS, AdminSetting, ReferralWork, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, NewTransaction,
-    Game, GameRules, Transaction,
+    Game, GameRules, Transaction, DummyTransaction,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword, getAdminProfile,

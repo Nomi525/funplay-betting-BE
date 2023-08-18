@@ -7,7 +7,7 @@ const walletSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
-const transactionSchema = new mongoose.Schema({
+const dummyTransactionSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     amount: { type: Number, required: true },
     type: { type: String, required: true }, 
@@ -18,7 +18,6 @@ const transactionSchema = new mongoose.Schema({
 );
 
 const Wallet = mongoose.model('Wallet', walletSchema);
-// const Transaction = mongoose.model('Transaction', transactionSchema);
+const DummyTransaction = mongoose.model('DummyTransaction', dummyTransactionSchema);
 
-// export { Wallet, Transaction }
-export { Wallet }
+export { Wallet, DummyTransaction }
