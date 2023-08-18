@@ -39,7 +39,7 @@ export const addNewTransaction = async (req, res) => {
 
             }
         });
-        const createTransction = await dataCreate({ userId: req.user, walletAddress, networkChainId, tokenAmount, tokenDollorValue: valueUsd }, NewTransaction);
+        const createTransction = await dataCreate({ userId: req.user, walletAddress, networkChainId, tokenName, tokenAmount, tokenDollorValue: valueUsd }, NewTransaction);
         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
     } catch (error) {
         return handleErrorResponse(res, error);
