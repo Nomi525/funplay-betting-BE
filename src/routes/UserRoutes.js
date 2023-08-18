@@ -3,7 +3,8 @@ import {
     userSignInMpin, verifyOtp, loginFromMpin, Auth, forgotPassword, resetPassword, verifyForgotOtp,
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
     deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
-    disconnectWallet, validatorMiddlware, setMpin, changeMpin, emailVerify, setPassword, addTransaction, getUserTransaction, userDashboard
+    disconnectWallet, validatorMiddlware, setMpin, changeMpin, emailVerify, setPassword, addTransaction, getUserTransaction, userDashboard,
+    addNewTransaction, getUserNewTransaction
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -49,6 +50,9 @@ userRoutes.post('/walletLogin/disconnect', disconnectWallet);
 // Transction Routes
 userRoutes.get('/transctions', Auth, getUserTransaction);
 userRoutes.post('/transction/add', Auth, addTransaction);
+
+userRoutes.get('/new-transctions', Auth, getUserNewTransaction);
+userRoutes.post('/new-transction/add', Auth, addNewTransaction);
 
 //Dashboard
 userRoutes.get('/dashboard', Auth, userDashboard)

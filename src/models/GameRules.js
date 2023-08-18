@@ -7,7 +7,7 @@ const gameRulesSchema = new mongoose.Schema({
         required: false
     },
     gameRules: {
-        type: Array,
+        type: String,
         required: false
     },
     is_deleted: {
