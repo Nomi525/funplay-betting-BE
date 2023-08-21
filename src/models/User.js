@@ -109,7 +109,7 @@ const userSchema = new mongoose.Schema(
         },
         isActive: {
             type: Boolean,
-            default: false
+            default: true
         },
         is_deleted: {
             type: Number,

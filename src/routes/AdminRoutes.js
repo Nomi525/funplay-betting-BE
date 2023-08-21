@@ -4,7 +4,7 @@ import {
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
     getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers,getAdminProfile, adminDashboard,getAdminSingleUser, changeStatusOfUser,
-    getUserReferralBySignIn,acceptWithdrawalRequest
+    getUserReferralBySignIn,acceptWithdrawalRequest,getSingleUserTransaction
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -40,6 +40,7 @@ adminRoutes.post('/single-user', Auth, getAdminSingleUser);
 adminRoutes.post('/user-edit', Auth, Upload, adminEditUser);
 adminRoutes.post('/user-delete', Auth, adminDeleteUser);
 adminRoutes.post("/user/activate/deactivate" , Auth,changeStatusOfUser)
+adminRoutes.post("/single-user/transaction" , Auth,getSingleUserTransaction)
 // User Query
 adminRoutes.get('/queries', Auth, getAllQuery);
 

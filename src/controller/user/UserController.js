@@ -17,6 +17,9 @@ export const userSignUpSignInOtp = async (req, res) => {
             if (existingUser.is_deleted != 0) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
             }
+            if (!existingUser.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             const updateOtp = await dataUpdated({ email }, { otp }, User)
             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
             await sendMail(existingUser.email, "Verify Otp", mailInfo)
@@ -187,6 +190,9 @@ export const singInFromEmailPassword = async (req, res) => {
         email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
+            if (!userFind.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             let verifyPassword = await passwordCompare(password, userFind.password);
             if (verifyPassword) {
                 const payload = {
@@ -223,6 +229,9 @@ export const loginFromMpin = async (req, res) => {
         let { userId, mPin } = req.body;
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
+            if (!user.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (user.mPin !== mPin) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_MPIN, []);
             }

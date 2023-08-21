@@ -45,7 +45,7 @@ import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, get
 import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
-import { acceptWithdrawalRequest, getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
+import { acceptWithdrawalRequest, getSingleUserTransaction, getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -109,5 +109,5 @@ export {
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
     userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
-    getTotalUserAmountDiposit, withdrawalRequest,acceptWithdrawalRequest , changeStatusOfUser
+    getTotalUserAmountDiposit, withdrawalRequest,acceptWithdrawalRequest , changeStatusOfUser,getSingleUserTransaction
 }
