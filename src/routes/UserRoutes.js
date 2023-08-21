@@ -4,7 +4,7 @@ import {
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
     deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
     disconnectWallet, validatorMiddlware, setMpin, changeMpin, emailVerify, setPassword, addTransaction, getUserTransaction, userDashboard,
-    addNewTransaction, getUserNewTransaction
+    addNewTransaction, getUserNewTransaction,getTotalUserAmountDiposit
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -53,6 +53,7 @@ userRoutes.post('/transction/add', Auth, addTransaction);
 
 userRoutes.get('/new-transctions', Auth, getUserNewTransaction);
 userRoutes.post('/new-transction/add', Auth, addNewTransaction);
+userRoutes.get('/total-amount-diposit', Auth, getTotalUserAmountDiposit);
 
 //Dashboard
 userRoutes.get('/dashboard', Auth, userDashboard)

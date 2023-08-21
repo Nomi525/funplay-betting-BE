@@ -1,7 +1,7 @@
 import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import {
     ResponseMessage, genrateToken, referralCode, StatusCodes, User, sendResponse, dataCreate,
-    dataUpdated, getSingleData, getAllData, passwordCompare, jwt, ejs, sendMail, fs, decryptObject,encryptObject, 
+    dataUpdated, getSingleData, getAllData, passwordCompare, jwt, ejs, sendMail, fs, decryptObject, encryptObject,
     hashedPassword, handleErrorResponse
 } from "./../../index.js";
 
@@ -292,7 +292,7 @@ export const editProfile = async (req, res) => {
             const objectEncrtypt = await encryptObject({ userId: findData._id, email: req.body.email });
             let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { objectEncrtypt });
             await sendMail(req.body.email, "Verify Email", mailInfo);
-            await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false, profile: req.body.profile, fullName: req.body.fullName }, User);
+            await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false, email: req.body.email, profile: req.body.profile, fullName: req.body.fullName }, User);
             return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, []);
         } else {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
@@ -315,7 +315,7 @@ export const emailVerify = async (req, res) => {
         // let { userId, email } = req.query;
         let { key } = req.query;
         const objectEecrypt = await decryptObject(key);
-        if(objectEecrypt === false){
+        if (objectEecrypt === false) {
             return res.redirect('http://betting.appworkdemo.com/user')
             // return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.VERIFY_LINK_EXPIRE, []);
         }
@@ -699,11 +699,13 @@ export const transactionHistory = async (req, res) => {
     try {
         // const { userId } = req.body;
         let transactionHistory = []
-        if (req.user) {
-            transactionHistory = transactionHistoryDummy.filter(user => user.userId == req.user);
-        } else {
-            transactionHistory = transactionHistoryDummy;
-        }
+        // console.log(req.user);
+        // if (req.user) {
+        //     transactionHistory = transactionHistoryDummy.filter(user => req.user == req.user);
+        // } else {
+        //     transactionHistory = transactionHistoryDummy;
+        // }
+        transactionHistory = transactionHistoryDummy;
         if (transactionHistory.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, transactionHistory);
         } else {
@@ -713,3 +715,21 @@ export const transactionHistory = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+// export const getUserReferralBySignIn = async (req, res) => {
+//     try {
+//         const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
+//         if (findUser) {
+//             const users = await getAllData({ referralByCode: findUser.referralCode, is_deleted: 0 }, User)
+//             if (users.length) {
+//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, users)
+//             } else {
+//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.RAFERRAL_NOT_FOUND, [])
+//             }
+//         } else {
+//             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_NOT_EXIST, [])
+//         }
+//     } catch (error) {
+//         return handleErrorResponse(req, error);
+//     }
+// }

@@ -42,15 +42,15 @@ import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
 import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
-import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction } from "./controller/user/TransactionController.js";
+import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction, getTotalUserAmountDiposit } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
+import { getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
 import { userRoutes } from "./routes/UserRoutes.js";
 import { commonRoutes } from "./routes/CommonRoutes.js";
-
 
 // Models
 import { Admin } from "./models/Admin.js";
@@ -80,6 +80,7 @@ import {
     genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword
 } from "./services/CommonService.js";
 
+
 dotenv.config();
 
 export {
@@ -106,5 +107,6 @@ export {
     validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
-    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction
+    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction,getUserReferralBySignIn,
+    getTotalUserAmountDiposit
 }

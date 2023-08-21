@@ -3,7 +3,7 @@ import {
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
-    getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers,getAdminProfile, adminDashboard,getAdminSingleUser
+    getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers,getAdminProfile, adminDashboard,getAdminSingleUser, getUserReferralBySignIn
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -62,5 +62,7 @@ adminRoutes.post("/game-rules/delete", Auth, gameRuleDelete);
 
 // Dashboard
 adminRoutes.get('/dashboard',Auth,adminDashboard);
+adminRoutes.post('/user-signin-by-referral',Auth,getUserReferralBySignIn);
+
 
 export { adminRoutes }
