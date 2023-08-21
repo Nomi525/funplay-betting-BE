@@ -129,6 +129,11 @@ const ResponseMessage = {
     TRANSCTION_DELETED : "Transction deleted successfully",
     TRANSCTION_GET : "Transction get successfully",
     TRANSCTION_NOT_FOUND : "Transction not found",
+    WITHDRAWAL_CREATED : "Withdrawal created successfully",
+    WITHDRAWAL_UPDATED : "Withdrawal updated successfully",
+    WITHDRAWAL_DELETED : "Withdrawal deleted successfully",
+    WITHDRAWAL_GET : "Withdrawal get successfully",
+    WITHDRAWAL_NOT_FOUND : "withdrawal not found",
     RAFERRAL_NOT_FOUND : "Referral not found",
 }
 

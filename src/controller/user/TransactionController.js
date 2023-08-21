@@ -1,7 +1,7 @@
 import CoinGecko from "coingecko-api";
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction, axios, User
+    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction, axios, User, WithdrawalRequest
 } from "../../index.js";
 
 export const addTransaction = async (req, res) => {
@@ -225,34 +225,9 @@ export const addNewTransaction = async (req, res) => {
 
 export const withdrawalRequest = async (req, res) => {
     try {
-        const { userId, tokenName, tokenAmount } = req.body;
-        const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
-        const findUser = await NewTransaction.findOne({ userId })
-        const dataNew = USDTPrice?.data?.data
-        if (!dataNew) {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, "Bad Request", []);
-        }
-        var value;
-        if (findUser) {
-            const mapData = dataNew.filter(d => d.name == tokenName).map(async (item) => {
-                value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
-                if ((findUser[`token${tokenName}`] > 0 && findUser[`token${tokenName}`] >= parseFloat(tokenAmount) && (findUser.tokenDollorValue > 0 && findUser.tokenDollorValue >= parseFloat(value)))) {
-                    findUser[`token${tokenName}`] -= parseFloat(tokenAmount)
-                    findUser.tokenDollorValue -= parseFloat(value)
-                    await findUser.save();
-                    return { status: "OK", data: findUser }
-                }
-            })
-
-            const promiseData = await Promise.all(mapData);
-            if (promiseData[0]?.status == "OK") {
-                return sendResponse(res, StatusCodes.OK, "Withdrawal done", promiseData[0]?.data)
-            } else {
-                return sendResponse(res, StatusCodes.NOT_FOUND, "Bad request", [])
-            }
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, [])
-        }
+        const { walletAddress, tokenName, tokenAmount } = req.body;
+        const createRequest = await dataCreate({userId : req.user, walletAddress, tokenName, tokenAmount},WithdrawalRequest)
+        return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WITHDRAWAL_CREATED, createRequest);
     } catch (error) {
         return handleErrorResponse(res, error);
     }

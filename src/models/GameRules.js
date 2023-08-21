@@ -6,7 +6,7 @@ const gameRulesSchema = new mongoose.Schema({
         ref: "Game",
         required: false
     },
-    gameType: {
+    gameName: {
         type: String,
         required: false
     },
