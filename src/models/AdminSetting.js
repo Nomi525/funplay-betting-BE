@@ -22,6 +22,10 @@ const adminSettingSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        walletAddress: {
+            type: String,
+            required : false
+        },
         is_deleted: {
             type: Number,
             default: 0,

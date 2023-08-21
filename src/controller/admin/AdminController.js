@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
-    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse,DummyTransaction
+    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {
@@ -192,7 +192,8 @@ export const adminLogout = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
-        const findUsers = await getAllData({ is_deleted: 0 }, User);
+        // const findUsers = await getAllData({ is_deleted: 0 }, User);
+        const findUsers = await User.find({ is_deleted: 0 }).sort({ createdAt: -1 });
         if (findUsers.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUsers);
         } else {
@@ -206,7 +207,8 @@ export const getAllUsers = async (req, res) => {
 export const getAdminSingleUser = async (req, res) => {
     try {
         const { userId } = req.body
-        const findUser = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        // const findUser = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email")
         if (findUser) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUser);
         } else {
