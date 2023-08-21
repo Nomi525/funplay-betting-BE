@@ -364,3 +364,22 @@ export const getWithdrawalList = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+
+
+export const changeStatusOfUser = async (req, res) => {
+    try {
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: req.body.id },
+            { $set: { isActive: req.body.status } },
+            { new: true }
+        );
+        const responseMessage = req.body.status === "true"
+            ? ResponseMessage.USER_ACTIVATED
+            : ResponseMessage.USER_DEACTIVATED;
+
+        return sendResponse(res, StatusCodes.OK, responseMessage);
+    } catch (err) {
+        return handleErrorResponse(res, err);
+    }
+};

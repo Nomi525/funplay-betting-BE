@@ -27,7 +27,7 @@ import { validatorMiddlware } from "./middleware/Validation.js";
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
-    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList, getAdminProfile, getAdminSingleUser
+    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList, getAdminProfile, getAdminSingleUser ,changeStatusOfUser
 } from "./controller/admin/AdminController.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
@@ -109,5 +109,5 @@ export {
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
     userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
-    getTotalUserAmountDiposit, withdrawalRequest,acceptWithdrawalRequest
+    getTotalUserAmountDiposit, withdrawalRequest,acceptWithdrawalRequest , changeStatusOfUser
 }

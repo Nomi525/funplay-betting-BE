@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, getAllDataCount, NewTransaction, WithdrawalRequest
+    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, getAllDataCount, axios, NewTransaction, WithdrawalRequest
 } from "../../index.js";
 
 export const getUserReferralBySignIn = async (req, res) => {
