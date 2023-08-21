@@ -42,10 +42,10 @@ import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
 import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
-import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction, getTotalUserAmountDiposit } from "./controller/user/TransactionController.js";
+import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
-import { getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
+import { acceptWithdrawalRequest, getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -67,6 +67,7 @@ import { Game } from "./models/Game.js";
 import { GameRules } from "./models/GameRules.js";
 import { Transaction } from "./models/Transaction.js";
 import { NewTransaction } from "./models/NewTransaction.js";
+import { WithdrawalRequest } from "./models/WithdrawalRequest.js";
 
 
 // Services
@@ -86,7 +87,7 @@ dotenv.config();
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, axios, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
     Admin, User, CMS, AdminSetting, ReferralWork, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, NewTransaction,
-    Game, GameRules, Transaction, DummyTransaction,
+    Game, GameRules, Transaction, DummyTransaction, WithdrawalRequest,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword, getAdminProfile,
@@ -107,6 +108,6 @@ export {
     validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules, getSingleGameRules,
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
-    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction,getUserReferralBySignIn,
-    getTotalUserAmountDiposit
+    userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
+    getTotalUserAmountDiposit, withdrawalRequest,acceptWithdrawalRequest
 }
