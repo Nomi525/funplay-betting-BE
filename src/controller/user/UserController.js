@@ -209,6 +209,15 @@ export const singInFromEmailPassword = async (req, res) => {
     }
 }
 
+export const singInWalletAddress = async (req, res) => {
+    try {
+        let { walletAddress, currency, referralByCode } = req.body;
+
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
 export const loginFromMpin = async (req, res) => {
     try {
         let { userId, mPin } = req.body;
@@ -283,20 +292,44 @@ export const userGuestLogin = (req, res) => {
 
 export const editProfile = async (req, res) => {
     try {
+        // console.log(req.body,'hiii')
         const findData = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
+   
         if (findData.email != req.body.email) {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
             const objectEncrtypt = await encryptObject({ userId: findData._id, email: req.body.email });
-            let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { objectEncrtypt });
-            await sendMail(req.body.email, "Verify Email", mailInfo);
-            await dataUpdated({ _id: findData._id, is_deleted: 0 }, { isVerified: false, email: req.body.email, profile: req.body.profile, fullName: req.body.fullName }, User);
+            if (req.body.email) {
+                let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", { objectEncrtypt });
+                await sendMail(req.body.email, "Verify Email", mailInfo);
+            }
+            await dataUpdated({ _id: findData._id, is_deleted: 0 }, {
+                isVerified: false, email: req.body.email, profile: req.body.profile,
+                fullName: req.body.fullName,
+                bankDetails: {
+                    bankName: req.body.bankName,
+                    branch: req.body.branch,
+                    accountHolder: req.body.accountHolder,
+                    accountNumber: req.body.accountNumber,
+                    IFSCCode: req.body.IFSCCode,
+                }
+            }, User);
             return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, []);
         } else {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, { profile: req.body.profile, fullName: req.body.fullName }, User);
+            const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, {
+                profile: req.body.profile,
+                fullName: req.body.fullName,
+                bankDetails: {
+                    bankName: req.body.bankName,
+                    branch: req.body.branch,
+                    accountHolder: req.body.accountHolder,
+                    accountNumber: req.body.accountNumber,
+                    IFSCCode: req.body.IFSCCode,
+                }
+            }, User);
             if (userData) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
             } else {

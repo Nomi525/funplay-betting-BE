@@ -81,6 +81,28 @@ const userSchema = new mongoose.Schema(
             required: false,
             default: "No"
         },
+        bankDetails: {
+            bankName: {
+                type: String,
+                required: false,
+            },
+            branch: {
+                type: String,
+                required: false,
+            },
+            accountHolder: {
+                type: String,
+                required: false,
+            },
+            accountNumber: {
+                type: Number,
+                required: false,
+            },
+            IFSCCode: {
+                type: String,
+                required: false,
+            }
+        },
         currency: {
             type: String,
             required: false

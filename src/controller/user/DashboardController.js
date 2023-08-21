@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, WalletLogin, getAllDataCount
+    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, WalletLogin, getAllDataCount, NewTransaction
 } from "../../index.js";
 
 
@@ -11,7 +11,7 @@ export const userDashboard = async (req, res) => {
             // const totalReferralCount = await getAllData({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
             // const totalTransaction = await getAllData({ userId: findUser._id, is_deleted: 0 }, Transaction);
             const totalReferralCount = await getAllDataCount({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
-            const totalTransaction = await getAllDataCount({ userId: findUser._id, is_deleted: 0 }, Transaction);
+            const totalTransaction = await getAllDataCount({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
             const totalRewards = 25;
             const totalDeposit = 2500;
             const walletDetails = await getAllData({}, WalletLogin);

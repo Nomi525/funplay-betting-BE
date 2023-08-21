@@ -10,7 +10,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendMail = (toEmail, subject, emailBody) => {
-    // console.log(toEmail, subject);
     return new Promise(function (resolve, reject) {
         const mailing = {
             from: process.env.EMAIL_USER,
