@@ -1,7 +1,8 @@
 import CoinGecko from "coingecko-api";
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction, axios, User, WithdrawalRequest
+    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction, axios, User,
+    WithdrawalRequest, TransactionHistory
 } from "../../index.js";
 
 export const addTransaction = async (req, res) => {
@@ -190,6 +191,9 @@ export const addNewTransaction = async (req, res) => {
                 }
                 findUser.tokenDollorValue += parseFloat(value)
                 await findUser.save();
+
+                await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposite" }, TransactionHistory)
+
                 return { status: 'OK', data: findUser }
             } else {
                 let bitcoinWalletAddress;
@@ -207,6 +211,9 @@ export const addNewTransaction = async (req, res) => {
                     [`token${tokenName}`]: tokenAmount,
                     tokenDollorValue: parseFloat(value)
                 }, NewTransaction);
+
+                await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposite" }, TransactionHistory)
+
                 return { status: 'CREATED', data: createTransction }
             }
         });
@@ -226,7 +233,7 @@ export const addNewTransaction = async (req, res) => {
 export const withdrawalRequest = async (req, res) => {
     try {
         const { walletAddress, tokenName, tokenAmount } = req.body;
-        const createRequest = await dataCreate({userId : req.user, walletAddress, tokenName, tokenAmount},WithdrawalRequest)
+        const createRequest = await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount }, WithdrawalRequest)
         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WITHDRAWAL_CREATED, createRequest);
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -253,6 +260,21 @@ export const getTotalUserAmountDiposit = async (req, res) => {
             return sendResponse(res, StatusCodes.OK, "User total deposit amount", { tokenDollorValue: findUser.tokenDollorValue })
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
+export const userDepositeWithdrawalHistory = async (req, res) => {
+    try {
+        const history = await getAllData({ userId: req.user, is_deleted: 0 }, TransactionHistory);
+        if (history.length) {
+            const deposit = history.filter(h => h.type == "deposite")
+            const withdrawal = history.filter(h => h.type == "withdrawal")
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, { deposit, withdrawal });
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, "History not found", []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);

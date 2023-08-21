@@ -4,7 +4,7 @@ import {
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
     getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers,getAdminProfile, adminDashboard,getAdminSingleUser, changeStatusOfUser,
-    getUserReferralBySignIn,acceptWithdrawalRequest,getSingleUserTransaction
+    getUserReferralBySignIn,acceptWithdrawalRequest,getSingleUserTransaction,gelAllUserDepositeAndWithdrawal
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -50,6 +50,7 @@ adminRoutes.get('/game/ratings', Auth, showRating)
 // Get WithdrwalList
 adminRoutes.get('/withdrawal-list', Auth, getWithdrawalList)
 adminRoutes.post('/accept-reject-withdrawal-request', Auth, acceptWithdrawalRequest)
+adminRoutes.post('/get-deposite-withdrawal-list', Auth, gelAllUserDepositeAndWithdrawal)
 
 // game Routes 
 adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);

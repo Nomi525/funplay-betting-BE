@@ -77,6 +77,9 @@ export const verifyOtp = async (req, res) => {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             } else {
                 if (type == "login") {
+                    if (!user.isActive) {
+                        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+                    }
                     const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
                     const payload = {
                         user: {
@@ -116,6 +119,9 @@ export const userSignInMpin = async (req, res) => {
     try {
         const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
         if (existingUser) {
+            if (!existingUser.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (!existingUser.isVerified) {
                 return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_NOT_VERIFY, []);
             }
@@ -134,7 +140,9 @@ export const singupFromEmailPassword = async (req, res) => {
         email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
-
+            if (!userFind.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (userFind.password == null) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, "Password not set", []);
             }
