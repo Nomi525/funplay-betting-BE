@@ -33,7 +33,7 @@ import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
     userGuestLogin, setPassword,
-    transactionHistory, singInFromEmailPassword, setMpin, changeMpin, emailVerify
+    transactionHistory, singInFromEmailPassword, setMpin, changeMpin, emailVerify, singInWalletAddress
 } from "./controller/user/UserController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
 import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/CommonController.js";
@@ -118,5 +118,5 @@ export {
     addTransaction, getUserTransaction,
     userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
     getTotalUserAmountDiposit, withdrawalRequest, acceptWithdrawalRequest, changeStatusOfUser,
-    getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, userDepositeWithdrawalHistory
+    getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, userDepositeWithdrawalHistory, singInWalletAddress
 }

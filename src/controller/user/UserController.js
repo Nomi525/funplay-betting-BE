@@ -226,7 +226,43 @@ export const singInFromEmailPassword = async (req, res) => {
 export const singInWalletAddress = async (req, res) => {
     try {
         let { walletAddress, currency, referralByCode } = req.body;
-
+        const findWalletAddress = await getSingleData({ walletAddress, is_deleted: 0 }, User);
+        if (findWalletAddress) {
+            if (!findWalletAddress.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
+            const payload = {
+                user: {
+                    id: findWalletAddress._id,
+                },
+            };
+            findWalletAddress.isLogin = true;
+            await findWalletAddress.save();
+            const token = await genrateToken({ payload });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...findWalletAddress._doc, token });
+        } else {
+            let referCode = referralCode(8);
+            let findReferralUser = null;
+            // For Referral Code
+            if (referralByCode) {
+                findReferralUser = await getSingleData({ referralCode: referralByCode, is_deleted: 0 }, User)
+                if (!findReferralUser) {
+                    return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
+                }
+            }
+            const createUser = await dataCreate({ walletAddress, currency, walletConnected: "Yes", referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User);
+            if (findReferralUser) {
+                findReferralUser.useReferralCodeUsers.push(createUser._id);
+                await findReferralUser.save();
+            }
+            const payload = {
+                user: {
+                    id: createUser._id,
+                },
+            };
+            const token = await genrateToken({ payload });
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_LOGGED_IN, { ...createUser._doc, token });
+        }
     } catch (error) {
         return handleErrorResponse(res, error);
     }
@@ -314,7 +350,7 @@ export const editProfile = async (req, res) => {
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
-   
+
         if (findData.email != req.body.email) {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
             const objectEncrtypt = await encryptObject({ userId: findData._id, email: req.body.email });
