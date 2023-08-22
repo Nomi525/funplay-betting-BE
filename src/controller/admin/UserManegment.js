@@ -93,11 +93,24 @@ export const getSingleUserTransaction = async (req, res) => {
 export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
     try {
         const { userId } = req.body;
-        const transactionHistory = await getAllData({ userId, is_deleted: 0 }, TransactionHistory);
+        // const transactionHistory = await getAllData({ userId, is_deleted: 0 }, TransactionHistory);
+        const transactionHistory = await TransactionHistory.find({ userId, is_deleted: 0 }).populate('userId')
         if (transactionHistory.length) {
-            const userDepositeHistory = transactionHistory.filter(history => history.type == "deposite")
-            const userWithdrawalHistory = transactionHistory.filter(history => history.type == "withdrawal")
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, { userDepositeHistory, userWithdrawalHistory });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transactionHistory);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
+export const getAllTransaction = async (req, res) => {
+    try {
+        // const transactionHistory = await getAllData({ is_deleted: 0 }, TransactionHistory);
+        const transactionHistory = await TransactionHistory.find({ is_deleted: 0 }).populate('userId')
+        if (transactionHistory.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transactionHistory);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
         }
