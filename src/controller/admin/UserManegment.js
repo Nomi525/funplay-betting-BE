@@ -95,9 +95,7 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
         const { userId } = req.body;
         const transactionHistory = await getAllData({ userId, is_deleted: 0 }, TransactionHistory);
         if (transactionHistory.length) {
-            const userDepositeHistory = transactionHistory.filter(history => history.type == "deposite")
-            const userWithdrawalHistory = transactionHistory.filter(history => history.type == "withdrawal")
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, { userDepositeHistory, userWithdrawalHistory });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transactionHistory);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
         }

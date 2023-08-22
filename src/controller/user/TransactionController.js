@@ -270,9 +270,7 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
     try {
         const history = await getAllData({ userId: req.user, is_deleted: 0 }, TransactionHistory);
         if (history.length) {
-            const deposit = history.filter(h => h.type == "deposite")
-            const withdrawal = history.filter(h => h.type == "withdrawal")
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, { deposit, withdrawal });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, history);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, "History not found", []);
         }
