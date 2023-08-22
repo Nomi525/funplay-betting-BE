@@ -27,13 +27,13 @@ import { validatorMiddlware } from "./middleware/Validation.js";
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
     adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
-    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList, getAdminProfile, getAdminSingleUser
+    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getWithdrawalList, getAdminProfile, getAdminSingleUser, changeStatusOfUser
 } from "./controller/admin/AdminController.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
     forgotPassword, resetPassword, changePassword, verifyForgotOtp, resendOtp, getProfile, userEditProfile, accountDeactivate,
     userGuestLogin, setPassword,
-    transactionHistory, singInFromEmailPassword, setMpin, changeMpin, emailVerify
+    transactionHistory, singInFromEmailPassword, setMpin, changeMpin, emailVerify, singInWalletAddress
 } from "./controller/user/UserController.js";
 import { addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail } from "./controller/admin/CmsController.js";
 import { addEditBanner, deleteBanner, allBannerGet } from "./controller/common/CommonController.js";
@@ -42,10 +42,17 @@ import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
 import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
-import { addNewTransaction, addTransaction, getUserTransaction, getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest } from "./controller/user/TransactionController.js";
+import {
+    addNewTransaction, addTransaction, getUserTransaction,
+    getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest,
+    userDepositeWithdrawalHistory
+} from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
-import { acceptWithdrawalRequest, getUserReferralBySignIn } from "./controller/admin/UserManegment.js";
+import {
+    acceptWithdrawalRequest, getSingleUserTransaction,
+    getUserReferralBySignIn, gelAllUserDepositeAndWithdrawal
+} from "./controller/admin/UserManegment.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -68,6 +75,7 @@ import { GameRules } from "./models/GameRules.js";
 import { Transaction } from "./models/Transaction.js";
 import { NewTransaction } from "./models/NewTransaction.js";
 import { WithdrawalRequest } from "./models/WithdrawalRequest.js";
+import { TransactionHistory } from "./models/TransactionHistory.js";
 
 
 // Services
@@ -87,7 +95,7 @@ dotenv.config();
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, axios, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
     Admin, User, CMS, AdminSetting, ReferralWork, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, NewTransaction,
-    Game, GameRules, Transaction, DummyTransaction, WithdrawalRequest,
+    Game, GameRules, Transaction, DummyTransaction, WithdrawalRequest, TransactionHistory,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword, getAdminProfile,
@@ -109,5 +117,6 @@ export {
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
     userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
-    getTotalUserAmountDiposit, withdrawalRequest,acceptWithdrawalRequest
+    getTotalUserAmountDiposit, withdrawalRequest, acceptWithdrawalRequest, changeStatusOfUser,
+    getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, userDepositeWithdrawalHistory, singInWalletAddress
 }

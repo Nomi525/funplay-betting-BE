@@ -17,6 +17,9 @@ export const userSignUpSignInOtp = async (req, res) => {
             if (existingUser.is_deleted != 0) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
             }
+            if (!existingUser.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             const updateOtp = await dataUpdated({ email }, { otp }, User)
             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
             await sendMail(existingUser.email, "Verify Otp", mailInfo)
@@ -74,6 +77,9 @@ export const verifyOtp = async (req, res) => {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_OTP, []);
             } else {
                 if (type == "login") {
+                    if (!user.isActive) {
+                        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+                    }
                     const userUpdate = await dataUpdated({ _id: userId }, { isVerified: true, isLogin: true, otp: null }, User)
                     const payload = {
                         user: {
@@ -113,6 +119,9 @@ export const userSignInMpin = async (req, res) => {
     try {
         const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
         if (existingUser) {
+            if (!existingUser.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (!existingUser.isVerified) {
                 return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_NOT_VERIFY, []);
             }
@@ -131,7 +140,9 @@ export const singupFromEmailPassword = async (req, res) => {
         email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
-
+            if (!userFind.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (userFind.password == null) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, "Password not set", []);
             }
@@ -187,6 +198,9 @@ export const singInFromEmailPassword = async (req, res) => {
         email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
+            if (!userFind.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             let verifyPassword = await passwordCompare(password, userFind.password);
             if (verifyPassword) {
                 const payload = {
@@ -212,7 +226,43 @@ export const singInFromEmailPassword = async (req, res) => {
 export const singInWalletAddress = async (req, res) => {
     try {
         let { walletAddress, currency, referralByCode } = req.body;
-
+        const findWalletAddress = await getSingleData({ walletAddress, is_deleted: 0 }, User);
+        if (findWalletAddress) {
+            if (!findWalletAddress.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
+            const payload = {
+                user: {
+                    id: findWalletAddress._id,
+                },
+            };
+            findWalletAddress.isLogin = true;
+            await findWalletAddress.save();
+            const token = await genrateToken({ payload });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...findWalletAddress._doc, token });
+        } else {
+            let referCode = referralCode(8);
+            let findReferralUser = null;
+            // For Referral Code
+            if (referralByCode) {
+                findReferralUser = await getSingleData({ referralCode: referralByCode, is_deleted: 0 }, User)
+                if (!findReferralUser) {
+                    return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
+                }
+            }
+            const createUser = await dataCreate({ walletAddress, currency, walletConnected: "Yes", referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User);
+            if (findReferralUser) {
+                findReferralUser.useReferralCodeUsers.push(createUser._id);
+                await findReferralUser.save();
+            }
+            const payload = {
+                user: {
+                    id: createUser._id,
+                },
+            };
+            const token = await genrateToken({ payload });
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_LOGGED_IN, { ...createUser._doc, token });
+        }
     } catch (error) {
         return handleErrorResponse(res, error);
     }
@@ -223,6 +273,9 @@ export const loginFromMpin = async (req, res) => {
         let { userId, mPin } = req.body;
         let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
         if (user) {
+            if (!user.isActive) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (user.mPin !== mPin) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_MPIN, []);
             }
@@ -297,7 +350,7 @@ export const editProfile = async (req, res) => {
         if (!findData) {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
-   
+
         if (findData.email != req.body.email) {
             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
             const objectEncrtypt = await encryptObject({ userId: findData._id, email: req.body.email });

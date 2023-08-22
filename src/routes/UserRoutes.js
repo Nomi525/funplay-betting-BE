@@ -4,7 +4,7 @@ import {
     resendOtp, changePassword, getProfile, userEditProfile, accountDeactivate, userGuestLogin, transactionHistory, addEditQuery,
     deleteQuery, addEditRating, gameRatingAverage, singupFromEmailPassword, singInFromEmailPassword, walletCreate,
     disconnectWallet, validatorMiddlware, setMpin, changeMpin, emailVerify, setPassword, addTransaction, getUserTransaction, userDashboard,
-    addNewTransaction, getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest
+    addNewTransaction, getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest, userDepositeWithdrawalHistory, singInWalletAddress
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -13,6 +13,7 @@ userRoutes.post('/verify-otp', verifyOtp);
 userRoutes.post('/resend-otp', resendOtp);
 userRoutes.post('/signup-password', [validatorMiddlware("signupValidator")], singupFromEmailPassword);
 userRoutes.post('/signin-password', singInFromEmailPassword);
+userRoutes.post('/signin-wallet', singInWalletAddress);
 userRoutes.post('/mpin-signin', userSignInMpin);
 userRoutes.post('/login-mpin', loginFromMpin);
 userRoutes.post('/set-mpin', setMpin);
@@ -55,6 +56,7 @@ userRoutes.get('/new-transctions', Auth, getUserNewTransaction);
 userRoutes.post('/new-transction/add', Auth, addNewTransaction);
 userRoutes.get('/total-amount-diposit', Auth, getTotalUserAmountDiposit);
 userRoutes.post('/withdrawal-request', Auth, withdrawalRequest);
+userRoutes.get('/get-deposite-withdrawal', Auth, userDepositeWithdrawalHistory);
 
 //Dashboard
 userRoutes.get('/dashboard', Auth, userDashboard)

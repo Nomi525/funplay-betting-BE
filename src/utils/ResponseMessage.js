@@ -135,6 +135,8 @@ const ResponseMessage = {
     WITHDRAWAL_GET : "Withdrawal get successfully",
     WITHDRAWAL_NOT_FOUND : "withdrawal not found",
     RAFERRAL_NOT_FOUND : "Referral not found",
+    USER_ACTIVATED : "User activated successfully",
+    USER_DEACTIVATED : "User deactivated successfully",
 }
 
 export { ResponseMessage }

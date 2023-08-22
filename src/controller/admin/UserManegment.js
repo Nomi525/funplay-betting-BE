@@ -1,6 +1,7 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, getAllDataCount, NewTransaction, WithdrawalRequest
+    getSingleData, getAllData, Rating, handleErrorResponse, User,
+    Transaction, getAllDataCount, axios, NewTransaction, WithdrawalRequest, TransactionHistory
 } from "../../index.js";
 
 export const getUserReferralBySignIn = async (req, res) => {
@@ -53,6 +54,10 @@ export const acceptWithdrawalRequest = async (req, res) => {
                         findUser[`token${tokenName}`] -= parseFloat(tokenAmount)
                         findUser.tokenDollorValue -= parseFloat(value)
                         await findUser.save();
+                        await dataCreate({
+                            userId, networkChainId: findUser.networkChainId, tokenName, tokenAmount,
+                            walletAddress: findUser.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
+                        }, TransactionHistory)
                         return { status: "OK", data: findUser }
                     }
                 })
@@ -71,9 +76,31 @@ export const acceptWithdrawalRequest = async (req, res) => {
     }
 }
 
-export const gelAllUserDeposit = (req, res) => {
+export const getSingleUserTransaction = async (req, res) => {
     try {
+        const { userId } = req.body
+        const transction = await getAllData({ userId, is_deleted: 0 }, NewTransaction);
+        if (transction.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transction);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
 
+export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const transactionHistory = await getAllData({ userId, is_deleted: 0 }, TransactionHistory);
+        if (transactionHistory.length) {
+            const userDepositeHistory = transactionHistory.filter(history => history.type == "deposite")
+            const userWithdrawalHistory = transactionHistory.filter(history => history.type == "withdrawal")
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, { userDepositeHistory, userWithdrawalHistory });
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
+        }
     } catch (error) {
         return handleErrorResponse(res, error);
     }
