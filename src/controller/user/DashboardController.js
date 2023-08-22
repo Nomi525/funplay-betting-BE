@@ -12,10 +12,11 @@ export const userDashboard = async (req, res) => {
             // const totalTransaction = await getAllData({ userId: findUser._id, is_deleted: 0 }, Transaction);
             const totalReferralCount = await getAllDataCount({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
             // const totalTransaction = await getAllDataCount({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
-            const transaction = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
-            const totalTransaction = transaction.length;
+            const totalTransaction = await getAllDataCount({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
+            const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
             const totalRewards = 25;
-            const totalDeposit = transaction.reduce((sum, data) => sum + data.tokenDollorValue, 0);
+            const totalDeposit = transactionDeposite.tokenDollorValue;
+            // const totalDeposit = transaction.reduce((sum, data) => sum + data.tokenDollorValue, 0);
             // const totalDeposit = 2500;
             const walletDetails = await getAllData({}, WalletLogin);
             return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, { totalReferralCount, totalTransaction, totalRewards, totalDeposit, walletDetails });

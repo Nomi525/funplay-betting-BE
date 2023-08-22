@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
-    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction
+    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {
@@ -207,10 +207,24 @@ export const getAllUsers = async (req, res) => {
 export const getAdminSingleUser = async (req, res) => {
     try {
         const { userId } = req.body
-        // const findUser = await getSingleData({ _id: userId, is_deleted: 0 }, User);
-        const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email")
+        const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
+        // console.log(findUser,'jjjj');
         if (findUser) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUser);
+            const walletAddress = await NewTransaction.findOne({ userId: findUser._id,is_deleted: 0 })
+            // const walletAddress = await NewTransaction.findOne({
+            //     userId: findUser._id, $or: [
+            //         { bitcoinWalletAddress: bitcoinAddress },
+            //         { ethereumWalletAddress: ethereumAddress }
+            //     ], is_deleted: 0
+            // })
+            // console.log(walletAddress);
+            // console.log(walletAddress);
+            // return
+            var walletAmount = 0;
+            if(walletAddress){
+                walletAmount =  walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
+            }
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, {...findUser._doc,walletAmount});
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
@@ -381,19 +395,19 @@ export const changeStatusOfUser = async (req, res) => {
         //     : ResponseMessage.USER_DEACTIVATED;
 
         const findUser = await getSingleData({ _id: id }, User);
-        if(findUser){
+        if (findUser) {
             var responseMessage;
-            if(findUser.isActive){
+            if (findUser.isActive) {
                 findUser.isActive = false
                 findUser.save();
                 responseMessage = ResponseMessage.USER_DEACTIVATED
-            }else{
+            } else {
                 findUser.isActive = true
                 findUser.save();
                 responseMessage = ResponseMessage.USER_ACTIVATED
             }
             return sendResponse(res, StatusCodes.OK, responseMessage, []);
-        }else{
+        } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
         }
         // return sendResponse(res, StatusCodes.OK, responseMessage);
