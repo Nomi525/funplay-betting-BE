@@ -138,8 +138,12 @@ export const singupFromEmailPassword = async (req, res) => {
     try {
         let { email, password, currency, referralByCode } = req.body;
         email = email ? email.toLowerCase() : null
-        let userFind = await getSingleData({ email, is_deleted: 0 }, User);
+        let userFind = await getSingleData({ email }, User);
+        // let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
+            if (userFind.is_deleted != 0) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (!userFind.isActive) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
             }
@@ -196,8 +200,12 @@ export const singInFromEmailPassword = async (req, res) => {
     try {
         let { email, password } = req.body;
         email = email ? email.toLowerCase() : null
-        let userFind = await getSingleData({ email, is_deleted: 0 }, User);
+        let userFind = await getSingleData({ email }, User);
+        // let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
+            if (userFind.is_deleted != 0) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (!userFind.isActive) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
             }
@@ -226,8 +234,12 @@ export const singInFromEmailPassword = async (req, res) => {
 export const singInWalletAddress = async (req, res) => {
     try {
         let { walletAddress, currency, referralByCode } = req.body;
-        const findWalletAddress = await getSingleData({ walletAddress, is_deleted: 0 }, User);
+        const findWalletAddress = await getSingleData({ walletAddress }, User);
+        // const findWalletAddress = await getSingleData({ walletAddress,is_deleted:0 }, User);
         if (findWalletAddress) {
+            if (findWalletAddress.is_deleted != 0) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (!findWalletAddress.isActive) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
             }
@@ -271,8 +283,11 @@ export const singInWalletAddress = async (req, res) => {
 export const loginFromMpin = async (req, res) => {
     try {
         let { userId, mPin } = req.body;
-        let user = await getSingleData({ _id: userId, is_deleted: 0 }, User);
+        let user = await getSingleData({ _id: userId }, User);
         if (user) {
+            if (user.is_deleted != 0) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            }
             if (!user.isActive) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
             }

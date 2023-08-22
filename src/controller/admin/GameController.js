@@ -64,10 +64,10 @@ export const getSingleGame = async (req, res) => {
 // Games Rules CRUD
 export const addEditGameRule = async (req, res) => {
     try {
-        const { gameId, gameRoleId, gameRules,gameType } = req.body;
-        const findGameRule = await getSingleData({ gameType }, GameRules);
+        const { gameId, gameRoleId, gameRules,gameName } = req.body;
+        const findGameRule = await getSingleData({ gameName }, GameRules);
         if (!findGameRule) {
-            const createGameRule = await dataCreate({ gameId, gameRules,gameType }, GameRules);
+            const createGameRule = await dataCreate({ gameId, gameRules,gameName }, GameRules);
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.GAME_RULES_CREATED, createGameRule);
         } else {
             findGameRule.gameRules = gameRules;
@@ -104,8 +104,8 @@ export const getGameRules = async (req, res) => {
 
 export const getSingleGameRules = async (req, res) => {
     try {
-        const { gameRuleId } = req.body;
-        const findGameRule = await getSingleData({ _id: gameRuleId, is_deleted: 0 }, GameRules);
+        const { gameName } = req.body;
+        const findGameRule = await getSingleData({ gameName: gameName, is_deleted: 0 }, GameRules);
         if (findGameRule) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RULES_GET, findGameRule);
         } else {
