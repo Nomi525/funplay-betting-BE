@@ -93,7 +93,8 @@ export const getSingleUserTransaction = async (req, res) => {
 export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
     try {
         const { userId } = req.body;
-        const transactionHistory = await getAllData({ userId, is_deleted: 0 }, TransactionHistory);
+        // const transactionHistory = await getAllData({ userId, is_deleted: 0 }, TransactionHistory);
+        const transactionHistory = await TransactionHistory.find({ userId, is_deleted: 0 }).populate('userId')
         if (transactionHistory.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transactionHistory);
         } else {
@@ -104,15 +105,16 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
     }
 }
 
-export const getAllTransaction = async (req,res) => {
-    try{
-        const transactionHistory = await getAllData({ is_deleted: 0 }, TransactionHistory);
+export const getAllTransaction = async (req, res) => {
+    try {
+        // const transactionHistory = await getAllData({ is_deleted: 0 }, TransactionHistory);
+        const transactionHistory = await TransactionHistory.find({ is_deleted: 0 }).populate('userId')
         if (transactionHistory.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transactionHistory);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
         }
-    }catch(error){
+    } catch (error) {
         return handleErrorResponse(res, error);
     }
 }
