@@ -51,7 +51,7 @@ import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
 import {
     acceptWithdrawalRequest, getSingleUserTransaction,
-    getUserReferralBySignIn, gelAllUserDepositeAndWithdrawal
+    getUserReferralBySignIn, gelAllUserDepositeAndWithdrawal, getAllTransaction
 } from "./controller/admin/UserManegment.js";
 
 // Routes
@@ -118,5 +118,6 @@ export {
     addTransaction, getUserTransaction,
     userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
     getTotalUserAmountDiposit, withdrawalRequest, acceptWithdrawalRequest, changeStatusOfUser,
-    getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, userDepositeWithdrawalHistory, singInWalletAddress
+    getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, userDepositeWithdrawalHistory, singInWalletAddress,
+    getAllTransaction
 }

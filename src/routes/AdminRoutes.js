@@ -3,8 +3,8 @@ import {
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
-    getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers,getAdminProfile, adminDashboard,getAdminSingleUser, changeStatusOfUser,
-    getUserReferralBySignIn,acceptWithdrawalRequest,getSingleUserTransaction,gelAllUserDepositeAndWithdrawal
+    getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers, getAdminProfile, adminDashboard, getAdminSingleUser, changeStatusOfUser,
+    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -39,8 +39,8 @@ adminRoutes.get('/users', Auth, getAllUsers);
 adminRoutes.post('/single-user', Auth, getAdminSingleUser);
 adminRoutes.post('/user-edit', Auth, Upload, adminEditUser);
 adminRoutes.post('/user-delete', Auth, adminDeleteUser);
-adminRoutes.post("/user/activate/deactivate" , Auth,changeStatusOfUser)
-adminRoutes.post("/single-user/transaction" , Auth,getSingleUserTransaction)
+adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser)
+adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction)
 // User Query
 adminRoutes.get('/queries', Auth, getAllQuery);
 
@@ -65,8 +65,11 @@ adminRoutes.post("/game-rules/add-edit", Auth, addEditGameRule);
 adminRoutes.post("/game-rules/delete", Auth, gameRuleDelete);
 
 // Dashboard
-adminRoutes.get('/dashboard',Auth,adminDashboard);
-adminRoutes.post('/user-signin-by-referral',Auth,getUserReferralBySignIn);
+adminRoutes.get('/dashboard', Auth, adminDashboard);
+adminRoutes.post('/user-signin-by-referral', Auth, getUserReferralBySignIn);
+
+// Transaction
+adminRoutes.get('/get-all-transaction', Auth, getAllTransaction)
 
 
 export { adminRoutes }
