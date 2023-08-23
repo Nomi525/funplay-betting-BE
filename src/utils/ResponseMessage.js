@@ -138,6 +138,8 @@ const ResponseMessage = {
     RAFERRAL_NOT_FOUND : "Referral not found",
     USER_ACTIVATED : "User activated successfully",
     USER_DEACTIVATED : "User deactivated successfully",
+    FAILED_TO_CREATE :"Fail to create",
+    FAILED_TO_UPDATE :"Fail to update"
 }
 
 export { ResponseMessage }
