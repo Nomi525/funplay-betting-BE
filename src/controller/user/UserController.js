@@ -780,7 +780,7 @@ export const userEditProfile = async (req, res) => {
     catch (error) {
         return handleErrorResponse(res, error);
     }
-};
+}
 
 export const accountDeactivate = async (req, res) => {
     try {

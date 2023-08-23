@@ -15,7 +15,7 @@ export const userDashboard = async (req, res) => {
             const totalTransaction = await getAllDataCount({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
             const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
             const totalRewards = 25;
-            const totalDeposit = transactionDeposite.tokenDollorValue;
+            const totalDeposit = transactionDeposite?.tokenDollorValue ? transactionDeposite.tokenDollorValue : 0;
             // const totalDeposit = transaction.reduce((sum, data) => sum + data.tokenDollorValue, 0);
             // const totalDeposit = 2500;
             const walletDetails = await getAllData({}, WalletLogin);

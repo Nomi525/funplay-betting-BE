@@ -230,11 +230,57 @@ export const addNewTransaction = async (req, res) => {
     }
 }
 
+// export const withdrawalRequest = async (req, res) => {
+//     try {
+//         const { walletAddress, tokenName, tokenAmount } = req.body;
+//         const createRequest = await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount }, WithdrawalRequest)
+//         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WITHDRAWAL_CREATED, createRequest);
+//     } catch (error) {
+//         return handleErrorResponse(res, error);
+//     }
+// }
+
 export const withdrawalRequest = async (req, res) => {
     try {
         const { walletAddress, tokenName, tokenAmount } = req.body;
-        const createRequest = await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount }, WithdrawalRequest)
-        return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WITHDRAWAL_CREATED, createRequest);
+        await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount }, WithdrawalRequest)
+        const findTransaction = await NewTransaction.findOne({ userId: req.user })
+        const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
+        const dataNew = USDTPrice?.data?.data
+        if (!dataNew) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Bad Request", []);
+        }
+        var value;
+        if (findTransaction) {
+            const mapData = dataNew.filter(d => d.name == tokenName).map(async (item) => {
+                value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
+                if ((findTransaction[`token${tokenName}`] > 0 && findTransaction[`token${tokenName}`] >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
+                    findTransaction[`token${tokenName}`] -= parseFloat(tokenAmount)
+                    findTransaction.tokenDollorValue -= parseFloat(value)
+
+                    findTransaction.tokenAmount -= parseFloat(tokenAmount)
+                    // For block coin
+                    findTransaction.blockDollor += parseFloat(value)
+                    findTransaction.blockAmount += parseFloat(tokenAmount)
+                    await findTransaction.save();
+
+                    await dataCreate({
+                        userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
+                        walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
+                    }, TransactionHistory)
+
+                    return { status: "OK", data: findTransaction }
+                }
+            })
+            const promiseData = await Promise.all(mapData);
+            if (promiseData[0]?.status == "OK") {
+                return sendResponse(res, StatusCodes.OK, "Withdrawal done", promiseData[0]?.data)
+            } else {
+                return sendResponse(res, StatusCodes.NOT_FOUND, "Bad request", [])
+            }
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, [])
+        }
     } catch (error) {
         return handleErrorResponse(res, error);
     }
