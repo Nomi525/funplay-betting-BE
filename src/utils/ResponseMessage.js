@@ -142,6 +142,7 @@ const ResponseMessage = {
     FAILED_TO_UPDATE :"Fail to update",
     REGISTERED : "Registered successfully",
     LOGIN : "Login successfully",
+    PASSWORD_SET:"Password set successfully"
 }
 
 export { ResponseMessage }

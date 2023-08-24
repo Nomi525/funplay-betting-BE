@@ -556,7 +556,7 @@ export const singupFromEmailPassword = async (req, res) => {
         userFind.isLogin = true;
         await userFind.save();
         const token = await genrateToken({ payload });
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_SET, {
           ...userFind._doc,
           token,
         });
