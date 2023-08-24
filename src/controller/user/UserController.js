@@ -87,7 +87,7 @@ export const verifyOtp = async (req, res) => {
                         },
                     };
                     const token = await genrateToken({ payload });
-                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token, type: "login" });
+                    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, { ...userUpdate._doc, token, type: "login" });
                 } else if (type == "forgotPassword") {
                     user.otp = null;
                     await user.save();
@@ -139,7 +139,6 @@ export const singupFromEmailPassword = async (req, res) => {
         let { email, password, currency, referralByCode } = req.body;
         email = email ? email.toLowerCase() : null
         let userFind = await getSingleData({ email }, User);
-        // let userFind = await getSingleData({ email, is_deleted: 0 }, User);
         if (userFind) {
             if (userFind.is_deleted != 0) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
@@ -160,7 +159,7 @@ export const singupFromEmailPassword = async (req, res) => {
                 userFind.isLogin = true;
                 await userFind.save();
                 const token = await genrateToken({ payload });
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...userFind._doc, token });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, { ...userFind._doc, token });
             } else {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_PASSWORD, []);
             }
@@ -189,7 +188,7 @@ export const singupFromEmailPassword = async (req, res) => {
                 },
             };
             const token = await genrateToken({ payload });
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...createUser._doc, token });
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.REGISTERED, { ...createUser._doc, token });
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -219,7 +218,7 @@ export const singInFromEmailPassword = async (req, res) => {
                 userFind.isLogin = true;
                 await userFind.save();
                 const token = await genrateToken({ payload });
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...userFind._doc, token });
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, { ...userFind._doc, token });
             } else {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_PASSWORD, []);
             }
@@ -251,7 +250,7 @@ export const singInWalletAddress = async (req, res) => {
             findWalletAddress.isLogin = true;
             await findWalletAddress.save();
             const token = await genrateToken({ payload });
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, { ...findWalletAddress._doc, token });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, { ...findWalletAddress._doc, token });
         } else {
             let referCode = referralCode(8);
             let findReferralUser = null;
@@ -273,7 +272,7 @@ export const singInWalletAddress = async (req, res) => {
                 },
             };
             const token = await genrateToken({ payload });
-            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_LOGGED_IN, { ...createUser._doc, token });
+            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.REGISTERED, { ...createUser._doc, token });
         }
     } catch (error) {
         return handleErrorResponse(res, error);
