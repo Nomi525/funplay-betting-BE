@@ -30,7 +30,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       await sendMail(existingUser.email, "Verify Otp", mailInfo)
       return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL, updateOtp);
     } else {
-      if(!req.body.currency){
+      if(!currency){
         return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_NOT_EXIST, []);
       }
       let referCode = referralCode(8);
