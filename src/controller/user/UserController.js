@@ -245,7 +245,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
       }
       if (!existingUser.currency) {
-        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
+        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
       }
       const updateOtp = await dataUpdated({ email }, { otp }, User)
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
