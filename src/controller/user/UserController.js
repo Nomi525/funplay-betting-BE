@@ -174,7 +174,7 @@ export const connectToWallet = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+        ResponseMessage.LOGIN,
         { ...walletUser._doc, token: token }
       );
     }
