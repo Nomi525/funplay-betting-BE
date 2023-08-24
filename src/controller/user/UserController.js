@@ -23,7 +23,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
       }
       if(!existingUser.currency){
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_NOT_EXIST, []);
+        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
       }
       const updateOtp = await dataUpdated({ email }, { otp }, User)
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
@@ -31,7 +31,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL, updateOtp);
     } else {
       if(!currency){
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_NOT_EXIST, []);
+        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
       }
       let referCode = referralCode(8);
       let findReferralUser = null;
@@ -39,7 +39,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       if (referralByCode) {
         findReferralUser = await User.findOne({ referralCode: referralByCode });
         if (!findReferralUser) {
-          return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
+          return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
         }
       }
       const userData = await dataCreate({ email, currency, otp, referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User)
