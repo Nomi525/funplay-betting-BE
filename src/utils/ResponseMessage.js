@@ -1,4 +1,6 @@
 const ResponseMessage = {
+    REGISTERED : "Registered successfully",
+    LOGIN : "Login successfully",
     DATABASE_CONNECTED: "Database connected",
     USER_ALREADY_EXIST: "User Already exist",
     ADMIN_ALREADY_EXIST: "Admin Already exist",
