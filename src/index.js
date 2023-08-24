@@ -57,7 +57,7 @@ import {
 import {
   logout,
   editProfile,
-  userSignup,
+  connectToWallet,
   updateLoginStatus,
   userSignInMpin,
   verifyOtp,
@@ -144,7 +144,6 @@ import { Admin } from "./models/Admin.js";
 import { User } from "./models/User.js";
 import { CMS } from "./models/CMS.js";
 import { AdminSetting } from "./models/AdminSetting.js";
-import { ReferralWork } from "./models/c.js";
 import { BannerModel } from "./models/Banner.js";
 import { Query } from "./models/Query.js";
 import { Rating } from "./models/Rating.js";
@@ -204,7 +203,6 @@ export {
   User,
   CMS,
   AdminSetting,
-  ReferralWork,
   BannerModel,
   Query,
   Rating,
@@ -251,7 +249,7 @@ export {
   getAllQuery,
   editProfile,
   logout,
-  userSignup,
+  connectToWallet,//userSignup,
   updateEmail,
   userSignInMpin,
   verifyOtp,

@@ -3,7 +3,7 @@ import {
   logout,
   editProfile,
   Upload,
-  userSignup,
+  connectToWallet,
   updateEmail,
   userSignInMpin,
   verifyOtp,
@@ -45,7 +45,7 @@ import {
 } from "./../index.js";
 const userRoutes = express.Router();
 
-userRoutes.post("/signup-signin-otp", userSignup);
+userRoutes.post("/signup-signin-otp", connectToWallet);
 userRoutes.post("/update-login-status", updateLoginStatus);
 userRoutes.post("/update-email", updateEmail);
 userRoutes.post("/verify-otp", verifyOtp);

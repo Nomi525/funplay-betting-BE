@@ -21,7 +21,7 @@ import {
   handleErrorResponse,
   generateOtp,
   ReferralUser,
-} from "./../../index.js";
+} from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
 //   try {
@@ -125,15 +125,14 @@ import {
 //   }
 // };
 
-export const userSignup = async (req, res) => {
+export const connectToWallet = async (req, res) => {
   try {
     const { email, currency, referralByCode, password, walletAddress } =
       req.body;
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
     const existingUser = await User.findOne({ email: lowercasedEmail });
-
-    if (existingUser) {   
+    if (existingUser) {
       if (existingUser.is_deleted !== 0 || !existingUser.isActive) {
         return sendResponse(
           res,
@@ -148,23 +147,35 @@ export const userSignup = async (req, res) => {
       );
       const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
+      const payload = {
+        user: {
+          id: existingUser._id,
+        },
+      };
+      const token = await genrateToken({ payload });
       return sendResponse(
         res,
         StatusCodes.OK,
         ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL,
-        updateOtp
+        { ...updateOtp._doc, token: token }
       );
     }
     // Check wallet address existence
     const walletUser = await User.findOne({
       "wallet.walletAddress": { $in: walletAddress },
     });
-
     if (walletUser) {
+      const payload = {
+        user: {
+          id: walletUser._id,
+        },
+      };
+      const token = await genrateToken({ payload });
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL
+        ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+        { ...walletUser._doc, token: token }
       );
     }
     const referCode = referralCode(8);
@@ -180,7 +191,6 @@ export const userSignup = async (req, res) => {
       const userOfReferral = await User.findOne({
         referralCode: referralByCode,
       });
-
       if (userOfReferral) {
         await ReferralUser.create({
           userId: userOfReferral._id,
@@ -197,14 +207,20 @@ export const userSignup = async (req, res) => {
       }
     }
     if (email) {
-      console.log("EMail");
       const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(lowercasedEmail, "Verify Otp", mailInfo);
     }
+    const payload = {
+      user: {
+        id: newUser._id,
+      },
+    };
+    const token = await genrateToken({ payload });
     return sendResponse(
       res,
       StatusCodes.CREATED,
-      ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL
+      ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+      { ...newUser._doc, token: token }
     );
   } catch (error) {
     console.log(error);
@@ -212,26 +228,150 @@ export const userSignup = async (req, res) => {
   }
 };
 
-export const updateEmail = async (req, res) => {
+export const userSignUpSignInOtp = async (req, res) => {
   try {
-    if (req.body.email) {
-      const findUser = await getSingleData({ email }, User);
-      const update = await User.updateOne(
-        { _id: findUser._id },
-        {
-          $push: {
-            wallet: { walletAddress: req.body.walletAddress },
-          },
-        }
-      );
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_RESEND);
-    } else {
+    let { email, currency, referralByCode } = req.body;
+    const otp = 4444;
+    email = email ? email.toLowerCase() : null;
+    const existingUser = await getSingleData({ email }, User);
+    if (email && referralByCode && existingUser) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.USER_NOT_FOUND,
+        ResponseMessage.USER_ALREADY_EXIST,
         []
       );
+    }
+
+    if (existingUser) {
+      if (existingUser.is_deleted != 0) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.DEACTIVATED_USER,
+          []
+        );
+      }
+      if (!existingUser.isActive) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.DEACTIVATED_USER,
+          []
+        );
+      }
+      if (!existingUser.currency) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_NOT_EXIST,
+          []
+        );
+      }
+      const updateOtp = await dataUpdated({ email }, { otp }, User);
+      let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+      await sendMail(existingUser.email, "Verify Otp", mailInfo);
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL,
+        updateOtp
+      );
+    } else {
+      if (!currency) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_NOT_EXIST,
+          []
+        );
+      }
+      let referCode = referralCode(8);
+      let findReferralUser = null;
+      // For Referral Code
+      if (referralByCode) {
+        findReferralUser = await User.findOne({ referralCode: referralByCode });
+        if (!findReferralUser) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+            []
+          );
+        }
+      }
+      const userData = await dataCreate(
+        {
+          email,
+          currency,
+          otp,
+          referralCode: referCode,
+          referralByCode: referralByCode ? referralByCode : null,
+        },
+        User
+      );
+      if (findReferralUser) {
+        findReferralUser.useReferralCodeUsers.push(userData._id);
+        await findReferralUser.save();
+      }
+      let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+      await sendMail(userData.email, "Verify Otp", mailInfo);
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+        userData
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+export const updateEmail = async (req, res) => {
+  try {
+    let { email, walletAddress } = req.body;
+    if (email) {
+      const findUser = await getSingleData({ email }, User);
+      if (findUser) {
+        await User.updateOne(
+          { _id: findUser._id },
+          {
+            $push: {
+              wallet: { walletAddress: walletAddress },
+            },
+          }
+        );
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS);
+      }
+    }
+    if (walletAddress && email) {
+      const walletUser = await User.findOne({
+        "wallet.walletAddress": { $in: walletAddress },
+      });
+      if (walletUser) {
+        await User.updateOne(
+          { _id: walletUser._id },
+          {
+            $set: {
+              email: email,
+            },
+          }
+        );
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.LOGIN_SUCCESS,
+          []
+        );
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_NOT_FOUND,
+          []
+        );
+      }
     }
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -241,7 +381,7 @@ export const updateEmail = async (req, res) => {
 export const updateLoginStatus = async (req, res) => {
   try {
     const walletUser = await User.findOne({
-      "wallet.walletAddress": { $in: walletAddress },
+      "wallet.walletAddress": { $in: req.body.walletAddress },
     });
     await User.updateOne(
       { _id: walletUser._id },
@@ -256,6 +396,7 @@ export const updateLoginStatus = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 export const resendOtp = async (req, res) => {
   try {
     let { userId } = req.body;
@@ -465,12 +606,10 @@ export const singupFromEmailPassword = async (req, res) => {
         userFind.isLogin = true;
         await userFind.save();
         const token = await genrateToken({ payload });
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.USER_LOGGED_IN,
-          { ...userFind._doc, token }
-        );
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
+          ...userFind._doc,
+          token,
+        });
       } else {
         return sendResponse(
           res,
@@ -526,7 +665,7 @@ export const singupFromEmailPassword = async (req, res) => {
         },
       };
       const token = await genrateToken({ payload });
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LOGGED_IN, {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
         ...createUser._doc,
         token,
       });

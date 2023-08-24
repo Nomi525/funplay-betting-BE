@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
-    ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction
+     Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {

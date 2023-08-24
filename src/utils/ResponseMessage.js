@@ -139,7 +139,9 @@ const ResponseMessage = {
     USER_ACTIVATED : "User activated successfully",
     USER_DEACTIVATED : "User deactivated successfully",
     FAILED_TO_CREATE :"Fail to create",
-    FAILED_TO_UPDATE :"Fail to update"
+    FAILED_TO_UPDATE :"Fail to update",
+    REGISTERED : "Registered successfully",
+    LOGIN : "Login successfully",
 }
 
 export { ResponseMessage }
