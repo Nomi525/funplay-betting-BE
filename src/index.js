@@ -80,6 +80,7 @@ import {
   emailVerify,
   singInWalletAddress,
   updateEmail,
+  userSignUpSignInOtp
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -327,4 +328,5 @@ export {
   singInWalletAddress,
   getAllTransaction,
   updateLoginStatus,
+  userSignUpSignInOtp
 };

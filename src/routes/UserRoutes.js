@@ -42,10 +42,12 @@ import {
   userDepositeWithdrawalHistory,
   singInWalletAddress,
   updateLoginStatus,
+  userSignUpSignInOtp
 } from "./../index.js";
 const userRoutes = express.Router();
 
-userRoutes.post("/signup-signin-otp", connectToWallet);
+userRoutes.post("/signup-signin-otp", userSignUpSignInOtp)//connectToWallet);
+userRoutes.post("/signup-signin-with-wallet",connectToWallet);
 userRoutes.post("/update-login-status", updateLoginStatus);
 userRoutes.post("/update-email", updateEmail);
 userRoutes.post("/verify-otp", verifyOtp);
