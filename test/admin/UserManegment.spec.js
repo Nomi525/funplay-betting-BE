@@ -4,7 +4,7 @@ import { adminToken } from "./Admin.spec.js";
 chai.use(chaiHttp);
 
 describe('Admin User manegment test case', () => {
-    
+    //#region  Get User Referral By Sign In
     it("Get User Referral By Sign In", (done) => {
         chai.request(appServer)
             .post('/api/admin/user-signin-by-referral')
@@ -24,7 +24,9 @@ describe('Admin User manegment test case', () => {
                 done();
             })
     });
+    //#endregion
 
+    //#region  Get get all transaction
     it("Get get all transaction", (done) => {
         chai.request(appServer)
             .get('/api/admin/get-all-transaction')
@@ -44,5 +46,94 @@ describe('Admin User manegment test case', () => {
                 done();
             })
     });
+    //#endregion
+
+    //#region Get all users
+    it("Get get all users", (done) => {
+        chai.request(appServer)
+            .get('/api/admin/users')
+            .set('auth', adminToken)
+            .send({})
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+    //#region Get single user
+    it("Get get single user", (done) => {
+        chai.request(appServer)
+            .post('/api/admin/single-user')
+            .set('auth', adminToken)
+            .send({userId : "64e706838c55dede240492eb"})
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+    //#region Change user status deactive
+    it("Change user status", (done) => {
+        chai.request(appServer)
+            .post('/api/admin/user/activate/deactivate')
+            .set('auth', adminToken)
+            .send({id : "64e706838c55dede240492eb"})
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+    //#region Change user status active
+    it("Change user status", (done) => {
+        chai.request(appServer)
+            .post('/api/admin/user/activate/deactivate')
+            .set('auth', adminToken)
+            .send({id : "64e706838c55dede240492eb"})
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
 
 })
