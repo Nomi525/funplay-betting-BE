@@ -233,16 +233,10 @@ export const userSignUpSignInOtp = async (req, res) => {
     let { email, currency, referralByCode } = req.body;
     const otp = 4444;
     email = email ? email.toLowerCase() : null
-    const existingUser = await getSingleData({ email }, User);
-    // console.log(req.body, "existingUser")
-
-    console.log((email && referralByCode && existingUser), "banis")
-
-    if (email && referralByCode && existingUser) {
-      console.log("INNNN")
+    const existingUser = await getSingleData({ email }, User);  
+    if (!!(email && referralByCode && existingUser)) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
     }
-
     if (existingUser) {
       if (existingUser.is_deleted != 0) {
         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
