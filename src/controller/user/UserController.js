@@ -310,6 +310,7 @@ export const updateEmail = async (req, res) => {
           {
             $set: {
               email: email,
+              walletConnected: "Yes"
             },
           }
         );
