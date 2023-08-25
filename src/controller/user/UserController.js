@@ -135,35 +135,35 @@ export const connectToWallet = async (req, res) => {
     if (lowercasedEmail) {
       existingUser = await User.findOne({ email: lowercasedEmail });
     }
-    if (existingUser) {
-      if (existingUser.is_deleted !== 0 || !existingUser.isActive) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.DEACTIVATED_USER,
-          []
-        );
-      }
-      const updateOtp = await User.updateOne(
-        { email: lowercasedEmail },
-        { otp }
-      );
-      console.log("existingUser");
-      const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(existingUser.email, "Verify Otp", mailInfo);
-      const payload = {
-        user: {
-          id: existingUser._id,
-        },
-      };
-      const token = await genrateToken({ payload });
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL,
-        { ...updateOtp._doc, token: token }
-      );
-    }
+    // if (existingUser) {
+    //   if (existingUser.is_deleted !== 0 || !existingUser.isActive) {
+    //     return sendResponse(
+    //       res,
+    //       StatusCodes.BAD_REQUEST,
+    //       ResponseMessage.DEACTIVATED_USER,
+    //       []
+    //     );
+    //   }
+    //   const updateOtp = await User.updateOne(
+    //     { email: lowercasedEmail },
+    //     { otp }
+    //   );
+    //   console.log("existingUser");
+    //   const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+    //   await sendMail(existingUser.email, "Verify Otp", mailInfo);
+    //   const payload = {
+    //     user: {
+    //       id: existingUser._id,
+    //     },
+    //   };
+    //   const token = await genrateToken({ payload });
+    //   return sendResponse(
+    //     res,
+    //     StatusCodes.OK,
+    //     ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL,
+    //     { ...updateOtp._doc, token: token }
+    //   );
+    // }
     // Check wallet address existence
     const walletUser = await User.findOne({
       "wallet.walletAddress": { $in: walletAddress },
@@ -189,30 +189,30 @@ export const connectToWallet = async (req, res) => {
       referralCode: referCode,
       otp,
     });
-    if (referralByCode) {
-      const userOfReferral = await User.findOne({
-        referralCode: referralByCode,
-      });
-      if (userOfReferral) {
-        await ReferralUser.create({
-          userId: userOfReferral._id,
-          referralUser: newUser._id,
-          referralByCode: referralByCode,
-        });
-      } else {
-        return sendResponse(
-          res,
-          StatusCodes.NOT_FOUND,
-          ResponseMessage.REFERRAL_CODE_NOT_FOUND,
-          []
-        );
-      }
-    }
-    if (email) {
-      console.log("EMAIL");
-      const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(lowercasedEmail, "Verify Otp", mailInfo);
-    }
+    // if (referralByCode) {
+    //   const userOfReferral = await User.findOne({
+    //     referralCode: referralByCode,
+    //   });
+    //   if (userOfReferral) {
+    //     await ReferralUser.create({
+    //       userId: userOfReferral._id,
+    //       referralUser: newUser._id,
+    //       referralByCode: referralByCode,
+    //     });
+    //   } else {
+    //     return sendResponse(
+    //       res,
+    //       StatusCodes.NOT_FOUND,
+    //       ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+    //       []
+    //     );
+    //   }
+    // }
+    // if (email) {
+    //   console.log("EMAIL");
+    //   const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+    //   await sendMail(lowercasedEmail, "Verify Otp", mailInfo);
+    // }
     const payload = {
       user: {
         id: newUser._id,
@@ -222,7 +222,7 @@ export const connectToWallet = async (req, res) => {
     return sendResponse(
       res,
       StatusCodes.CREATED,
-      ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+      ResponseMessage.WALLET_CONNECT,
       { ...newUser._doc, token: token }
     );
   } catch (error) {
@@ -386,6 +386,32 @@ export const updateEmail = async (req, res) => {
     }
   } catch (error) {
     return handleErrorResponse(res, error);
+  }
+};
+
+export const checkWalletAddress = async(req,res) => {
+  try{
+    let { walletAddress } = req.body;
+    let existingUser = await User.findOne({"wallet.walletAddress":walletAddress});
+    console.log(existingUser , ":existingUser")
+    if(existingUser){
+       return sendResponse(
+        res,
+        StatusCodes.OK,
+        "",
+        []
+      );
+    }else{
+       return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "",
+        []
+      );
+    }
+
+  }catch(error){
+    console.log(error , ":Error")
   }
 };
 

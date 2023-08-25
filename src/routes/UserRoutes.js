@@ -1,3 +1,4 @@
+import { checkWalletAddress } from "../controller/user/UserController.js";
 import {
   express,
   logout,
@@ -57,6 +58,7 @@ userRoutes.post(
   [validatorMiddlware("signupValidator")],
   singupFromEmailPassword
 );
+userRoutes.post("/check-wallet-connectivity", checkWalletAddress);
 userRoutes.post("/signin-password", singInFromEmailPassword);
 userRoutes.post("/signin-wallet", singInWalletAddress);
 userRoutes.post("/mpin-signin", userSignInMpin);
