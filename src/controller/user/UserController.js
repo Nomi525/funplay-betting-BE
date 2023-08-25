@@ -131,9 +131,9 @@ export const connectToWallet = async (req, res) => {
       req.body;
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
-    let existingUser ;
-    if(lowercasedEmail){
-       existingUser = await User.findOne({ email: lowercasedEmail });
+    let existingUser;
+    if (lowercasedEmail) {
+      existingUser = await User.findOne({ email: lowercasedEmail });
     }
     if (existingUser) {
       if (existingUser.is_deleted !== 0 || !existingUser.isActive) {
@@ -148,7 +148,7 @@ export const connectToWallet = async (req, res) => {
         { email: lowercasedEmail },
         { otp }
       );
-      console.log("existingUser")
+      console.log("existingUser");
       const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
       const payload = {
@@ -175,12 +175,10 @@ export const connectToWallet = async (req, res) => {
         },
       };
       const token = await genrateToken({ payload });
-      return sendResponse(
-        res,
-        StatusCodes.CREATED,
-        ResponseMessage.LOGIN,
-        { ...walletUser._doc, token: token }
-      );
+      return sendResponse(res, StatusCodes.CREATED, ResponseMessage.LOGIN, {
+        ...walletUser._doc,
+        token: token,
+      });
     }
     const referCode = referralCode(8);
     const newUser = await User.create({
@@ -211,7 +209,7 @@ export const connectToWallet = async (req, res) => {
       }
     }
     if (email) {
-      console.log("EMAIL")
+      console.log("EMAIL");
       const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(lowercasedEmail, "Verify Otp", mailInfo);
     }
@@ -237,28 +235,66 @@ export const userSignUpSignInOtp = async (req, res) => {
   try {
     let { email, currency, referralByCode } = req.body;
     const otp = 4444;
-    email = email ? email.toLowerCase() : null
+    email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
     if (!!(email && referralByCode && existingUser)) {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.USER_ALREADY_EXIST,
+        []
+      );
     }
     if (existingUser) {
       if (existingUser.is_deleted != 0) {
-        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.DEACTIVATED_USER,
+          []
+        );
       }
       if (!existingUser.isActive) {
-        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.DEACTIVATED_USER,
+          []
+        );
       }
       if (!existingUser.currency) {
-        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_ALREADY_EXIST,
+          []
+        );
       }
-      const updateOtp = await dataUpdated({ email }, { otp }, User)
+      if(existingUser.registerType == "Password"){
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.REGISTERED_TYPE_NOT_MATCH,
+          []
+        );
+      }
+      const updateOtp = await dataUpdated({ email }, { otp }, User);
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(existingUser.email, "Verify Otp", mailInfo)
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL, updateOtp);
+      await sendMail(existingUser.email, "Verify Otp", mailInfo);
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL,
+        updateOtp
+      );
     } else {
       if (!currency) {
-        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_NOT_EXIST,
+          []
+        );
       }
       let referCode = referralCode(8);
       let findReferralUser = null;
@@ -266,22 +302,41 @@ export const userSignUpSignInOtp = async (req, res) => {
       if (referralByCode) {
         findReferralUser = await User.findOne({ referralCode: referralByCode });
         if (!findReferralUser) {
-          return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.REFERRAL_CODE_NOT_FOUND, []);
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+            []
+          );
         }
       }
-      const userData = await dataCreate({ email, currency, otp, referralCode: referCode, referralByCode: referralByCode ? referralByCode : null }, User)
+      const userData = await dataCreate(
+        {
+          email,
+          currency,
+          otp,
+          referralCode: referCode,
+          referralByCode: referralByCode ? referralByCode : null,
+        },
+        User
+      );
       if (findReferralUser) {
         findReferralUser.useReferralCodeUsers.push(userData._id);
         await findReferralUser.save();
       }
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(userData.email, "Verify Otp", mailInfo)
-      return sendResponse(res, StatusCodes.CREATED, ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL, userData);
+      await sendMail(userData.email, "Verify Otp", mailInfo);
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+        userData
+      );
     }
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 
 export const updateEmail = async (req, res) => {
   try {
@@ -502,22 +557,38 @@ export const userSignInMpin = async (req, res) => {
           []
         );
       }
-      if (existingUser.password == null && type == "login") {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.PASSWORD_NOT_SET,
-          []
-        );
-      } else {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.USER_ALREADY_EXIST,
-          []
-        );
+      if (type == "login") {
+        if (existingUser.registerType == "OTP") {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.PASSWORD_NOT_SET,
+            []
+          );
+        } else {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_ALREADY_EXIST,
+            []
+          );
+        }
       }
-
+      // if (existingUser.password == null && type == "login") {
+      //   return sendResponse(
+      //     res,
+      //     StatusCodes.BAD_REQUEST,
+      //     ResponseMessage.PASSWORD_NOT_SET,
+      //     []
+      //   );
+      // } else {
+      //   return sendResponse(
+      //     res,
+      //     StatusCodes.BAD_REQUEST,
+      //     ResponseMessage.USER_ALREADY_EXIST,
+      //     []
+      //   );
+      // }
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -637,11 +708,10 @@ export const singupFromEmailPassword = async (req, res) => {
         },
       };
       const token = await genrateToken({ payload });
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED
-        , {
-          ...createUser._doc,
-          token,
-        });
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
+        ...createUser._doc,
+        token,
+      });
     }
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -1526,9 +1596,9 @@ export const userEditProfile = async (req, res) => {
     let otp = 4444;
     const user = await User.findById(Id);
     if (req.files.profile) {
-      fs.unlink("./public/uploads/" + user.profile, () => { });
+      fs.unlink("./public/uploads/" + user.profile, () => {});
     } else if (req.body.removeProfileUrl) {
-      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
+      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => {});
       user.profile = "";
       await user.save();
     } else {
