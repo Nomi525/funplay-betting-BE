@@ -111,6 +111,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    registerType:{
+      type:String,
+      required:false,
+      enum:["OTP","Password"]
+    },
     isActive: {
       type: Boolean,
       default: true,
