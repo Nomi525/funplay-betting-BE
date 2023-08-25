@@ -17,6 +17,8 @@ describe('Admin User manegment test case', () => {
                     expect(res.body.status).to.be.equal(200);
                 } else if (res.body.status == 404) {
                     expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
                 } else {
                     expect(res.body.status).to.be.equal(500);
                 }
@@ -39,6 +41,8 @@ describe('Admin User manegment test case', () => {
                     expect(res.body.status).to.be.equal(200);
                 } else if (res.body.status == 404) {
                     expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
                 } else {
                     expect(res.body.status).to.be.equal(500);
                 }
@@ -61,6 +65,8 @@ describe('Admin User manegment test case', () => {
                     expect(res.body.status).to.be.equal(200);
                 } else if (res.body.status == 404) {
                     expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
                 } else {
                     expect(res.body.status).to.be.equal(500);
                 }
@@ -75,7 +81,7 @@ describe('Admin User manegment test case', () => {
         chai.request(appServer)
             .post('/api/admin/single-user')
             .set('auth', adminToken)
-            .send({userId : "64e706838c55dede240492eb"})
+            .send({ userId: "64e706838c55dede240492eb" })
             .end((err, res) => {
                 if (res.body.status == 201) {
                     expect(res.body.status).to.be.equal(201);
@@ -83,6 +89,8 @@ describe('Admin User manegment test case', () => {
                     expect(res.body.status).to.be.equal(200);
                 } else if (res.body.status == 404) {
                     expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
                 } else {
                     expect(res.body.status).to.be.equal(500);
                 }
@@ -93,11 +101,11 @@ describe('Admin User manegment test case', () => {
     //#endregion
 
     //#region Change user status deactive
-    it("Change user status", (done) => {
+    it("User deactivate", (done) => {
         chai.request(appServer)
             .post('/api/admin/user/activate/deactivate')
             .set('auth', adminToken)
-            .send({id : "64e706838c55dede240492eb"})
+            .send({ id: "64e706838c55dede240492eb" })
             .end((err, res) => {
                 if (res.body.status == 201) {
                     expect(res.body.status).to.be.equal(201);
@@ -105,6 +113,8 @@ describe('Admin User manegment test case', () => {
                     expect(res.body.status).to.be.equal(200);
                 } else if (res.body.status == 404) {
                     expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
                 } else {
                     expect(res.body.status).to.be.equal(500);
                 }
@@ -115,11 +125,11 @@ describe('Admin User manegment test case', () => {
     //#endregion
 
     //#region Change user status active
-    it("Change user status", (done) => {
+    it("User activate", (done) => {
         chai.request(appServer)
             .post('/api/admin/user/activate/deactivate')
             .set('auth', adminToken)
-            .send({id : "64e706838c55dede240492eb"})
+            .send({ id: "64e706838c55dede240492eb" })
             .end((err, res) => {
                 if (res.body.status == 201) {
                     expect(res.body.status).to.be.equal(201);
@@ -127,6 +137,82 @@ describe('Admin User manegment test case', () => {
                     expect(res.body.status).to.be.equal(200);
                 } else if (res.body.status == 404) {
                     expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+
+    //#region Get single user transaction
+    it("Get single transaction", (done) => {
+        chai.request(appServer)
+            .post('/api/admin/single-user/transaction')
+            .set('auth', adminToken)
+            .send({ userId: "64e706838c55dede240492eb" })
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+    //#region Get single user transaction
+    it("Get all transaction", (done) => {
+        chai.request(appServer)
+            .get('/api/admin/get-all-transaction')
+            .set('auth', adminToken)
+            .send({})
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion 
+
+
+    //#region Get deposite withdrawal list
+    it(" Get deposite withdrawal list", (done) => {
+        chai.request(appServer)
+            .post('/api/admin/get-deposite-withdrawal-list')
+            .set('auth', adminToken)
+            .send({ userId: "64e706838c55dede240492eb" })
+            .end((err, res) => {
+                if (res.body.status == 201) {
+                    expect(res.body.status).to.be.equal(201);
+                } else if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
                 } else {
                     expect(res.body.status).to.be.equal(500);
                 }

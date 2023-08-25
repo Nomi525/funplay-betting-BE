@@ -9,13 +9,26 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    gameDuration : {
+    gameRound: {
         type: Number,
         required: false
     },
+    gameWinningAmount: {
+        type: Number,
+        required: false
+    },
+    gameDuration: {
+        type: Number,
+        required: false
+    },
+    isActive: {
+        type: Boolean,
+        required: false,
+        default: true
+    },
     is_deleted: {
         type: Number,
-        default : 0 
+        default: 0
     },
 }, { timestamps: true });
 

@@ -2,9 +2,10 @@ import {
     express, Auth, Upload, adminLogin, adminEditProfile, adminChangePassword, adminForgetPassword, adminVerifyOtp, adminResetPassword,
     adminLogout, addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, getwithdrwalcheck,
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
-    adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
+    adminDeleteUser, getAllQuery, showRating,getSingleGameRating,deleteRating, getWithdrawalList, addEditGame, gameDelete,gameActiveDeactive, getAllGame, addEditGameRule, getGameRules,
     getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers, getAdminProfile, adminDashboard, getAdminSingleUser, changeStatusOfUser,
-    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction
+    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction,
+    adminResendOtp, notificationAddEdit, getAllNotification, getSingleNotification, deleteNotification
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -13,6 +14,7 @@ const adminRoutes = express.Router();
 adminRoutes.post('/login', adminLogin);
 adminRoutes.post('/forgot-password', adminForgetPassword);
 adminRoutes.post('/verify-otp', adminVerifyOtp);
+adminRoutes.post('/resend-otp', adminResendOtp);
 adminRoutes.post('/reset-password', adminResetPassword);
 adminRoutes.post('/change-password', Auth, adminChangePassword);
 adminRoutes.get('/profile', Auth, getAdminProfile);
@@ -46,6 +48,8 @@ adminRoutes.get('/queries', Auth, getAllQuery);
 
 // Rating
 adminRoutes.get('/game/ratings', Auth, showRating)
+adminRoutes.post('/single-game-rating', Auth, getSingleGameRating)
+adminRoutes.post('/rating-delete', Auth, deleteRating)
 
 // Get WithdrwalList
 adminRoutes.get('/withdrawal-list', Auth, getWithdrawalList)
@@ -56,6 +60,7 @@ adminRoutes.post('/get-deposite-withdrawal-list', Auth, gelAllUserDepositeAndWit
 adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);
 adminRoutes.get("/games", Auth, getAllGame);
 adminRoutes.post("/single-game", Auth, getSingleGame);
+adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
 adminRoutes.post("/game/delete", Auth, gameDelete);
 
 // Game Rules Routes
@@ -70,6 +75,13 @@ adminRoutes.post('/user-signin-by-referral', Auth, getUserReferralBySignIn);
 
 // Transaction
 adminRoutes.get('/get-all-transaction', Auth, getAllTransaction)
+
+//#region Notification
+adminRoutes.post('/notification-add-edit', Auth, notificationAddEdit)
+adminRoutes.get('/notifications', Auth, getAllNotification)
+adminRoutes.post('/single-notification', Auth, getSingleNotification)
+adminRoutes.post('/notification-delete', Auth, deleteNotification)
+//#endregion
 
 
 export { adminRoutes }
