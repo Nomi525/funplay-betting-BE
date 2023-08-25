@@ -370,20 +370,56 @@ export const adminDeleteUser = async (req, res) => {
     }
 }
 
+//#region Get All Game Raiting
 export const showRating = async (req, res) => {
     try {
-        const ratings = await getAllData({}, Rating);
-        const twoDigitGameId = '64c9ffac7ea983a6405655cv';
-        const footbalGameId = '64c9ffac7ea983a6405655fv';
-
-        const twoDigitGame = ratings.filter(rating => rating.gameId == twoDigitGameId)
-        const footbalGame = ratings.filter(rating => rating.gameId == footbalGameId)
-
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, { twoDigitGame, footbalGame });
+        const ratings = await Rating.find({ is_deleted: 0 })
+            .populate("userId", "fullName email mobileNumber referralCode profile address currency")
+            .populate("gameId", "gameName gameImage gameDuration")
+        if (ratings.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, ratings);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+        }
     } catch (error) {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
+
+//#region Get Single Game Raiting
+export const getSingleGameRating = async (req, res) => {
+    try {
+        const { gameId } = req.body;
+        const rating = await Rating.findOne({ gameId, is_deleted: 0 })
+            .populate("userId", "fullName email mobileNumber referralCode profile address currency")
+            .populate("gameId", "gameName gameImage gameDuration")
+        if (rating) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, rating);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
+
+//#region Delete Raiting
+export const deleteRating = async (req, res) => {
+    try {
+        const { ratingId } = req.body;
+        const deleteRating = await dataUpdated({ _id: ratingId }, { is_deleted: 1 }, Rating)
+        if (deleteRating) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.RATING_DELETED, []);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
 
 export const getWithdrawalList = async (req, res) => {
     try {
