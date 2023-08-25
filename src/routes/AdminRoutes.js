@@ -4,7 +4,7 @@ import {
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
     getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers, getAdminProfile, adminDashboard, getAdminSingleUser, changeStatusOfUser,
-    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction
+    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction,adminResendOtp
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -13,6 +13,7 @@ const adminRoutes = express.Router();
 adminRoutes.post('/login', adminLogin);
 adminRoutes.post('/forgot-password', adminForgetPassword);
 adminRoutes.post('/verify-otp', adminVerifyOtp);
+adminRoutes.post('/resend-otp', adminResendOtp);
 adminRoutes.post('/reset-password', adminResetPassword);
 adminRoutes.post('/change-password', Auth, adminChangePassword);
 adminRoutes.get('/profile', Auth, getAdminProfile);

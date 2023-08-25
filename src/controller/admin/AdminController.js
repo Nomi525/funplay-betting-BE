@@ -128,6 +128,25 @@ export const adminForgetPassword = async (req, res) => {
     }
 }
 
+export const adminResendOtp = async (req, res) => {
+    try {
+        let { adminId } = req.body;
+        const otp = 4444;
+        // const otp = generateOtp();
+        const findAdmin = await getSingleData({ _id: adminId, is_deleted: 0 }, Admin);
+        if (findAdmin) {
+            const updateOtp = await dataUpdated({ _id: adminId }, { otp }, Admin)
+            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+            await sendMail(findAdmin.email, "Verify Otp", mailInfo);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_RESEND, []);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
 export const adminVerifyOtp = async (req, res) => {
     try {
         let { id, otp } = req.body;
@@ -210,7 +229,7 @@ export const getAdminSingleUser = async (req, res) => {
         const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
         // console.log(findUser,'jjjj');
         if (findUser) {
-            const walletAddress = await NewTransaction.findOne({ userId: findUser._id,is_deleted: 0 })
+            const walletAddress = await NewTransaction.findOne({ userId: findUser._id, is_deleted: 0 })
             // const walletAddress = await NewTransaction.findOne({
             //     userId: findUser._id, $or: [
             //         { bitcoinWalletAddress: bitcoinAddress },
@@ -221,10 +240,10 @@ export const getAdminSingleUser = async (req, res) => {
             // console.log(walletAddress);
             // return
             var walletAmount = 0;
-            if(walletAddress){
-                walletAmount =  walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
+            if (walletAddress) {
+                walletAmount = walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
             }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, {...findUser._doc,walletAmount});
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, { ...findUser._doc, walletAmount });
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
