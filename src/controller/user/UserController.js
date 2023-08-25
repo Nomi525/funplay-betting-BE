@@ -131,7 +131,10 @@ export const connectToWallet = async (req, res) => {
       req.body;
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
-    const existingUser = await User.findOne({ email: lowercasedEmail });
+    let existingUser ;
+    if(lowercasedEmail){
+       existingUser = await User.findOne({ email: lowercasedEmail });
+    }
     if (existingUser) {
       if (existingUser.is_deleted !== 0 || !existingUser.isActive) {
         return sendResponse(
@@ -145,6 +148,7 @@ export const connectToWallet = async (req, res) => {
         { email: lowercasedEmail },
         { otp }
       );
+      console.log("existingUser")
       const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
       const payload = {
@@ -207,6 +211,7 @@ export const connectToWallet = async (req, res) => {
       }
     }
     if (email) {
+      console.log("EMAIL")
       const mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(lowercasedEmail, "Verify Otp", mailInfo);
     }
@@ -233,7 +238,7 @@ export const userSignUpSignInOtp = async (req, res) => {
     let { email, currency, referralByCode } = req.body;
     const otp = 4444;
     email = email ? email.toLowerCase() : null
-    const existingUser = await getSingleData({ email }, User);  
+    const existingUser = await getSingleData({ email }, User);
     if (!!(email && referralByCode && existingUser)) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_ALREADY_EXIST, []);
     }
@@ -475,7 +480,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 export const userSignInMpin = async (req, res) => {
-  let { email } = req.body;
+  let { email, type } = req.body;
   email = email ? email.toLowerCase() : null;
   try {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
@@ -488,14 +493,30 @@ export const userSignInMpin = async (req, res) => {
           []
         );
       }
-      if (!existingUser.isVerified) {
+      if (!existingUser.isVerified && existingUser.password !== null) {
         return sendResponse(
           res,
-          StatusCodes.CREATED,
+          StatusCodes.BAD_REQUEST,
           ResponseMessage.USER_NOT_VERIFY,
           []
         );
       }
+      if (existingUser.password == null && type == "login") {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.PASSWORD_NOT_SET,
+          []
+        );
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_ALREADY_EXIST,
+          []
+        );
+      }
+
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -615,11 +636,11 @@ export const singupFromEmailPassword = async (req, res) => {
         },
       };
       const token = await genrateToken({ payload });
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_SET
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED
         , {
-        ...createUser._doc,
-        token,
-      });
+          ...createUser._doc,
+          token,
+        });
     }
   } catch (error) {
     return handleErrorResponse(res, error);
