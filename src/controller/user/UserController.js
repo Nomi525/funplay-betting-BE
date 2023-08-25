@@ -615,7 +615,8 @@ export const singupFromEmailPassword = async (req, res) => {
         },
       };
       const token = await genrateToken({ payload });
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_SET
+        , {
         ...createUser._doc,
         token,
       });
