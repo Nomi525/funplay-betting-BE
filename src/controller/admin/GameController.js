@@ -2,26 +2,71 @@ import { Game, GameRules, sendResponse, StatusCodes, createError, ResponseMessag
 
 export const addEditGame = async (req, res) => {
     try {
-        const { gameName, gameDuration, gameId } = req.body;
-        const findGame = await getSingleData({ gameName: gameName, is_deleted: 0 }, Game);
-        if (!gameId) {
-            if (findGame) {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_EXIST, [])
-            }
-            const gameImage = req.gameImageUrl;
-            const newGame = await dataCreate({ gameName, gameImage, gameDuration }, Game)
-            const createGame = await newGame.save();
-            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.GAME_CREATED, createGame);
+      const { gameName, gameDuration, gameId } = req.body;
+      const findGameQuery = {
+        gameName: { $regex: "^" + gameName + "$", $options: "i" },
+        is_deleted: 0,
+      };
+      if (gameId) {
+        findGameQuery._id = { $ne: gameId };
+      }
+      const findGame = await getSingleData(findGameQuery, Game);
+      if (findGame) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.GAME_EXIST,
+          []
+        );
+      }
+      const gameImage = req.gameImageUrl ? req.gameImageUrl : findGame?.gameImage;
+      if (!gameId) {
+        const newGame = await dataCreate(
+          { gameName, gameImage, gameDuration },
+          Game
+        );
+        const createGame = await newGame.save();
+        if (createGame) {
+          return sendResponse(
+            res,
+            StatusCodes.CREATED,
+            ResponseMessage.GAME_CREATED,
+            createGame
+          );
         } else {
-            const gameImage = req.gameImageUrl ? req.gameImageUrl : findGame?.gameImage;
-            const updateGame = await dataUpdated({ _id: gameId }, { gameName, gameImage, gameDuration }, Game)
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_UPDATED, updateGame);
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.FAILED_TO_CREATED,
+            []
+          );
         }
-
+      } else {
+        const updateGame = await dataUpdated(
+          { _id: gameId },
+          { gameName, gameImage, gameDuration },
+          Game
+        );
+        if (updateGame) {
+          return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GAME_UPDATED,
+            updateGame
+          );
+        } else {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.FAILED_TO_UPDATE,
+            []
+          );
+        }
+      }
     } catch (error) {
-        return handleErrorResponse(res, error);
+      return handleErrorResponse(res, error);
     }
-}
+  };
 
 export const gameDelete = async (req, res) => {
     try {
