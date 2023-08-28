@@ -330,8 +330,11 @@ export const userSignUpSignInOtp = async (req, res) => {
         User
       );
       if (findReferralUser) {
-        findReferralUser.useReferralCodeUsers.push(userData._id);
-        await findReferralUser.save();
+        await ReferralUser.create({
+          userId: findReferralUser._id,
+          referralUser: userData._id,
+          referralByCode: referralByCode,
+        });
       }
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(userData.email, "Verify Otp", mailInfo);
@@ -343,7 +346,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       );
     }
   } catch (error) {
-    console.log(error, ":Error")
+    console.log(error, ":Error");
     return handleErrorResponse(res, error);
   }
 };
@@ -360,7 +363,8 @@ export const updateEmail = async (req, res) => {
             $push: {
               wallet: { walletAddress: walletAddress },
             },
-          },{new : true}
+          },
+          { new: true }
         );
         const payload = {
           user: {
@@ -368,7 +372,12 @@ export const updateEmail = async (req, res) => {
           },
         };
         const token = await genrateToken({ payload });
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, { ...userUpdate._doc, token:token });
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.LOGIN_SUCCESS,
+          { ...userUpdate._doc, token: token }
+        );
       }
     }
     if (walletAddress && email) {
@@ -381,10 +390,10 @@ export const updateEmail = async (req, res) => {
           {
             $set: {
               email: email,
-              walletConnected: "Yes"
+              walletConnected: "Yes",
             },
           },
-          {new : true}
+          { new: true }
         );
         const payload = {
           user: {
@@ -396,7 +405,7 @@ export const updateEmail = async (req, res) => {
           res,
           StatusCodes.OK,
           ResponseMessage.LOGIN_SUCCESS,
-          { ...updateUser._doc, token:token }
+          { ...updateUser._doc, token: token }
         );
       } else {
         return sendResponse(
@@ -415,22 +424,16 @@ export const updateEmail = async (req, res) => {
 export const checkWalletAddress = async (req, res) => {
   try {
     let { walletAddress } = req.body;
-    let existingUser = await User.findOne({ "wallet.walletAddress": walletAddress });
+    let existingUser = await User.findOne({
+      "wallet.walletAddress": walletAddress,
+    });
     if (existingUser) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        []
-      );
+      return sendResponse(res, StatusCodes.OK, []);
     } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        []
-      );
+      return sendResponse(res, StatusCodes.BAD_REQUEST, []);
     }
   } catch (error) {
-    console.log(error, ":Error")
+    console.log(error, ":Error");
   }
 };
 
@@ -585,7 +588,6 @@ export const userSignInMpin = async (req, res) => {
   email = email ? email.toLowerCase() : null;
   try {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
-    console.log(existingUser , ":existingUser");
     if (existingUser) {
       if (!existingUser.isActive) {
         return sendResponse(
@@ -605,7 +607,6 @@ export const userSignInMpin = async (req, res) => {
       // }
       if (type == "login") {
         if (existingUser.registerType == "OTP") {
-          console.log("IN")
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -653,7 +654,6 @@ export const singupFromEmailPassword = async (req, res) => {
     let { email, password, currency, referralByCode, registerType } = req.body;
     email = email ? email.toLowerCase() : null;
     let userFind = await getSingleData({ email }, User);
-    // let userFind = await getSingleData({ email, is_deleted: 0 }, User);
     if (userFind) {
       if (userFind.is_deleted != 0) {
         return sendResponse(
@@ -740,8 +740,11 @@ export const singupFromEmailPassword = async (req, res) => {
         User
       );
       if (findReferralUser) {
-        findReferralUser.useReferralCodeUsers.push(createUser._id);
-        await findReferralUser.save();
+        await ReferralUser.create({
+          userId: findReferralUser._id,
+          referralUser: userData._id,
+          referralByCode: referralByCode,
+        });
       }
       const payload = {
         user: {
@@ -1637,9 +1640,9 @@ export const userEditProfile = async (req, res) => {
     let otp = 4444;
     const user = await User.findById(Id);
     if (req.files.profile) {
-      fs.unlink("./public/uploads/" + user.profile, () => { });
+      fs.unlink("./public/uploads/" + user.profile, () => {});
     } else if (req.body.removeProfileUrl) {
-      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
+      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => {});
       user.profile = "";
       await user.save();
     } else {
