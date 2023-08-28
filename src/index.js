@@ -15,6 +15,7 @@ import path from 'path';
 import Joi from "joi";
 import crypto from "crypto";
 import axios from "axios";
+import CurrencyConverter from 'currency-converter-lt'
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -26,8 +27,10 @@ import { validatorMiddlware } from "./middleware/Validation.js";
 // Controllers
 import {
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword,
-    adminResetPassword, adminVerifyOtp, getAllUsers, getwithdrwalcheck, adminDashboardCount, adminSetting, adminWithdrawalRequest,
-    getTransactionList, howToReferralWork, adminEditUser, adminDeleteUser, showRating, getSingleGameRating, deleteRating, getWithdrawalList, getAdminProfile, getAdminSingleUser, changeStatusOfUser, adminResendOtp
+    adminResetPassword, adminVerifyOtp, getwithdrwalcheck, adminSetting, adminWithdrawalRequest,
+    getTransactionList, howToReferralWork, showRating, getSingleGameRating,
+    deleteRating, getWithdrawalList,
+    getAdminProfile, adminResendOtp
 } from "./controller/admin/AdminController.js";
 import {
     logout, editProfile, userSignUpSignInOtp, userSignInMpin, verifyOtp, loginFromMpin, singupFromEmailPassword,
@@ -41,7 +44,10 @@ import { addEditQuery, deleteQuery } from "./controller/user/QuerySectionControl
 import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import { addEditRating, gameRatingAverage } from "./controller/user/RatingController.js";
 import { walletCreate, disconnectWallet } from "./controller/user/WalletLoginController.js";
-import { addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, gameActiveDeactive,getSingleGame, getSingleGameRules, gameRuleDelete } from "./controller/admin/GameController.js";
+import {
+    addEditGame, addEditGameRule, getGameRules, gameDelete, getAllGame, gameActiveDeactive, getSingleGame,
+    getSingleGameRules, gameRuleDelete
+} from "./controller/admin/GameController.js";
 import {
     addNewTransaction, addTransaction, getUserTransaction,
     getUserNewTransaction, getTotalUserAmountDiposit, withdrawalRequest,
@@ -50,8 +56,9 @@ import {
 import { adminDashboard } from "./controller/admin/DashboardController.js";
 import { userDashboard } from "./controller/user/DashboardController.js";
 import {
+    getAllUsers, getAdminSingleUser, adminEditUser, adminDeleteUser, changeStatusOfUser,
     acceptWithdrawalRequest, getSingleUserTransaction,
-    getUserReferralBySignIn, gelAllUserDepositeAndWithdrawal, getAllTransaction
+    getUserReferralBySignIn, gelAllUserDepositeAndWithdrawal, getAllTransaction, allCurrencyConverter
 } from "./controller/admin/UserManegment.js";
 import {
     notificationAddEdit, getAllNotification, getSingleNotification, deleteNotification
@@ -89,17 +96,15 @@ import { appServer } from "../server.js";
 
 import {
     createError, sendResponse, passwordHash, passwordCompare, genrateToken, generateOtp,
-    genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword
+    genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword, currencyConverter
 } from "./services/CommonService.js";
-
-
 
 dotenv.config();
 
 export {
     express, dotenv, cors, mongoose, StatusCodes, bcryptjs, jwt, axios, crypto, multer, nodemailer, ejs, fs, chai, expect, chaiHttp, appServer, path,
     Admin, User, CMS, AdminSetting, ReferralWork, BannerModel, Query, Rating, Wallet, WalletLogin, Joi, NewTransaction, Notification,
-    Game, GameRules, Transaction, DummyTransaction, WithdrawalRequest, TransactionHistory,
+    Game, GameRules, Transaction, DummyTransaction, WithdrawalRequest, TransactionHistory, CurrencyConverter,
     dbConnection, setMpin, changeMpin, emailVerify, setPassword,
     ResponseMessage, sendMail, Auth, Upload,
     adminLogin, adminEditProfile, adminLogout, adminChangePassword, adminForgetPassword, adminResetPassword, getAdminProfile,
@@ -116,15 +121,15 @@ export {
     genrateToken, generateOtp, genString, referralCode, encryptObject, decryptObject, handleErrorResponse, hashedPassword,
     addEditRating,
     addEditPrivacyPolicy, addEditAboutUs, addEditTermsAndCondition, getCMSDetail, userEditProfile, accountDeactivate, getwithdrwalcheck,
-    adminDashboardCount,
+
     walletCreate, disconnectWallet,
-    validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame,gameActiveDeactive, addEditGameRule, getGameRules, getSingleGameRules,
+    validatorRequest, validatorMiddlware, addEditGame, gameDelete, getAllGame, gameActiveDeactive, addEditGameRule, getGameRules, getSingleGameRules,
     gameRuleDelete, getSingleGame,
     addTransaction, getUserTransaction,
     userDashboard, adminDashboard, addNewTransaction, getUserNewTransaction, getUserReferralBySignIn,
     getTotalUserAmountDiposit, withdrawalRequest, acceptWithdrawalRequest, changeStatusOfUser,
     getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, userDepositeWithdrawalHistory, singInWalletAddress,
     getAllTransaction, adminResendOtp,
-    notificationAddEdit, getAllNotification, getSingleNotification, deleteNotification
+    notificationAddEdit, getAllNotification, getSingleNotification, deleteNotification,currencyConverter,allCurrencyConverter
 
 }

@@ -154,6 +154,7 @@ const ResponseMessage = {
     NOTIFICATION_GET : "Notification get successfully",
     NOTIFICATION_NOT_FOUND : "Notification not found",
     USER_DISABLE_BY_ADMIN : "User disable by admin",
+    CURRENCY_CONVERTED : "Currency converted successfully",
 }
 
 export { ResponseMessage }
