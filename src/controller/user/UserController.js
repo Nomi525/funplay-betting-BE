@@ -128,8 +128,7 @@ import {
 export const connectToWallet = async (req, res) => {
   try {
     const { email, currency, referralByCode, password, wallet } = req.body;
-    let walletArray = [];
-    walletArray.push(wallet);
+    const walletArray = [JSON.parse(req.body.wallet)];
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
     let existingUser;
@@ -182,12 +181,11 @@ export const connectToWallet = async (req, res) => {
       });
     }
     const referCode = referralCode(8);
-
     const newUser = await User.create({
       email: lowercasedEmail,
       currency,
       password,
-      wallet: wallet ? walletArray : [],
+      wallet: walletArray,
       referralCode: referCode,
       otp,
     });
@@ -426,13 +424,17 @@ export const updateEmail = async (req, res) => {
 export const checkWalletAddress = async (req, res) => {
   try {
     let { walletAddress } = req.body;
-    let existingUser = await User.findOne({
-      "wallet.walletAddress": walletAddress,
-    });
+    let existingUser = await User.findOne(
+      {
+        "wallet.walletAddress": walletAddress,
+        walletConnected: "Yes",
+      },
+      { walletConnected: 1 }
+    );
     if (existingUser) {
-      return sendResponse(res, StatusCodes.OK, []);
+      return sendResponse(res, StatusCodes.OK, "", existingUser);
     } else {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, []);
+      return sendResponse(res, StatusCodes.BAD_REQUEST, "");
     }
   } catch (error) {
     console.log(error, ":Error");
