@@ -1,32 +1,64 @@
 import CoinGecko from "coingecko-api";
 import {
-    ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, handleErrorResponse, Transaction, NewTransaction, axios, User,
-    WithdrawalRequest, TransactionHistory
+  ResponseMessage,
+  StatusCodes,
+  sendResponse,
+  dataCreate,
+  dataUpdated,
+  getSingleData,
+  getAllData,
+  handleErrorResponse,
+  Transaction,
+  NewTransaction,
+  axios,
+  User,
+  WithdrawalRequest,
+  TransactionHistory,
 } from "../../index.js";
 
 export const addTransaction = async (req, res) => {
-    try {
-        const { networkChainId, networkType, hashKey } = req.body;
-        const createTransction = await dataCreate({ userId: req.user, networkChainId, networkType, hashKey }, Transaction);
-        return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
+  try {
+    const { networkChainId, networkType, hashKey } = req.body;
+    const createTransction = await dataCreate(
+      { userId: req.user, networkChainId, networkType, hashKey },
+      Transaction
+    );
+    return sendResponse(
+      res,
+      StatusCodes.CREATED,
+      ResponseMessage.TRANSCTION_CREATED,
+      createTransction
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 export const getUserTransaction = async (req, res) => {
-    try {
-        const transction = await getAllData({ userId: req.user, is_deleted: 0 }, Transaction);
-        if (transction.length) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transction);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
+  try {
+    const transction = await getAllData(
+      { userId: req.user, is_deleted: 0 },
+      Transaction
+    );
+    if (transction.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.TRANSCTION_GET,
+        transction
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.TRANSCTION_NOT_FOUND,
+        []
+      );
     }
-}
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 // export const addNewTransaction = async (req, res) => {
 //     try {
@@ -70,13 +102,13 @@ export const getUserTransaction = async (req, res) => {
 //             //         await findUser.save();
 //             //         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, findUser);
 //             //     }else{
-//             //         const createTransction = await dataCreate({ 
-//             //             userId: req.user, 
-//             //             walletAddress, 
-//             //             networkChainId, 
-//             //             [`token${tokenAmount}`] : tokenName, 
-//             //             [`token${tokenAmount}Amount`] : value, 
-//             //             tokenDollorValue: value 
+//             //         const createTransction = await dataCreate({
+//             //             userId: req.user,
+//             //             walletAddress,
+//             //             networkChainId,
+//             //             [`token${tokenAmount}`] : tokenName,
+//             //             [`token${tokenAmount}Amount`] : value,
+//             //             tokenDollorValue: value
 //             //         }, NewTransaction);
 //             //         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
 //             //     }
@@ -87,13 +119,13 @@ export const getUserTransaction = async (req, res) => {
 //             //         await findUser.save();
 //             //         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, findUser);
 //             //     }else{
-//             //         const createTransction = await dataCreate({ 
-//             //             userId: req.user, 
-//             //             walletAddress, 
-//             //             networkChainId, 
-//             //             tokenEthereum : tokenName, 
-//             //             tokenEthereumAmount : valueEthereumUsd, 
-//             //             tokenDollorValue: valueEthereumUsd 
+//             //         const createTransction = await dataCreate({
+//             //             userId: req.user,
+//             //             walletAddress,
+//             //             networkChainId,
+//             //             tokenEthereum : tokenName,
+//             //             tokenEthereumAmount : valueEthereumUsd,
+//             //             tokenDollorValue: valueEthereumUsd
 //             //         }, NewTransaction);
 //             //         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
 //             //     }
@@ -104,13 +136,13 @@ export const getUserTransaction = async (req, res) => {
 //             //         await findUser.save();
 //             //         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, findUser);
 //             //     }else{
-//             //         const createTransction = await dataCreate({ 
-//             //             userId: req.user, 
-//             //             walletAddress, 
-//             //             networkChainId, 
-//             //             tokenTether : tokenName, 
-//             //             tokenTetherAmount : valueTetherUsd, 
-//             //             tokenDollorValue: valueTetherUsd 
+//             //         const createTransction = await dataCreate({
+//             //             userId: req.user,
+//             //             walletAddress,
+//             //             networkChainId,
+//             //             tokenTether : tokenName,
+//             //             tokenTetherAmount : valueTetherUsd,
+//             //             tokenDollorValue: valueTetherUsd
 //             //         }, NewTransaction);
 //             //         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
 //             //     }
@@ -121,13 +153,13 @@ export const getUserTransaction = async (req, res) => {
 //             //         await findUser.save();
 //             //         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, findUser);
 //             //     }else{
-//             //         const createTransction = await dataCreate({ 
-//             //             userId: req.user, 
-//             //             walletAddress, 
-//             //             networkChainId, 
-//             //             tokenBNB : tokenName, 
-//             //             tokenBNBAmount : valueBNBUsd, 
-//             //             tokenDollorValue: valueBNBUsd 
+//             //         const createTransction = await dataCreate({
+//             //             userId: req.user,
+//             //             walletAddress,
+//             //             networkChainId,
+//             //             tokenBNB : tokenName,
+//             //             tokenBNBAmount : valueBNBUsd,
+//             //             tokenDollorValue: valueBNBUsd
 //             //         }, NewTransaction);
 //             //         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
 //             //     }
@@ -139,13 +171,13 @@ export const getUserTransaction = async (req, res) => {
 //             //         await findUser.save();
 //             //         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, findUser);
 //             //     }else{
-//             //         const createTransction = await dataCreate({ 
-//             //             userId: req.user, 
-//             //             walletAddress, 
-//             //             networkChainId, 
-//             //             tokenPolygon : tokenName, 
-//             //             tokenPolygonAmount : valuePolygonUsd, 
-//             //             tokenDollorValue: valuePolygonUsd 
+//             //         const createTransction = await dataCreate({
+//             //             userId: req.user,
+//             //             walletAddress,
+//             //             networkChainId,
+//             //             tokenPolygon : tokenName,
+//             //             tokenPolygonAmount : valuePolygonUsd,
+//             //             tokenDollorValue: valuePolygonUsd
 //             //         }, NewTransaction);
 //             //         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, createTransction);
 //             //     }
@@ -161,120 +193,200 @@ export const getUserTransaction = async (req, res) => {
 // }
 
 export const addNewTransaction = async (req, res) => {
-    try {
-        const { walletAddress, networkChainId, tokenName, tokenAmount } = req.body;
-        const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
-        // Bitcoin  Ethereum Tether BNB Polygon
-        const findUser = await NewTransaction.findOne({ userId: req.user })
-        const dataNew = USDTPrice.data.data
+  try {
+    const { walletAddress, networkChainId, tokenName, tokenAmount } = req.body;
+    const USDTPrice = await axios.get("https://api.coincap.io/v2/assets");
+    // Bitcoin  Ethereum Tether BNB Polygon
+    const findUser = await NewTransaction.findOne({ userId: req.user });
+    const dataNew = USDTPrice.data.data;
 
-        if (!dataNew) {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid tokan", []);
-        }
-        var value;
-        const mapData = dataNew.filter(d => d.name == tokenName).map(async (item) => {
-            value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
-            if (findUser) {
-                if (tokenName == "Bitcoin") {
-                    if (!findUser.bitcoinWalletAddress.includes(walletAddress)) {
-                        findUser.bitcoinWalletAddress.push(walletAddress)
-                    }
-                } else {
-                    if (!findUser.ethereumWalletAddress.includes(walletAddress)) {
-                        findUser.ethereumWalletAddress.push(walletAddress)
-                    }
-                }
-                if (findUser[`token${tokenName}`]) {
-                    findUser[`token${tokenName}`] += parseFloat(tokenAmount)
-                } else {
-                    findUser[`token${tokenName}`] = parseFloat(tokenAmount)
-                }
-                findUser.tokenDollorValue += parseFloat(value)
-                await findUser.save();
-
-                await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposite" }, TransactionHistory)
-
-                return { status: 'OK', data: findUser }
-            } else {
-                let bitcoinWalletAddress;
-                let ethereumWalletAddress;
-                if (tokenName == "Bitcoin") {
-                    bitcoinWalletAddress = [walletAddress]
-                } else {
-                    ethereumWalletAddress = [walletAddress]
-                }
-                const createTransction = await dataCreate({
-                    userId: req.user,
-                    bitcoinWalletAddress,
-                    ethereumWalletAddress,
-                    networkChainId,
-                    [`token${tokenName}`]: tokenAmount,
-                    tokenDollorValue: parseFloat(value)
-                }, NewTransaction);
-
-                await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposite" }, TransactionHistory)
-
-                return { status: 'CREATED', data: createTransction }
-            }
-        });
-        const promiseData = await Promise.all(mapData)
-        if (promiseData[0]?.status == "OK") {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_UPDATED, promiseData[0]?.data);
-        } else if (promiseData[0]?.status == "CREATED") {
-            return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, promiseData[0]?.data);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
+    if (!dataNew) {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid tokan", []);
     }
-}
+    var value;
+    const mapData = dataNew
+      .filter((d) => d.name == tokenName)
+      .map(async (item) => {
+        value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
+        if (findUser) {
+          if (tokenName == "Bitcoin") {
+            if (!findUser.bitcoinWalletAddress.includes(walletAddress)) {
+              findUser.bitcoinWalletAddress.push(walletAddress);
+            }
+          } else {
+            if (!findUser.ethereumWalletAddress.includes(walletAddress)) {
+              findUser.ethereumWalletAddress.push(walletAddress);
+            }
+          }
+          if (findUser[`token${tokenName}`]) {
+            findUser[`token${tokenName}`] += parseFloat(tokenAmount);
+          } else {
+            findUser[`token${tokenName}`] = parseFloat(tokenAmount);
+          }
+          findUser.tokenDollorValue += parseFloat(value);
+          await findUser.save();
+
+          await dataCreate(
+            {
+              userId: req.user,
+              networkChainId,
+              tokenName,
+              tokenAmount,
+              walletAddress,
+              tokenAmount,
+              tokenDollorValue: value,
+              type: "deposite",
+            },
+            TransactionHistory
+          );
+
+          return { status: "OK", data: findUser };
+        } else {
+          let bitcoinWalletAddress;
+          let ethereumWalletAddress;
+          if (tokenName == "Bitcoin") {
+            bitcoinWalletAddress = [walletAddress];
+          } else {
+            ethereumWalletAddress = [walletAddress];
+          }
+          const createTransction = await dataCreate(
+            {
+              userId: req.user,
+              bitcoinWalletAddress,
+              ethereumWalletAddress,
+              networkChainId,
+              [`token${tokenName}`]: tokenAmount,
+              tokenDollorValue: parseFloat(value),
+            },
+            NewTransaction
+          );
+
+          await dataCreate(
+            {
+              userId: req.user,
+              networkChainId,
+              tokenName,
+              tokenAmount,
+              walletAddress,
+              tokenAmount,
+              tokenDollorValue: value,
+              type: "deposite",
+            },
+            TransactionHistory
+          );
+
+          return { status: "CREATED", data: createTransction };
+        }
+      });
+    const promiseData = await Promise.all(mapData);
+    if (promiseData[0]?.status == "OK") {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.TRANSCTION_UPDATED,
+        promiseData[0]?.data
+      );
+    } else if (promiseData[0]?.status == "CREATED") {
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.TRANSCTION_CREATED,
+        promiseData[0]?.data
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.DATA_NOT_FOUND,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 export const withdrawalRequest = async (req, res) => {
-    try {
-        const { walletAddress, tokenName, tokenAmount } = req.body;
-        const createRequest = await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount }, WithdrawalRequest)
-        return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WITHDRAWAL_CREATED, createRequest);
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
+  try {
+    const { walletAddress, tokenName, tokenAmount } = req.body;
+    const createRequest = await dataCreate(
+      { userId: req.user, walletAddress, tokenName, tokenAmount },
+      WithdrawalRequest
+    );
+    return sendResponse(
+      res,
+      StatusCodes.CREATED,
+      ResponseMessage.WITHDRAWAL_CREATED,
+      createRequest
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 export const getUserNewTransaction = async (req, res) => {
-    try {
-        const transction = await getAllData({ userId: req.user, is_deleted: 0 }, NewTransaction);
-        if (transction.length) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transction);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.TRANSCTION_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
+  try {
+    const transction = await getAllData(
+      { userId: req.user, is_deleted: 0 },
+      NewTransaction
+    );
+    if (transction.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.TRANSCTION_GET,
+        transction
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.TRANSCTION_NOT_FOUND,
+        []
+      );
     }
-}
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 export const getTotalUserAmountDiposit = async (req, res) => {
-    try {
-        const findUser = await getSingleData({ userId: req.user }, NewTransaction);
-        if (findUser) {
-            return sendResponse(res, StatusCodes.OK, "User total deposit amount", { tokenDollorValue: findUser.tokenDollorValue })
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
+  try {
+    const findUser = await getSingleData({ userId: req.user }, NewTransaction);
+    if (findUser) {
+      return sendResponse(res, StatusCodes.OK, "User total deposit amount", {
+        tokenDollorValue: findUser.tokenDollorValue,
+      });
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.USER_NOT_EXIST,
+        []
+      );
     }
-}
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 export const userDepositeWithdrawalHistory = async (req, res) => {
-    try {
-        const history = await getAllData({ userId: req.user, is_deleted: 0 }, TransactionHistory);
-        if (history.length) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, history);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, "History not found", []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
+  try {
+    const history = await getAllData(
+      { userId: req.user, is_deleted: 0 },
+      TransactionHistory
+    );
+    if (history.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.TRANSCTION_GET,
+        history
+      );
+    } else {
+      return sendResponse(res, StatusCodes.NOT_FOUND, "History not found", []);
     }
-}
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};

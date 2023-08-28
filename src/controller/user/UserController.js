@@ -127,8 +127,9 @@ import {
 
 export const connectToWallet = async (req, res) => {
   try {
-    const { email, currency, referralByCode, password, walletAddress } =
-      req.body;
+    const { email, currency, referralByCode, password, wallet } = req.body;
+    let walletArray = [];
+    walletArray.push(wallet);
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
     let existingUser;
@@ -166,7 +167,7 @@ export const connectToWallet = async (req, res) => {
     // }
     // Check wallet address existence
     const walletUser = await User.findOne({
-      "wallet.walletAddress": { $in: walletAddress },
+      "wallet.walletAddress": { $in: wallet.walletAddress },
     });
     if (walletUser) {
       const payload = {
@@ -181,11 +182,12 @@ export const connectToWallet = async (req, res) => {
       });
     }
     const referCode = referralCode(8);
+
     const newUser = await User.create({
       email: lowercasedEmail,
       currency,
       password,
-      wallet: walletAddress ? [{ walletAddress }] : [],
+      wallet: wallet ? walletArray : [],
       referralCode: referCode,
       otp,
     });
@@ -499,7 +501,18 @@ export const verifyOtp = async (req, res) => {
           []
         );
       } else {
-        if (type == "login") {
+        if (type == "signup") {
+          const userUpdate = await dataUpdated(
+            { _id: userId },
+            { isVerified: true, otp: null },
+            User
+          );
+
+          return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
+            ...userUpdate._doc,
+            type,
+          });
+        } else if (type == "login") {
           if (!user.isActive) {
             return sendResponse(
               res,
