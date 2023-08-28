@@ -4,6 +4,7 @@ import {
     ReferralWork, Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction
 } from "./../../index.js";
 
+//#region admin login
 export const adminLogin = async (req, res) => {
     try {
         const findAdmin = await getSingleData({ email: req.body.email, is_deleted: 0 }, Admin);
@@ -26,7 +27,9 @@ export const adminLogin = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin get profile
 export const getAdminProfile = async (req, res) => {
     try {
         let findAdmin = await getSingleData({ _id: req.admin, is_deleted: 0 }, Admin);
@@ -39,7 +42,9 @@ export const getAdminProfile = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin edit profile
 export const adminEditProfile = async (req, res) => {
     try {
         const findData = await getSingleData({ _id: req.admin }, Admin);
@@ -57,7 +62,9 @@ export const adminEditProfile = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region get withdrwal check
 export const getwithdrwalcheck = (req, res) => {
     try {
         let userBankDetails =
@@ -80,7 +87,9 @@ export const getwithdrwalcheck = (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin change password
 export const adminChangePassword = async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body
@@ -102,7 +111,9 @@ export const adminChangePassword = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin forget password
 export const adminForgetPassword = async (req, res) => {
     try {
         const { email } = req.body
@@ -127,7 +138,9 @@ export const adminForgetPassword = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin resend otp
 export const adminResendOtp = async (req, res) => {
     try {
         let { adminId } = req.body;
@@ -146,7 +159,9 @@ export const adminResendOtp = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin verify otp
 export const adminVerifyOtp = async (req, res) => {
     try {
         let { id, otp } = req.body;
@@ -167,7 +182,9 @@ export const adminVerifyOtp = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin reset password
 export const adminResetPassword = async (req, res) => {
     try {
         let { adminId, password } = req.body;
@@ -193,7 +210,9 @@ export const adminResetPassword = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin logout
 export const adminLogout = async (req, res) => {
     try {
         const findAdmin = await getSingleData({ _id: req.admin, is_deleted: 0 }, Admin);
@@ -208,75 +227,9 @@ export const adminLogout = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
-export const getAllUsers = async (req, res) => {
-    try {
-        // const findUsers = await getAllData({ is_deleted: 0 }, User);
-        const findUsers = await User.find({ is_deleted: 0 }).sort({ createdAt: -1 });
-        if (findUsers.length) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUsers);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const getAdminSingleUser = async (req, res) => {
-    try {
-        const { userId } = req.body
-        const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
-        // console.log(findUser,'jjjj');
-        if (findUser) {
-            const walletAddress = await NewTransaction.findOne({ userId: findUser._id, is_deleted: 0 })
-            // const walletAddress = await NewTransaction.findOne({
-            //     userId: findUser._id, $or: [
-            //         { bitcoinWalletAddress: bitcoinAddress },
-            //         { ethereumWalletAddress: ethereumAddress }
-            //     ], is_deleted: 0
-            // })
-            // console.log(walletAddress);
-            // console.log(walletAddress);
-            // return
-            var walletAmount = 0;
-            if (walletAddress) {
-                walletAmount = walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
-            }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, { ...findUser._doc, walletAmount });
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const adminDashboardCount = async (req, res) => {
-    try {
-        let totalUsers = 1500
-        let totalActiveUsers = 150
-        let totalNewLoginUsersIn24Hours = 255
-        let totalDeactivatedUsers = 55
-        let totalZeroBalancetransactionUsers = 120
-        let totalZeroBalanceusersin24Hours = 250
-        return res.status(200).json({
-            status: StatusCodes.OK,
-            message: ResponseMessage.DATA_FETCHED,
-            data: {
-                totalUsers: totalUsers,
-                totalActiveUsers: totalActiveUsers,
-                totalNewLoginUsersIn24Hours: totalNewLoginUsersIn24Hours,
-                totalDeactivatedUsers: totalDeactivatedUsers,
-                totalZeroBalancetransactionUsers: totalZeroBalancetransactionUsers,
-                totalZeroBalanceusersin24Hours: totalZeroBalanceusersin24Hours,
-            },
-        });
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
+//#region Admin Setting add end edit
 export const adminSetting = async (req, res) => {
     try {
         const findSetting = await AdminSetting.findOne();
@@ -291,7 +244,9 @@ export const adminSetting = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region admin withdrawal request accept and reject
 export const adminWithdrawalRequest = async (req, res) => {
     try {
         const { transactionId, requestType } = req.body
@@ -305,7 +260,9 @@ export const adminWithdrawalRequest = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region Get user transaction list
 export const getTransactionList = async (req, res) => {
     try {
         const { type } = req.body;
@@ -320,7 +277,9 @@ export const getTransactionList = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
 
+//#region How to work referral code Details add and edit
 export const howToReferralWork = async (req, res) => {
     try {
         const { referralWork } = req.body
@@ -337,38 +296,7 @@ export const howToReferralWork = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
-
-export const adminEditUser = async (req, res) => {
-    try {
-        const { userId, fullName, userName, email } = req.body;
-        const findUser = await getSingleData({ _id: userId }, User)
-        if (findUser) {
-            const profile = req.profileUrl ? req.profileUrl : findUser.profile;
-            const updateUser = await dataUpdated({ _id: userId }, { fullName, userName, email, profile }, User);
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, updateUser);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const adminDeleteUser = async (req, res) => {
-    try {
-        const { userId } = req.body;
-        const findUser = await getSingleData({ _id: userId }, User)
-        if (findUser) {
-            findUser.is_deleted = 1;
-            await findUser.save();
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_DELETED, []);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
+//#endregion
 
 //#region Get All Game Raiting
 export const showRating = async (req, res) => {
@@ -421,6 +349,7 @@ export const deleteRating = async (req, res) => {
 }
 //#endregion
 
+//#region Get Withdrawal List
 export const getWithdrawalList = async (req, res) => {
     try {
         const withdrwal = await getAllData({}, DummyTransaction);
@@ -433,40 +362,4 @@ export const getWithdrawalList = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
-
-
-
-export const changeStatusOfUser = async (req, res) => {
-    try {
-        const { id } = req.body;
-        // const updatedUser = await User.findOneAndUpdate(
-        //     { _id: req.body.id },
-        //     { $set: { isActive: req.body.status } },
-        //     { new: true }
-        // );
-        // console.log(updatedUser);
-        // const responseMessage = req.body.status === "true"
-        //     ? ResponseMessage.USER_ACTIVATED
-        //     : ResponseMessage.USER_DEACTIVATED;
-
-        const findUser = await getSingleData({ _id: id }, User);
-        if (findUser) {
-            var responseMessage;
-            if (findUser.isActive) {
-                findUser.isActive = false
-                findUser.save();
-                responseMessage = ResponseMessage.USER_DEACTIVATED
-            } else {
-                findUser.isActive = true
-                findUser.save();
-                responseMessage = ResponseMessage.USER_ACTIVATED
-            }
-            return sendResponse(res, StatusCodes.OK, responseMessage, []);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
-        }
-        // return sendResponse(res, StatusCodes.OK, responseMessage);
-    } catch (err) {
-        return handleErrorResponse(res, err);
-    }
-};
+//#endregion
