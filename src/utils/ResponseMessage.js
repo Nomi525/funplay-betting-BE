@@ -129,7 +129,7 @@ const ResponseMessage = {
     RATING_DELETED : "Rating deleted successfully",
     RATING_GET : "Rating get successfully",
     RATING_NOT_FOUND : "Rating not found",
-    TRANSCTION_CREATED : "Transction created successfully",
+    TRANSCTION_CREATED : "Transcation successfully",
     TRANSCTION_UPDATED : "Transction updated successfully",
     TRANSCTION_DELETED : "Transction deleted successfully",
     TRANSCTION_GET : "Transction get successfully",
