@@ -81,8 +81,8 @@ adminRoutes.post("/how-referral-work", Auth, howToReferralWork);
 // -------- Setting -------- //
 adminRoutes.post("/setting", Auth, adminSetting);
 adminRoutes.post("/withdrawal-request", Auth, adminWithdrawalRequest);
-adminRoutes.post("/add-edit-coin-setting",  addEditCoinSetting);
-adminRoutes.post("/get-coin-setting", Auth, getCoinSetting);
+adminRoutes.post("/add-edit-coin-setting", Auth, addEditCoinSetting);
+adminRoutes.get("/get-coin-setting/:coinId", Auth, getCoinSetting);
 adminRoutes.get("/get-list-coin-setting", Auth, getListCoinSetting);
 
 // ------ User

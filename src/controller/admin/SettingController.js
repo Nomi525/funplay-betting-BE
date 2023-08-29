@@ -82,7 +82,7 @@ export const addEditCoinSetting = async (req, res) => {
 //#region Get  Coin setting
 export const getCoinSetting = async (req, res) => {
   try {
-    const { coinId } = req.body;
+    const { coinId } = req.params;
     const findCoinSetting = await getSingleData(
       { _id: coinId, is_deleted: 0 },
       CoinSetting
