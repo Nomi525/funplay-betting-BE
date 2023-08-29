@@ -254,6 +254,14 @@ export const userSignUpSignInOtp = async (req, res) => {
         []
       );
     }
+    if (existingUser && currency && email) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_ALREADY_EXIST,
+          []
+        );
+    }  
     if (existingUser) {
       if (existingUser.is_deleted != 0) {
         return sendResponse(

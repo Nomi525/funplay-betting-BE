@@ -28,6 +28,10 @@ const transactionHistorySchema = new mongoose.Schema({
         required: false,
         default: 0,
     },
+    tetherType :{
+        type: String,
+        required: false
+    },
     type: {
         type: String,
         required: false

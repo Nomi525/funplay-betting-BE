@@ -194,6 +194,7 @@ import {
   decryptObject,
   handleErrorResponse,
   hashedPassword,
+  currencyConverter
 } from "./services/CommonService.js";
 
 dotenv.config();
@@ -357,6 +358,7 @@ export {
   Notification,
   allCurrencyConverter,
   gameActiveDeactive,
+  currencyConverter,
   addEditCoinSetting,
   getCoinSetting,
   getListCoinSetting
