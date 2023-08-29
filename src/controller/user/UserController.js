@@ -278,15 +278,7 @@ export const userSignUpSignInOtp = async (req, res) => {
           ResponseMessage.USER_ALREADY_EXIST,
           []
         );
-      }
-      // if (existingUser.registerType == "Password") {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.REGISTERED_TYPE_NOT_MATCH,
-      //     []
-      //   );
-      // }
+      }    
       const updateOtp = await dataUpdated({ email }, { otp }, User);
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
