@@ -44,6 +44,7 @@ import {
   singInWalletAddress,
   updateLoginStatus,
   userSignUpSignInOtp,
+  userGetAllGame
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -107,5 +108,8 @@ userRoutes.get("/get-deposite-withdrawal", Auth, userDepositeWithdrawalHistory);
 
 //Dashboard
 userRoutes.get("/dashboard", Auth, userDashboard);
+
+//#region Game
+userRoutes.get('/games', Auth, userGetAllGame)
 
 export { userRoutes };

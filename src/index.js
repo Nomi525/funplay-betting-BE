@@ -84,6 +84,7 @@ import {
   singInWalletAddress,
   updateEmail,
   userSignUpSignInOtp,
+  userGetAllGame,
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -361,5 +362,6 @@ export {
   currencyConverter,
   addEditCoinSetting,
   getCoinSetting,
-  getListCoinSetting
+  getListCoinSetting,
+  userGetAllGame
 };

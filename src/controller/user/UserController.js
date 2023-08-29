@@ -21,6 +21,7 @@ import {
   handleErrorResponse,
   generateOtp,
   ReferralUser,
+  Game,
 } from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
@@ -278,7 +279,7 @@ export const userSignUpSignInOtp = async (req, res) => {
           ResponseMessage.USER_ALREADY_EXIST,
           []
         );
-      }    
+      }
       const updateOtp = await dataUpdated({ email }, { otp }, User);
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
@@ -1654,9 +1655,9 @@ export const userEditProfile = async (req, res) => {
     let otp = 4444;
     const user = await User.findById(Id);
     if (req.files.profile) {
-      fs.unlink("./public/uploads/" + user.profile, () => {});
+      fs.unlink("./public/uploads/" + user.profile, () => { });
     } else if (req.body.removeProfileUrl) {
-      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => {});
+      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
       user.profile = "";
       await user.save();
     } else {
@@ -1800,3 +1801,16 @@ export const transactionHistory = async (req, res) => {
 //         return handleErrorResponse(req, error);
 //     }
 // }
+
+export const userGetAllGame = async (req, res) => {
+  try {
+    const games = await getAllData({ isActive: true, is_deleted: 0 }, Game)
+    if (games.length) {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_GET_ALL, games)
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, [])
+    }
+  } catch (error) {
+    return handleErrorResponse(req, error);
+  }
+}
