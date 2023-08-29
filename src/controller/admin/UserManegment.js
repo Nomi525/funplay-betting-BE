@@ -118,3 +118,13 @@ export const getAllTransaction = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+export const allCurrencyConverter = async (req, res) => {
+    try {
+        const { fromCurrency, toCurrency, amount } = req.body;
+        const currency = await currencyConverter(fromCurrency, toCurrency, amount);
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.CURRENCY_CONVERTED, currency);
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}

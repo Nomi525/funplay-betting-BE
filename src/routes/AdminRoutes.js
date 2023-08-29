@@ -4,7 +4,9 @@ import {
     adminDashboardCount, adminSetting, adminWithdrawalRequest, getTransactionList, howToReferralWork, adminEditUser,
     adminDeleteUser, getAllQuery, showRating, getWithdrawalList, addEditGame, gameDelete, getAllGame, addEditGameRule, getGameRules,
     getSingleGame, getSingleGameRules, gameRuleDelete, getAllUsers, getAdminProfile, adminDashboard, getAdminSingleUser, changeStatusOfUser,
-    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction
+    getUserReferralBySignIn, acceptWithdrawalRequest, getSingleUserTransaction, gelAllUserDepositeAndWithdrawal, getAllTransaction,
+    getSingleGameRating, deleteRating, notificationAddEdit, getAllNotification, getSingleNotification, deleteNotification,
+    allCurrencyConverter,gameActiveDeactive
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -46,6 +48,8 @@ adminRoutes.get('/queries', Auth, getAllQuery);
 
 // Rating
 adminRoutes.get('/game/ratings', Auth, showRating)
+adminRoutes.post('/single-game-rating', Auth, getSingleGameRating)
+adminRoutes.post('/rating-delete', Auth, deleteRating)
 
 // Get WithdrwalList
 adminRoutes.get('/withdrawal-list', Auth, getWithdrawalList)
@@ -57,6 +61,7 @@ adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);
 adminRoutes.get("/games", Auth, getAllGame);
 adminRoutes.post("/single-game", Auth, getSingleGame);
 adminRoutes.post("/game/delete", Auth, gameDelete);
+adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
 
 // Game Rules Routes
 adminRoutes.get("/game-rules", Auth, getGameRules);
@@ -70,6 +75,16 @@ adminRoutes.post('/user-signin-by-referral', Auth, getUserReferralBySignIn);
 
 // Transaction
 adminRoutes.get('/get-all-transaction', Auth, getAllTransaction)
+
+//#region Notification
+adminRoutes.post('/notification-add-edit', Auth, notificationAddEdit)
+adminRoutes.get('/notifications', Auth, getAllNotification)
+adminRoutes.post('/single-notification', Auth, getSingleNotification)
+adminRoutes.post('/notification-delete', Auth, deleteNotification)
+//#endregion
+
+adminRoutes.post('/currency-convert', allCurrencyConverter);
+//#endregion
 
 
 export { adminRoutes }

@@ -14,7 +14,7 @@ import {
 
 export const addEditGame = async (req, res) => {
   try {
-    const { gameName, gameDuration, gameId } = req.body;
+    const { gameName, gameDuration, gameRound, gameWinningAmount, gameId } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -34,7 +34,7 @@ export const addEditGame = async (req, res) => {
     const gameImage = req.gameImageUrl ? req.gameImageUrl : findGame?.gameImage;
     if (!gameId) {
       const newGame = await dataCreate(
-        { gameName, gameImage, gameDuration },
+        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount },
         Game
       );
       const createGame = await newGame.save();
@@ -56,7 +56,7 @@ export const addEditGame = async (req, res) => {
     } else {
       const updateGame = await dataUpdated(
         { _id: gameId },
-        { gameName, gameImage, gameDuration },
+        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount },
         Game
       );
       if (updateGame) {
@@ -89,6 +89,30 @@ export const gameDelete = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+//#region Game delete
+export const gameActiveDeactive = async (req, res) => {
+  try {
+    const { gameId } = req.body;
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame) {
+      if (findGame.isActive) {
+        findGame.isActive = false;
+        await findGame.save();
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DEACTIVE, []);
+      } else {
+        findGame.isActive = true;
+        await findGame.save();
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_ACTIVE, []);
+      }
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
 
 export const getAllGame = async (req, res) => {
   try {

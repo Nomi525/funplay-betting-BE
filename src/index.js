@@ -15,6 +15,7 @@ import path from "path";
 import Joi from "joi";
 import crypto from "crypto";
 import axios from "axios";
+import CurrencyConverter from 'currency-converter-lt'
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -53,6 +54,8 @@ import {
   getAdminProfile,
   getAdminSingleUser,
   changeStatusOfUser,
+  getSingleGameRating,
+  deleteRating
 } from "./controller/admin/AdminController.js";
 import {
   logout,
@@ -115,6 +118,7 @@ import {
   getSingleGame,
   getSingleGameRules,
   gameRuleDelete,
+  gameActiveDeactive
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -133,7 +137,14 @@ import {
   getUserReferralBySignIn,
   gelAllUserDepositeAndWithdrawal,
   getAllTransaction,
+  allCurrencyConverter
 } from "./controller/admin/UserManegment.js";
+import {
+  notificationAddEdit,
+  getAllNotification,
+  getSingleNotification,
+  deleteNotification
+} from "./controller/admin/NotificationController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -157,6 +168,7 @@ import { NewTransaction } from "./models/NewTransaction.js";
 import { WithdrawalRequest } from "./models/WithdrawalRequest.js";
 import { TransactionHistory } from "./models/TransactionHistory.js";
 import { ReferralUser } from "./models/ReferralUser.js";
+import { Notification } from "./models/Notification.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -328,5 +340,15 @@ export {
   singInWalletAddress,
   getAllTransaction,
   updateLoginStatus,
-  userSignUpSignInOtp
+  userSignUpSignInOtp,
+  CurrencyConverter,  
+  getSingleGameRating,
+  deleteRating,
+  notificationAddEdit,
+  getAllNotification,
+  getSingleNotification,
+  deleteNotification,
+  Notification,
+  allCurrencyConverter,
+  gameActiveDeactive
 };

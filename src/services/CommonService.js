@@ -1,7 +1,13 @@
-import { bcryptjs, StatusCodes, ResponseMessage, jwt, crypto } from "../index.js";
+import { bcryptjs, StatusCodes, ResponseMessage, jwt, crypto, CurrencyConverter } from "../index.js";
 var key = "a6dfc106fadd4849e8b23759afea1b86c6c4c4b782c2cf08335c61dc4610fae5efe05ee361a4850f56ddb9457a96bbe01d2820d5106851db64cf210f70ec5e98";
 var secretCryptoKey = crypto.createHash("sha256").update(String(key)).digest("base64").slice(0, 32);
 var iv = crypto.randomBytes(16);
+
+export const currencyConverter = async (fromCurrency, toCurrency, amount) => {
+    let currencyConverter = new CurrencyConverter({ from: fromCurrency, to: toCurrency, amount })
+    const currency = await currencyConverter.convert();
+    return currency;
+}
 
 export const createError = async (res, error) => {
     return res.status(500).json({
