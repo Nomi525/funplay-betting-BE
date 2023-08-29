@@ -419,16 +419,6 @@ export const getWithdrawalList = async (req, res) => {
 export const changeStatusOfUser = async (req, res) => {
     try {
         const { id } = req.body;
-        // const updatedUser = await User.findOneAndUpdate(
-        //     { _id: req.body.id },
-        //     { $set: { isActive: req.body.status } },
-        //     { new: true }
-        // );
-        // console.log(updatedUser);
-        // const responseMessage = req.body.status === "true"
-        //     ? ResponseMessage.USER_ACTIVATED
-        //     : ResponseMessage.USER_DEACTIVATED;
-
         const findUser = await getSingleData({ _id: id }, User);
         if (findUser) {
             var responseMessage;
@@ -445,7 +435,6 @@ export const changeStatusOfUser = async (req, res) => {
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
         }
-        // return sendResponse(res, StatusCodes.OK, responseMessage);
     } catch (err) {
         return handleErrorResponse(res, err);
     }

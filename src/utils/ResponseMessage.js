@@ -82,7 +82,12 @@ const ResponseMessage = {
     GAME_RATING_AVERAGE : "Game rating fetched",
     WALLET_DISCONNECTED : "Wallet Disconnected",
     GAME_ADDED : "Game created successfully", 
+    COINSETTING_CREATED : "Currency setting created successfully", 
+    COINSETTING_UPDATED : "Currency setting updated successfully", 
+    COINSETTING_GET : "Currency setting fetched successfully", 
+    COINSETTING_LIST : "Currency setting list fetched successfully", 
     GAME_EXIST : "Game already exist", 
+    CURRENCY_EXIST : "Currency already exist", 
     EMAIL_PASSWORD_VERIFY : "Please verify otp to update profile ", 
     PROFILE_UPDATED : "Profile updated successfully", 
     EMAIL_ALREADY_EXIST : "Email is already in use please use another",
@@ -140,12 +145,14 @@ const ResponseMessage = {
     USER_DEACTIVATED : "User deactivated successfully",
     FAILED_TO_CREATE :"Fail to create",
     FAILED_TO_UPDATE :"Fail to update",
+    FAILED_TO_FETCH :"There is no content found.",
     REGISTERED : "Registered successfully",
     LOGIN : "Login successfully",
     PASSWORD_SET:"Password set successfully",
     PASSWORD_NOT_SET : "Password has been not set yet",
     REGISTERED_TYPE_NOT_MATCH:"You have registered with password ,kindly login with password.",
-    WALLET_CONNECT:"Registered with wallet successfully"
+    WALLET_CONNECT:"Registered with wallet successfully",
+    CURRENCY_CONVERTED : "Currency converted successfully",
 }
 
 export { ResponseMessage }
