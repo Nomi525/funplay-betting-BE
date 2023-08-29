@@ -255,13 +255,13 @@ export const userSignUpSignInOtp = async (req, res) => {
       );
     }
     if (existingUser && currency && email) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.USER_ALREADY_EXIST,
-          []
-        );
-    }  
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.USER_ALREADY_EXIST,
+        []
+      );
+    }
     if (existingUser) {
       if (existingUser.is_deleted != 0) {
         return sendResponse(
@@ -286,7 +286,7 @@ export const userSignUpSignInOtp = async (req, res) => {
           ResponseMessage.USER_ALREADY_EXIST,
           []
         );
-      }    
+      }
       const updateOtp = await dataUpdated({ email }, { otp }, User);
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
@@ -437,7 +437,16 @@ export const checkWalletAddress = async (req, res) => {
       "wallet.isConnected": true,
     });
     if (existingUser) {
-      return sendResponse(res, StatusCodes.OK, "", existingUser);
+      const payload = {
+        user: {
+          id: existingUser._id,
+        },
+      };
+      const token = await genrateToken({ payload });
+      return sendResponse(res, StatusCodes.OK, "", {
+        ...existingUser._doc,
+        token: token,
+      });
     } else {
       return sendResponse(res, StatusCodes.BAD_REQUEST, "");
     }
