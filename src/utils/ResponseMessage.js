@@ -145,7 +145,8 @@ const ResponseMessage = {
     PASSWORD_SET:"Password set successfully",
     PASSWORD_NOT_SET : "Password has been not set yet",
     REGISTERED_TYPE_NOT_MATCH:"You have registered with password ,kindly login with password.",
-    WALLET_CONNECT:"Registered with wallet successfully"
+    WALLET_CONNECT:"Registered with wallet successfully",
+    CURRENCY_CONVERTED : "Currency converted successfully",
 }
 
 export { ResponseMessage }
