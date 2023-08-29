@@ -1,3 +1,4 @@
+import { checkWalletAddress } from "../controller/user/UserController.js";
 import {
   express,
   logout,
@@ -42,12 +43,12 @@ import {
   userDepositeWithdrawalHistory,
   singInWalletAddress,
   updateLoginStatus,
-  userSignUpSignInOtp
+  userSignUpSignInOtp,
 } from "./../index.js";
 const userRoutes = express.Router();
 
-userRoutes.post("/signup-signin-otp", userSignUpSignInOtp)//connectToWallet);
-userRoutes.post("/signup-signin-with-wallet",connectToWallet);
+userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
+userRoutes.post("/signup-signin-with-wallet", connectToWallet);
 userRoutes.post("/update-login-status", updateLoginStatus);
 userRoutes.post("/update-email", updateEmail);
 userRoutes.post("/verify-otp", verifyOtp);
@@ -57,6 +58,7 @@ userRoutes.post(
   [validatorMiddlware("signupValidator")],
   singupFromEmailPassword
 );
+userRoutes.post("/check-wallet-connectivity", checkWalletAddress);
 userRoutes.post("/signin-password", singInFromEmailPassword);
 userRoutes.post("/signin-wallet", singInWalletAddress);
 userRoutes.post("/mpin-signin", userSignInMpin);

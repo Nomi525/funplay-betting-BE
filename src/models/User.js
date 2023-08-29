@@ -78,6 +78,16 @@ const userSchema = new mongoose.Schema(
           type: String,
           required: false,
         },
+        walletType: {
+          type: String,
+          required: false,
+          enum: ["web3model", "magic"],
+        },
+        isConnected: {
+          type: Boolean,
+          required: false,
+          default: false,
+        },
       },
     ],
     walletConnected: {
@@ -110,6 +120,11 @@ const userSchema = new mongoose.Schema(
     currency: {
       type: String,
       required: false,
+    },
+    registerType: {
+      type: String,
+      required: false,
+      enum: ["OTP", "Password"],
     },
     isActive: {
       type: Boolean,

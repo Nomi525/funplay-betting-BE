@@ -31,7 +31,7 @@ const ResponseMessage = {
     INVALID_OTP: "Invalid otp",
     INVALID_PASSWORD: "Invalid password",
     OTP_NOT_VERIFY: "Invalid otp",
-    USER_NOT_VERIFY: "User not verify",
+    USER_NOT_VERIFY: "User is not verify",
     PASSWORD_CHANGED: "Password has been changed",
     OLD_PASSWORD_WORNG: "Old password is wrong",
     OLD_PASSWORD_SAME: "Old and new password should not be same",
@@ -142,7 +142,10 @@ const ResponseMessage = {
     FAILED_TO_UPDATE :"Fail to update",
     REGISTERED : "Registered successfully",
     LOGIN : "Login successfully",
-    PASSWORD_SET:"Password set successfully"
+    PASSWORD_SET:"Password set successfully",
+    PASSWORD_NOT_SET : "Password has been not set yet",
+    REGISTERED_TYPE_NOT_MATCH:"You have registered with password ,kindly login with password.",
+    WALLET_CONNECT:"Registered with wallet successfully"
 }
 
 export { ResponseMessage }
