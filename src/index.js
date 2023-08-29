@@ -15,7 +15,7 @@ import path from "path";
 import Joi from "joi";
 import crypto from "crypto";
 import axios from "axios";
-import CurrencyConverter from 'currency-converter-lt'
+import CurrencyConverter from "currency-converter-lt";
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -55,7 +55,7 @@ import {
   getAdminSingleUser,
   changeStatusOfUser,
   getSingleGameRating,
-  deleteRating
+  deleteRating,
 } from "./controller/admin/AdminController.js";
 import {
   logout,
@@ -83,7 +83,7 @@ import {
   emailVerify,
   singInWalletAddress,
   updateEmail,
-  userSignUpSignInOtp
+  userSignUpSignInOtp,
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -118,7 +118,7 @@ import {
   getSingleGame,
   getSingleGameRules,
   gameRuleDelete,
-  gameActiveDeactive
+  gameActiveDeactive,
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -137,14 +137,19 @@ import {
   getUserReferralBySignIn,
   gelAllUserDepositeAndWithdrawal,
   getAllTransaction,
-  allCurrencyConverter
+  allCurrencyConverter,
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
   getAllNotification,
   getSingleNotification,
-  deleteNotification
+  deleteNotification,
 } from "./controller/admin/NotificationController.js";
+import {
+  addEditCoinSetting,
+  getCoinSetting,
+  getListCoinSetting,
+} from "./controller/admin/SettingController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -169,7 +174,7 @@ import { WithdrawalRequest } from "./models/WithdrawalRequest.js";
 import { TransactionHistory } from "./models/TransactionHistory.js";
 import { ReferralUser } from "./models/ReferralUser.js";
 import { Notification } from "./models/Notification.js";
-
+import { CoinSetting } from "./models/CoinsSetting.js";
 // Services
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
@@ -231,6 +236,7 @@ export {
   WithdrawalRequest,
   TransactionHistory,
   ReferralUser,
+  CoinSetting,
   dbConnection,
   setMpin,
   changeMpin,
@@ -263,7 +269,7 @@ export {
   getAllQuery,
   editProfile,
   logout,
-  connectToWallet,//userSignup,
+  connectToWallet, //userSignup,
   updateEmail,
   userSignInMpin,
   verifyOtp,
@@ -342,7 +348,7 @@ export {
   getAllTransaction,
   updateLoginStatus,
   userSignUpSignInOtp,
-  CurrencyConverter,  
+  CurrencyConverter,
   getSingleGameRating,
   deleteRating,
   notificationAddEdit,
@@ -352,5 +358,8 @@ export {
   Notification,
   allCurrencyConverter,
   gameActiveDeactive,
-  currencyConverter
+  currencyConverter,
+  addEditCoinSetting,
+  getCoinSetting,
+  getListCoinSetting
 };
