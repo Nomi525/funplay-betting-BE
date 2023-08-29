@@ -83,11 +83,11 @@ const userSchema = new mongoose.Schema(
           required: false,
           enum: ["web3model", "magic"],
         },
-        isConnected:{
+        isConnected: {
           type: Boolean,
           required: false,
-          default:false
-        }
+          default: false,
+        },
       },
     ],
     walletConnected: {

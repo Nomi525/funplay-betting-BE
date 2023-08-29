@@ -166,7 +166,7 @@ export const connectToWallet = async (req, res) => {
     // }
     // Check wallet address existence
     const walletUser = await User.findOne({
-      "wallet.walletAddress": wallet.walletAddress,     
+      "wallet.walletAddress": wallet.walletAddress,
       "wallet.walletType": wallet.walletType,
     });
     if (walletUser) {
@@ -383,18 +383,20 @@ export const updateEmail = async (req, res) => {
     }
     if (walletAddress && email) {
       const walletUser = await User.findOne({
-        "wallet.walletAddress": wallet.walletAddress,       
-        "wallet.walletType": wallet.walletType,
+        "wallet.walletAddress": walletAddress,
+        "wallet.walletType": walletType,
       });
       if (walletUser) {
         const updateUser = await User.findOneAndUpdate(
           {
             _id: walletUser._id,
+            "wallet.walletAddress": walletAddress,
+            "wallet.walletType": walletType,
           },
           {
             $set: {
               email: email,
-              "wallet.isConnected":true
+              "wallet.$.isConnected": true,
             },
           },
           { new: true }
@@ -421,20 +423,19 @@ export const updateEmail = async (req, res) => {
       }
     }
   } catch (error) {
+    console.log(error, ":Error");
     return handleErrorResponse(res, error);
   }
 };
 
 export const checkWalletAddress = async (req, res) => {
   try {
-    let { walletAddress,walletType } = req.body;
-    let existingUser = await User.findOne(
-      {
-        "wallet.walletAddress": walletAddress,     
-        "wallet.walletType": walletType,      
-        "wallet.isConnected": true,
-      }      
-    );
+    let { walletAddress, walletType } = req.body;
+    let existingUser = await User.findOne({
+      "wallet.walletAddress": walletAddress,
+      // "wallet.walletType": walletType,
+      "wallet.isConnected": true,
+    });
     if (existingUser) {
       return sendResponse(res, StatusCodes.OK, "", existingUser);
     } else {
@@ -449,7 +450,7 @@ export const updateLoginStatus = async (req, res) => {
   try {
     let { walletAddress, walletType } = req.body;
     const walletUser = await User.findOne({
-      "wallet.walletAddress": wallet.walletAddress,     
+      "wallet.walletAddress": wallet.walletAddress,
       "wallet.walletType": wallet.walletType,
     });
     await User.updateOne(
