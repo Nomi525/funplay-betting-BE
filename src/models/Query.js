@@ -23,6 +23,10 @@ const querySchema = new mongoose.Schema(
             type: String,
             required: false
         },
+        queryDocument: {
+            type: String,
+            required: false
+        },
         is_deleted: {
             type: Number,
             default: 0,

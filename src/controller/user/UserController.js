@@ -509,9 +509,14 @@ export const verifyOtp = async (req, res) => {
             { isVerified: true, otp: null },
             User
           );
-
+          const payload = {
+            user: {
+              id: userUpdate._id,
+            },
+          };
+          const token = await genrateToken({ payload });
           return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
-            ...userUpdate._doc,
+            ...userUpdate._doc, token,
             type,
           });
         } else if (type == "login") {

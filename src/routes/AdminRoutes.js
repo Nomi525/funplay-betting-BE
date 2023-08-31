@@ -53,6 +53,9 @@ import {
   addEditCoinSetting,
   getCoinSetting,
   getListCoinSetting,
+  getAdminSetting,
+  getSingleQuery,
+  adminDeleteQuery
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -79,7 +82,10 @@ adminRoutes.post("/transaction", Auth, getTransactionList);
 adminRoutes.post("/how-referral-work", Auth, howToReferralWork);
 
 // -------- Setting -------- //
-adminRoutes.post("/setting", Auth, adminSetting);
+adminRoutes.get("/setting-get", Auth, getAdminSetting);
+adminRoutes.post("/setting-add-edit", Auth, adminSetting);
+
+//#region Withdrawal
 adminRoutes.post("/withdrawal-request", Auth, adminWithdrawalRequest);
 adminRoutes.post("/add-edit-coin-setting", Auth, addEditCoinSetting);
 adminRoutes.get("/get-coin-setting/:coinId", Auth, getCoinSetting);
@@ -94,6 +100,8 @@ adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser);
 adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction);
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);
+adminRoutes.post("/get-single-query", Auth,  getSingleQuery);
+adminRoutes.post("/query-delete", Auth, adminDeleteQuery);
 
 // Rating
 adminRoutes.get("/game/ratings", Auth, showRating);

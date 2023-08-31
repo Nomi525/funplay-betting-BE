@@ -210,8 +210,30 @@
 //     //             done();
 //     //         });
 //     // });
- 
-//     //  *********  Admin Setting *********** //
+
+//     //  *********  Admin Setting Get *********** //
+//     // it('**** Admin Setting Get ****', (done) => {
+//     //     chai.request(appServer)
+//     //         .get('/api/admin/setting-get')
+//     //         .set('auth', adminToken)
+//     //         .end((err, res) => {
+//     //             if (res.body.status == 201) {
+//     //                 expect(res.body.status).to.be.equal(201);
+//     //             } else if (res.body.status == 200) {
+//     //                 expect(res.body.status).to.be.equal(200);
+//     //             } else if (res.body.status == 400) {
+//     //                 expect(res.body.status).to.be.equal(400);
+//     //             } else if (res.body.status == 404) {
+//     //                 expect(res.body.status).to.be.equal(404);
+//     //             } else {
+//     //                 expect(res.body.status).to.be.equal(500);
+//     //             }
+//     //             expect(res.body).to.have.all.keys('status', 'message', 'data')
+//     //             done();
+//     //         });
+//     // });
+
+//     //  *********  Admin withdrawal-request *********** //
 //     // it('**** Admin withdrawal-request ****', (done) => {
 //     //     chai.request(appServer)
 //     //         .post('/api/admin/withdrawal-request')
