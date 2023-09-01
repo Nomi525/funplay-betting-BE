@@ -617,14 +617,6 @@ export const userSignInMpin = async (req, res) => {
           []
         );
       }
-      // if (!existingUser.isVerified && existingUser.password !== null) {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.USER_NOT_VERIFY,
-      //     []
-      //   );
-      // }
       if (type == "login") {
         if (existingUser.registerType == "OTP") {
           return sendResponse(
@@ -635,21 +627,6 @@ export const userSignInMpin = async (req, res) => {
           );
         }
       }
-      // if (existingUser.password == null && type == "login") {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.PASSWORD_NOT_SET,
-      //     []
-      //   );
-      // } else {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.USER_ALREADY_EXIST,
-      //     []
-      //   );
-      // }
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -695,7 +672,7 @@ export const singupFromEmailPassword = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          "Password not set",
+          ResponseMessage.PASSWORD_NOT_SET,
           []
         );
       }
@@ -709,7 +686,7 @@ export const singupFromEmailPassword = async (req, res) => {
         userFind.isLogin = true;
         await userFind.save();
         const token = await genrateToken({ payload });
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_SET, {
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
           ...userFind._doc,
           token,
         });

@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
-    Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction, Transaction
+    Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction, Transaction, ReferralUser
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {
@@ -207,24 +207,16 @@ export const getAllUsers = async (req, res) => {
 export const getAdminSingleUser = async (req, res) => {
     try {
         const { userId } = req.body
-        const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
-        // console.log(findUser,'jjjj');
+        // const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
+        const findUser = await User.findOne({ _id: userId, is_deleted: 0 })
         if (findUser) {
             const walletAddress = await NewTransaction.findOne({ userId: findUser._id, is_deleted: 0 })
-            // const walletAddress = await NewTransaction.findOne({
-            //     userId: findUser._id, $or: [
-            //         { bitcoinWalletAddress: bitcoinAddress },
-            //         { ethereumWalletAddress: ethereumAddress }
-            //     ], is_deleted: 0
-            // })
-            // console.log(walletAddress);
-            // console.log(walletAddress);
-            // return
+            const referralUsers = await ReferralUser.find({ userId: findUser._id }).populate('referralUser')
             var walletAmount = 0;
             if (walletAddress) {
                 walletAmount = walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
             }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, { ...findUser._doc, walletAmount });
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, { ...findUser._doc, walletAmount, useReferralCodeUsers: referralUsers });
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
@@ -275,10 +267,10 @@ export const adminSetting = async (req, res) => {
 
 export const getAdminSetting = async (req, res) => {
     try {
-        const settings = await getSingleData({},AdminSetting);
-        if(settings){
+        const settings = await getSingleData({}, AdminSetting);
+        if (settings) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.SETTING_GET, settings);
-        }else{
+        } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SETTING_NOT_FOUND, []);
         }
     } catch (error) {
