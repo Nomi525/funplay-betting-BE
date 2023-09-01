@@ -56,6 +56,7 @@ import {
   changeStatusOfUser,
   getSingleGameRating,
   deleteRating,
+  getAdminSetting
 } from "./controller/admin/AdminController.js";
 import {
   logout,
@@ -84,6 +85,7 @@ import {
   singInWalletAddress,
   updateEmail,
   userSignUpSignInOtp,
+  userGetAllGame,
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -100,7 +102,11 @@ import {
   addEditQuery,
   deleteQuery,
 } from "./controller/user/QuerySectionController.js";
-import { getAllQuery } from "./controller/admin/QuerySectionController.js";
+import { 
+  getAllQuery,
+  getSingleQuery,
+  adminDeleteQuery
+} from "./controller/admin/QuerySectionController.js";
 import {
   addEditRating,
   gameRatingAverage,
@@ -361,5 +367,9 @@ export {
   currencyConverter,
   addEditCoinSetting,
   getCoinSetting,
-  getListCoinSetting
+  getListCoinSetting,
+  userGetAllGame,
+  getAdminSetting,
+  getSingleQuery,
+  adminDeleteQuery
 };

@@ -14,6 +14,10 @@ const ratingSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    is_deleted : {
+        type: Number,
+        default: 0,
+    }
 }, { timestamps: true });
 
 const Rating = mongoose.model('Rating', ratingSchema);

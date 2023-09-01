@@ -1,18 +1,18 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Query,handleErrorResponse
+    getSingleData, getAllData, Query, handleErrorResponse
 } from "../../index.js";
 
 export const addEditQuery = async (req, res) => {
     try {
         const { userName, email, mobileNumber, description, queryId } = req.body;
         if (!queryId) {
-            const createQuery = await dataCreate({ userId: req.user, userName, email, mobileNumber, description, queryDocument:req.imageUrl }, Query);
+            const createQuery = await dataCreate({ userId: req.user, userName, email, mobileNumber, description, queryDocument: req.queryDocumentUrl }, Query);
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.QUERY_CREATED, createQuery);
         } else {
             const updeteObj = { userName, email, mobileNumber, description };
-            if (req.imageUrl) {
-                updeteObj.queryDocument = req.imageUrl
+            if (req.queryDocumentUrl) {
+                updeteObj.queryDocument = req.queryDocumentUrl
             }
             const updateQuery = await dataUpdated({ _id: queryId }, updeteObj, Query);
             if (updateQuery) {

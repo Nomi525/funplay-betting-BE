@@ -147,7 +147,7 @@ export const addNewTransaction = async (req, res) => {
         findUser.tokenDollorValue += parseFloat(value)
         await findUser.save();
 
-        await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenDollorValue: value, type: "deposite" }, TransactionHistory)
+        await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenDollorValue: value, type: "deposit" }, TransactionHistory)
 
         return { status: 'OK', data: findUser }
       } else {
@@ -631,18 +631,18 @@ export const withdrawalRequest = async (req, res) => {
               return { status: "OK", data: findTransaction }
             }
           } else {
-            return { status: 'BAD_REQUST', data: [] }
+            return { status: ResponseMessage.WITHDRAWAL_INVALID, data: [] }
           }
         }
       })
       const promiseData = await Promise.all(mapData);
       if (promiseData[0]?.status == "OK") {
-        return sendResponse(res, StatusCodes.OK, "Withdrawal done", promiseData[0]?.data)
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.WITHDRAWAL_REQUEST_SEND, promiseData[0]?.data)
       } else {
-        return sendResponse(res, StatusCodes.NOT_FOUND, "Bad request", [])
+        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.WITHDRAWAL_INVALID, [])
       }
     } else {
-      return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, [])
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, [])
     }
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -665,7 +665,7 @@ export const getUserNewTransaction = async (req, res) => {
     } else {
       return sendResponse(
         res,
-        StatusCodes.NOT_FOUND,
+        StatusCodes.BAD_REQUEST,
         ResponseMessage.TRANSCTION_NOT_FOUND,
         []
       );
@@ -679,13 +679,13 @@ export const getTotalUserAmountDiposit = async (req, res) => {
   try {
     const findUser = await getSingleData({ userId: req.user }, NewTransaction);
     if (findUser) {
-      return sendResponse(res, StatusCodes.OK, "User total deposit amount", {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_DEPOSIT_AMOUNT, {
         tokenDollorValue: findUser.tokenDollorValue,
       });
     } else {
       return sendResponse(
         res,
-        StatusCodes.NOT_FOUND,
+        StatusCodes.BAD_REQUEST,
         ResponseMessage.USER_NOT_EXIST,
         []
       );
@@ -709,7 +709,7 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
         history
       );
     } else {
-      return sendResponse(res, StatusCodes.NOT_FOUND, "History not found", []);
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.TRANSCTION_NOT_FOUND, []);
     }
   } catch (error) {
     return handleErrorResponse(res, error);

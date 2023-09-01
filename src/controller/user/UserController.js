@@ -21,6 +21,7 @@ import {
   handleErrorResponse,
   generateOtp,
   ReferralUser,
+  Game,
 } from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
@@ -546,9 +547,14 @@ export const verifyOtp = async (req, res) => {
             { isVerified: true, otp: null },
             User
           );
-
+          const payload = {
+            user: {
+              id: userUpdate._id,
+            },
+          };
+          const token = await genrateToken({ payload });
           return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
-            ...userUpdate._doc,
+            ...userUpdate._doc, token,
             type,
           });
         } else if (type == "login") {
@@ -649,14 +655,6 @@ export const userSignInMpin = async (req, res) => {
           []
         );
       }
-      // if (!existingUser.isVerified && existingUser.password !== null) {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.USER_NOT_VERIFY,
-      //     []
-      //   );
-      // }
       if (type == "login") {
         if (
           existingUser.registerType == "OTP" &&
@@ -670,21 +668,6 @@ export const userSignInMpin = async (req, res) => {
           );
         }
       }
-      // if (existingUser.password == null && type == "login") {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.PASSWORD_NOT_SET,
-      //     []
-      //   );
-      // } else {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.USER_ALREADY_EXIST,
-      //     []
-      //   );
-      // }
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -730,7 +713,7 @@ export const singupFromEmailPassword = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          "Password not set",
+          ResponseMessage.PASSWORD_NOT_SET,
           []
         );
       }
@@ -744,7 +727,7 @@ export const singupFromEmailPassword = async (req, res) => {
         userFind.isLogin = true;
         await userFind.save();
         const token = await genrateToken({ payload });
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.PASSWORD_SET, {
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
           ...userFind._doc,
           token,
         });
@@ -1695,9 +1678,9 @@ export const userEditProfile = async (req, res) => {
     let otp = 4444;
     const user = await User.findById(Id);
     if (req.files.profile) {
-      fs.unlink("./public/uploads/" + user.profile, () => {});
+      fs.unlink("./public/uploads/" + user.profile, () => { });
     } else if (req.body.removeProfileUrl) {
-      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => {});
+      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
       user.profile = "";
       await user.save();
     } else {
@@ -1841,3 +1824,16 @@ export const transactionHistory = async (req, res) => {
 //         return handleErrorResponse(req, error);
 //     }
 // }
+
+export const userGetAllGame = async (req, res) => {
+  try {
+    const games = await getAllData({ isActive: true, is_deleted: 0 }, Game)
+    if (games.length) {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_GET_ALL, games)
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, [])
+    }
+  } catch (error) {
+    return handleErrorResponse(req, error);
+  }
+}

@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
-     Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction
+    Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction, Transaction, ReferralUser
 } from "./../../index.js";
 
 export const adminLogin = async (req, res) => {
@@ -207,24 +207,16 @@ export const getAllUsers = async (req, res) => {
 export const getAdminSingleUser = async (req, res) => {
     try {
         const { userId } = req.body
-        const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
-        // console.log(findUser,'jjjj');
+        // const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
+        const findUser = await User.findOne({ _id: userId, is_deleted: 0 })
         if (findUser) {
-            const walletAddress = await NewTransaction.findOne({ userId: findUser._id,is_deleted: 0 })
-            // const walletAddress = await NewTransaction.findOne({
-            //     userId: findUser._id, $or: [
-            //         { bitcoinWalletAddress: bitcoinAddress },
-            //         { ethereumWalletAddress: ethereumAddress }
-            //     ], is_deleted: 0
-            // })
-            // console.log(walletAddress);
-            // console.log(walletAddress);
-            // return
+            const walletAddress = await NewTransaction.findOne({ userId: findUser._id, is_deleted: 0 })
+            const referralUsers = await ReferralUser.find({ userId: findUser._id }).populate('referralUser')
             var walletAmount = 0;
-            if(walletAddress){
-                walletAmount =  walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
+            if (walletAddress) {
+                walletAmount = walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
             }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, {...findUser._doc,walletAmount});
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, { ...findUser._doc, walletAmount, useReferralCodeUsers: referralUsers });
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
@@ -267,6 +259,19 @@ export const adminSetting = async (req, res) => {
         } else {
             const createSetting = await dataCreate(req.body, AdminSetting);
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.SETTING_CREATED, createSetting);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
+export const getAdminSetting = async (req, res) => {
+    try {
+        const settings = await getSingleData({}, AdminSetting);
+        if (settings) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.SETTING_GET, settings);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SETTING_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -360,7 +365,7 @@ export const showRating = async (req, res) => {
         if (ratings.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, ratings);
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.RATING_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -378,7 +383,7 @@ export const getSingleGameRating = async (req, res) => {
         if (rating) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, rating);
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.RATING_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -391,10 +396,11 @@ export const deleteRating = async (req, res) => {
     try {
         const { ratingId } = req.body;
         const deleteRating = await dataUpdated({ _id: ratingId }, { is_deleted: 1 }, Rating)
+        console.log(deleteRating);
         if (deleteRating) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.RATING_DELETED, []);
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.RATING_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);

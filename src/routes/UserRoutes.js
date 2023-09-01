@@ -44,6 +44,7 @@ import {
   singInWalletAddress,
   updateLoginStatus,
   userSignUpSignInOtp,
+  userGetAllGame
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -84,7 +85,7 @@ userRoutes.get("/verify-email", emailVerify);
 userRoutes.get("/transaction-history", Auth, transactionHistory);
 
 // Query-Section Routes
-userRoutes.post("/query/add-edit", Auth, addEditQuery);
+userRoutes.post("/query/add-edit", Auth, Upload, addEditQuery);
 userRoutes.post("/query/delete", Auth, deleteQuery);
 
 // Rating Routes
@@ -101,11 +102,14 @@ userRoutes.post("/transction/add", Auth, addTransaction);
 
 userRoutes.get("/new-transctions", Auth, getUserNewTransaction);
 userRoutes.post("/new-transction/add", Auth, addNewTransaction);
-userRoutes.get("/total-amount-diposit", Auth, getTotalUserAmountDiposit);
+userRoutes.get("/total-amount-deposit", Auth, getTotalUserAmountDiposit);
 userRoutes.post("/withdrawal-request", Auth, withdrawalRequest);
-userRoutes.get("/get-deposite-withdrawal", Auth, userDepositeWithdrawalHistory);
+userRoutes.get("/get-deposit-withdrawal", Auth, userDepositeWithdrawalHistory);
 
 //Dashboard
 userRoutes.get("/dashboard", Auth, userDashboard);
+
+//#region Game
+userRoutes.get('/games', Auth, userGetAllGame)
 
 export { userRoutes };
