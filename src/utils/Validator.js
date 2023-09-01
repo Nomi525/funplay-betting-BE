@@ -18,7 +18,8 @@ const signupValidator = Joi.object().keys({
         }),
     currency: Joi.string().optional(),
     referralByCode: Joi.string().optional(),
-    registerType: Joi.string().optional()
+    registerType: Joi.string().optional(),
+    type: Joi.string().optional()
 })
 
 export const validatorRequest = {

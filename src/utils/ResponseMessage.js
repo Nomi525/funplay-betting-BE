@@ -30,6 +30,7 @@ const ResponseMessage = {
     LOGIN_SUCCESS : "User login suceessfully",
     INVALID_OTP: "Invalid otp",
     INVALID_PASSWORD: "Invalid password",
+    INVALID_TYPE: "Invalid type",
     OTP_NOT_VERIFY: "Invalid otp",
     USER_NOT_VERIFY: "User is not verify",
     PASSWORD_CHANGED: "Password has been changed",
