@@ -689,116 +689,254 @@ export const userSignInMpin = async (req, res) => {
 
 export const singupFromEmailPassword = async (req, res) => {
   try {
-    let { email, password, currency, referralByCode, registerType } = req.body;
+    let { email, password, currency, referralByCode, registerType,type } = req.body;
     email = email ? email.toLowerCase() : null;
     let userFind = await getSingleData({ email }, User);
-    if (userFind) {
-      if (userFind.is_deleted != 0) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.DEACTIVATED_USER,
-          []
-        );
-      }
-      if (!userFind.isActive) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.DEACTIVATED_USER,
-          []
-        );
-      }
-      if (userFind.password == null) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.PASSWORD_NOT_SET,
-          []
-        );
-      }
-      let verifyPassword = await passwordCompare(password, userFind.password);
-      if (verifyPassword) {
-        const payload = {
-          user: {
-            id: userFind._id,
-          },
-        };
-        userFind.isLogin = true;
-        await userFind.save();
-        const token = await genrateToken({ payload });
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
-          ...userFind._doc,
-          token,
-        });
-      } else {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.INVALID_PASSWORD,
-          []
-        );
-      }
-    } else {
-      if (!password) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.PASSWORD_REQUIRED,
-          []
-        );
-      }
-      let referCode = referralCode(8);
-      let findReferralUser = null;
-      // For Referral Code
-      if (referralByCode) {
-        findReferralUser = await getSingleData(
-          { referralCode: referralByCode, is_deleted: 0 },
-          User
-        );
-        if (!findReferralUser) {
+    if(type == "login"){
+      if (userFind) {
+        if (userFind.is_deleted != 0) {
           return sendResponse(
             res,
-            StatusCodes.NOT_FOUND,
-            ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.DEACTIVATED_USER,
             []
           );
         }
+        if (!userFind.isActive) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.DEACTIVATED_USER,
+            []
+          );
+        }
+        if (userFind.password == null) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.PASSWORD_NOT_SET,
+            []
+          );
+        }
+        let verifyPassword = await passwordCompare(password, userFind.password);
+        if (verifyPassword) {
+          const payload = {
+            user: {
+              id: userFind._id,
+            },
+          };
+          userFind.isLogin = true;
+          await userFind.save();
+          const token = await genrateToken({ payload });
+          return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
+            ...userFind._doc,
+            token,
+          });
+        } else {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.INVALID_PASSWORD,
+            []
+          );
+        }
+      }else{
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_NOT_FOUND,
+          []
+        );
       }
-      password = await hashedPassword(password);
-      const createUser = await dataCreate(
-        {
-          email,
-          currency,
-          password,
-          referralCode: referCode,
-          registerType,
-          referralByCode: referralByCode ? referralByCode : null,
-        },
-        User
-      );
-      if (findReferralUser) {
-        await ReferralUser.create({
-          userId: findReferralUser._id,
-          referralUser: userData._id,
-          referralByCode: referralByCode,
+    }else if(type == "signup"){
+      if(userFind){
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_ALREADY_EXIST,
+          []
+        );
+      }else{
+        if (!password) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.PASSWORD_REQUIRED,
+            []
+          );
+        }
+        let referCode = referralCode(8);
+        let findReferralUser = null;
+        // For Referral Code
+        if (referralByCode) {
+          findReferralUser = await getSingleData(
+            { referralCode: referralByCode, is_deleted: 0 },
+            User
+          );
+          if (!findReferralUser) {
+            return sendResponse(
+              res,
+              StatusCodes.NOT_FOUND,
+              ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+              []
+            );
+          }
+        }
+        password = await hashedPassword(password);
+        const createUser = await dataCreate(
+          {
+            email,
+            currency,
+            password,
+            referralCode: referCode,
+            registerType,
+            referralByCode: referralByCode ? referralByCode : null,
+          },
+          User
+        );
+        if (findReferralUser) {
+          await ReferralUser.create({
+            userId: findReferralUser._id,
+            referralUser: userData._id,
+            referralByCode: referralByCode,
+          });
+        }
+        const payload = {
+          user: {
+            id: createUser._id,
+          },
+        };
+        const token = await genrateToken({ payload });
+        return sendResponse(res, StatusCodes.CREATED, ResponseMessage.REGISTERED, {
+          ...createUser._doc,
+          token,
         });
       }
-      const payload = {
-        user: {
-          id: createUser._id,
-        },
-      };
-      const token = await genrateToken({ payload });
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
-        ...createUser._doc,
-        token,
-      });
+    }else{
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.INVALID_TYPE,
+        []
+      );
     }
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
+
+// export const singupFromEmailPassword = async (req, res) => {
+//   try {
+//     let { email, password, currency, referralByCode, registerType } = req.body;
+//     email = email ? email.toLowerCase() : null;
+//     let userFind = await getSingleData({ email }, User);
+//     if (userFind) {
+//       if (userFind.is_deleted != 0) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.DEACTIVATED_USER,
+//           []
+//         );
+//       }
+//       if (!userFind.isActive) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.DEACTIVATED_USER,
+//           []
+//         );
+//       }
+//       if (userFind.password == null) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.PASSWORD_NOT_SET,
+//           []
+//         );
+//       }
+//       let verifyPassword = await passwordCompare(password, userFind.password);
+//       if (verifyPassword) {
+//         const payload = {
+//           user: {
+//             id: userFind._id,
+//           },
+//         };
+//         userFind.isLogin = true;
+//         await userFind.save();
+//         const token = await genrateToken({ payload });
+//         return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
+//           ...userFind._doc,
+//           token,
+//         });
+//       } else {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.INVALID_PASSWORD,
+//           []
+//         );
+//       }
+//     } else {
+//       if (!password) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.PASSWORD_REQUIRED,
+//           []
+//         );
+//       }
+//       let referCode = referralCode(8);
+//       let findReferralUser = null;
+//       // For Referral Code
+//       if (referralByCode) {
+//         findReferralUser = await getSingleData(
+//           { referralCode: referralByCode, is_deleted: 0 },
+//           User
+//         );
+//         if (!findReferralUser) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.NOT_FOUND,
+//             ResponseMessage.REFERRAL_CODE_NOT_FOUND,
+//             []
+//           );
+//         }
+//       }
+//       password = await hashedPassword(password);
+//       const createUser = await dataCreate(
+//         {
+//           email,
+//           currency,
+//           password,
+//           referralCode: referCode,
+//           registerType,
+//           referralByCode: referralByCode ? referralByCode : null,
+//         },
+//         User
+//       );
+//       if (findReferralUser) {
+//         await ReferralUser.create({
+//           userId: findReferralUser._id,
+//           referralUser: userData._id,
+//           referralByCode: referralByCode,
+//         });
+//       }
+//       const payload = {
+//         user: {
+//           id: createUser._id,
+//         },
+//       };
+//       const token = await genrateToken({ payload });
+//       return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
+//         ...createUser._doc,
+//         token,
+//       });
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
 
 export const singInFromEmailPassword = async (req, res) => {
   try {
