@@ -135,6 +135,22 @@ export const connectToWallet = async (req, res) => {
     if (lowercasedEmail) {
       existingUser = await User.findOne({ email: lowercasedEmail });
     }
+    if (existingUser) {
+      await existingUser.updateOne({
+        $set: {
+          wallet: {
+            walletAddress: walletArray[0].walletAddress,
+            walletType: walletArray[0].walletType,
+            isConnected: true,
+          },
+        },
+      });
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.WALLET_CONNECT
+      );
+    }
     // if (existingUser) {
     //   if (existingUser.is_deleted !== 0 || !existingUser.isActive) {
     //     return sendResponse(
@@ -170,6 +186,7 @@ export const connectToWallet = async (req, res) => {
       "wallet.walletType": wallet.walletType,
     });
     if (walletUser) {
+      await walletUser.updateOne({ $set: { "wallet.$.isConnected": true } });
       const payload = {
         user: {
           id: walletUser._id,
@@ -186,7 +203,11 @@ export const connectToWallet = async (req, res) => {
       email: lowercasedEmail,
       currency,
       password,
-      wallet: walletArray,
+      wallet: {
+        walletAddress: walletArray[0].walletAddress,
+        walletType: walletArray[0].walletType,
+        isConnected: true,
+      },
       referralCode: referCode,
       otp,
     });
@@ -637,7 +658,10 @@ export const userSignInMpin = async (req, res) => {
       //   );
       // }
       if (type == "login") {
-        if (existingUser.registerType == "OTP") {
+        if (
+          existingUser.registerType == "OTP" &&
+          existingUser.password == null
+        ) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -1086,7 +1110,7 @@ export const editProfile = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.EMAIL_PASSWORD_VERIFY,
+        ResponseMessage.PROFILE_UPDATED,
         []
       );
     } else {

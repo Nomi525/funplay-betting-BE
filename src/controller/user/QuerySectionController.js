@@ -7,10 +7,14 @@ export const addEditQuery = async (req, res) => {
     try {
         const { userName, email, mobileNumber, description, queryId } = req.body;
         if (!queryId) {
-            const createQuery = await dataCreate({ userId: req.user, userName, email, mobileNumber, description }, Query);
+            const createQuery = await dataCreate({ userId: req.user, userName, email, mobileNumber, description, queryDocument:req.imageUrl }, Query);
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.QUERY_CREATED, createQuery);
         } else {
-            const updateQuery = await dataUpdated({ _id: queryId }, { description }, Query);
+            const updeteObj = { userName, email, mobileNumber, description };
+            if (req.imageUrl) {
+                updeteObj.queryDocument = req.imageUrl
+            }
+            const updateQuery = await dataUpdated({ _id: queryId }, updeteObj, Query);
             if (updateQuery) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.QUERY_UPDATED, updateQuery);
             } else {
