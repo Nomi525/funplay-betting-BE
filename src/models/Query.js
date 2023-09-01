@@ -1,4 +1,4 @@
-import { mongoose } from '../index.js';
+import { mongoose } from "../index.js";
 
 const querySchema = new mongoose.Schema(
     {
@@ -20,10 +20,6 @@ const querySchema = new mongoose.Schema(
             required: false
         },
         description: {
-            type: String,
-            required: false
-        },
-        queryDocument: {
             type: String,
             required: false
         },
