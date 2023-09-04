@@ -195,7 +195,7 @@ export const addNewTransaction = async (req, res) => {
           }
         }
         const createTransction = await dataCreate(createObject, NewTransaction);
-        await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposite" }, TransactionHistory)
+        await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposit" }, TransactionHistory)
 
         return { status: 'CREATED', data: createTransction }
       }
