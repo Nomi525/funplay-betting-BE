@@ -22,6 +22,7 @@ import {
   generateOtp,
   ReferralUser,
   Game,
+  CMS,
 } from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
@@ -1979,3 +1980,18 @@ export const userGetAllGame = async (req, res) => {
     return handleErrorResponse(req, error);
   }
 }
+
+//#region getCMS
+export const userGetCMSDetail = async (req, res) => {
+  try {
+      const CMSData = await CMS.findOne();
+      return res.status(200).json({
+          status: StatusCodes.OK,
+          message: ResponseMessage.CMS_DETAILS,
+          data: CMSData,
+      });
+  } catch (error) {
+      return handleErrorResponse(res, error);
+  }
+};
+//#endregion

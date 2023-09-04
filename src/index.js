@@ -86,6 +86,7 @@ import {
   updateEmail,
   userSignUpSignInOtp,
   userGetAllGame,
+  userGetCMSDetail
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -371,5 +372,6 @@ export {
   userGetAllGame,
   getAdminSetting,
   getSingleQuery,
-  adminDeleteQuery
+  adminDeleteQuery,
+  userGetCMSDetail
 };

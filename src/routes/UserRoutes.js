@@ -44,7 +44,8 @@ import {
   singInWalletAddress,
   updateLoginStatus,
   userSignUpSignInOtp,
-  userGetAllGame
+  userGetAllGame,
+  userGetCMSDetail
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -111,5 +112,8 @@ userRoutes.get("/dashboard", Auth, userDashboard);
 
 //#region Game
 userRoutes.get('/games', Auth, userGetAllGame)
+
+//#region CMS
+userRoutes.get('/cms-details', Auth, userGetCMSDetail)
 
 export { userRoutes };
