@@ -33,25 +33,35 @@ export const addEditGame = async (req, res) => {
     }
     const gameImage = req.gameImageUrl ? req.gameImageUrl : findGame?.gameImage;
     if (!gameId) {
-      const newGame = await dataCreate(
-        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount },
-        Game
-      );
-      const createGame = await newGame.save();
-      if (createGame) {
-        return sendResponse(
-          res,
-          StatusCodes.CREATED,
-          ResponseMessage.GAME_CREATED,
-          createGame
-        );
-      } else {
+      const checkGameCount = await Game.countDocuments({ $or: [{ isActive: true, is_deleted: 0 }] });
+      if (checkGameCount >= 5) {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          ResponseMessage.FAILED_TO_CREATE,
+          process.env.GAME_MAX_LIMIT,
           []
         );
+      } else {
+        const newGame = await dataCreate(
+          { gameName, gameImage, gameDuration, gameRound, gameWinningAmount },
+          Game
+        );
+        const createGame = await newGame.save();
+        if (createGame) {
+          return sendResponse(
+            res,
+            StatusCodes.CREATED,
+            ResponseMessage.GAME_CREATED,
+            createGame
+          );
+        } else {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.FAILED_TO_CREATE,
+            []
+          );
+        }
       }
     } else {
       const updateGame = await dataUpdated(
@@ -96,6 +106,17 @@ export const gameActiveDeactive = async (req, res) => {
     const { gameId } = req.body;
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame) {
+      if (findGame.isActive == false) {
+        const checkGameCount = await Game.countDocuments({ $or: [{ isActive: true, is_deleted: 0 }] });
+        if (checkGameCount >= 5) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            process.env.GAME_ACTIVE_LIMIT,
+            []
+          );
+        }
+      }
       if (findGame.isActive) {
         findGame.isActive = false;
         await findGame.save();
@@ -235,9 +256,9 @@ export const getGameRules = async (req, res) => {
 
 export const getSingleGameRules = async (req, res) => {
   try {
-    const { gameRuleId } = req.body;  
+    const { gameId } = req.body;
     const findGameRule = await GameRules.findOne({
-      _id: gameRuleId,
+      gameId,
       is_deleted: 0,
     }).populate("gameId", "gameName gameImage gameDuration");
     if (findGameRule) {
@@ -262,8 +283,8 @@ export const getSingleGameRules = async (req, res) => {
 
 export const gameRuleDelete = async (req, res) => {
   try {
-    const { gameRuleId } = req.body;
-    await dataUpdated({ _id: gameRuleId }, { is_deleted: 1 }, GameRules);
+    const { gameId } = req.body;
+    await dataUpdated({ gameId }, { is_deleted: 1 }, GameRules);
     return sendResponse(
       res,
       StatusCodes.OK,

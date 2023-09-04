@@ -452,12 +452,15 @@ export const updateEmail = async (req, res) => {
 
 export const checkWalletAddress = async (req, res) => {
   try {
-    let { walletAddress, walletType } = req.body;
-    let existingUser = await User.findOne({
+    let { walletAddress, email,walletType } = req.body;
+    const queryOjb = {
       "wallet.walletAddress": walletAddress,
-      // "wallet.walletType": walletType,
       "wallet.isConnected": true,
-    });
+    }
+    if(email){
+      queryOjb.email = email
+    }
+    let existingUser = await User.findOne(queryOjb);
     if (existingUser) {
       const payload = {
         user: {
@@ -474,6 +477,7 @@ export const checkWalletAddress = async (req, res) => {
     }
   } catch (error) {
     console.log(error, ":Error");
+    return handleErrorResponse(res, error);
   }
 };
 
