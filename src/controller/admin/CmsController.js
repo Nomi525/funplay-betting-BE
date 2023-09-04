@@ -59,7 +59,7 @@ export const addEditAboutUs = async (req, res) => {
                     });
                     let updatedData = await CMS.find({ deletedStatus: 0 });
                     if (updateAboutUs) {
-                        return sendResponse(res, StatusCodes.OK, ResponseMessage.RULE_UPDATE, updatedData);
+                        return sendResponse(res, StatusCodes.OK, ResponseMessage.ABOUT_US_UPDATE, updatedData);
                     }
                 }
             } else {
@@ -70,7 +70,7 @@ export const addEditAboutUs = async (req, res) => {
                 let aboutUsData = await aboutUs.save();
                 // let aboutUsData = await CMS.find({ deletedStatus: 0 });
                 if (data) {
-                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.RULE_ADDED, aboutUsData);
+                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.ABOUT_US_ADDED, aboutUsData);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
