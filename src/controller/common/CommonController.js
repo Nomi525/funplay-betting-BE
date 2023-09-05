@@ -29,7 +29,7 @@ export const addEditBanner = async (req, res) => {
 
 export const allBannerGet = async (req, res) => {
     try {
-        if (req.admin || req.user) {
+        // if (req.admin || req.user) {
             // const createdBy = req.user ? req.user : req.admin;
             // const findBanner = await getAllData({ is_deleted: 0, createdBy }, BannerModel)
             const findBanner = await getAllData({ is_deleted: 0 }, BannerModel)
@@ -38,9 +38,9 @@ export const allBannerGet = async (req, res) => {
             } else {
                 return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
             }
-        } else {
-            return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
-        }
+        // } else {
+        //     return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
+        // }
     } catch (error) {
         return handleErrorResponse(res, error);
     }
