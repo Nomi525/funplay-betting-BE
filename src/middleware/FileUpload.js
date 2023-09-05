@@ -38,6 +38,10 @@ var upload = multer({ storage }).fields([
         name: "queryDocument",
         maxCount: 1,
     },
+    {
+        name: "bannerImage",
+        maxCount: Infinity,
+    },
 ]);
 
 export default function (req, res, next) {
@@ -57,6 +61,9 @@ export default function (req, res, next) {
 
                 var queryDocument = req.files.queryDocument ? req.files.queryDocument[0].filename : "";
                 req.queryDocumentUrl = queryDocument;
+
+                var bannerImage = req.files.bannerImage || [];
+                req.bannerImageUrl = bannerImage.map((file) => file.filename);
                 next();
             } else {
                 next();
