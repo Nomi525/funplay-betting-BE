@@ -4,7 +4,7 @@ export const addEditBanner = async (req, res) => {
     try {
         if (req.admin || req.user) {
             if (!req.body.bannerId) {
-                req.body.bannerImage = req.imageUrl;
+                req.body.bannerImage = req.bannerImageUrl;
                 req.body.type = req.user ? 'user' : 'admin';
                 req.body.createdBy = req.user ? req.user : req.admin;
                 const createBanner = await dataCreate(req.body, BannerModel);
@@ -12,7 +12,7 @@ export const addEditBanner = async (req, res) => {
             } else {
                 const findBanner = await getSingleData({ _id: req.body.bannerId }, BannerModel)
                 if (findBanner) {
-                    req.body.bannerImage = req.imageUrl ? req.imageUrl : findBanner.bannerImage;
+                    req.body.bannerImage = req.bannerImageUrl ? req.bannerImageUrl : findBanner.bannerImage;
                     const updatedBanner = await dataUpdated({ _id: req.body.bannerId }, req.body, BannerModel)
                     return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_UPDATED, updatedBanner);
                 } else {
