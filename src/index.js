@@ -27,6 +27,7 @@ import {
   getAllData,
   getAllDataCount,
   deleteById,
+  createReward
 } from "./services/QueryService.js";
 import { validatorRequest } from "./utils/Validator.js";
 import { validatorMiddlware } from "./middleware/Validation.js";
@@ -182,6 +183,8 @@ import { TransactionHistory } from "./models/TransactionHistory.js";
 import { ReferralUser } from "./models/ReferralUser.js";
 import { Notification } from "./models/Notification.js";
 import { CoinSetting } from "./models/CoinsSetting.js";
+import { Reward } from "./models/Reward.js";
+
 // Services
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
@@ -234,6 +237,7 @@ export {
   Rating,
   Wallet,
   WalletLogin,
+  Reward,
   Joi,
   NewTransaction,
   Game,
@@ -373,5 +377,6 @@ export {
   getAdminSetting,
   getSingleQuery,
   adminDeleteQuery,
-  userGetCMSDetail
+  userGetCMSDetail,
+  createReward
 };

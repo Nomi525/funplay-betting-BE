@@ -23,6 +23,9 @@ import {
   ReferralUser,
   Game,
   CMS,
+  Reward,
+  AdminSetting,
+  createReward,
 } from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
@@ -213,6 +216,9 @@ export const connectToWallet = async (req, res) => {
       referralCode: referCode,
       otp,
     });
+    if(newUser){
+      await createReward(newUser._id,'Created Reward','First time reward from admin side');
+    }
     // if (referralByCode) {
     //   const userOfReferral = await User.findOne({
     //     referralCode: referralByCode,
@@ -360,6 +366,9 @@ export const userSignUpSignInOtp = async (req, res) => {
           referralByCode: referralByCode,
         });
       }
+      if(userData){
+        await createReward(userData._id,'Created Reward','First time reward from admin side');
+      }
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(userData.email, "Verify Otp", mailInfo);
       return sendResponse(
@@ -453,12 +462,12 @@ export const updateEmail = async (req, res) => {
 
 export const checkWalletAddress = async (req, res) => {
   try {
-    let { walletAddress, email,walletType } = req.body;
+    let { walletAddress, email, walletType } = req.body;
     const queryOjb = {
       "wallet.walletAddress": walletAddress,
       "wallet.isConnected": true,
     }
-    if(email){
+    if (email) {
       queryOjb.email = email
     }
     let existingUser = await User.findOne(queryOjb);
@@ -497,7 +506,7 @@ export const updateLoginStatus = async (req, res) => {
         },
       }
     );
-    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS);
+    return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN_SUCCESS, []);
   } catch (error) {
     return handleErrorResponse(res, error);
   }
@@ -694,10 +703,10 @@ export const userSignInMpin = async (req, res) => {
 
 export const singupFromEmailPassword = async (req, res) => {
   try {
-    let { email, password, currency, referralByCode, registerType,type } = req.body;
+    let { email, password, currency, referralByCode, registerType, type } = req.body;
     email = email ? email.toLowerCase() : null;
     let userFind = await getSingleData({ email }, User);
-    if(type == "login"){
+    if (type == "login") {
       if (userFind) {
         if (userFind.is_deleted != 0) {
           return sendResponse(
@@ -745,7 +754,7 @@ export const singupFromEmailPassword = async (req, res) => {
             []
           );
         }
-      }else{
+      } else {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
@@ -753,15 +762,15 @@ export const singupFromEmailPassword = async (req, res) => {
           []
         );
       }
-    }else if(type == "signup"){
-      if(userFind){
+    } else if (type == "signup") {
+      if (userFind) {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
           ResponseMessage.USER_ALREADY_EXIST,
           []
         );
-      }else{
+      } else {
         if (!password) {
           return sendResponse(
             res,
@@ -806,6 +815,9 @@ export const singupFromEmailPassword = async (req, res) => {
             referralByCode: referralByCode,
           });
         }
+        if (createUser) {
+          await createReward(createUser._id,'Created Reward','First time reward from admin side');
+        }
         const payload = {
           user: {
             id: createUser._id,
@@ -817,7 +829,7 @@ export const singupFromEmailPassword = async (req, res) => {
           token,
         });
       }
-    }else{
+    } else {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -1984,14 +1996,14 @@ export const userGetAllGame = async (req, res) => {
 //#region getCMS
 export const userGetCMSDetail = async (req, res) => {
   try {
-      const CMSData = await CMS.findOne();
-      return res.status(200).json({
-          status: StatusCodes.OK,
-          message: ResponseMessage.CMS_DETAILS,
-          data: CMSData,
-      });
+    const CMSData = await CMS.findOne();
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: ResponseMessage.CMS_DETAILS,
+      data: CMSData,
+    });
   } catch (error) {
-      return handleErrorResponse(res, error);
+    return handleErrorResponse(res, error);
   }
 };
 //#endregion
