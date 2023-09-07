@@ -154,6 +154,7 @@ const ResponseMessage = {
     USER_DEACTIVATED : "User deactivated successfully",
     FAILED_TO_CREATE :"Fail to create",
     FAILED_TO_UPDATE :"Fail to update",
+    FAILED_TO_DELETE :"Fail to delete",
     FAILED_TO_FETCH :"There is no content found.",
     REGISTERED : "Registered successfully",
     LOGIN : "Login successfully",
@@ -168,6 +169,12 @@ const ResponseMessage = {
     NOTIFICATION_DELETED : "Notification deleted successfully",
     NOTIFICATION_GET : "Notification get successfully",
     NOTIFICATION_NOT_FOUND : "Notification not found",
+    ROLE_EXIST : "Role name already exist",
+    ROLE_CREATED : "Role created successfully", 
+    ROLE_UPDATED : "Role updated successfully", 
+    ROLE_GET : "Role fetched successfully", 
+    ROLE_LIST : "Role list fetched successfully",
+    ROLE_DELETE : "Role deleted successfully",
 }
 
 export { ResponseMessage }

@@ -216,8 +216,8 @@ export const connectToWallet = async (req, res) => {
       referralCode: referCode,
       otp,
     });
-    if(newUser){
-      await createReward(newUser._id,'Created Reward','First time reward from admin side');
+    if (newUser) {
+      await createReward(newUser._id, 'Created Reward', 'First time reward from admin side');
     }
     // if (referralByCode) {
     //   const userOfReferral = await User.findOne({
@@ -366,8 +366,8 @@ export const userSignUpSignInOtp = async (req, res) => {
           referralByCode: referralByCode,
         });
       }
-      if(userData){
-        await createReward(userData._id,'Created Reward','First time reward from admin side');
+      if (userData) {
+        await createReward(userData._id, 'Created Reward', 'First time reward from admin side');
       }
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(userData.email, "Verify Otp", mailInfo);
@@ -655,12 +655,20 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-export const userSignInMpin = async (req, res) => {
+export const userCheckEmail = async (req, res) => {
   let { email, type } = req.body;
   email = email ? email.toLowerCase() : null;
   try {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
     if (existingUser) {
+      if (type == "signup") {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_ALREADY_EXIST,
+          []
+        );
+      }
       if (!existingUser.isActive) {
         return sendResponse(
           res,
@@ -669,6 +677,7 @@ export const userSignInMpin = async (req, res) => {
           []
         );
       }
+
       if (type == "login") {
         if (
           existingUser.registerType == "OTP" &&
@@ -816,7 +825,7 @@ export const singupFromEmailPassword = async (req, res) => {
           });
         }
         if (createUser) {
-          await createReward(createUser._id,'Created Reward','First time reward from admin side');
+          await createReward(createUser._id, 'Created Reward', 'First time reward from admin side');
         }
         const payload = {
           user: {

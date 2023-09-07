@@ -55,7 +55,11 @@ import {
   getListCoinSetting,
   getAdminSetting,
   getSingleQuery,
-  adminDeleteQuery
+  adminDeleteQuery,
+  addEditRole, 
+  getRole, 
+  getListRole, 
+  deleteRole
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -69,6 +73,13 @@ adminRoutes.post("/change-password", Auth, adminChangePassword);
 adminRoutes.get("/profile", Auth, getAdminProfile);
 adminRoutes.post("/profile-update", Auth, Upload, adminEditProfile);
 adminRoutes.post("/logout", Auth, adminLogout);
+
+//#region Role routes
+adminRoutes.post("/role-add-edit", Auth, addEditRole);
+adminRoutes.get("/get-single-role/:roleId", Auth, getRole);
+adminRoutes.get("/get-roles", Auth, getListRole);
+adminRoutes.post("/delete-role", Auth, deleteRole);
+
 
 // ********* CMS Api ************ //
 adminRoutes.post("/cms/add-edit-privacy-policy", Auth, addEditPrivacyPolicy);
