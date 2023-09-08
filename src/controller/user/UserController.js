@@ -1476,7 +1476,7 @@ export const setPassword = async (req, res) => {
       if (findUser.password != null) {
         return sendResponse(
           res,
-          StatusCodes.OK,
+          StatusCodes.BAD_REQUEST,
           ResponseMessage.SET_PASSWORD_ALREADY,
           []
         );

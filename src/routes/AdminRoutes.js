@@ -59,7 +59,8 @@ import {
   addEditRole, 
   getRole, 
   getListRole, 
-  deleteRole
+  deleteRole,
+  adminResendOtp
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -68,6 +69,7 @@ const adminRoutes = express.Router();
 adminRoutes.post("/login", adminLogin);
 adminRoutes.post("/forgot-password", adminForgetPassword);
 adminRoutes.post("/verify-otp", adminVerifyOtp);
+adminRoutes.post('/resend-otp', adminResendOtp);
 adminRoutes.post("/reset-password", adminResetPassword);
 adminRoutes.post("/change-password", Auth, adminChangePassword);
 adminRoutes.get("/profile", Auth, getAdminProfile);

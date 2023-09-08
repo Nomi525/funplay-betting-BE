@@ -57,7 +57,8 @@ import {
   changeStatusOfUser,
   getSingleGameRating,
   deleteRating,
-  getAdminSetting
+  getAdminSetting,
+  adminResendOtp
 } from "./controller/admin/AdminController.js";
 import {
   logout,
@@ -183,6 +184,7 @@ import { NewTransaction } from "./models/NewTransaction.js";
 import { WithdrawalRequest } from "./models/WithdrawalRequest.js";
 import { TransactionHistory } from "./models/TransactionHistory.js";
 import { ReferralUser } from "./models/ReferralUser.js";
+import { ReferralWork } from "./models/ReferralWork.js";
 import { Notification } from "./models/Notification.js";
 import { CoinSetting } from "./models/CoinsSetting.js";
 import { Reward } from "./models/Reward.js";
@@ -251,6 +253,7 @@ export {
   WithdrawalRequest,
   TransactionHistory,
   ReferralUser,
+  ReferralWork,
   CoinSetting,
   dbConnection,
   setMpin,
@@ -386,5 +389,6 @@ export {
   addEditRole, 
   getRole, 
   getListRole, 
-  deleteRole
+  deleteRole,
+  adminResendOtp
 };
