@@ -14,7 +14,7 @@ import {
 
 export const addEditGame = async (req, res) => {
   try {
-    const { gameName, gameDuration, gameRound, gameWinningAmount, gameId } = req.body;
+    const { gameName, gameDuration, gameRound, gameWinningAmount, gameId, gameTimeFrom, gameTimeTo } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -43,7 +43,7 @@ export const addEditGame = async (req, res) => {
         );
       } else {
         const newGame = await dataCreate(
-          { gameName, gameImage, gameDuration, gameRound, gameWinningAmount },
+          { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo },
           Game
         );
         const createGame = await newGame.save();
@@ -66,7 +66,7 @@ export const addEditGame = async (req, res) => {
     } else {
       const updateGame = await dataUpdated(
         { _id: gameId },
-        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount },
+        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo },
         Game
       );
       if (updateGame) {
