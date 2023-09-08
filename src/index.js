@@ -27,6 +27,7 @@ import {
   getAllData,
   getAllDataCount,
   deleteById,
+  createReward
 } from "./services/QueryService.js";
 import { validatorRequest } from "./utils/Validator.js";
 import { validatorMiddlware } from "./middleware/Validation.js";
@@ -63,7 +64,7 @@ import {
   editProfile,
   connectToWallet,
   updateLoginStatus,
-  userSignInMpin,
+  userCheckEmail,
   verifyOtp,
   loginFromMpin,
   singupFromEmailPassword,
@@ -103,7 +104,7 @@ import {
   addEditQuery,
   deleteQuery,
 } from "./controller/user/QuerySectionController.js";
-import { 
+import {
   getAllQuery,
   getSingleQuery,
   adminDeleteQuery
@@ -158,6 +159,8 @@ import {
   getListCoinSetting,
 } from "./controller/admin/SettingController.js";
 
+import { addEditRole, getRole, getListRole, deleteRole } from "./controller/admin/RoleCotroller.js";
+
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
 import { userRoutes } from "./routes/UserRoutes.js";
@@ -182,6 +185,9 @@ import { TransactionHistory } from "./models/TransactionHistory.js";
 import { ReferralUser } from "./models/ReferralUser.js";
 import { Notification } from "./models/Notification.js";
 import { CoinSetting } from "./models/CoinsSetting.js";
+import { Reward } from "./models/Reward.js";
+import { Role } from "./models/Role.js";
+
 // Services
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
@@ -234,6 +240,8 @@ export {
   Rating,
   Wallet,
   WalletLogin,
+  Reward,
+  Role,
   Joi,
   NewTransaction,
   Game,
@@ -278,7 +286,7 @@ export {
   logout,
   connectToWallet, //userSignup,
   updateEmail,
-  userSignInMpin,
+  userCheckEmail,
   verifyOtp,
   loginFromMpin,
   forgotPassword,
@@ -373,5 +381,10 @@ export {
   getAdminSetting,
   getSingleQuery,
   adminDeleteQuery,
-  userGetCMSDetail
+  userGetCMSDetail,
+  createReward,
+  addEditRole, 
+  getRole, 
+  getListRole, 
+  deleteRole
 };

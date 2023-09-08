@@ -6,22 +6,23 @@ const rewardSchema = new mongoose.Schema({
         ref: "User",
         required: false
     },
-    name: { 
+    title: { 
         type: String, 
         required: false 
     },
     points: { 
         type: Number, 
-        required: false 
-    },
-    redeemed: {
-        type: Number,
         required: false,
-        default: 0
+        default: 0,
     },
     description: {
         type: String,
         required: false
+    },
+    redeemed: {
+        type: Boolean,
+        required: false,
+        default: false
     },
     is_deleted: {
         type: Number,

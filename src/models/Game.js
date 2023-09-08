@@ -17,6 +17,14 @@ const gameSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    gameTimeFrom : {
+        type: String,
+        required: false
+    },
+    gameTimeTo : {
+        type: String,
+        required: false
+    },
     gameDuration : {
         type: Number,
         required: false

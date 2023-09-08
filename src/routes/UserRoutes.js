@@ -6,7 +6,7 @@ import {
   Upload,
   connectToWallet,
   updateEmail,
-  userSignInMpin,
+  userCheckEmail,
   verifyOtp,
   loginFromMpin,
   Auth,
@@ -63,7 +63,7 @@ userRoutes.post(
 userRoutes.post("/check-wallet-connectivity", checkWalletAddress);
 userRoutes.post("/signin-password", singInFromEmailPassword);
 userRoutes.post("/signin-wallet", singInWalletAddress);
-userRoutes.post("/mpin-signin", userSignInMpin);
+userRoutes.post("/check-email", userCheckEmail);
 userRoutes.post("/login-mpin", loginFromMpin);
 userRoutes.post("/set-mpin", setMpin);
 userRoutes.get("/guest-login", userGuestLogin);
