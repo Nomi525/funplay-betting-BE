@@ -176,6 +176,12 @@ const ResponseMessage = {
     ROLE_GET : "Role fetched successfully", 
     ROLE_LIST : "Role list fetched successfully",
     ROLE_DELETE : "Role deleted successfully",
+    BANNER_TITLE_EXITS : "Banner title already exits",
+    BANNER_CREATED : "Banner created successfully",
+    BANNER_UPDATED : "Banner updated successfully",
+    BANNER_DELETED : "Banner deleted successfully",
+    BANNER_GET : "Banner get successfully",
+    BANNER_NOT_FOUND : "Banner not found",
 }
 
 export { ResponseMessage }
