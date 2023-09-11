@@ -3,6 +3,22 @@ import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendRespo
 export const addEditBanner = async (req, res) => {
     try {
         if (req.admin || req.user) {
+            const findBannerQuery = {
+                bannerName: { $regex: "^" + req.body.bannerName + "$", $options: "i" },
+                is_deleted: 0,
+            };
+            if (req.body.bannerId) {
+                findBannerQuery._id = { $ne: req.body.bannerId };
+            }
+            const findBanner = await getSingleData(findBannerQuery, BannerModel);
+            if (findBanner) {
+                return sendResponse(
+                    res,
+                    StatusCodes.BAD_REQUEST,
+                    ResponseMessage.BANNER_TITLE_EXITS,
+                    []
+                );
+            }
             if (!req.body.bannerId) {
                 req.body.bannerImage = req.bannerImageUrl;
                 req.body.type = req.user ? 'user' : 'admin';
