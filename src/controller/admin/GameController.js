@@ -38,7 +38,7 @@ export const addEditGame = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          process.env.GAME_MAX_LIMIT,
+          ResponseMessage.GAME_MAX_LIMIT,
           []
         );
       } else {
@@ -112,7 +112,7 @@ export const gameActiveDeactive = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
-            process.env.GAME_ACTIVE_LIMIT,
+            ResponseMessage.GAME_ACTIVE_LIMIT,
             []
           );
         }
