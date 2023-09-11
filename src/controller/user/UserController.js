@@ -267,7 +267,7 @@ export const userSignUpSignInOtp = async (req, res) => {
     const otp = 4444;
     email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
-    if (existingUser?.registerType == "Password") {
+    if (existingUser?.registerType == "Password" && type !== "signup") {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
