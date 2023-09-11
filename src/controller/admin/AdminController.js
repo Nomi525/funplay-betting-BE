@@ -1,6 +1,6 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
-    getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,
+    getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,ReferralWork,
     Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction, Transaction, ReferralUser
 } from "./../../index.js";
 
@@ -102,6 +102,27 @@ export const adminChangePassword = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+//#region admin resend otp
+export const adminResendOtp = async (req, res) => {
+    try {
+        let { adminId } = req.body;
+        const otp = 4444;
+        // const otp = generateOtp();
+        const findAdmin = await getSingleData({ _id: adminId, is_deleted: 0 }, Admin);
+        if (findAdmin) {
+            const updateOtp = await dataUpdated({ _id: adminId }, { otp }, Admin)
+            let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+            await sendMail(findAdmin.email, "Verify Otp", mailInfo);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_RESEND, []);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
 
 export const adminForgetPassword = async (req, res) => {
     try {

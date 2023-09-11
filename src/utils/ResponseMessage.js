@@ -160,7 +160,8 @@ const ResponseMessage = {
     LOGIN : "Login successfully",
     PASSWORD_SET:"Password set successfully",
     PASSWORD_NOT_SET : "Password has been not set yet",
-    REGISTERED_TYPE_NOT_MATCH:"You have registered with password ,kindly login with password.",
+    REGISTERED_TYPE_NOT_MATCH:"You have not registered with password ,kindly login with otp then set password.",
+    // REGISTERED_TYPE_NOT_MATCH:"You have registered with password ,kindly login with password.",
     WALLET_CONNECT:"Registered with wallet successfully",
     CURRENCY_CONVERTED : "Currency converted successfully",
     NOTIFICATION_TITLE_EXITS : "Notification title already exits",
@@ -175,6 +176,12 @@ const ResponseMessage = {
     ROLE_GET : "Role fetched successfully", 
     ROLE_LIST : "Role list fetched successfully",
     ROLE_DELETE : "Role deleted successfully",
+    BANNER_TITLE_EXITS : "Banner title already exits",
+    BANNER_CREATED : "Banner created successfully",
+    BANNER_UPDATED : "Banner updated successfully",
+    BANNER_DELETED : "Banner deleted successfully",
+    BANNER_GET : "Banner get successfully",
+    BANNER_NOT_FOUND : "Banner not found",
 }
 
 export { ResponseMessage }
