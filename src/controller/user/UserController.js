@@ -271,7 +271,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.REGISTERED_TYPE_NOT_MATCH,
+        ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
         []
       );
     }
@@ -283,7 +283,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         []
       );
     }
-    if (existingUser && currency && email) {
+    if (!!(existingUser && existingUser.isVerified && currency && email)) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -291,6 +291,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         []
       );
     }
+
     if (existingUser) {
       if (existingUser.is_deleted != 0) {
         return sendResponse(
@@ -316,7 +317,7 @@ export const userSignUpSignInOtp = async (req, res) => {
           []
         );
       }
-      const updateOtp = await dataUpdated({ email }, { otp }, User);
+      const updateOtp = await dataUpdated({ email }, { otp, currency }, User);
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
       return sendResponse(
@@ -737,7 +738,7 @@ export const singupFromEmailPassword = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
-            ResponseMessage.PASSWORD_NOT_SET,
+            ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_PASSWORD,
             []
           );
         }
@@ -772,7 +773,7 @@ export const singupFromEmailPassword = async (req, res) => {
         );
       }
     } else if (type == "signup") {
-      if (userFind) {
+      if ((userFind && userFind.isVerified == true) || (userFind && userFind.registerType == "Password")) {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
@@ -787,6 +788,20 @@ export const singupFromEmailPassword = async (req, res) => {
             ResponseMessage.PASSWORD_REQUIRED,
             []
           );
+        }
+        if (userFind) {
+          req.body.password =  await hashedPassword(password);
+          const updateUser = await dataUpdated({ email: email }, req.body, User)
+          const payload = {
+            user: {
+              id: updateUser._id,
+            },
+          };
+          const token = await genrateToken({ payload });
+          return sendResponse(res, StatusCodes.CREATED, ResponseMessage.REGISTERED, {
+            ...updateUser._doc,
+            token,
+          });
         }
         let referCode = referralCode(8);
         let findReferralUser = null;
@@ -1471,7 +1486,7 @@ export const forgotPassword = async (req, res) => {
 export const setPassword = async (req, res) => {
   try {
     let { password } = req.body;
-    const findUser = await getSingleData({ _id: req.user }, User);
+    const findUser = await getSingleData({ _id: req.user, isVerified: true }, User);
     if (findUser) {
       if (findUser.password != null) {
         return sendResponse(
