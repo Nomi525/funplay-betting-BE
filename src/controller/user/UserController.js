@@ -655,7 +655,6 @@ export const verifyOtp = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 export const userCheckEmail = async (req, res) => {
   let { email, type } = req.body;
   email = email ? email.toLowerCase() : null;
@@ -663,12 +662,15 @@ export const userCheckEmail = async (req, res) => {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
     if (existingUser) {
       if (type == "signup") {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.USER_ALREADY_EXIST,
-          []
-        );
+        if(existingUser?.isVerified){
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_ALREADY_EXIST,
+            []
+          );
+        }
+       
       }
       if (!existingUser.isActive) {
         return sendResponse(
