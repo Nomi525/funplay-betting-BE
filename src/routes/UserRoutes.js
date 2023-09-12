@@ -114,6 +114,6 @@ userRoutes.get("/dashboard", Auth, userDashboard);
 userRoutes.get('/games', Auth, userGetAllGame)
 
 //#region CMS
-userRoutes.get('/cms-details', Auth, userGetCMSDetail)
+userRoutes.get('/cms-details', userGetCMSDetail)
 
 export { userRoutes };
