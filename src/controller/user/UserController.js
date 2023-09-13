@@ -484,7 +484,7 @@ export const checkWalletAddress = async (req, res) => {
         token: token,
       });
     } else {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, "");
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
     }
   } catch (error) {
     console.log(error, ":Error");
@@ -656,13 +656,23 @@ export const verifyOtp = async (req, res) => {
   }
 };
 export const userCheckEmail = async (req, res) => {
-  let { email, type } = req.body;
+  let { email, type, registerType } = req.body;
   email = email ? email.toLowerCase() : null;
   try {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
     if (existingUser) {
       if (type == "signup") {
-        if(existingUser?.isVerified){
+        if (registerType == "Password") {
+          if (existingUser) {
+            return sendResponse(
+              res,
+              StatusCodes.BAD_REQUEST,
+              ResponseMessage.USER_ALREADY_EXIST,
+              []
+            );
+          }
+        }
+        if (existingUser?.isVerified) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -670,7 +680,7 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
-       
+
       }
       if (!existingUser.isActive) {
         return sendResponse(
@@ -792,7 +802,7 @@ export const singupFromEmailPassword = async (req, res) => {
           );
         }
         if (userFind) {
-          req.body.password =  await hashedPassword(password);
+          req.body.password = await hashedPassword(password);
           const updateUser = await dataUpdated({ email: email }, req.body, User)
           const payload = {
             user: {
@@ -1241,7 +1251,17 @@ export const editProfile = async (req, res) => {
         []
       );
     }
-
+    if (req.body.email) {
+      const checkEmail = await getSingleData({ _id: { $ne: req.user }, email: { $regex: "^" + req.body.email + "$", $options: "i" } },User)
+      if (checkEmail) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.USER_ALREADY_EXIST,
+          []
+        );
+      }
+    }
     if (findData.email != req.body.email) {
       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
       const objectEncrtypt = await encryptObject({
@@ -1271,10 +1291,16 @@ export const editProfile = async (req, res) => {
         },
         User
       );
+      let message;
+      if (req.body.bankName || req.body.branch || req.body.accountHolder || req.body.accountNumber || req.body.IFSCCode) {
+        message = ResponseMessage.BANK_DETAILS_UPDATED
+      } else {
+        message = ResponseMessage.PROFILE_UPDATED
+      }
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.PROFILE_UPDATED,
+        message,
         []
       );
     } else {
@@ -1488,7 +1514,7 @@ export const forgotPassword = async (req, res) => {
 export const setPassword = async (req, res) => {
   try {
     let { password } = req.body;
-    const findUser = await getSingleData({ _id: req.user, isVerified: true }, User);
+    const findUser = await getSingleData({ _id: req.user }, User);
     if (findUser) {
       if (findUser.password != null) {
         return sendResponse(

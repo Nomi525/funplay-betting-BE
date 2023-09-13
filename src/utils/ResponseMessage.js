@@ -91,6 +91,7 @@ const ResponseMessage = {
     CURRENCY_EXIST : "Currency already exist", 
     EMAIL_PASSWORD_VERIFY : "Please verify otp to update profile ", 
     PROFILE_UPDATED : "Profile updated successfully", 
+    BANK_DETAILS_UPDATED : "Bank details updated successfully", 
     EMAIL_ALREADY_EXIST : "Email is already in use please use another",
     SET_PASSWORD : "Password set successfully",
     SET_PASSWORD_ALREADY : "Password already set",
