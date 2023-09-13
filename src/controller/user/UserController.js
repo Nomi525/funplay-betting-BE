@@ -267,11 +267,11 @@ export const userSignUpSignInOtp = async (req, res) => {
     const otp = 4444;
     email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
-    if (existingUser?.registerType == "Password") {
+    if (existingUser?.registerType == "Password" && type !== "signup") {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.REGISTERED_TYPE_NOT_MATCH,
+        ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
         []
       );
     }
@@ -283,7 +283,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         []
       );
     }
-    if (existingUser && currency && email) {
+    if (!!(existingUser && existingUser.isVerified && currency && email)) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -291,6 +291,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         []
       );
     }
+
     if (existingUser) {
       if (existingUser.is_deleted != 0) {
         return sendResponse(
@@ -316,7 +317,7 @@ export const userSignUpSignInOtp = async (req, res) => {
           []
         );
       }
-      const updateOtp = await dataUpdated({ email }, { otp }, User);
+      const updateOtp = await dataUpdated({ email }, { otp, currency }, User);
       let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
       await sendMail(existingUser.email, "Verify Otp", mailInfo);
       return sendResponse(
@@ -483,7 +484,7 @@ export const checkWalletAddress = async (req, res) => {
         token: token,
       });
     } else {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, "");
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
     }
   } catch (error) {
     console.log(error, ":Error");
@@ -654,20 +655,32 @@ export const verifyOtp = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 export const userCheckEmail = async (req, res) => {
-  let { email, type } = req.body;
+  let { email, type, registerType } = req.body;
   email = email ? email.toLowerCase() : null;
   try {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
     if (existingUser) {
       if (type == "signup") {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.USER_ALREADY_EXIST,
-          []
-        );
+        if (registerType == "Password" || registerType == "OTP") {
+          if (existingUser) {
+            return sendResponse(
+              res,
+              StatusCodes.BAD_REQUEST,
+              ResponseMessage.USER_ALREADY_EXIST,
+              []
+            );
+          }
+        }
+        if (existingUser?.isVerified) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_ALREADY_EXIST,
+            []
+          );
+        }
+
       }
       if (!existingUser.isActive) {
         return sendResponse(
@@ -737,7 +750,7 @@ export const singupFromEmailPassword = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
-            ResponseMessage.PASSWORD_NOT_SET,
+            ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_PASSWORD,
             []
           );
         }
@@ -772,7 +785,7 @@ export const singupFromEmailPassword = async (req, res) => {
         );
       }
     } else if (type == "signup") {
-      if (userFind) {
+      if ((userFind && userFind.isVerified == true) || (userFind && userFind.registerType == "Password")) {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
@@ -787,6 +800,20 @@ export const singupFromEmailPassword = async (req, res) => {
             ResponseMessage.PASSWORD_REQUIRED,
             []
           );
+        }
+        if (userFind) {
+          req.body.password = await hashedPassword(password);
+          const updateUser = await dataUpdated({ email: email }, req.body, User)
+          const payload = {
+            user: {
+              id: updateUser._id,
+            },
+          };
+          const token = await genrateToken({ payload });
+          return sendResponse(res, StatusCodes.CREATED, ResponseMessage.REGISTERED, {
+            ...updateUser._doc,
+            token,
+          });
         }
         let referCode = referralCode(8);
         let findReferralUser = null;
@@ -1224,7 +1251,17 @@ export const editProfile = async (req, res) => {
         []
       );
     }
-
+    if (req.body.email) {
+      const checkEmail = await getSingleData({ _id: { $ne: req.user }, email: { $regex: "^" + req.body.email + "$", $options: "i" } },User)
+      if (checkEmail) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.EMAIL_ALREADY_EXIST,
+          []
+        );
+      }
+    }
     if (findData.email != req.body.email) {
       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
       const objectEncrtypt = await encryptObject({
@@ -1237,7 +1274,7 @@ export const editProfile = async (req, res) => {
         });
         await sendMail(req.body.email, "Verify Email", mailInfo);
       }
-      await dataUpdated(
+      const updateProfile = await dataUpdated(
         { _id: findData._id, is_deleted: 0 },
         {
           isVerified: false,
@@ -1254,11 +1291,17 @@ export const editProfile = async (req, res) => {
         },
         User
       );
+      let message;
+      if (req.body.bankName || req.body.branch || req.body.accountHolder || req.body.accountNumber || req.body.IFSCCode) {
+        message = ResponseMessage.BANK_DETAILS_UPDATED
+      } else {
+        message = ResponseMessage.PROFILE_UPDATED
+      }
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.PROFILE_UPDATED,
-        []
+        message,
+        updateProfile
       );
     } else {
       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
@@ -1281,7 +1324,7 @@ export const editProfile = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.OK,
-          ResponseMessage.USER_UPDATED,
+          ResponseMessage.PROFILE_UPDATED,
           userData
         );
       } else {
