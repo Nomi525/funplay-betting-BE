@@ -662,7 +662,7 @@ export const userCheckEmail = async (req, res) => {
     const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
     if (existingUser) {
       if (type == "signup") {
-        if (registerType == "Password") {
+        if (registerType == "Password" || registerType == "OTP") {
           if (existingUser) {
             return sendResponse(
               res,
@@ -1257,7 +1257,7 @@ export const editProfile = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          ResponseMessage.USER_ALREADY_EXIST,
+          ResponseMessage.EMAIL_ALREADY_EXIST,
           []
         );
       }
@@ -1274,7 +1274,7 @@ export const editProfile = async (req, res) => {
         });
         await sendMail(req.body.email, "Verify Email", mailInfo);
       }
-      await dataUpdated(
+      const updateProfile = await dataUpdated(
         { _id: findData._id, is_deleted: 0 },
         {
           isVerified: false,
@@ -1301,7 +1301,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.OK,
         message,
-        []
+        updateProfile
       );
     } else {
       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
@@ -1324,7 +1324,7 @@ export const editProfile = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.OK,
-          ResponseMessage.USER_UPDATED,
+          ResponseMessage.PROFILE_UPDATED,
           userData
         );
       } else {
