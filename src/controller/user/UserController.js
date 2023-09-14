@@ -659,7 +659,7 @@ export const userCheckEmail = async (req, res) => {
   let { email, type, registerType } = req.body;
   email = email ? email.toLowerCase() : null;
   try {
-    const existingUser = await getSingleData({ email, is_deleted: 0 }, User);
+    const existingUser = await getSingleData({ email }, User);
     if (existingUser) {
       if (type == "signup") {
         if (registerType == "Password" || registerType == "OTP") {
@@ -682,16 +682,16 @@ export const userCheckEmail = async (req, res) => {
         }
 
       }
-      if (!existingUser.isActive) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.DEACTIVATED_USER,
-          []
-        );
-      }
 
       if (type == "login") {
+        if (!existingUser.isActive || existingUser.is_deleted == 1) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.DEACTIVATED_USER,
+            []
+          );
+        }
         if (
           existingUser.registerType == "OTP" &&
           existingUser.password == null
@@ -1252,7 +1252,7 @@ export const editProfile = async (req, res) => {
       );
     }
     if (req.body.email) {
-      const checkEmail = await getSingleData({ _id: { $ne: req.user }, email: { $regex: "^" + req.body.email + "$", $options: "i" } },User)
+      const checkEmail = await getSingleData({ _id: { $ne: req.user }, email: { $regex: "^" + req.body.email + "$", $options: "i" } }, User)
       if (checkEmail) {
         return sendResponse(
           res,
@@ -1960,7 +1960,7 @@ export const accountDeactivate = async (req, res) => {
   try {
     const upadteUser = await dataUpdated(
       { _id: req.user },
-      { is_deleted: 1 },
+      { isActive: false },
       User
     );
     if (upadteUser) {
