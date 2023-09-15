@@ -263,7 +263,7 @@ export const connectToWallet = async (req, res) => {
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { email, currency, referralByCode, registerType ,type } = req.body;
+    let { email, currency, referralByCode, registerType, type } = req.body;
     const otp = 4444;
     email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
@@ -272,6 +272,22 @@ export const userSignUpSignInOtp = async (req, res) => {
         res,
         StatusCodes.BAD_REQUEST,
         ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
+        []
+      );
+    }
+    if (existingUser?.registerType == "OTP" && type == "login" && existingUser.isVerified == false) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.USER_NOT_EXIST,
+        []
+      );
+    }
+    if (existingUser?.registerType == "Password" && type == "signup") {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.USER_ALREADY_EXIST,
         []
       );
     }
@@ -679,7 +695,7 @@ export const userCheckEmail = async (req, res) => {
     if (existingUser) {
       if (type == "signup") {
         if (registerType == "Password" || registerType == "OTP") {
-          if (existingUser) {
+          if (existingUser?.registerType == "Password") {
             return sendResponse(
               res,
               StatusCodes.BAD_REQUEST,
@@ -687,14 +703,22 @@ export const userCheckEmail = async (req, res) => {
               []
             );
           }
-        }
-        if (existingUser?.isVerified) {
-          return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.USER_ALREADY_EXIST,
-            []
-          );
+          if (existingUser?.isVerified) {
+            return sendResponse(
+              res,
+              StatusCodes.BAD_REQUEST,
+              ResponseMessage.USER_ALREADY_EXIST,
+              []
+            );
+          }
+          if (existingUser && registerType == "Password" && existingUser?.isVerified) {
+            return sendResponse(
+              res,
+              StatusCodes.BAD_REQUEST,
+              ResponseMessage.USER_ALREADY_EXIST,
+              []
+            );
+          }
         }
 
       }
@@ -710,7 +734,7 @@ export const userCheckEmail = async (req, res) => {
         }
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null
+          existingUser.password == null && existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -718,7 +742,15 @@ export const userCheckEmail = async (req, res) => {
             ResponseMessage.PASSWORD_NOT_SET,
             []
           );
+        } else {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_NOT_EXIST,
+            []
+          );
         }
+
       }
       return sendResponse(
         res,
