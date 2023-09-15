@@ -263,7 +263,7 @@ export const connectToWallet = async (req, res) => {
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { email, currency, referralByCode, registerType } = req.body;
+    let { email, currency, referralByCode, registerType ,type } = req.body;
     const otp = 4444;
     email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
