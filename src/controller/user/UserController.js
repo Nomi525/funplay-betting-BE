@@ -742,7 +742,9 @@ export const userCheckEmail = async (req, res) => {
             ResponseMessage.PASSWORD_NOT_SET,
             []
           );
-        } else {
+        }
+        if (existingUser.registerType == "Password" &&
+          existingUser.password == null) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -759,6 +761,8 @@ export const userCheckEmail = async (req, res) => {
         existingUser
       );
     } else {
+      console.log("OUT")
+
       return sendResponse(
         res,
         StatusCodes.NOT_FOUND,
