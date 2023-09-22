@@ -464,7 +464,7 @@ export const addNewTransaction = async (req, res) => {
 export const withdrawalRequest = async (req, res) => {
   try {
     const { walletAddress, tokenName, tokenAmount, tetherType } = req.body;
-    const findTransaction = await NewTransaction.findOne({ userId: req.user })
+    const findTransaction = await NewTransaction.findOne({ userId: req.user, $or: [{ bitcoinWalletAddress: walletAddress }, { ethereumWalletAddress: walletAddress }], })
     const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
     const dataNew = USDTPrice?.data?.data
     if (!dataNew) {
@@ -476,24 +476,6 @@ export const withdrawalRequest = async (req, res) => {
       await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tetherType }, WithdrawalRequest)
       const mapData = dataNew.filter(d => d.name == tokenName).map(async (item) => {
         value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
-        // if ((findTransaction[`token${tokenName}`] > 0 && findTransaction[`token${tokenName}`] >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-        //   findTransaction[`token${tokenName}`] -= parseFloat(tokenAmount)
-        //   findTransaction.tokenDollorValue -= parseFloat(value)
-
-        //   findTransaction.tokenAmount -= parseFloat(tokenAmount)
-        //   // For block coin
-        //   findTransaction.blockDollor += parseFloat(value)
-        //   findTransaction.blockAmount += parseFloat(tokenAmount)
-        //   await findTransaction.save();
-
-        //   await dataCreate({
-        //     userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-        //     walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
-        //   }, TransactionHistory)
-
-        //   return { status: "OK", data: findTransaction }
-        // }
-
         if (tokenName == "Bitcoin") {
           // Bitcoin
           if ((findTransaction.tokenBitcoin > 0 && findTransaction.tokenBitcoin >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
@@ -511,9 +493,9 @@ export const withdrawalRequest = async (req, res) => {
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
 
-            return { status: "OK", data: findTransaction }
+            return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
-
+          return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "BNB") {
           // BNB
           if ((findTransaction.tokenBNB > 0 && findTransaction.tokenBNB >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
@@ -531,9 +513,9 @@ export const withdrawalRequest = async (req, res) => {
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
 
-            return { status: "OK", data: findTransaction }
+            return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
-
+          return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "Binance USD") {
           // BUSD
           if ((findTransaction.tokenBUSD > 0 && findTransaction.tokenBUSD >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
@@ -551,8 +533,9 @@ export const withdrawalRequest = async (req, res) => {
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
 
-            return { status: "OK", data: findTransaction }
+            return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
+          return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "Ethereum") {
           // Ethereum
           if ((findTransaction.tokenEthereum > 0 && findTransaction.tokenEthereum >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
@@ -570,8 +553,9 @@ export const withdrawalRequest = async (req, res) => {
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
 
-            return { status: "OK", data: findTransaction }
+            return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
+          return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "Polygon") {
           // Polygon
           if ((findTransaction.tokenPolygon > 0 && findTransaction.tokenPolygon >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
@@ -589,8 +573,9 @@ export const withdrawalRequest = async (req, res) => {
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
 
-            return { status: "OK", data: findTransaction }
+            return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
+          return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "Tether") {
           if (tetherType == "PolygonUSDT") {
             // PolygonUSDT
@@ -609,8 +594,9 @@ export const withdrawalRequest = async (req, res) => {
                 walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, tetherType, type: "withdrawal"
               }, TransactionHistory)
 
-              return { status: "OK", data: findTransaction }
+              return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
             }
+            return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
           } else if (tetherType == "EthereumUSDT") {
             // Ethereum USDT
             if ((findTransaction.tokenEthereumUSDT > 0 && findTransaction.tokenEthereumUSDT >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
@@ -628,21 +614,27 @@ export const withdrawalRequest = async (req, res) => {
                 walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, tetherType, type: "withdrawal"
               }, TransactionHistory)
 
-              return { status: "OK", data: findTransaction }
+              return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
             }
+            return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
           } else {
-            return { status: ResponseMessage.WITHDRAWAL_INVALID, data: [] }
+            return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
           }
         }
       })
       const promiseData = await Promise.all(mapData);
-      if (promiseData[0]?.status == "OK") {
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.WITHDRAWAL_REQUEST_SEND, promiseData[0]?.data)
+      if (promiseData[0] == undefined) {
+        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.WITHDRAWAL_INVALID, [])
+      }
+      if (promiseData[0]?.status == 200) {
+        return sendResponse(res, StatusCodes.OK, promiseData[0]?.message, promiseData[0]?.data)
+      } else if (promiseData[0]?.status == 400) {
+        return sendResponse(res, StatusCodes.BAD_REQUEST, promiseData[0]?.message, [])
       } else {
         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.WITHDRAWAL_INVALID, [])
       }
     } else {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, [])
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
     }
   } catch (error) {
     return handleErrorResponse(res, error);

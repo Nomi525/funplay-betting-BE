@@ -148,6 +148,7 @@ const ResponseMessage = {
     WITHDRAWAL_REQUEST_SEND : "Withdrawal request send successfully",
     WITHDRAWAL_NOT_FOUND : "withdrawal not found",
     WITHDRAWAL_INVALID : "Invalid withdrawal request",
+    INSUFFICIENT_BALANCE : "Insufficient balance in your account.",
     GET_DEPOSIT_AMOUNT : "Deposit amount get successfully",
     RAFERRAL_NOT_FOUND : "Referral not found",
     USER_ACTIVATED : "User activated successfully",
