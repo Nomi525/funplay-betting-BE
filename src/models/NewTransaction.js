@@ -51,7 +51,7 @@ const newTransactionSchema = new mongoose.Schema({
         required: false 
     },
     tokenDollorValue: {
-        type: Number,
+        type: String,
         required: false,
         default: 0,
     },

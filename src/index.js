@@ -16,6 +16,8 @@ import Joi from "joi";
 import crypto from "crypto";
 import axios from "axios";
 import CurrencyConverter from "currency-converter-lt";
+import Decimal from 'decimal.js'
+Decimal.set({ precision: 100 });
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -209,7 +211,9 @@ import {
   decryptObject,
   handleErrorResponse,
   hashedPassword,
-  currencyConverter
+  currencyConverter,
+  minusLargeSmallValue,
+  plusLargeSmallValue
 } from "./services/CommonService.js";
 
 dotenv.config();
@@ -390,5 +394,8 @@ export {
   getRole, 
   getListRole, 
   deleteRole,
-  adminResendOtp
+  adminResendOtp,
+  minusLargeSmallValue,
+  plusLargeSmallValue,
+  Decimal
 };
