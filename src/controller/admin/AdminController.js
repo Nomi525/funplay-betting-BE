@@ -1,9 +1,8 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
-    getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting,ReferralWork,
+    getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting, ReferralWork,
     Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction, Transaction, ReferralUser
 } from "./../../index.js";
-
 export const adminLogin = async (req, res) => {
     try {
         const findAdmin = await getSingleData({ email: req.body.email, is_deleted: 0 }, Admin);
@@ -12,11 +11,11 @@ export const adminLogin = async (req, res) => {
             await findAdmin.save();
             const comparePassword = await passwordCompare(req.body.password, findAdmin.password);
             if (comparePassword) {
-                let token = jwt.sign({ admin: { id: findAdmin._id } }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' });
+                let token = jwt.sign({ admin: { id: findAdmin._id, role: findAdmin.role } }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' });
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_LOGGED_IN, { ...findAdmin._doc, token });
             }
             else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
+                return sendResponse(res, StatusCodes.BAD_req, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
             }
         }
         else {

@@ -2,7 +2,7 @@ import { mongoose } from '../index.js';
 
 const adminSchema = new mongoose.Schema(
     {
-        firsName: {
+        firstName: {
             type: String,
             required: false,
         },
@@ -13,6 +13,7 @@ const adminSchema = new mongoose.Schema(
         email: {
             type: String,
             Unique: true,
+            lowercase: true,
         },
         mobileNumber: {
             type: Number,
@@ -24,7 +25,7 @@ const adminSchema = new mongoose.Schema(
         },
         isLogin: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         resetPasswordAllow: {
             type: Boolean,
@@ -41,6 +42,32 @@ const adminSchema = new mongoose.Schema(
         address: {
             type: String,
             required: false,
+        },
+        role: {
+            type: String,
+            enum: ['admin', 'subadmin'],
+            default: 'subadmin',
+            required: false,
+        },
+        deviceId: {
+            type: String,
+            required: false,
+        },
+        ipAddress: {
+            type: String,
+            required: false,
+        },
+        latitude: {
+            type: Number,
+            required: false,
+        },
+        longitude: {
+            type: Number,
+            required: false,
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
         },
         is_deleted: {
             type: Number,

@@ -183,6 +183,14 @@ const ResponseMessage = {
     BANNER_DELETED : "Banner deleted successfully",
     BANNER_GET : "Banner get successfully",
     BANNER_NOT_FOUND : "Banner not found",
+    SUBADMIN_ALREADY_EXITS : "Subdmin already exits",
+    SUBADMIN_NOT_FOUND : "Subdmin not found exits",
+    SUBADMIN_CREATED : "Subdmin created successfully",
+    SUBADMIN_UPDATED : "Subdmin updated successfully",
+    SUBADMIN_DELETED : "Subdmin deleted successfully",
+    SUBADMIN_GET : "Subdmin get successfully",
+    SUBADMIN_ACTIVE : "Subdmin active successfully",
+    SUBADMIN_DEACTIVE : "Subdmin deactive successfully",
 }
 
 export { ResponseMessage }

@@ -162,7 +162,21 @@ import {
   getListCoinSetting,
 } from "./controller/admin/SettingController.js";
 
-import { addEditRole, getRole, getListRole, deleteRole } from "./controller/admin/RoleCotroller.js";
+import {
+  addEditRole,
+  getRole,
+  getListRole,
+  deleteRole
+} from "./controller/admin/RoleCotroller.js";
+
+import {
+  addSubadmin,
+  deleteSubadmin,
+  getLoginSubadmin,
+  subadminActiveDeactive,
+  getSingleSubadmin,
+  getAllSubadmin
+} from "./controller/admin/SubadminController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -213,7 +227,7 @@ import {
   hashedPassword,
   currencyConverter,
   minusLargeSmallValue,
-  plusLargeSmallValue
+  plusLargeSmallValue,
 } from "./services/CommonService.js";
 
 dotenv.config();
@@ -390,12 +404,18 @@ export {
   adminDeleteQuery,
   userGetCMSDetail,
   createReward,
-  addEditRole, 
-  getRole, 
-  getListRole, 
+  addEditRole,
+  getRole,
+  getListRole,
   deleteRole,
   adminResendOtp,
   minusLargeSmallValue,
   plusLargeSmallValue,
-  Decimal
+  Decimal,
+  addSubadmin,
+  deleteSubadmin,
+  getLoginSubadmin,
+  subadminActiveDeactive,
+  getSingleSubadmin,
+  getAllSubadmin
 };

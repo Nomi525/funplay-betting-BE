@@ -60,7 +60,13 @@ import {
   getRole, 
   getListRole, 
   deleteRole,
-  adminResendOtp
+  adminResendOtp,
+  addSubadmin,
+  deleteSubadmin,
+  getLoginSubadmin,
+  subadminActiveDeactive,
+  getSingleSubadmin,
+  getAllSubadmin
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -81,6 +87,15 @@ adminRoutes.post("/role-add-edit", Auth, addEditRole);
 adminRoutes.get("/get-single-role/:roleId", Auth, getRole);
 adminRoutes.get("/get-roles", Auth, getListRole);
 adminRoutes.post("/delete-role", Auth, deleteRole);
+
+//#region Subadmin routes
+adminRoutes.post("/add-subadmin", Auth, addSubadmin);
+adminRoutes.get("/get-single-subadmin/:subadminId", Auth, getSingleSubadmin);
+adminRoutes.get("/get-all-subadmin", Auth, getAllSubadmin);
+adminRoutes.post("/delete-subadmin", Auth, deleteSubadmin);
+adminRoutes.get("/get-login-subadmin", Auth, getLoginSubadmin);
+adminRoutes.post("/active-deactive-subadmin", Auth, subadminActiveDeactive);
+//#endregion
 
 
 // ********* CMS Api ************ //
