@@ -16,6 +16,8 @@ import Joi from "joi";
 import crypto from "crypto";
 import axios from "axios";
 import CurrencyConverter from "currency-converter-lt";
+import Decimal from 'decimal.js'
+Decimal.set({ precision: 100 });
 
 // Common
 import { dbConnection } from "./config/Db.config.js";
@@ -41,20 +43,11 @@ import {
   adminForgetPassword,
   adminResetPassword,
   adminVerifyOtp,
-  getAllUsers,
-  getwithdrwalcheck,
-  adminDashboardCount,
   adminSetting,
   adminWithdrawalRequest,
-  getTransactionList,
   howToReferralWork,
-  adminEditUser,
-  adminDeleteUser,
   showRating,
-  getWithdrawalList,
   getAdminProfile,
-  getAdminSingleUser,
-  changeStatusOfUser,
   getSingleGameRating,
   deleteRating,
   getAdminSetting,
@@ -77,9 +70,7 @@ import {
   getProfile,
   userEditProfile,
   accountDeactivate,
-  userGuestLogin,
   setPassword,
-  transactionHistory,
   singInFromEmailPassword,
   setMpin,
   changeMpin,
@@ -131,8 +122,6 @@ import {
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
-  addTransaction,
-  getUserTransaction,
   getUserNewTransaction,
   getTotalUserAmountDiposit,
   withdrawalRequest,
@@ -147,6 +136,11 @@ import {
   gelAllUserDepositeAndWithdrawal,
   getAllTransaction,
   allCurrencyConverter,
+  adminEditUser,
+  getAllUsers,
+  getAdminSingleUser,
+  adminDeleteUser,
+  changeStatusOfUser,
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -160,7 +154,21 @@ import {
   getListCoinSetting,
 } from "./controller/admin/SettingController.js";
 
-import { addEditRole, getRole, getListRole, deleteRole } from "./controller/admin/RoleCotroller.js";
+import {
+  addEditRole,
+  getRole,
+  getListRole,
+  deleteRole
+} from "./controller/admin/RoleCotroller.js";
+
+import {
+  addSubadmin,
+  deleteSubadmin,
+  getLoginSubadmin,
+  subadminActiveDeactive,
+  getSingleSubadmin,
+  getAllSubadmin
+} from "./controller/admin/SubadminController.js";
 
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -175,11 +183,10 @@ import { AdminSetting } from "./models/AdminSetting.js";
 import { BannerModel } from "./models/Banner.js";
 import { Query } from "./models/Query.js";
 import { Rating } from "./models/Rating.js";
-import { DummyTransaction, Wallet } from "./models/Wallet.js";
+import { Wallet } from "./models/Wallet.js";
 import { WalletLogin } from "./models/WalletLogin.js";
 import { Game } from "./models/Game.js";
 import { GameRules } from "./models/GameRules.js";
-import { Transaction } from "./models/Transaction.js";
 import { NewTransaction } from "./models/NewTransaction.js";
 import { WithdrawalRequest } from "./models/WithdrawalRequest.js";
 import { TransactionHistory } from "./models/TransactionHistory.js";
@@ -209,7 +216,9 @@ import {
   decryptObject,
   handleErrorResponse,
   hashedPassword,
-  currencyConverter
+  currencyConverter,
+  minusLargeSmallValue,
+  plusLargeSmallValue,
 } from "./services/CommonService.js";
 
 dotenv.config();
@@ -248,8 +257,6 @@ export {
   NewTransaction,
   Game,
   GameRules,
-  Transaction,
-  DummyTransaction,
   WithdrawalRequest,
   TransactionHistory,
   ReferralUser,
@@ -275,19 +282,17 @@ export {
   getAllUsers,
   adminSetting,
   adminWithdrawalRequest,
-  getTransactionList,
   howToReferralWork,
   getAdminSingleUser,
   adminEditUser,
   adminDeleteUser,
   showRating,
-  getWithdrawalList,
   singupFromEmailPassword,
   singInFromEmailPassword,
   getAllQuery,
   editProfile,
   logout,
-  connectToWallet, //userSignup,
+  connectToWallet,
   updateEmail,
   userCheckEmail,
   verifyOtp,
@@ -301,8 +306,6 @@ export {
   resendOtp,
   changePassword,
   getProfile,
-  userGuestLogin,
-  transactionHistory,
   gameRatingAverage,
   addEditQuery,
   deleteQuery,
@@ -334,8 +337,6 @@ export {
   getCMSDetail,
   userEditProfile,
   accountDeactivate,
-  getwithdrwalcheck,
-  adminDashboardCount,
   walletCreate,
   disconnectWallet,
   validatorRequest,
@@ -348,8 +349,6 @@ export {
   getSingleGameRules,
   gameRuleDelete,
   getSingleGame,
-  addTransaction,
-  getUserTransaction,
   userDashboard,
   adminDashboard,
   addNewTransaction,
@@ -386,9 +385,18 @@ export {
   adminDeleteQuery,
   userGetCMSDetail,
   createReward,
-  addEditRole, 
-  getRole, 
-  getListRole, 
+  addEditRole,
+  getRole,
+  getListRole,
   deleteRole,
-  adminResendOtp
+  adminResendOtp,
+  minusLargeSmallValue,
+  plusLargeSmallValue,
+  Decimal,
+  addSubadmin,
+  deleteSubadmin,
+  getLoginSubadmin,
+  subadminActiveDeactive,
+  getSingleSubadmin,
+  getAllSubadmin
 };

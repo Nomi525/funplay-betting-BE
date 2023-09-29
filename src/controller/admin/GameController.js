@@ -34,7 +34,7 @@ export const addEditGame = async (req, res) => {
     const gameImage = req.gameImageUrl ? req.gameImageUrl : findGame?.gameImage;
     if (!gameId) {
       const checkGameCount = await Game.countDocuments({ $or: [{ isActive: true, is_deleted: 0 }] });
-      if (checkGameCount >= 5) {
+      if (checkGameCount >= 6) {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
@@ -108,7 +108,7 @@ export const gameActiveDeactive = async (req, res) => {
     if (findGame) {
       if (findGame.isActive == false) {
         const checkGameCount = await Game.countDocuments({ $or: [{ isActive: true, is_deleted: 0 }] });
-        if (checkGameCount >= 5) {
+        if (checkGameCount >= 6) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,

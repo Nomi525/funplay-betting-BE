@@ -13,17 +13,13 @@ import {
   addEditAboutUs,
   addEditTermsAndCondition,
   getCMSDetail,
-  getwithdrwalcheck,
-  adminDashboardCount,
   adminSetting,
   adminWithdrawalRequest,
-  getTransactionList,
   howToReferralWork,
   adminEditUser,
   adminDeleteUser,
   getAllQuery,
   showRating,
-  getWithdrawalList,
   addEditGame,
   gameDelete,
   getAllGame,
@@ -60,7 +56,13 @@ import {
   getRole, 
   getListRole, 
   deleteRole,
-  adminResendOtp
+  adminResendOtp,
+  addSubadmin,
+  deleteSubadmin,
+  getLoginSubadmin,
+  subadminActiveDeactive,
+  getSingleSubadmin,
+  getAllSubadmin
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -82,6 +84,15 @@ adminRoutes.get("/get-single-role/:roleId", Auth, getRole);
 adminRoutes.get("/get-roles", Auth, getListRole);
 adminRoutes.post("/delete-role", Auth, deleteRole);
 
+//#region Subadmin routes
+adminRoutes.post("/add-subadmin", Auth, addSubadmin);
+adminRoutes.get("/get-single-subadmin/:subadminId", Auth, getSingleSubadmin);
+adminRoutes.get("/get-all-subadmin", Auth, getAllSubadmin);
+adminRoutes.post("/delete-subadmin", Auth, deleteSubadmin);
+adminRoutes.get("/get-login-subadmin", Auth, getLoginSubadmin);
+adminRoutes.post("/active-deactive-subadmin", Auth, subadminActiveDeactive);
+//#endregion
+
 
 // ********* CMS Api ************ //
 adminRoutes.post("/cms/add-edit-privacy-policy", Auth, addEditPrivacyPolicy);
@@ -89,9 +100,6 @@ adminRoutes.post("/cms/about-us", Auth, addEditAboutUs);
 adminRoutes.post("/cms/terms-and-condition", Auth, addEditTermsAndCondition);
 adminRoutes.get("/cms", Auth, getCMSDetail);
 
-adminRoutes.get("/checkWallet", Auth, getwithdrwalcheck);
-// adminRoutes.get("/dashboard", Auth, adminDashboardCount)
-adminRoutes.post("/transaction", Auth, getTransactionList);
 adminRoutes.post("/how-referral-work", Auth, howToReferralWork);
 
 // -------- Setting -------- //
@@ -122,7 +130,6 @@ adminRoutes.post("/single-game-rating", Auth, getSingleGameRating);
 adminRoutes.post("/rating-delete", Auth, deleteRating);
 
 // Get WithdrwalList
-adminRoutes.get("/withdrawal-list", Auth, getWithdrawalList);
 adminRoutes.post(
   "/accept-reject-withdrawal-request",
   Auth,

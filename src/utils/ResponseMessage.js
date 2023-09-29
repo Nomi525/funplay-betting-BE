@@ -27,7 +27,7 @@ const ResponseMessage = {
     SOMETHING_WENT_WRONG: "Something went wrong",
     ACCOUNT_NOT_EXIST: "Account not exist",
     VERIFICATION_COMPLETED: "OTP has been verified",
-    LOGIN_SUCCESS : "User login suceessfully",
+    LOGIN_SUCCESS : "User login successfully",
     INVALID_OTP: "Invalid otp",
     INVALID_PASSWORD: "Invalid password",
     INVALID_TYPE: "Invalid type",
@@ -148,6 +148,7 @@ const ResponseMessage = {
     WITHDRAWAL_REQUEST_SEND : "Withdrawal request send successfully",
     WITHDRAWAL_NOT_FOUND : "withdrawal not found",
     WITHDRAWAL_INVALID : "Invalid withdrawal request",
+    INSUFFICIENT_BALANCE : "Insufficient balance in your account.",
     GET_DEPOSIT_AMOUNT : "Deposit amount get successfully",
     RAFERRAL_NOT_FOUND : "Referral not found",
     USER_ACTIVATED : "User activated successfully",
@@ -182,6 +183,14 @@ const ResponseMessage = {
     BANNER_DELETED : "Banner deleted successfully",
     BANNER_GET : "Banner get successfully",
     BANNER_NOT_FOUND : "Banner not found",
+    SUBADMIN_ALREADY_EXITS : "Subdmin already exits",
+    SUBADMIN_NOT_FOUND : "Subdmin not found exits",
+    SUBADMIN_CREATED : "Subdmin created successfully",
+    SUBADMIN_UPDATED : "Subdmin updated successfully",
+    SUBADMIN_DELETED : "Subdmin deleted successfully",
+    SUBADMIN_GET : "Subdmin get successfully",
+    SUBADMIN_ACTIVE : "Subdmin active successfully",
+    SUBADMIN_DEACTIVE : "Subdmin deactive successfully",
 }
 
 export { ResponseMessage }

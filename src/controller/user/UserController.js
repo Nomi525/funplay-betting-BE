@@ -1,4 +1,3 @@
-import { transactionHistoryDummy } from "../../utils/DummyData.js";
 import {
   ResponseMessage,
   genrateToken,
@@ -263,7 +262,7 @@ export const connectToWallet = async (req, res) => {
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { email, currency, referralByCode, registerType } = req.body;
+    let { email, currency, referralByCode, registerType, type } = req.body;
     const otp = 4444;
     email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
@@ -272,6 +271,22 @@ export const userSignUpSignInOtp = async (req, res) => {
         res,
         StatusCodes.BAD_REQUEST,
         ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
+        []
+      );
+    }
+    if (existingUser?.registerType == "OTP" && type == "login" && existingUser.isVerified == false) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.USER_NOT_EXIST,
+        []
+      );
+    }
+    if (existingUser?.registerType == "Password" && type == "signup") {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.USER_ALREADY_EXIST,
         []
       );
     }
@@ -473,6 +488,22 @@ export const checkWalletAddress = async (req, res) => {
     }
     let existingUser = await User.findOne(queryOjb);
     if (existingUser) {
+      // if (existingUser.is_deleted != 0) {
+      //   return sendResponse(
+      //     res,
+      //     StatusCodes.BAD_REQUEST,
+      //     ResponseMessage.DEACTIVATED_USER,
+      //     []
+      //   );
+      // }
+      // if (!existingUser.isActive) {
+      //   return sendResponse(
+      //     res,
+      //     StatusCodes.BAD_REQUEST,
+      //     ResponseMessage.DEACTIVATED_USER,
+      //     []
+      //   );
+      // }
       const payload = {
         user: {
           id: existingUser._id,
@@ -663,7 +694,7 @@ export const userCheckEmail = async (req, res) => {
     if (existingUser) {
       if (type == "signup") {
         if (registerType == "Password" || registerType == "OTP") {
-          if (existingUser) {
+          if (existingUser?.registerType == "Password") {
             return sendResponse(
               res,
               StatusCodes.BAD_REQUEST,
@@ -671,14 +702,22 @@ export const userCheckEmail = async (req, res) => {
               []
             );
           }
-        }
-        if (existingUser?.isVerified) {
-          return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.USER_ALREADY_EXIST,
-            []
-          );
+          if (existingUser?.isVerified) {
+            return sendResponse(
+              res,
+              StatusCodes.BAD_REQUEST,
+              ResponseMessage.USER_ALREADY_EXIST,
+              []
+            );
+          }
+          if (existingUser && registerType == "Password" && existingUser?.isVerified) {
+            return sendResponse(
+              res,
+              StatusCodes.BAD_REQUEST,
+              ResponseMessage.USER_ALREADY_EXIST,
+              []
+            );
+          }
         }
 
       }
@@ -694,7 +733,7 @@ export const userCheckEmail = async (req, res) => {
         }
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null
+          existingUser.password == null && existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -703,6 +742,16 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
+        if (existingUser.registerType == "Password" &&
+          existingUser.password == null) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_NOT_EXIST,
+            []
+          );
+        }
+
       }
       return sendResponse(
         res,
@@ -711,6 +760,8 @@ export const userCheckEmail = async (req, res) => {
         existingUser
       );
     } else {
+      console.log("OUT")
+
       return sendResponse(
         res,
         StatusCodes.NOT_FOUND,
@@ -877,119 +928,6 @@ export const singupFromEmailPassword = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
-// export const singupFromEmailPassword = async (req, res) => {
-//   try {
-//     let { email, password, currency, referralByCode, registerType } = req.body;
-//     email = email ? email.toLowerCase() : null;
-//     let userFind = await getSingleData({ email }, User);
-//     if (userFind) {
-//       if (userFind.is_deleted != 0) {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.DEACTIVATED_USER,
-//           []
-//         );
-//       }
-//       if (!userFind.isActive) {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.DEACTIVATED_USER,
-//           []
-//         );
-//       }
-//       if (userFind.password == null) {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.PASSWORD_NOT_SET,
-//           []
-//         );
-//       }
-//       let verifyPassword = await passwordCompare(password, userFind.password);
-//       if (verifyPassword) {
-//         const payload = {
-//           user: {
-//             id: userFind._id,
-//           },
-//         };
-//         userFind.isLogin = true;
-//         await userFind.save();
-//         const token = await genrateToken({ payload });
-//         return sendResponse(res, StatusCodes.OK, ResponseMessage.LOGIN, {
-//           ...userFind._doc,
-//           token,
-//         });
-//       } else {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.INVALID_PASSWORD,
-//           []
-//         );
-//       }
-//     } else {
-//       if (!password) {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.PASSWORD_REQUIRED,
-//           []
-//         );
-//       }
-//       let referCode = referralCode(8);
-//       let findReferralUser = null;
-//       // For Referral Code
-//       if (referralByCode) {
-//         findReferralUser = await getSingleData(
-//           { referralCode: referralByCode, is_deleted: 0 },
-//           User
-//         );
-//         if (!findReferralUser) {
-//           return sendResponse(
-//             res,
-//             StatusCodes.NOT_FOUND,
-//             ResponseMessage.REFERRAL_CODE_NOT_FOUND,
-//             []
-//           );
-//         }
-//       }
-//       password = await hashedPassword(password);
-//       const createUser = await dataCreate(
-//         {
-//           email,
-//           currency,
-//           password,
-//           referralCode: referCode,
-//           registerType,
-//           referralByCode: referralByCode ? referralByCode : null,
-//         },
-//         User
-//       );
-//       if (findReferralUser) {
-//         await ReferralUser.create({
-//           userId: findReferralUser._id,
-//           referralUser: userData._id,
-//           referralByCode: referralByCode,
-//         });
-//       }
-//       const payload = {
-//         user: {
-//           id: createUser._id,
-//         },
-//       };
-//       const token = await genrateToken({ payload });
-//       return sendResponse(res, StatusCodes.OK, ResponseMessage.REGISTERED, {
-//         ...createUser._doc,
-//         token,
-//       });
-//     }
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// };
 
 export const singInFromEmailPassword = async (req, res) => {
   try {
@@ -1192,50 +1130,6 @@ export const loginFromMpin = async (req, res) => {
   }
 };
 
-export const userGuestLogin = (req, res) => {
-  try {
-    const dummyData = {
-      images: [
-        "1690357406723oljak.png",
-        "1690357406723oljak.png",
-        "1690357406723oljak.png",
-      ],
-      banners: ["1690357406723oljak.png", "1690357406723oljak.png"],
-      games: ["Football", "Number change", "Tass"],
-      liveBettingList: [
-        {
-          name: "rohit",
-          bet: 50,
-        },
-        {
-          name: "chetan",
-          bet: 20,
-        },
-        {
-          name: "sachin",
-          bet: 60,
-        },
-      ],
-      previousGamesWinners: [
-        {
-          name: "chetan",
-        },
-        {
-          name: "kapil",
-        },
-      ],
-    };
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GUEST_LOGIN,
-      dummyData
-    );
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
-
 export const editProfile = async (req, res) => {
   try {
     // console.log(req.body,'hiii')
@@ -1391,55 +1285,6 @@ export const emailVerify = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
-// export const editProfile = async (req, res) => {
-//     try {
-//         const findData = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
-//         if (!findData) {
-//             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-//         }
-//         // const otp = generateOtp();
-//         const otp = 4444;
-//         if (findData.email != req.body.email || findData.mobileNumber != req.body.mobileNumber) {
-//             // console.log('email mobile not eqaul');
-//             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp: otp });
-//             await sendMail(findData.email, "Forgot Password", mailInfo);
-//             const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, {otp: otp}, User);
-
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.EMAIL_PASSWORD_VERIFY, { type: "emailVerify" });
-//         } else {
-//             // console.log('email mobile eqaul');
-//             req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-//             const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
-
-//             if (userData) {
-//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
-//             } else {
-//                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
-//             }
-//         }
-
-//         // For MPIN
-//         // if (req.body.mPin) {
-//         //     const findUser = await getSingleData({ mPin: req.body.mPin }, User);
-//         //     if (findUser) {
-//         //         return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.MPIN_ALREADY_USE, []);
-//         //     }
-//         // }
-
-//         // req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-//         // const userData = await dataUpdated({ _id: findData._id, is_deleted: 0 }, req.body, User);
-
-//         // if (userData) {
-//         //     return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, userData);
-//         // } else {
-//         //     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
-//         // }
-
-//     } catch (error) {
-//         return handleErrorResponse(res, error);
-//     }
-// }
 
 export const logout = async (req, res) => {
   try {
@@ -1969,37 +1814,6 @@ export const accountDeactivate = async (req, res) => {
         StatusCodes.OK,
         ResponseMessage.USER_DEACTIVATED,
         []
-      );
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.NOT_FOUND,
-        ResponseMessage.DATA_NOT_FOUND,
-        []
-      );
-    }
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
-
-export const transactionHistory = async (req, res) => {
-  try {
-    // const { userId } = req.body;
-    let transactionHistory = [];
-    // console.log(req.user);
-    // if (req.user) {
-    //     transactionHistory = transactionHistoryDummy.filter(user => req.user == req.user);
-    // } else {
-    //     transactionHistory = transactionHistoryDummy;
-    // }
-    transactionHistory = transactionHistoryDummy;
-    if (transactionHistory.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.DATA_GET,
-        transactionHistory
       );
     } else {
       return sendResponse(

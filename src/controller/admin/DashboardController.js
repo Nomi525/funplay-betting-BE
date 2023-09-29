@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, getAllDataCount, NewTransaction, WalletLogin
+    getSingleData, getAllData, Rating, handleErrorResponse, User, getAllDataCount, NewTransaction, WalletLogin
 } from "../../index.js";
 
 export const adminDashboard = async (req, res) => {
