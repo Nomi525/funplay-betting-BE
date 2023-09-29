@@ -626,7 +626,7 @@ export const verifyOtp = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.OK,
-            ResponseMessage.LOGIN_SUCCESS,
+            ResponseMessage.LOGIN,
             { ...userUpdate._doc, token, type: "login" }
           );
         } else if (type == "forgotPassword") {
@@ -742,6 +742,19 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
+
+        if (
+          existingUser.registerType == "OTP" &&
+          existingUser.password == null && !existingUser.isVerified
+        ) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_NOT_EXIST,
+            []
+          );
+        }
+
         if (existingUser.registerType == "Password" &&
           existingUser.password == null) {
           return sendResponse(
