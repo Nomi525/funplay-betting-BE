@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, Transaction, WalletLogin, getAllDataCount, NewTransaction, TransactionHistory, Reward
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, getAllDataCount, NewTransaction, TransactionHistory, Reward
 } from "../../index.js";
 
 
@@ -8,7 +8,6 @@ export const userDashboard = async (req, res) => {
     try {
         const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (findUser) {
-
             const totalUserswhoPlacedBidsin24Hrs = 12;
             const totalBidin24Hrs = 35
             const totalWinningAmountin24Hrs = 15
@@ -19,7 +18,6 @@ export const userDashboard = async (req, res) => {
 
             const totalReferralCount = await getAllDataCount({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
             const transactions = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
-            // const totalTransaction = await getAllDataCount({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
             const totalTransaction = transactions.length
             const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
 
@@ -43,14 +41,9 @@ export const userDashboard = async (req, res) => {
                     $lte: endOfDay,
                 }
             };
-
             const totalRewardsDistributedToday = await Reward.countDocuments({ userId: findUser._id, is_deleted: 0, ...rewardTodayQuery });
-
             const totalDeposit = transactionDeposite ? transactionDeposite.tokenDollorValue : 0;
             const totalWithdrawalRequests = transactions.filter( tran => tran.type == "withdrawal").length
-
-            // const totalDeposit = transaction.reduce((sum, data) => sum + data.tokenDollorValue, 0);
-            // const walletDetails = await getAllData({}, WalletLogin);
             return sendResponse(
                 res,
                 StatusCodes.OK,

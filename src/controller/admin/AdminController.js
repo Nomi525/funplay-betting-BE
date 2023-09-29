@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting, ReferralWork,
-    Rating, Wallet, hashedPassword, handleErrorResponse, DummyTransaction, NewTransaction, Transaction, ReferralUser
+    Rating, Wallet, hashedPassword, handleErrorResponse, NewTransaction, ReferralUser
 } from "./../../index.js";
 export const adminLogin = async (req, res) => {
     try {
@@ -9,13 +9,26 @@ export const adminLogin = async (req, res) => {
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
+            if (findAdmin.role == "subadmin") {
+                if(!findAdmin.isActive){
+                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+                }
+                await dataUpdated({ _id: findAdmin._id }, {
+                    deviceId: req.body.deviceId,
+                    ipAddress: req.body.ipAddress,
+                    deviceName: req.body.deviceName,
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude,
+                    address: req.body.address,
+                }, Admin);
+            }
             const comparePassword = await passwordCompare(req.body.password, findAdmin.password);
             if (comparePassword) {
                 let token = jwt.sign({ admin: { id: findAdmin._id, role: findAdmin.role } }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' });
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_LOGGED_IN, { ...findAdmin._doc, token });
             }
             else {
-                return sendResponse(res, StatusCodes.BAD_req, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
             }
         }
         else {
@@ -52,29 +65,6 @@ export const adminEditProfile = async (req, res) => {
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const getwithdrwalcheck = (req, res) => {
-    try {
-        let userBankDetails =
-            [{ "bankName": "YES Bank", "AccountNo": 65656565656565, "IFSCCode": "YES0987" }]
-
-
-        let walletDetails = {
-            walletName: "paytm",
-            walletAmount: 5000,
-            DebitAmount: 45000
-        };
-
-        let fundDetails = {
-            mode: "credit"
-        }
-        // Combining all the details into one array
-        let userDetailsArray = { userBankDetails: userBankDetails, walletDetails: walletDetails, fundDetails: fundDetails }
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_WALLET_DETAIL, userDetailsArray);
     } catch (error) {
         return handleErrorResponse(res, error);
     }
@@ -210,66 +200,6 @@ export const adminLogout = async (req, res) => {
     }
 }
 
-export const getAllUsers = async (req, res) => {
-    try {
-        // const findUsers = await getAllData({ is_deleted: 0 }, User);
-        const findUsers = await User.find({ is_deleted: 0 }).sort({ createdAt: -1 });
-        if (findUsers.length) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUsers);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const getAdminSingleUser = async (req, res) => {
-    try {
-        const { userId } = req.body
-        // const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
-        const findUser = await User.findOne({ _id: userId, is_deleted: 0 })
-        if (findUser) {
-            const walletAddress = await NewTransaction.findOne({ userId: findUser._id, is_deleted: 0 })
-            const referralUsers = await ReferralUser.find({ userId: findUser._id }).populate('referralUser')
-            var walletAmount = 0;
-            if (walletAddress) {
-                walletAmount = walletAddress?.tokenDollorValue ? walletAddress?.tokenDollorValue : 0
-            }
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, { ...findUser._doc, walletAmount, useReferralCodeUsers: referralUsers });
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const adminDashboardCount = async (req, res) => {
-    try {
-        let totalUsers = 1500
-        let totalActiveUsers = 150
-        let totalNewLoginUsersIn24Hours = 255
-        let totalDeactivatedUsers = 55
-        let totalZeroBalancetransactionUsers = 120
-        let totalZeroBalanceusersin24Hours = 250
-        return res.status(200).json({
-            status: StatusCodes.OK,
-            message: ResponseMessage.DATA_FETCHED,
-            data: {
-                totalUsers: totalUsers,
-                totalActiveUsers: totalActiveUsers,
-                totalNewLoginUsersIn24Hours: totalNewLoginUsersIn24Hours,
-                totalDeactivatedUsers: totalDeactivatedUsers,
-                totalZeroBalancetransactionUsers: totalZeroBalancetransactionUsers,
-                totalZeroBalanceusersin24Hours: totalZeroBalanceusersin24Hours,
-            },
-        });
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
 export const adminSetting = async (req, res) => {
     try {
         const findSetting = await AdminSetting.findOne();
@@ -312,21 +242,6 @@ export const adminWithdrawalRequest = async (req, res) => {
     }
 }
 
-export const getTransactionList = async (req, res) => {
-    try {
-        const { type } = req.body;
-        if (type) {
-            const findTranscation = await getAllData({ type }, DummyTransaction)
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findTranscation);
-        }
-        const findAllTranscation = await getAllData({}, DummyTransaction)
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findAllTranscation);
-
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
 export const howToReferralWork = async (req, res) => {
     try {
         const { referralWork } = req.body
@@ -338,38 +253,6 @@ export const howToReferralWork = async (req, res) => {
         } else {
             const createWork = await dataCreate({ referralWork }, ReferralWork)
             return sendResponse(res, StatusCodes.OK, ResponseMessage.HOW_TO_WORK_REFERRAL_UPDATED, createWork);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const adminEditUser = async (req, res) => {
-    try {
-        const { userId, fullName, userName, email } = req.body;
-        const findUser = await getSingleData({ _id: userId }, User)
-        if (findUser) {
-            const profile = req.profileUrl ? req.profileUrl : findUser.profile;
-            const updateUser = await dataUpdated({ _id: userId }, { fullName, userName, email, profile }, User);
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_UPDATED, updateUser);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-export const adminDeleteUser = async (req, res) => {
-    try {
-        const { userId } = req.body;
-        const findUser = await getSingleData({ _id: userId }, User)
-        if (findUser) {
-            findUser.is_deleted = 1;
-            await findUser.save();
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_DELETED, []);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -427,41 +310,3 @@ export const deleteRating = async (req, res) => {
     }
 }
 
-export const getWithdrawalList = async (req, res) => {
-    try {
-        const withdrwal = await getAllData({}, DummyTransaction);
-        if (withdrwal.length) {
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_WITHDRAWAL, withdrwal);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.WITHDRAWAL_NOT_FOUND, []);
-        }
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-}
-
-
-
-export const changeStatusOfUser = async (req, res) => {
-    try {
-        const { id } = req.body;
-        const findUser = await getSingleData({ _id: id }, User);
-        if (findUser) {
-            var responseMessage;
-            if (findUser.isActive) {
-                findUser.isActive = false
-                findUser.save();
-                responseMessage = ResponseMessage.USER_DEACTIVATED
-            } else {
-                findUser.isActive = true
-                findUser.save();
-                responseMessage = ResponseMessage.USER_ACTIVATED
-            }
-            return sendResponse(res, StatusCodes.OK, responseMessage, []);
-        } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.USER_NOT_EXIST, []);
-        }
-    } catch (err) {
-        return handleErrorResponse(res, err);
-    }
-};

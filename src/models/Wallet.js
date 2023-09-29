@@ -7,17 +7,6 @@ const walletSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
-const dummyTransactionSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    amount: { type: Number, required: true },
-    type: { type: String, required: true }, 
-    date: { type: Date, default: Date.now },
-    isRequest: { type: String, enum: [ "pending", "approved", "reject"], default: "pending" }
-},
-    { timestamps: true }
-);
-
 const Wallet = mongoose.model('Wallet', walletSchema);
-const DummyTransaction = mongoose.model('DummyTransaction', dummyTransactionSchema);
 
-export { Wallet, DummyTransaction }
+export { Wallet }

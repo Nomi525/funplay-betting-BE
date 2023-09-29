@@ -57,6 +57,10 @@ const adminSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        deviceName : {
+            type: String,
+            required: false,
+        },
         latitude: {
             type: Number,
             required: false,

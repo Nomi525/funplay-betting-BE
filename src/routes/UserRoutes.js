@@ -18,8 +18,6 @@ import {
   getProfile,
   userEditProfile,
   accountDeactivate,
-  userGuestLogin,
-  transactionHistory,
   addEditQuery,
   deleteQuery,
   addEditRating,
@@ -33,8 +31,6 @@ import {
   changeMpin,
   emailVerify,
   setPassword,
-  addTransaction,
-  getUserTransaction,
   userDashboard,
   addNewTransaction,
   getUserNewTransaction,
@@ -66,7 +62,6 @@ userRoutes.post("/signin-wallet", singInWalletAddress);
 userRoutes.post("/check-email", userCheckEmail);
 userRoutes.post("/login-mpin", loginFromMpin);
 userRoutes.post("/set-mpin", setMpin);
-userRoutes.get("/guest-login", userGuestLogin);
 userRoutes.post("/forgot-password", forgotPassword);
 userRoutes.post("/verify-forgot-otp", verifyForgotOtp);
 userRoutes.post("/reset-password", resetPassword);
@@ -83,7 +78,6 @@ userRoutes.post("/set-password", Auth, setPassword);
 userRoutes.get("/verify-email", emailVerify);
 
 // Transaction History Routes
-userRoutes.get("/transaction-history", Auth, transactionHistory);
 
 // Query-Section Routes
 userRoutes.post("/query/add-edit", Auth, Upload, addEditQuery);
@@ -98,8 +92,6 @@ userRoutes.post("/walletLogin/login", walletCreate);
 userRoutes.post("/walletLogin/disconnect", disconnectWallet);
 
 // Transction Routes
-userRoutes.get("/transctions", Auth, getUserTransaction);
-userRoutes.post("/transction/add", Auth, addTransaction);
 
 userRoutes.get("/new-transctions", Auth, getUserNewTransaction);
 userRoutes.post("/new-transction/add", Auth, addNewTransaction);
@@ -111,7 +103,7 @@ userRoutes.get("/get-deposit-withdrawal", Auth, userDepositeWithdrawalHistory);
 userRoutes.get("/dashboard", Auth, userDashboard);
 
 //#region Game
-userRoutes.get('/games', Auth, userGetAllGame)
+userRoutes.get('/games', userGetAllGame)
 
 //#region CMS
 userRoutes.get('/cms-details', userGetCMSDetail)

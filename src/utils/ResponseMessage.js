@@ -27,7 +27,7 @@ const ResponseMessage = {
     SOMETHING_WENT_WRONG: "Something went wrong",
     ACCOUNT_NOT_EXIST: "Account not exist",
     VERIFICATION_COMPLETED: "OTP has been verified",
-    LOGIN_SUCCESS : "User login suceessfully",
+    LOGIN_SUCCESS : "User login successfully",
     INVALID_OTP: "Invalid otp",
     INVALID_PASSWORD: "Invalid password",
     INVALID_TYPE: "Invalid type",
