@@ -1,7 +1,7 @@
 import {
     ResponseMessage, StatusCodes, sendResponse,
     getSingleData, getAllData, handleErrorResponse, User,
-    NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter
+    NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter,ReferralUser
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -22,7 +22,6 @@ export const adminEditUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
-        // const findUsers = await getAllData({ is_deleted: 0 }, User);
         const findUsers = await User.find({ is_deleted: 0 }).sort({ createdAt: -1 });
         if (findUsers.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUsers);
@@ -37,7 +36,6 @@ export const getAllUsers = async (req, res) => {
 export const getAdminSingleUser = async (req, res) => {
     try {
         const { userId } = req.body
-        // const findUser = await User.findOne({ _id: userId, is_deleted: 0 }).populate('useReferralCodeUsers', "fullName  profile currency email referralCode createdAt")
         const findUser = await User.findOne({ _id: userId, is_deleted: 0 })
         if (findUser) {
             const walletAddress = await NewTransaction.findOne({ userId: findUser._id, is_deleted: 0 })
@@ -116,13 +114,12 @@ export const getUserReferralBySignIn = async (req, res) => {
 
 export const acceptWithdrawalRequest = async (req, res) => {
     try {
-        // const { userId, tokenName, tokenAmount } = req.body;
         const { status, withdrawalRequestId } = req.body;
         const withdrawalRequest = await getSingleData({ _id: withdrawalRequestId, status: "pendding" }, WithdrawalRequest);
         if (!withdrawalRequest) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid withdrawal request", []);
         }
-        // return
+
         const findTransaction = await getSingleData({ userId: withdrawalRequest.userId }, NewTransaction);
 
         if (!findTransaction) {
