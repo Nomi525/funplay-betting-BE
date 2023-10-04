@@ -91,6 +91,7 @@ import {
   addEditBanner,
   deleteBanner,
   allBannerGet,
+  getSingleGameRule
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
@@ -398,5 +399,6 @@ export {
   getLoginSubadmin,
   subadminActiveDeactive,
   getSingleSubadmin,
-  getAllSubadmin
+  getAllSubadmin,
+  getSingleGameRule
 };

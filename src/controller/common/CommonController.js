@@ -1,4 +1,4 @@
-import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse } from "./../../index.js";
+import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -67,6 +67,24 @@ export const deleteBanner = async (req, res) => {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.BANNER_DELETED, []);
             } else {
                 return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.BANNER_NOT_FOUND, []);
+            }
+        } else {
+            return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
+export const getSingleGameRule = async (req, res) => {
+    try {
+        if (req.admin || req.user) {
+            const { gameId } = req.params;
+            const findGameRule = await getSingleData({ gameId }, GameRules)
+            if (findGameRule) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RULES_GET, findGameRule);
+            } else {
+                return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.GAME_RULES_NOT_FOUND, []);
             }
         } else {
             return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
