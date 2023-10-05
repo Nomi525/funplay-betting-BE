@@ -155,12 +155,21 @@ import {
   getListCoinSetting,
 } from "./controller/admin/SettingController.js";
 
+// Role
 import {
   addEditRole,
   getRole,
   getListRole,
   deleteRole
 } from "./controller/admin/RoleCotroller.js";
+
+// Permission
+import {
+  addEditPermission,
+  getAllPermission,
+  permissionGetById,
+  permissionActiveDeActive
+} from "./controller/admin/PermissionController.js";
 
 import {
   addSubadmin,
@@ -197,6 +206,7 @@ import { Notification } from "./models/Notification.js";
 import { CoinSetting } from "./models/CoinsSetting.js";
 import { Reward } from "./models/Reward.js";
 import { Role } from "./models/Role.js";
+import { Permission } from "./models/Permissions.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -254,6 +264,7 @@ export {
   WalletLogin,
   Reward,
   Role,
+  Permission,
   Joi,
   NewTransaction,
   Game,
@@ -400,5 +411,9 @@ export {
   subadminActiveDeactive,
   getSingleSubadmin,
   getAllSubadmin,
-  getSingleGameRule
+  getSingleGameRule,
+  addEditPermission,
+  getAllPermission,
+  permissionGetById,
+  permissionActiveDeActive
 };

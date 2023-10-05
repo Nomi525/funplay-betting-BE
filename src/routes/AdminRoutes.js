@@ -52,9 +52,9 @@ import {
   getAdminSetting,
   getSingleQuery,
   adminDeleteQuery,
-  addEditRole, 
-  getRole, 
-  getListRole, 
+  addEditRole,
+  getRole,
+  getListRole,
   deleteRole,
   adminResendOtp,
   addSubadmin,
@@ -62,7 +62,11 @@ import {
   getLoginSubadmin,
   subadminActiveDeactive,
   getSingleSubadmin,
-  getAllSubadmin
+  getAllSubadmin,
+  addEditPermission,
+  getAllPermission,
+  permissionGetById,
+  permissionActiveDeActive
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -83,6 +87,12 @@ adminRoutes.post("/role-add-edit", Auth, addEditRole);
 adminRoutes.get("/get-single-role/:roleId", Auth, getRole);
 adminRoutes.get("/get-roles", Auth, getListRole);
 adminRoutes.post("/delete-role", Auth, deleteRole);
+
+//#region Permission Routes
+adminRoutes.post("/permission-add-edit", Auth, addEditPermission)
+adminRoutes.get("/get-all-permission", Auth, getAllPermission)
+adminRoutes.get("/get-single-permission/:permissionId", Auth, permissionGetById)
+adminRoutes.post("/permission-active-deactive", Auth, permissionActiveDeActive)
 
 //#region Subadmin routes
 adminRoutes.post("/add-subadmin", Auth, addSubadmin);
@@ -121,7 +131,7 @@ adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser);
 adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction);
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);
-adminRoutes.post("/get-single-query", Auth,  getSingleQuery);
+adminRoutes.post("/get-single-query", Auth, getSingleQuery);
 adminRoutes.post("/query-delete", Auth, adminDeleteQuery);
 
 // Rating

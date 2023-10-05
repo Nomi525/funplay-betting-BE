@@ -13,7 +13,7 @@ import {
 //#region create and update ROLE
 export const addEditRole = async (req, res) => {
     try {
-        const { roleId, roleName } = req.body;
+        const { roleId, roleName, permission, permissionType } = req.body;
         const findRoleQuery = {
             roleName: { $regex: "^" + roleName + "$", $options: "i" },
             is_deleted: 0,
@@ -32,7 +32,7 @@ export const addEditRole = async (req, res) => {
         }
         if (!roleId) {
             const addRole = await dataCreate(
-                { roleName },
+                { roleName, permission, permissionType },
                 Role
             );
             const createRole = await addRole.save();
@@ -54,7 +54,7 @@ export const addEditRole = async (req, res) => {
         } else {
             const updateRole = await dataUpdated(
                 { _id: roleId },
-                { roleName },
+                { roleName, permission, permissionType },
                 Role
             );
             if (updateRole) {
