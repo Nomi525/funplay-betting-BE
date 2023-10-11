@@ -12,7 +12,7 @@ commonRoutes.post('/banner-delete', Auth, deleteBanner);
 commonRoutes.get('/get-single-game-rule/:gameId', Auth, getSingleGameRule);
 
 //#region Currecny Routes
-commonRoutes.get('/get-all-currency', Auth, getAllCurrency)
+commonRoutes.get('/get-all-currency', getAllCurrency)
 //#endregion
 
 export { commonRoutes }

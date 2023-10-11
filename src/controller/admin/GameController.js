@@ -10,12 +10,12 @@ import {
   dataCreate,
   getAllData,
   handleErrorResponse,
-  GameHistory,
+  GameHistory
 } from "../../index.js";
 
 export const addEditGame = async (req, res) => {
   try {
-    const { gameName, gameDuration, gameRound, gameWinningAmount, gameId, gameTimeFrom, gameTimeTo, description } = req.body;
+    const { gameName, gameDuration, gameRound, gameWinningAmount, gameId, gameTimeFrom, gameTimeTo, gameMode, description } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -44,7 +44,7 @@ export const addEditGame = async (req, res) => {
         );
       } else {
         const newGame = await dataCreate(
-          { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, description },
+          { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
           Game
         );
         const createGame = await newGame.save();
@@ -67,7 +67,7 @@ export const addEditGame = async (req, res) => {
     } else {
       const updateGame = await dataUpdated(
         { _id: gameId },
-        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, description },
+        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
         Game
       );
       if (updateGame) {

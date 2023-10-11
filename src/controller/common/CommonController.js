@@ -98,15 +98,11 @@ export const getSingleGameRule = async (req, res) => {
 //#region Gel all currecy
 export const getAllCurrency = async (req, res) => {
     try {
-        if (req.admin || req.user) {
-            const getCurrecy = await getAllData({ is_deleted: 0 }, Currency)
-            if (getCurrecy.length) {
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.CURRENCY_GET, getCurrecy);
-            } else {
-                return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.CURRENCY_NOT_FOUND, []);
-            }
+        const getCurrecy = await getAllData({ is_deleted: 0 }, Currency)
+        if (getCurrecy.length) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.CURRENCY_GET, getCurrecy);
         } else {
-            return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.CURRENCY_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
