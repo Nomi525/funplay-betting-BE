@@ -29,6 +29,10 @@ const gameSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    gameMode : {
+        type: String,
+        required: false
+    },
     description : {
         type: String,
         required: false

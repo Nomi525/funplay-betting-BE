@@ -134,7 +134,7 @@ adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser);
 adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction);
 adminRoutes.get("/get-game-wise-user-list/:gameId", Auth, getGameWiseUserList);
 adminRoutes.get("/get-user-wise-game-list/:userId", Auth, getUserWiseGameList)
-adminRoutes.get("/get-game-history", getGameHistory)
+adminRoutes.get("/get-game-history", Auth, getGameHistory)
 
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);
