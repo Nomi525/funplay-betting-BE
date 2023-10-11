@@ -29,6 +29,10 @@ const gameSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    description : {
+        type: String,
+        required: false
+    },
     isActive: {
         type: Boolean,
         required: false,

@@ -144,7 +144,8 @@ import {
   getAdminSingleUser,
   adminDeleteUser,
   changeStatusOfUser,
-  getGameWiseUserList
+  getGameWiseUserList,
+  getUserWiseGameList
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -423,5 +424,6 @@ export {
   getAllPermission,
   permissionGetById,
   permissionActiveDeActive,
-  getAllCurrency
+  getAllCurrency,
+  getUserWiseGameList
 };

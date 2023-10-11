@@ -352,3 +352,47 @@ export const getGameWiseUserList = async (req, res) => {
     }
 }
 //#endregion
+
+//#region Get game wise user list
+export const getUserWiseGameList = async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const findGameHistory = [
+            {
+                "_id": "65252e9b43c1ecf214f5507c",
+                "gameId": {
+                    "gameName" : "Lodo"
+                },
+                "totalBetAmount": 20,
+                "totalWinAmount": 50,
+                "totalLoseAmount": 0
+            },
+            {
+                "_id": "64f87781f2b289a180d6070e",
+                "gameId": {
+                    "gameName" : "One Color"
+                },
+                "totalBetAmount": 120.13131231132124,
+                "totalWinAmount": 300,
+                "totalLoseAmount": 0
+            },
+            {
+                "_id": "64f6e7ab22902eef672b943f",
+                "gameId": {
+                    "gameName" : "2 Color"
+                },
+                "totalBetAmount": 210,
+                "totalWinAmount": 270,
+                "totalLoseAmount": 100
+            }
+        ];
+        if (findGameHistory.length) {
+            return sendResponse(res, StatusCodes.OK, "Get game history", findGameHistory);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Game history not found", []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
