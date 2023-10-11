@@ -68,7 +68,8 @@ import {
   permissionGetById,
   permissionActiveDeActive,
   getGameWiseUserList,
-  getGameHistory
+  getGameHistory,
+  getUserWiseGameList
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -131,8 +132,9 @@ adminRoutes.post("/user-edit", Auth, Upload, adminEditUser);
 adminRoutes.post("/user-delete", Auth, adminDeleteUser);
 adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser);
 adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction);
-adminRoutes.get("/get-game-wise-user-list/:gameId",getGameWiseUserList);
-adminRoutes.get("/get-game-history",getGameHistory)
+adminRoutes.get("/get-game-wise-user-list/:gameId", Auth, getGameWiseUserList);
+adminRoutes.get("/get-user-wise-game-list/:userId", Auth, getUserWiseGameList)
+adminRoutes.get("/get-game-history", getGameHistory)
 
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);

@@ -1862,7 +1862,7 @@ export const accountDeactivate = async (req, res) => {
 
 export const userGetAllGame = async (req, res) => {
   try {
-    const games = await getAllData({ isActive: true, is_deleted: 0 }, Game)
+    const games = await Game.find({ is_deleted: 0 }).sort({ _id: -1 });
     if (games.length) {
       return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_GET_ALL, games)
     } else {
