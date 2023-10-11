@@ -66,7 +66,9 @@ import {
   addEditPermission,
   getAllPermission,
   permissionGetById,
-  permissionActiveDeActive
+  permissionActiveDeActive,
+  getGameWiseUserList,
+  getGameHistory
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -129,6 +131,9 @@ adminRoutes.post("/user-edit", Auth, Upload, adminEditUser);
 adminRoutes.post("/user-delete", Auth, adminDeleteUser);
 adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser);
 adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction);
+adminRoutes.get("/get-game-wise-user-list/:gameId",getGameWiseUserList);
+adminRoutes.get("/get-game-history",getGameHistory)
+
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);
 adminRoutes.post("/get-single-query", Auth, getSingleQuery);
@@ -151,12 +156,13 @@ adminRoutes.post(
   gelAllUserDepositeAndWithdrawal
 );
 
-// game Routes
+// Game Routes
 adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);
 adminRoutes.get("/games", Auth, getAllGame);
 adminRoutes.post("/single-game", Auth, getSingleGame);
 adminRoutes.post("/game/delete", Auth, gameDelete);
 adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
+
 
 // Game Rules Routes
 adminRoutes.get("/game-rules", Auth, getGameRules);

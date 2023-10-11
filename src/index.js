@@ -91,7 +91,8 @@ import {
   addEditBanner,
   deleteBanner,
   allBannerGet,
-  getSingleGameRule
+  getSingleGameRule,
+  getAllCurrency
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
@@ -120,6 +121,7 @@ import {
   getSingleGameRules,
   gameRuleDelete,
   gameActiveDeactive,
+  getGameHistory
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -142,6 +144,7 @@ import {
   getAdminSingleUser,
   adminDeleteUser,
   changeStatusOfUser,
+  getGameWiseUserList
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -207,6 +210,7 @@ import { CoinSetting } from "./models/CoinsSetting.js";
 import { Reward } from "./models/Reward.js";
 import { Role } from "./models/Role.js";
 import { Permission } from "./models/Permissions.js";
+import { GameHistory } from "./models/GameHistory.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -274,6 +278,7 @@ export {
   ReferralUser,
   ReferralWork,
   CoinSetting,
+  GameHistory,
   dbConnection,
   setMpin,
   changeMpin,
@@ -370,6 +375,7 @@ export {
   withdrawalRequest,
   acceptWithdrawalRequest,
   changeStatusOfUser,
+  getGameWiseUserList,
   getSingleUserTransaction,
   gelAllUserDepositeAndWithdrawal,
   userDepositeWithdrawalHistory,
@@ -387,6 +393,7 @@ export {
   Notification,
   allCurrencyConverter,
   gameActiveDeactive,
+  getGameHistory,
   currencyConverter,
   addEditCoinSetting,
   getCoinSetting,
@@ -415,5 +422,6 @@ export {
   addEditPermission,
   getAllPermission,
   permissionGetById,
-  permissionActiveDeActive
+  permissionActiveDeActive,
+  getAllCurrency
 };
