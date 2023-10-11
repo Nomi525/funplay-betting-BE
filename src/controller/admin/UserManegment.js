@@ -1,7 +1,8 @@
 import {
     ResponseMessage, StatusCodes, sendResponse,
     getSingleData, getAllData, handleErrorResponse, User,
-    NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter,ReferralUser
+    NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
+    GameHistory,mongoose,plusLargeSmallValue,minusLargeSmallValue
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -165,6 +166,59 @@ export const acceptWithdrawalRequest = async (req, res) => {
     }
 }
 
+// export const acceptWithdrawalRequest = async (req, res) => {
+//     try {
+//         const { status, withdrawalRequestId } = req.body;
+//         if (!status || status == '' || status == undefined) {
+//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
+//         }
+//         const withdrawalRequest = await getSingleData({ _id: withdrawalRequestId, status: "pendding" }, WithdrawalRequest);
+//         if (!withdrawalRequest) {
+//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid withdrawal request", []);
+//         }
+
+//         const findTransaction = await getSingleData({ userId: withdrawalRequest.userId }, NewTransaction);
+//         if (!findTransaction) {
+//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Transaction not found", []);
+//         }
+
+//         const tokenName = withdrawalRequest.tokenName;
+//         const tokenAmount = withdrawalRequest.tokenAmount;
+//         const tokenDollerValue = withdrawalRequest.tokenValue;
+//         let requestStatus = ''
+//         let requestMessage = ''
+//         if (status == "reject") {
+//             requestStatus = "reject";
+//             if (withdrawalRequest.tokenName == "Tether") {
+//                 if (withdrawalRequest.tetherType == "PolygonUSDT") {
+//                     findTransaction.tokenPolygonUSDT = await plusLargeSmallValue(findTransaction.tokenPolygonUSDT, tokenAmount)
+//                 } else if (withdrawalRequest.tetherType == "EthereumUSDT") {
+//                     findTransaction.tokenEthereumUSDT = await plusLargeSmallValue(findTransaction.tokenEthereumUSDT, tokenAmount)
+//                 } else {
+//                     return sendResponse(res, StatusCodes.OK, "Invalid status", []);
+//                 }
+//             } else {
+//                 findTransaction[`token${tokenName}`] = await plusLargeSmallValue(findTransaction[`token${tokenName}`], tokenAmount);
+//             }
+//             requestMessage = "Reject request";
+//         }
+//         if (status == "accept") {
+//             requestStatus = "accept";
+//             requestMessage = "Accept request";
+//         }
+//         withdrawalRequest.status = requestStatus;
+//         await withdrawalRequest.save();
+//         findTransaction.blockAmount = await minusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
+//         findTransaction.blockDollor = await minusLargeSmallValue(findTransaction.blockDollor, tokenDollerValue)
+//         await findTransaction.save();
+//         return sendResponse(res, StatusCodes.OK, requestMessage, []);
+
+//     } catch (error) {
+//         console.log(error);
+//         return handleErrorResponse(res, error);
+//     }
+// }
+
 export const getSingleUserTransaction = async (req, res) => {
     try {
         const { userId } = req.body
@@ -215,3 +269,86 @@ export const allCurrencyConverter = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+//#region Get game wise user list
+export const getGameWiseUserList = async (req, res) => {
+    try {
+        const findGameHistory = [
+            {
+                "_id": "65252e9b43c1ecf214f5507c",
+                "totalBetAmount": 20,
+                "totalWinAmount": 50,
+                "totalLoseAmount": 0,
+                "userDetails": []
+            },
+            {
+                "_id": "64f87781f2b289a180d6070e",
+                "totalBetAmount": 120.13131231132124,
+                "totalWinAmount": 300,
+                "totalLoseAmount": 0,
+                "userDetails": [
+                    {
+                        "_id": "64f87781f2b289a180d6070e",
+                        "email": "chetan.vhits@gmail.com"
+                    }
+                ]
+            },
+            {
+                "_id": "64f6e7ab22902eef672b943f",
+                "totalBetAmount": 210,
+                "totalWinAmount": 270,
+                "totalLoseAmount": 100,
+                "userDetails": [
+                    {
+                        "_id": "64f6e7ab22902eef672b943f",
+                        "email": "radha@yopmail.com",
+                        "fullName": "krishna"
+                    }
+                ]
+            }
+        ];
+
+        // const { gameId } = req.params;
+        // const findGameHistory = await GameHistory.aggregate([
+        //     { $match: { gameId: new mongoose.Types.ObjectId(gameId) } },
+        //     {
+        //         $group: {
+        //             _id: '$userId',
+        //             totalBetAmount: { $sum: { $toDouble: '$betAmount' } },
+        //             totalWinAmount: { $sum: { $toDouble: '$winAmount' } },
+        //             totalLoseAmount: { $sum: { $toDouble: '$loseAmount' } },
+        //             game: { $first: '$gameId' },
+        //             user: { $first: '$userId' },
+        //         }
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: 'users',
+        //             localField: '_id',
+        //             foreignField: '_id',
+        //             as: 'userDetails',
+        //         },
+        //     },
+        //     {
+        //         $project: {
+        //             //   _id: 0, 
+        //             'userDetails._id': 1,
+        //             'userDetails.email': 1,
+        //             'userDetails.fullName': 1,
+        //             totalBetAmount: 1,
+        //             totalWinAmount: 1,
+        //             totalLoseAmount: 1,
+        //         },
+        //     },
+        // ]).sort({ _id: -1 })
+
+        if (findGameHistory.length) {
+            return sendResponse(res, StatusCodes.OK, "Get game history", findGameHistory);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Game history not found", []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion

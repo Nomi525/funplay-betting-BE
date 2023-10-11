@@ -1,3 +1,4 @@
+import { Currency } from "../../models/Currency.js";
 import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
@@ -93,3 +94,22 @@ export const getSingleGameRule = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+//#region Gel all currecy
+export const getAllCurrency = async (req, res) => {
+    try {
+        if (req.admin || req.user) {
+            const getCurrecy = await getAllData({ is_deleted: 0 }, Currency)
+            if (getCurrecy.length) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.CURRENCY_GET, getCurrecy);
+            } else {
+                return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.CURRENCY_NOT_FOUND, []);
+            }
+        } else {
+            return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.UNAUTHORIZED, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion

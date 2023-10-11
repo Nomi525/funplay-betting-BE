@@ -23,32 +23,39 @@ const newTransactionSchema = new mongoose.Schema({
         required: false 
     },
     tokenBitcoin: { 
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenBNB: { 
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenBUSD: { 
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenEthereum: {
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenEthereumUSDT: {
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenPolygon: {
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenPolygonUSDT: {
-        type: Number,
-        required: false 
+        type: String,
+        required: false,
+        default: 0,
     },
     tokenDollorValue: {
         type: String,
@@ -56,12 +63,12 @@ const newTransactionSchema = new mongoose.Schema({
         default: 0,
     },
     blockDollor : {
-        type: Number,
+        type: String,
         required: false,
         default: 0,
     },
     blockAmount : {
-        type: Number,
+        type: String,
         required: false,
         default: 0,
     },

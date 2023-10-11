@@ -911,7 +911,7 @@ export const singupFromEmailPassword = async (req, res) => {
         if (findReferralUser) {
           await ReferralUser.create({
             userId: findReferralUser._id,
-            referralUser: userData._id,
+            referralUser: createUser._id,
             referralByCode: referralByCode,
           });
         }
@@ -938,6 +938,7 @@ export const singupFromEmailPassword = async (req, res) => {
       );
     }
   } catch (error) {
+    console.log(error);
     return handleErrorResponse(res, error);
   }
 };

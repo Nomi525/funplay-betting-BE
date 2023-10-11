@@ -21,12 +21,10 @@ export const addNewTransaction = async (req, res) => {
   try {
     const { walletAddress, networkChainId, tokenName, tokenAmount, tetherType } = req.body;
     const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
+    const dataNew = USDTPrice.data.data
+    return res.send(dataNew)
     // Bitcoin Tether BNB Polygon
     const findUser = await NewTransaction.findOne({ userId: req.user })
-    const dataNew = USDTPrice.data.data
-
-    // return res.send(dataNew);
-
     if (!dataNew) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid tokan", []);
     }
@@ -48,7 +46,8 @@ export const addNewTransaction = async (req, res) => {
         if (tokenName == "Bitcoin") {
           // Bitcoin
           if (findUser.tokenBitcoin) {
-            findUser.tokenBitcoin += parseFloat(tokenAmount)
+            // findUser.tokenBitcoin += parseFloat(tokenAmount)
+            findUser.tokenBitcoin = await plusLargeSmallValue(findUser.tokenBitcoin, tokenAmount)
           } else {
             findUser.tokenBitcoin = parseFloat(tokenAmount)
           }
@@ -56,29 +55,34 @@ export const addNewTransaction = async (req, res) => {
         } else if (tokenName == "BNB") {
           // BNB
           if (findUser.tokenBNB) {
-            findUser.tokenBNB += parseFloat(tokenAmount)
+            // findUser.tokenBNB += parseFloat(tokenAmount)
+            findUser.tokenBNB = await plusLargeSmallValue(findUser.tokenBNB, tokenAmount)
           } else {
             findUser.tokenBNB = parseFloat(tokenAmount)
           }
 
-        } else if (tokenName == "Binance USD") {
+          // } else if (tokenName == "Binance USD") {
+        } else if (tokenName == "BUSD") {
           // BUSD
           if (findUser.tokenBUSD) {
-            findUser.tokenBUSD += parseFloat(tokenAmount)
+            // findUser.tokenBUSD += parseFloat(tokenAmount)
+            findUser.tokenBUSD = await plusLargeSmallValue(findUser.tokenBUSD, tokenAmount)
           } else {
             findUser.tokenBUSD = parseFloat(tokenAmount)
           }
         } else if (tokenName == "Ethereum") {
           // Ethereum
           if (findUser.tokenEthereum) {
-            findUser.tokenEthereum += parseFloat(tokenAmount)
+            // findUser.tokenEthereum += parseFloat(tokenAmount)
+            findUser.tokenEthereum = await plusLargeSmallValue(findUser.tokenEthereum, tokenAmount)
           } else {
             findUser.tokenEthereum = parseFloat(tokenAmount)
           }
         } else if (tokenName == "Polygon") {
           // Polygon
           if (findUser.tokenPolygon) {
-            findUser.tokenPolygon += parseFloat(tokenAmount)
+            // findUser.tokenPolygon = parseFloat(findUser.tokenPolygon) + parseFloat(tokenAmount)
+            findUser.tokenPolygon = await plusLargeSmallValue(findUser.tokenPolygon, tokenAmount)
           } else {
             findUser.tokenPolygon = parseFloat(tokenAmount)
           }
@@ -86,14 +90,16 @@ export const addNewTransaction = async (req, res) => {
           if (tetherType == "PolygonUSDT") {
             // PolygonUSDT
             if (findUser.tokenPolygonUSDT) {
-              findUser.tokenPolygonUSDT += parseFloat(tokenAmount)
+              // findUser.tokenPolygonUSDT += parseFloat(tokenAmount)
+              findUser.tokenPolygonUSDT = await plusLargeSmallValue(findUser.tokenPolygonUSDT, tokenAmount)
             } else {
               findUser.tokenPolygonUSDT = parseFloat(tokenAmount)
             }
           } else if (tetherType == "EthereumUSDT") {
             // Ethereum USDT
             if (findUser.tokenEthereumUSDT) {
-              findUser.tokenEthereumUSDT += parseFloat(tokenAmount)
+              // findUser.tokenEthereumUSDT += parseFloat(tokenAmount)
+              findUser.tokenEthereumUSDT = await plusLargeSmallValue(findUser.tokenEthereumUSDT, tokenAmount)
             } else {
               findUser.tokenEthereumUSDT = parseFloat(tokenAmount)
             }
@@ -101,7 +107,7 @@ export const addNewTransaction = async (req, res) => {
             return { status: 'BAD_REQUST', data: [] }
           }
         }
-        findUser.tokenDollorValue = await plusLargeSmallValue(findUser.tokenDollorValue,value)
+        findUser.tokenDollorValue = await plusLargeSmallValue(findUser.tokenDollorValue, value)
         // findUser.tokenDollorValue += value
         await findUser.save();
 
@@ -132,7 +138,8 @@ export const addNewTransaction = async (req, res) => {
           // BNB
           createObject.tokenBNB = parseFloat(tokenAmount)
 
-        } else if (tokenName == "Binance USD") {
+          // } else if (tokenName == "Binance USD") {
+        } else if (tokenName == "BUSD") {
           // BUSD
           createObject.tokenBUSD = parseFloat(tokenAmount)
         } else if (tokenName == "Ethereum") {
@@ -167,6 +174,7 @@ export const addNewTransaction = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DATA_NOT_FOUND, []);
     }
   } catch (error) {
+    console.log('hiii',error);
     return handleErrorResponse(res, error);
   }
 }
@@ -182,26 +190,32 @@ export const withdrawalRequest = async (req, res) => {
     }
     var value;
     if (findTransaction) {
-      await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tetherType }, WithdrawalRequest)
+      // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tetherType }, WithdrawalRequest)
       const mapData = dataNew.filter(d => d.name == tokenName).map(async (item) => {
         value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
         if (tokenName == "Bitcoin") {
           // Bitcoin
           if ((findTransaction.tokenBitcoin > 0 && findTransaction.tokenBitcoin >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            findTransaction.tokenBitcoin -= parseFloat(tokenAmount)
+            // findTransaction.tokenBitcoin -= parseFloat(tokenAmount)
+            findTransaction.tokenBitcoin = await minusLargeSmallValue(findTransaction.tokenBitcoin, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
             // findTransaction.tokenDollorValue -= parseFloat(value)
 
-            findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
             // For block coin
-            findTransaction.blockDollor += parseFloat(value)
-            findTransaction.blockAmount += parseFloat(tokenAmount)
+            // findTransaction.blockDollor += parseFloat(value)
+            // findTransaction.blockAmount += parseFloat(tokenAmount)
+            findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+            findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
 
             await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
+
+            await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
 
             return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
@@ -209,81 +223,98 @@ export const withdrawalRequest = async (req, res) => {
         } else if (tokenName == "BNB") {
           // BNB
           if ((findTransaction.tokenBNB > 0 && findTransaction.tokenBNB >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            findTransaction.tokenBNB -= parseFloat(tokenAmount)
+            // findTransaction.tokenBNB -= parseFloat(tokenAmount)
+            findTransaction.tokenBNB = await minusLargeSmallValue(findTransaction.tokenBNB, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
             // findTransaction.tokenDollorValue -= parseFloat(value)
 
-            findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
             // For block coin
-            findTransaction.blockDollor += parseFloat(value)
-            findTransaction.blockAmount += parseFloat(tokenAmount)
+            // findTransaction.blockDollor += parseFloat(value)
+            // findTransaction.blockAmount += parseFloat(tokenAmount)
+            findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+            findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
 
             await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
-
+            await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
           return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
-        } else if (tokenName == "Binance USD") {
+          // } else if (tokenName == "Binance USD") {
+        } else if (tokenName == "BUSD") {
           // BUSD
           if ((findTransaction.tokenBUSD > 0 && findTransaction.tokenBUSD >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            findTransaction.tokenBUSD -= parseFloat(tokenAmount)
+            // findTransaction.tokenBUSD -= parseFloat(tokenAmount)
+            findTransaction.tokenBUSD = await minusLargeSmallValue(findTransaction.tokenBUSD, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
             // findTransaction.tokenDollorValue -= parseFloat(value)
 
-            findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
             // For block coin
-            findTransaction.blockDollor += parseFloat(value)
-            findTransaction.blockAmount += parseFloat(tokenAmount)
+            // findTransaction.blockDollor += parseFloat(value)
+            // findTransaction.blockAmount += parseFloat(tokenAmount)
+            findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+            findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
 
             await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
-
+            await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
           return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "Ethereum") {
           // Ethereum
           if ((findTransaction.tokenEthereum > 0 && findTransaction.tokenEthereum >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            findTransaction.tokenEthereum -= parseFloat(tokenAmount)
+            // findTransaction.tokenEthereum -= parseFloat(tokenAmount)
+            findTransaction.tokenEthereum = await minusLargeSmallValue(findTransaction.tokenEthereum, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
             // findTransaction.tokenDollorValue -= parseFloat(value)
 
-            findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
             // For block coin
-            findTransaction.blockDollor += parseFloat(value)
-            findTransaction.blockAmount += parseFloat(tokenAmount)
+            // findTransaction.blockDollor += parseFloat(value)
+            // findTransaction.blockAmount += parseFloat(tokenAmount)
+            findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+            findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
 
             await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
-
+            await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
           return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
         } else if (tokenName == "Polygon") {
           // Polygon
           if ((findTransaction.tokenPolygon > 0 && findTransaction.tokenPolygon >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            findTransaction.tokenPolygon -= parseFloat(tokenAmount)
+            // findTransaction.tokenPolygon -= parseFloat(tokenAmount)
+            findTransaction.tokenPolygon = await minusLargeSmallValue(findTransaction.tokenPolygon, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-            findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
             // For block coin
-            findTransaction.blockDollor += parseFloat(value)
-            findTransaction.blockAmount += parseFloat(tokenAmount)
+            // findTransaction.blockDollor += parseFloat(value)
+            // findTransaction.blockAmount += parseFloat(tokenAmount)
+            findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+            findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
             await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, type: "withdrawal"
             }, TransactionHistory)
-
+            await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
           }
           return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
@@ -291,41 +322,49 @@ export const withdrawalRequest = async (req, res) => {
           if (tetherType == "PolygonUSDT") {
             // PolygonUSDT
             if ((findTransaction.tokenPolygonUSDT > 0 && findTransaction.tokenPolygonUSDT >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-              findTransaction.tokenPolygonUSDT -= parseFloat(tokenAmount)
+              // findTransaction.tokenPolygonUSDT -= parseFloat(tokenAmount)
+              findTransaction.tokenPolygonUSDT = await minusLargeSmallValue(findTransaction.tokenPolygonUSDT, tokenAmount)
               findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
               // findTransaction.tokenDollorValue -= parseFloat(value)
 
-              findTransaction.tokenAmount -= parseFloat(tokenAmount)
+              // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+              // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
               // For block coin
-              findTransaction.blockDollor += parseFloat(value)
-              findTransaction.blockAmount += parseFloat(tokenAmount)
+              // findTransaction.blockDollor += parseFloat(value)
+              // findTransaction.blockAmount += parseFloat(tokenAmount)
+              findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+              findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
               await findTransaction.save();
 
               await dataCreate({
                 userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
                 walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, tetherType, type: "withdrawal"
               }, TransactionHistory)
-
+              await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
               return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
             }
             return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
           } else if (tetherType == "EthereumUSDT") {
             // Ethereum USDT
             if ((findTransaction.tokenEthereumUSDT > 0 && findTransaction.tokenEthereumUSDT >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-              findTransaction.tokenEthereumUSDT -= parseFloat(tokenAmount)
-              findTransaction.tokenAmount -= parseFloat(tokenAmount)
+              // findTransaction.tokenEthereumUSDT -= parseFloat(tokenAmount)
+              findTransaction.tokenEthereumUSDT = await minusLargeSmallValue(findTransaction.tokenEthereumUSDT, tokenAmount)
+              // findTransaction.tokenAmount -= parseFloat(tokenAmount)
+              // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
               findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
               // findTransaction.tokenDollorValue -= parseFloat(value)
               // For block coin
-              findTransaction.blockDollor += parseFloat(value)
-              findTransaction.blockAmount += parseFloat(tokenAmount)
+              // findTransaction.blockDollor += parseFloat(value)
+              // findTransaction.blockAmount += parseFloat(tokenAmount)
+              findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
+              findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
               await findTransaction.save();
 
               await dataCreate({
                 userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
                 walletAddress: findTransaction.walletAddress, tokenAmount, tokenDollorValue: value, tetherType, type: "withdrawal"
               }, TransactionHistory)
-
+              await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType }, WithdrawalRequest)
               return { status: 200, message: ResponseMessage.WITHDRAWAL_REQUEST_SEND, data: findTransaction }
             }
             return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
@@ -349,6 +388,7 @@ export const withdrawalRequest = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
     }
   } catch (error) {
+    console.log(error);
     return handleErrorResponse(res, error);
   }
 }

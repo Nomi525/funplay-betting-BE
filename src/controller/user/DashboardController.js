@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, getAllDataCount, NewTransaction, TransactionHistory, Reward
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser,getAllDataCount, NewTransaction, TransactionHistory, Reward
 } from "../../index.js";
 
 
@@ -8,6 +8,7 @@ export const userDashboard = async (req, res) => {
     try {
         const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (findUser) {
+            console.log(findUser.referralCode,'hhh');
             const totalUserswhoPlacedBidsin24Hrs = 12;
             const totalBidin24Hrs = 35
             const totalWinningAmountin24Hrs = 15
@@ -16,7 +17,8 @@ export const userDashboard = async (req, res) => {
             const oneMonthAgo = new Date();
             oneMonthAgo.setMonth(today.getMonth() - 1);
 
-            const totalReferralCount = await getAllDataCount({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
+            // const totalReferralCount = await getAllDataCount({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
+            const totalReferralCount = await ReferralUser.countDocuments({ userId: findUser._id })
             const transactions = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
             const totalTransaction = transactions.length
             const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);

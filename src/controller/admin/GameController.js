@@ -10,6 +10,7 @@ import {
   dataCreate,
   getAllData,
   handleErrorResponse,
+  GameHistory,
 } from "../../index.js";
 
 export const addEditGame = async (req, res) => {
@@ -135,6 +136,7 @@ export const gameActiveDeactive = async (req, res) => {
 }
 //#endregion
 
+//#region Get all games
 export const getAllGame = async (req, res) => {
   try {
     const games = await getAllData({ is_deleted: 0 }, Game);
@@ -157,7 +159,9 @@ export const getAllGame = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
 
+//#region Get single game
 export const getSingleGame = async (req, res) => {
   try {
     const { gameId } = req.body;
@@ -181,6 +185,388 @@ export const getSingleGame = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
+
+//#region Game History
+export const getGameHistory = async (req, res) => {
+  try {
+    // const getGameHistory = await GameHistory.find({ is_deleted: 0 })
+    //   .populate('userId', 'fullName email')
+    //   .populate('gameId', 'gameName gameImage gameDuration gameRound gameTimeFrom gameTimeTo gameWinningAmount')
+    //   .sort({ _id: -1 })
+   const getGameHistory = [
+      {
+          "_id": "6525285c43c1ecf214f55076",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55075",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55074",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55073",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55072",
+          "userId": {
+              "_id": "64f6e7ab22902eef672b943f",
+              "email": "radha@yopmail.com",
+              "fullName": "krishna"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55071",
+          "userId": {
+              "_id": "64f6e7ab22902eef672b943f",
+              "email": "radha@yopmail.com",
+              "fullName": "krishna"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55070",
+          "userId": {
+              "_id": "64f6e7ab22902eef672b943f",
+              "email": "radha@yopmail.com",
+              "fullName": "krishna"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "50",
+          "winAmount": "120",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f5506f",
+          "userId": {
+              "_id": "64f6e7ab22902eef672b943f",
+              "email": "radha@yopmail.com",
+              "fullName": "krishna"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "100",
+          "winAmount": "0",
+          "loseAmount": "100",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f5506e",
+          "userId": {
+              "_id": "64f6e7ab22902eef672b943f",
+              "email": "radha@yopmail.com",
+              "fullName": "krishna"
+          },
+          "gameId": null,
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f5506d",
+          "userId": {
+              "_id": "64f6e7ab22902eef672b943f",
+              "email": "radha@yopmail.com",
+              "fullName": "krishna"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f5506c",
+          "userId": null,
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f5506b",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f5506a",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e87c66776138ff31940593",
+              "gameName": "Cricket 12",
+              "gameImage": "1692957829243awjpj.jpg",
+              "gameRound": 7,
+              "gameWinningAmount": 500,
+              "gameDuration": 25,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30"
+          },
+          "betAmount": "30",
+          "winAmount": "0",
+          "loseAmount": "30",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55069",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e87c66776138ff31940593",
+              "gameName": "Cricket 12",
+              "gameImage": "1692957829243awjpj.jpg",
+              "gameRound": 7,
+              "gameWinningAmount": 500,
+              "gameDuration": 25,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30"
+          },
+          "betAmount": "20",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55068",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e87c66776138ff31940593",
+              "gameName": "Cricket 12",
+              "gameImage": "1692957829243awjpj.jpg",
+              "gameRound": 7,
+              "gameWinningAmount": 500,
+              "gameDuration": 25,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30"
+          },
+          "betAmount": "80",
+          "winAmount": "0",
+          "loseAmount": "80",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55067",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e87c66776138ff31940593",
+              "gameName": "Cricket 12",
+              "gameImage": "1692957829243awjpj.jpg",
+              "gameRound": 7,
+              "gameWinningAmount": 500,
+              "gameDuration": 25,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30"
+          },
+          "betAmount": "20",
+          "winAmount": "0",
+          "loseAmount": "20",
+          "is_deleted": 0
+      },
+      {
+          "_id": "6525285c43c1ecf214f55066",
+          "userId": {
+              "_id": "64f87781f2b289a180d6070e",
+              "email": "chetan.vhits@gmail.com"
+          },
+          "gameId": {
+              "_id": "64e701c35281f931162796dd",
+              "gameName": "card",
+              "gameImage": "169295590571637gmsh.jpg",
+              "gameDuration": 25,
+              "gameRound": 7,
+              "gameTimeFrom": "1.20",
+              "gameTimeTo": "1.30",
+              "gameWinningAmount": 500
+          },
+          "betAmount": "20.131312311321231313",
+          "winAmount": "50",
+          "loseAmount": "0",
+          "is_deleted": 0
+      }
+  ]
+    if (getGameHistory.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        "Get game history",
+        getGameHistory
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "Game history not found",
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
 
 // Games Rules CRUD
 export const addEditGameRule = async (req, res) => {
