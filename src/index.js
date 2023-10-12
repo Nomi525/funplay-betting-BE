@@ -184,6 +184,12 @@ import {
   getAllSubadmin
 } from "./controller/admin/SubadminController.js";
 
+// Number Betting
+import {
+  addNumberBet,
+  getAllNumberBet
+} from "./controller/user/NumberBettingController.js";
+
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
 import { userRoutes } from "./routes/UserRoutes.js";
@@ -212,6 +218,7 @@ import { Reward } from "./models/Reward.js";
 import { Role } from "./models/Role.js";
 import { Permission } from "./models/Permissions.js";
 import { GameHistory } from "./models/GameHistory.js";
+import { NumberBetting } from "./models/NumberBetting.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -280,6 +287,7 @@ export {
   ReferralWork,
   CoinSetting,
   GameHistory,
+  NumberBetting,
   dbConnection,
   setMpin,
   changeMpin,
@@ -425,5 +433,7 @@ export {
   permissionGetById,
   permissionActiveDeActive,
   getAllCurrency,
-  getUserWiseGameList
+  getUserWiseGameList,
+  addNumberBet,
+  getAllNumberBet
 };

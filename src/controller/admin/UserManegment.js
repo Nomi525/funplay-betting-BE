@@ -2,7 +2,7 @@ import {
     ResponseMessage, StatusCodes, sendResponse,
     getSingleData, getAllData, handleErrorResponse, User,
     NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-    GameHistory,mongoose,plusLargeSmallValue,minusLargeSmallValue
+    GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -113,9 +113,66 @@ export const getUserReferralBySignIn = async (req, res) => {
     }
 }
 
+// export const acceptWithdrawalRequest = async (req, res) => {
+//     try {
+//         const { status, withdrawalRequestId } = req.body;
+//         const withdrawalRequest = await getSingleData({ _id: withdrawalRequestId, status: "pendding" }, WithdrawalRequest);
+//         if (!withdrawalRequest) {
+//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid withdrawal request", []);
+//         }
+
+//         const findTransaction = await getSingleData({ userId: withdrawalRequest.userId }, NewTransaction);
+
+//         if (!findTransaction) {
+//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Transaction not found", []);
+//         }
+//         if (status == "reject") {
+//             withdrawalRequest.status = "reject";
+//             await withdrawalRequest.save();
+//             const dollor = findTransaction.blockDollor;
+//             const amount = findTransaction.blockAmount;
+//             if (withdrawalRequest.tokenName == "Binance USD") {
+//                 findTransaction.tokenBUSD += amount;
+//             } else if (withdrawalRequest.tokenName == "Tether") {
+//                 if (withdrawalRequest.tetherType == "PolygonUSDT") {
+//                     findTransaction.tokenPolygonUSDT += amount;
+//                 } else if (withdrawalRequest.tetherType == "EthereumUSDT") {
+//                     findTransaction.tokenEthereumUSDT += amount;
+//                 } else {
+//                     return sendResponse(res, StatusCodes.OK, "Invalid status", []);
+//                 }
+//             } else {
+//                 findTransaction[`token${withdrawalRequest.tokenName}`] += amount;
+//             }
+//             findTransaction.blockDollor = 0;
+//             findTransaction.blockAmount = 0;
+//             findTransaction.tokenDollorValue += dollor;
+
+//             await findTransaction.save();
+//             return sendResponse(res, StatusCodes.OK, "Reject request", []);
+
+//         }
+//         if (status == "accept") {
+//             withdrawalRequest.status = "accept";
+//             await withdrawalRequest.save();
+//             findTransaction.blockDollor = 0;
+//             findTransaction.blockAmount = 0;
+//             await findTransaction.save();
+//             return sendResponse(res, StatusCodes.OK, "Accept request", []);
+//         }
+//         return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
+//     } catch (error) {
+//         return handleErrorResponse(res, error);
+//     }
+// }
+
 export const acceptWithdrawalRequest = async (req, res) => {
     try {
         const { status, withdrawalRequestId } = req.body;
+        if (!status || status == '' || status == undefined) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
+        }
+
         const withdrawalRequest = await getSingleData({ _id: withdrawalRequestId, status: "pendding" }, WithdrawalRequest);
         if (!withdrawalRequest) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid withdrawal request", []);
@@ -126,98 +183,50 @@ export const acceptWithdrawalRequest = async (req, res) => {
         if (!findTransaction) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Transaction not found", []);
         }
+
+        const tokenName = withdrawalRequest.tokenName;
+        const tokenAmount = withdrawalRequest.tokenAmount;
+        const tokenDollerValue = withdrawalRequest.tokenValue;
+
+        let requestStatus = ''
+        let requestMessage = ''
+        
+        // For accept
+        if (status == "accept") {
+            requestStatus = "accept";
+            requestMessage = ResponseMessage.WITHDRAWAL_REQUEST_ACCEPTED;
+        }
+
+        // For reject
         if (status == "reject") {
-            withdrawalRequest.status = "reject";
-            await withdrawalRequest.save();
-            const dollor = findTransaction.blockDollor;
-            const amount = findTransaction.blockAmount;
-            if (withdrawalRequest.tokenName == "Binance USD") {
-                findTransaction.tokenBUSD += amount;
-            } else if (withdrawalRequest.tokenName == "Tether") {
+            requestStatus = "reject";
+            requestMessage = ResponseMessage.WITHDRAWAL_REQUEST_REJECTED;
+            if (withdrawalRequest.tokenName == "Tether") {
                 if (withdrawalRequest.tetherType == "PolygonUSDT") {
-                    findTransaction.tokenPolygonUSDT += amount;
+                    findTransaction.tokenPolygonUSDT = await plusLargeSmallValue(findTransaction.tokenPolygonUSDT, tokenAmount)
                 } else if (withdrawalRequest.tetherType == "EthereumUSDT") {
-                    findTransaction.tokenEthereumUSDT += amount;
+                    findTransaction.tokenEthereumUSDT = await plusLargeSmallValue(findTransaction.tokenEthereumUSDT, tokenAmount)
                 } else {
                     return sendResponse(res, StatusCodes.OK, "Invalid status", []);
                 }
             } else {
-                findTransaction[`token${withdrawalRequest.tokenName}`] += amount;
+                findTransaction[`token${tokenName}`] = await plusLargeSmallValue(findTransaction[`token${tokenName}`], tokenAmount);
             }
-            findTransaction.blockDollor = 0;
-            findTransaction.blockAmount = 0;
-            findTransaction.tokenDollorValue += dollor;
-
-            await findTransaction.save();
-            return sendResponse(res, StatusCodes.OK, "Reject request", []);
-
+            findTransaction.tokenDollorValue = await plusLargeSmallValue(findTransaction.tokenDollorValue, tokenDollerValue)
         }
-        if (status == "accept") {
-            withdrawalRequest.status = "accept";
-            await withdrawalRequest.save();
-            findTransaction.blockDollor = 0;
-            findTransaction.blockAmount = 0;
-            await findTransaction.save();
-            return sendResponse(res, StatusCodes.OK, "Accept request", []);
-        }
-        return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
+        
+        withdrawalRequest.status = requestStatus;
+        await withdrawalRequest.save();
+        
+        findTransaction.blockAmount = await minusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
+        findTransaction.blockDollor = await minusLargeSmallValue(findTransaction.blockDollor, tokenDollerValue)
+        await findTransaction.save();
+        return sendResponse(res, StatusCodes.OK, requestMessage, []);
     } catch (error) {
+        console.log(error);
         return handleErrorResponse(res, error);
     }
 }
-
-// export const acceptWithdrawalRequest = async (req, res) => {
-//     try {
-//         const { status, withdrawalRequestId } = req.body;
-//         if (!status || status == '' || status == undefined) {
-//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
-//         }
-//         const withdrawalRequest = await getSingleData({ _id: withdrawalRequestId, status: "pendding" }, WithdrawalRequest);
-//         if (!withdrawalRequest) {
-//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid withdrawal request", []);
-//         }
-
-//         const findTransaction = await getSingleData({ userId: withdrawalRequest.userId }, NewTransaction);
-//         if (!findTransaction) {
-//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Transaction not found", []);
-//         }
-
-//         const tokenName = withdrawalRequest.tokenName;
-//         const tokenAmount = withdrawalRequest.tokenAmount;
-//         const tokenDollerValue = withdrawalRequest.tokenValue;
-//         let requestStatus = ''
-//         let requestMessage = ''
-//         if (status == "reject") {
-//             requestStatus = "reject";
-//             if (withdrawalRequest.tokenName == "Tether") {
-//                 if (withdrawalRequest.tetherType == "PolygonUSDT") {
-//                     findTransaction.tokenPolygonUSDT = await plusLargeSmallValue(findTransaction.tokenPolygonUSDT, tokenAmount)
-//                 } else if (withdrawalRequest.tetherType == "EthereumUSDT") {
-//                     findTransaction.tokenEthereumUSDT = await plusLargeSmallValue(findTransaction.tokenEthereumUSDT, tokenAmount)
-//                 } else {
-//                     return sendResponse(res, StatusCodes.OK, "Invalid status", []);
-//                 }
-//             } else {
-//                 findTransaction[`token${tokenName}`] = await plusLargeSmallValue(findTransaction[`token${tokenName}`], tokenAmount);
-//             }
-//             requestMessage = "Reject request";
-//         }
-//         if (status == "accept") {
-//             requestStatus = "accept";
-//             requestMessage = "Accept request";
-//         }
-//         withdrawalRequest.status = requestStatus;
-//         await withdrawalRequest.save();
-//         findTransaction.blockAmount = await minusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
-//         findTransaction.blockDollor = await minusLargeSmallValue(findTransaction.blockDollor, tokenDollerValue)
-//         await findTransaction.save();
-//         return sendResponse(res, StatusCodes.OK, requestMessage, []);
-
-//     } catch (error) {
-//         console.log(error);
-//         return handleErrorResponse(res, error);
-//     }
-// }
 
 export const getSingleUserTransaction = async (req, res) => {
     try {
@@ -361,7 +370,7 @@ export const getUserWiseGameList = async (req, res) => {
             {
                 "_id": "65252e9b43c1ecf214f5507c",
                 "gameId": {
-                    "gameName" : "Lodo"
+                    "gameName": "Lodo"
                 },
                 "totalBetAmount": 20,
                 "totalWinAmount": 50,
@@ -370,7 +379,7 @@ export const getUserWiseGameList = async (req, res) => {
             {
                 "_id": "64f87781f2b289a180d6070e",
                 "gameId": {
-                    "gameName" : "One Color"
+                    "gameName": "One Color"
                 },
                 "totalBetAmount": 120.13131231132124,
                 "totalWinAmount": 300,
@@ -379,7 +388,7 @@ export const getUserWiseGameList = async (req, res) => {
             {
                 "_id": "64f6e7ab22902eef672b943f",
                 "gameId": {
-                    "gameName" : "2 Color"
+                    "gameName": "2 Color"
                 },
                 "totalBetAmount": 210,
                 "totalWinAmount": 270,

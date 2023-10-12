@@ -26,7 +26,7 @@ const gameSchema = new mongoose.Schema({
         required: false
     },
     gameDuration : {
-        type: Number,
+        type: String,
         required: false
     },
     gameMode : {

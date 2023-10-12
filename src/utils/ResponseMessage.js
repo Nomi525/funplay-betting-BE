@@ -210,6 +210,11 @@ const ResponseMessage = {
     CURRENCY_UPDATED: "Currency updated successfully",
     CURRENCY_DELETED: "Currency deleted successfully",
     CURRENCY_GET: "Currency get successfully",
+    WITHDRAWAL_REQUEST_ACCEPTED : "Withdrawal request accepted successfully",
+    WITHDRAWAL_REQUEST_REJECTED : "Withdrawal request rejected successfully",
+    NUMBER_BET_CRETED : "Number bet created successfully",
+    NUMBER_BET_GET : "Get number bet successfully",
+    NUMBER_BET_NOT_FOUND : "Number bet not found",
 }
 
 export { ResponseMessage }
