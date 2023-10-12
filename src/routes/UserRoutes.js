@@ -41,7 +41,9 @@ import {
   updateLoginStatus,
   userSignUpSignInOtp,
   userGetAllGame,
-  userGetCMSDetail
+  userGetCMSDetail,
+  addNumberBet,
+  getAllNumberBet
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -107,5 +109,9 @@ userRoutes.get('/games', userGetAllGame)
 
 //#region CMS
 userRoutes.get('/cms-details', userGetCMSDetail)
+
+// Number Betting Routes
+userRoutes.post('/create-number-bet', Auth, addNumberBet);
+userRoutes.get('/get-number-bets', Auth, getAllNumberBet);
 
 export { userRoutes };

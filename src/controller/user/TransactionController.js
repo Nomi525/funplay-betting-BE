@@ -22,7 +22,6 @@ export const addNewTransaction = async (req, res) => {
     const { walletAddress, networkChainId, tokenName, tokenAmount, tetherType } = req.body;
     const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
     const dataNew = USDTPrice.data.data
-    return res.send(dataNew)
     // Bitcoin Tether BNB Polygon
     const findUser = await NewTransaction.findOne({ userId: req.user })
     if (!dataNew) {
