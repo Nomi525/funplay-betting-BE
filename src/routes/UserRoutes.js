@@ -43,7 +43,9 @@ import {
   userGetAllGame,
   userGetCMSDetail,
   addNumberBet,
-  getAllNumberBet
+  getAllNumberBet,
+  getSingleNumberBet,
+  deleteNumberBet
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -87,7 +89,7 @@ userRoutes.post("/query/delete", Auth, deleteQuery);
 
 // Rating Routes
 userRoutes.post("/game/rating/add-edit", Auth, addEditRating);
-userRoutes.post("/game/rating/average", Auth, gameRatingAverage);
+userRoutes.get("/game/rating/average/:gameId", gameRatingAverage);
 
 // Wallet login
 userRoutes.post("/walletLogin/login", walletCreate);
@@ -113,5 +115,8 @@ userRoutes.get('/cms-details', userGetCMSDetail)
 // Number Betting Routes
 userRoutes.post('/create-number-bet', Auth, addNumberBet);
 userRoutes.get('/get-number-bets', Auth, getAllNumberBet);
+userRoutes.get('/get-single-number-bet/:numberBetId', Auth, getSingleNumberBet);
+userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);
+
 
 export { userRoutes };

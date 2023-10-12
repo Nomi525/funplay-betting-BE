@@ -187,7 +187,9 @@ import {
 // Number Betting
 import {
   addNumberBet,
-  getAllNumberBet
+  getAllNumberBet,
+  getSingleNumberBet,
+  deleteNumberBet
 } from "./controller/user/NumberBettingController.js";
 
 // Routes
@@ -435,5 +437,7 @@ export {
   getAllCurrency,
   getUserWiseGameList,
   addNumberBet,
-  getAllNumberBet
+  getAllNumberBet,
+  getSingleNumberBet,
+  deleteNumberBet
 };

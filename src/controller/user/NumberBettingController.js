@@ -30,7 +30,37 @@ export const getAllNumberBet = async (req, res) => {
         if (getNumberBetting.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.NUMBER_BET_GET, getNumberBetting)
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_GET, getNumberBetting)
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_NOT_FOUND, [])
+        }
+    } catch (error) {
+        return handleErrorResponse(error);
+    }
+}
+
+export const getSingleNumberBet = async (req, res) => {
+    try {
+        const { numberBetId } = req.params;
+        if (!numberBetId) return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_ID, [])
+        const getSingleNumberBet = await getSingleData({ _id: numberBetId, userId: req.user, is_deleted: 0 }, NumberBetting)
+        if (getSingleNumberBet) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.NUMBER_BET_GET, getSingleNumberBet)
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_NOT_FOUND, [])
+        }
+    } catch (error) {
+        return handleErrorResponse(error);
+    }
+}
+
+export const deleteNumberBet = async (req, res) => {
+    try {
+        const { numberBetId } = req.body;
+        if (!numberBetId) return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_ID, [])
+        const deleteNumberBet = await dataUpdated({ _id: numberBetId, userId: req.user }, { is_deleted: 1 }, NumberBetting)
+        if (deleteNumberBet) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.NUMBER_BET_DELETED, [])
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_NOT_FOUND, [])
         }
     } catch (error) {
         return handleErrorResponse(error);
