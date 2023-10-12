@@ -18,7 +18,7 @@ export const addNumberBet = async (req, res) => {
         }, NumberBetting);
         return sendResponse(res, StatusCodes.CREATED, ResponseMessage.NUMBER_BET_CRETED, createNumberBet)
     } catch (error) {
-        return handleErrorResponse(error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -33,7 +33,7 @@ export const getAllNumberBet = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_NOT_FOUND, [])
         }
     } catch (error) {
-        return handleErrorResponse(error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -48,7 +48,7 @@ export const getSingleNumberBet = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_NOT_FOUND, [])
         }
     } catch (error) {
-        return handleErrorResponse(error);
+        return handleErrorResponse(res, error);
     }
 }
 
@@ -63,6 +63,6 @@ export const deleteNumberBet = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.NUMBER_BET_NOT_FOUND, [])
         }
     } catch (error) {
-        return handleErrorResponse(error);
+        return handleErrorResponse(res, error);
     }
 }

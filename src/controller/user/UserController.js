@@ -25,6 +25,7 @@ import {
   Reward,
   AdminSetting,
   createReward,
+  Rating,
 } from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
@@ -1864,12 +1865,23 @@ export const userGetAllGame = async (req, res) => {
   try {
     const games = await Game.find({ is_deleted: 0 }).sort({ _id: -1 });
     if (games.length) {
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_GET_ALL, games)
+      const newGames = games.map((async (game) => {
+        const ratings = await Rating.find({ gameId: game._id })
+        let ratingAverage
+        if(ratings.length){
+          ratingAverage = ratings.reduce((sum, ratingData) => sum + ratingData.rating, 0) / ratings.length
+        }else{
+          ratingAverage = 0
+        }
+        return { ...game._doc, ratingAverage }
+      }))
+      const data = await Promise.all(newGames)
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_GET_ALL, data)
     } else {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, [])
     }
   } catch (error) {
-    return handleErrorResponse(req, error);
+    return handleErrorResponse(res, error);
   }
 }
 
