@@ -2,7 +2,8 @@ import { mongoose } from '../index.js';
 
 const ratingSchema = new mongoose.Schema({
     gameId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Game",
         required: false
     },
     userId: {

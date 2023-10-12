@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, createError, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating,handleErrorResponse
+    getSingleData, getAllData, Rating, handleErrorResponse
 } from "../../index.js";
 
 export const addEditRating = async (req, res) => {
@@ -21,14 +21,15 @@ export const addEditRating = async (req, res) => {
 
 export const gameRatingAverage = async (req, res) => {
     try {
-        const gameId = req.body.gameId;
+        const gameId = req.params.gameId;
         const ratings = await getAllData({ gameId }, Rating);
+        let ratingAverage = 0
         if (ratings.length) {
             const totalScore = ratings.reduce((sum, rating) => sum + rating.rating, 0);
-            const averageScore = totalScore / ratings.length;
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RATING_AVERAGE, averageScore);
+            ratingAverage = totalScore / ratings.length;
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RATING_AVERAGE, { ratingAverage });
         } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.RATING_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_RATING_AVERAGE, { ratingAverage });
         }
     } catch (error) {
         return handleErrorResponse(res, error);

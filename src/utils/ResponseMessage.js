@@ -213,8 +213,10 @@ const ResponseMessage = {
     WITHDRAWAL_REQUEST_ACCEPTED : "Withdrawal request accepted successfully",
     WITHDRAWAL_REQUEST_REJECTED : "Withdrawal request rejected successfully",
     NUMBER_BET_CRETED : "Number bet created successfully",
+    NUMBER_BET_DELETED : "Number bet deleted successfully",
     NUMBER_BET_GET : "Get number bet successfully",
     NUMBER_BET_NOT_FOUND : "Number bet not found",
+    NUMBER_BET_ID : "Number bet id is required",
 }
 
 export { ResponseMessage }
