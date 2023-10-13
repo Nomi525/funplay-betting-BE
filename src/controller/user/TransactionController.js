@@ -45,7 +45,6 @@ export const addNewTransaction = async (req, res) => {
         if (tokenName == "Bitcoin") {
           // Bitcoin
           if (findUser.tokenBitcoin) {
-            // findUser.tokenBitcoin += parseFloat(tokenAmount)
             findUser.tokenBitcoin = await plusLargeSmallValue(findUser.tokenBitcoin, tokenAmount)
           } else {
             findUser.tokenBitcoin = parseFloat(tokenAmount)
@@ -54,17 +53,14 @@ export const addNewTransaction = async (req, res) => {
         } else if (tokenName == "BNB") {
           // BNB
           if (findUser.tokenBNB) {
-            // findUser.tokenBNB += parseFloat(tokenAmount)
             findUser.tokenBNB = await plusLargeSmallValue(findUser.tokenBNB, tokenAmount)
           } else {
             findUser.tokenBNB = parseFloat(tokenAmount)
           }
 
-          // } else if (tokenName == "Binance USD") {
         } else if (tokenName == "BUSD") {
           // BUSD
           if (findUser.tokenBUSD) {
-            // findUser.tokenBUSD += parseFloat(tokenAmount)
             findUser.tokenBUSD = await plusLargeSmallValue(findUser.tokenBUSD, tokenAmount)
           } else {
             findUser.tokenBUSD = parseFloat(tokenAmount)
@@ -72,7 +68,6 @@ export const addNewTransaction = async (req, res) => {
         } else if (tokenName == "Ethereum") {
           // Ethereum
           if (findUser.tokenEthereum) {
-            // findUser.tokenEthereum += parseFloat(tokenAmount)
             findUser.tokenEthereum = await plusLargeSmallValue(findUser.tokenEthereum, tokenAmount)
           } else {
             findUser.tokenEthereum = parseFloat(tokenAmount)
@@ -80,7 +75,6 @@ export const addNewTransaction = async (req, res) => {
         } else if (tokenName == "Polygon") {
           // Polygon
           if (findUser.tokenPolygon) {
-            // findUser.tokenPolygon = parseFloat(findUser.tokenPolygon) + parseFloat(tokenAmount)
             findUser.tokenPolygon = await plusLargeSmallValue(findUser.tokenPolygon, tokenAmount)
           } else {
             findUser.tokenPolygon = parseFloat(tokenAmount)
@@ -89,7 +83,6 @@ export const addNewTransaction = async (req, res) => {
           if (tetherType == "PolygonUSDT") {
             // PolygonUSDT
             if (findUser.tokenPolygonUSDT) {
-              // findUser.tokenPolygonUSDT += parseFloat(tokenAmount)
               findUser.tokenPolygonUSDT = await plusLargeSmallValue(findUser.tokenPolygonUSDT, tokenAmount)
             } else {
               findUser.tokenPolygonUSDT = parseFloat(tokenAmount)
@@ -97,7 +90,6 @@ export const addNewTransaction = async (req, res) => {
           } else if (tetherType == "EthereumUSDT") {
             // Ethereum USDT
             if (findUser.tokenEthereumUSDT) {
-              // findUser.tokenEthereumUSDT += parseFloat(tokenAmount)
               findUser.tokenEthereumUSDT = await plusLargeSmallValue(findUser.tokenEthereumUSDT, tokenAmount)
             } else {
               findUser.tokenEthereumUSDT = parseFloat(tokenAmount)
@@ -107,7 +99,6 @@ export const addNewTransaction = async (req, res) => {
           }
         }
         findUser.tokenDollorValue = await plusLargeSmallValue(findUser.tokenDollorValue, value)
-        // findUser.tokenDollorValue += value
         await findUser.save();
 
         await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenDollorValue: value, type: "deposit" }, TransactionHistory)
@@ -137,7 +128,6 @@ export const addNewTransaction = async (req, res) => {
           // BNB
           createObject.tokenBNB = parseFloat(tokenAmount)
 
-          // } else if (tokenName == "Binance USD") {
         } else if (tokenName == "BUSD") {
           // BUSD
           createObject.tokenBUSD = parseFloat(tokenAmount)
@@ -189,22 +179,13 @@ export const withdrawalRequest = async (req, res) => {
     }
     var value;
     if (findTransaction) {
-      // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tetherType }, WithdrawalRequest)
       const mapData = dataNew.filter(d => d.name == tokenName).map(async (item) => {
         value = parseFloat(item.priceUsd) * parseFloat(tokenAmount);
         if (tokenName == "Bitcoin") {
           // Bitcoin
           if ((findTransaction.tokenBitcoin > 0 && findTransaction.tokenBitcoin >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            // findTransaction.tokenBitcoin -= parseFloat(tokenAmount)
             findTransaction.tokenBitcoin = await minusLargeSmallValue(findTransaction.tokenBitcoin, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-            // findTransaction.tokenDollorValue -= parseFloat(value)
-
-            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
-            // For block coin
-            // findTransaction.blockDollor += parseFloat(value)
-            // findTransaction.blockAmount += parseFloat(tokenAmount)
             findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
             findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
@@ -222,16 +203,8 @@ export const withdrawalRequest = async (req, res) => {
         } else if (tokenName == "BNB") {
           // BNB
           if ((findTransaction.tokenBNB > 0 && findTransaction.tokenBNB >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            // findTransaction.tokenBNB -= parseFloat(tokenAmount)
             findTransaction.tokenBNB = await minusLargeSmallValue(findTransaction.tokenBNB, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-            // findTransaction.tokenDollorValue -= parseFloat(value)
-
-            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
-            // For block coin
-            // findTransaction.blockDollor += parseFloat(value)
-            // findTransaction.blockAmount += parseFloat(tokenAmount)
             findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
             findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
@@ -248,16 +221,8 @@ export const withdrawalRequest = async (req, res) => {
         } else if (tokenName == "BUSD") {
           // BUSD
           if ((findTransaction.tokenBUSD > 0 && findTransaction.tokenBUSD >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            // findTransaction.tokenBUSD -= parseFloat(tokenAmount)
             findTransaction.tokenBUSD = await minusLargeSmallValue(findTransaction.tokenBUSD, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-            // findTransaction.tokenDollorValue -= parseFloat(value)
-
-            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
-            // For block coin
-            // findTransaction.blockDollor += parseFloat(value)
-            // findTransaction.blockAmount += parseFloat(tokenAmount)
             findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
             findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
@@ -273,16 +238,8 @@ export const withdrawalRequest = async (req, res) => {
         } else if (tokenName == "Ethereum") {
           // Ethereum
           if ((findTransaction.tokenEthereum > 0 && findTransaction.tokenEthereum >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            // findTransaction.tokenEthereum -= parseFloat(tokenAmount)
             findTransaction.tokenEthereum = await minusLargeSmallValue(findTransaction.tokenEthereum, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-            // findTransaction.tokenDollorValue -= parseFloat(value)
-
-            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
-            // For block coin
-            // findTransaction.blockDollor += parseFloat(value)
-            // findTransaction.blockAmount += parseFloat(tokenAmount)
             findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
             findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
@@ -298,14 +255,8 @@ export const withdrawalRequest = async (req, res) => {
         } else if (tokenName == "Polygon") {
           // Polygon
           if ((findTransaction.tokenPolygon > 0 && findTransaction.tokenPolygon >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-            // findTransaction.tokenPolygon -= parseFloat(tokenAmount)
             findTransaction.tokenPolygon = await minusLargeSmallValue(findTransaction.tokenPolygon, tokenAmount)
             findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-            // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-            // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
-            // For block coin
-            // findTransaction.blockDollor += parseFloat(value)
-            // findTransaction.blockAmount += parseFloat(tokenAmount)
             findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
             findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
             await findTransaction.save();
@@ -321,16 +272,8 @@ export const withdrawalRequest = async (req, res) => {
           if (tetherType == "PolygonUSDT") {
             // PolygonUSDT
             if ((findTransaction.tokenPolygonUSDT > 0 && findTransaction.tokenPolygonUSDT >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-              // findTransaction.tokenPolygonUSDT -= parseFloat(tokenAmount)
               findTransaction.tokenPolygonUSDT = await minusLargeSmallValue(findTransaction.tokenPolygonUSDT, tokenAmount)
               findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-              // findTransaction.tokenDollorValue -= parseFloat(value)
-
-              // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-              // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
-              // For block coin
-              // findTransaction.blockDollor += parseFloat(value)
-              // findTransaction.blockAmount += parseFloat(tokenAmount)
               findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
               findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
               await findTransaction.save();
@@ -346,15 +289,9 @@ export const withdrawalRequest = async (req, res) => {
           } else if (tetherType == "EthereumUSDT") {
             // Ethereum USDT
             if ((findTransaction.tokenEthereumUSDT > 0 && findTransaction.tokenEthereumUSDT >= parseFloat(tokenAmount) && (findTransaction.tokenDollorValue > 0 && findTransaction.tokenDollorValue >= parseFloat(value)))) {
-              // findTransaction.tokenEthereumUSDT -= parseFloat(tokenAmount)
               findTransaction.tokenEthereumUSDT = await minusLargeSmallValue(findTransaction.tokenEthereumUSDT, tokenAmount)
-              // findTransaction.tokenAmount -= parseFloat(tokenAmount)
-              // findTransaction.tokenAmount = await minusLargeSmallValue(findTransaction.tokenAmount, tokenAmount)
               findTransaction.tokenDollorValue = await minusLargeSmallValue(findTransaction.tokenDollorValue, value)
-              // findTransaction.tokenDollorValue -= parseFloat(value)
               // For block coin
-              // findTransaction.blockDollor += parseFloat(value)
-              // findTransaction.blockAmount += parseFloat(tokenAmount)
               findTransaction.blockDollor = await plusLargeSmallValue(findTransaction.blockDollor, value)
               findTransaction.blockAmount = await plusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
               await findTransaction.save();

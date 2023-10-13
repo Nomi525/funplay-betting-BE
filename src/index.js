@@ -192,6 +192,14 @@ import {
   deleteNumberBet
 } from "./controller/user/NumberBettingController.js";
 
+// Currency Coin
+import { 
+  addEditCurrencyCoin,
+  getAllCurrencyCoin,
+  getSingleCurrencyCoin,
+  currenyCoinDelete,
+} from "./controller/admin/CurrencyCoinController.js";
+
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
 import { userRoutes } from "./routes/UserRoutes.js";
@@ -221,13 +229,13 @@ import { Role } from "./models/Role.js";
 import { Permission } from "./models/Permissions.js";
 import { GameHistory } from "./models/GameHistory.js";
 import { NumberBetting } from "./models/NumberBetting.js";
+import { CurrencyCoin } from "./models/CurrencyCoin.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
 import Upload from "./middleware/FileUpload.js";
 import { appServer } from "../server.js";
-
 import {
   createError,
   sendResponse,
@@ -249,6 +257,11 @@ import {
 dotenv.config();
 
 export {
+  CurrencyCoin,
+  addEditCurrencyCoin,
+  getAllCurrencyCoin,
+  getSingleCurrencyCoin,
+  currenyCoinDelete,
   express,
   dotenv,
   cors,

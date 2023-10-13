@@ -96,7 +96,6 @@ userRoutes.post("/walletLogin/login", walletCreate);
 userRoutes.post("/walletLogin/disconnect", disconnectWallet);
 
 // Transction Routes
-
 userRoutes.get("/new-transctions", Auth, getUserNewTransaction);
 userRoutes.post("/new-transction/add", Auth, addNewTransaction);
 userRoutes.get("/total-amount-deposit", Auth, getTotalUserAmountDiposit);

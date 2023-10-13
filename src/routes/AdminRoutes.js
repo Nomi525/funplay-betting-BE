@@ -69,7 +69,11 @@ import {
   permissionActiveDeActive,
   getGameWiseUserList,
   getGameHistory,
-  getUserWiseGameList
+  getUserWiseGameList,
+  addEditCurrencyCoin,
+  getAllCurrencyCoin,
+  getSingleCurrencyCoin,
+  currenyCoinDelete,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -188,5 +192,12 @@ adminRoutes.post("/notification-delete", Auth, deleteNotification);
 
 adminRoutes.post("/currency-convert", allCurrencyConverter);
 //#endregion
+
+
+// Currency Coin Routes
+adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
+adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
+adminRoutes.get("/get-single-currency-coin/:currencyCoinId", Auth, getSingleCurrencyCoin);
+adminRoutes.post("/delete-currency-coin", Auth, currenyCoinDelete);
 
 export { adminRoutes };

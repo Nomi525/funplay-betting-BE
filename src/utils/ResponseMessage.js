@@ -210,6 +210,11 @@ const ResponseMessage = {
     CURRENCY_UPDATED: "Currency updated successfully",
     CURRENCY_DELETED: "Currency deleted successfully",
     CURRENCY_GET: "Currency get successfully",
+    CURRENCY_COIN_NOT_FOUND: "Coin not found",
+    CURRENCY_COIN_CREATED: "Coin created successfully",
+    CURRENCY_COIN_UPDATED: "Coin updated successfully",
+    CURRENCY_COIN_DELETED: "Coin deleted successfully",
+    CURRENCY_COIN_GET: "Coin get successfully",
     WITHDRAWAL_REQUEST_ACCEPTED : "Withdrawal request accepted successfully",
     WITHDRAWAL_REQUEST_REJECTED : "Withdrawal request rejected successfully",
     NUMBER_BET_CRETED : "Number bet created successfully",
@@ -217,6 +222,7 @@ const ResponseMessage = {
     NUMBER_BET_GET : "Get number bet successfully",
     NUMBER_BET_NOT_FOUND : "Number bet not found",
     NUMBER_BET_ID : "Number bet id is required",
+
 }
 
 export { ResponseMessage }
