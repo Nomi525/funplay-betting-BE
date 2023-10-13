@@ -1843,24 +1843,6 @@ export const accountDeactivate = async (req, res) => {
   }
 };
 
-// export const getUserReferralBySignIn = async (req, res) => {
-//     try {
-//         const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
-//         if (findUser) {
-//             const users = await getAllData({ referralByCode: findUser.referralCode, is_deleted: 0 }, User)
-//             if (users.length) {
-//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, users)
-//             } else {
-//                 return sendResponse(res, StatusCodes.OK, ResponseMessage.RAFERRAL_NOT_FOUND, [])
-//             }
-//         } else {
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_NOT_EXIST, [])
-//         }
-//     } catch (error) {
-//         return handleErrorResponse(req, error);
-//     }
-// }
-
 export const userGetAllGame = async (req, res) => {
   try {
     const games = await Game.find({ is_deleted: 0 }).sort({ _id: -1 });
