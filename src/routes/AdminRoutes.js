@@ -74,6 +74,7 @@ import {
   getAllCurrencyCoin,
   getSingleCurrencyCoin,
   currenyCoinDelete,
+  addEditGameWiseTime
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -168,6 +169,8 @@ adminRoutes.get("/games", Auth, getAllGame);
 adminRoutes.post("/single-game", Auth, getSingleGame);
 adminRoutes.post("/game/delete", Auth, gameDelete);
 adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
+adminRoutes.post("/add-edit-game-wise-time", Auth, addEditGameWiseTime);
+
 
 
 // Game Rules Routes
