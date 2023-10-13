@@ -1,4 +1,3 @@
-import { checkWalletAddress } from "../controller/user/UserController.js";
 import {
   express,
   logout,
@@ -45,7 +44,9 @@ import {
   addNumberBet,
   getAllNumberBet,
   getSingleNumberBet,
-  deleteNumberBet
+  deleteNumberBet,
+  checkWalletAddress,
+  getSingleGameTime
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -107,6 +108,7 @@ userRoutes.get("/dashboard", Auth, userDashboard);
 
 //#region Game
 userRoutes.get('/games', userGetAllGame)
+userRoutes.get('/get-single-game-time/:gameId', getSingleGameTime)
 
 //#region CMS
 userRoutes.get('/cms-details', userGetCMSDetail)

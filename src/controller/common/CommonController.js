@@ -1,5 +1,5 @@
 import { Currency } from "../../models/Currency.js";
-import { ResponseMessage, StatusCodes, User, BannerModel, createError, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules } from "./../../index.js";
+import { ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -103,6 +103,22 @@ export const getAllCurrency = async (req, res) => {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.CURRENCY_GET, getCurrecy);
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.CURRENCY_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
+
+//#region Gel all game time
+export const getSingleGameTime = async (req, res) => {
+    try {
+        const { gameId } = req.params
+        const getGameTime = await getSingleData({ gameId, is_deleted: 0 }, GameTime)
+        if (getGameTime) {
+            return sendResponse(res, StatusCodes.OK, "Get game time successfully", getGameTime);
+        } else {
+            return sendResponse(res, StatusCodes.NOT_FOUND, "Game time not found", []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);

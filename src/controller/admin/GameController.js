@@ -10,12 +10,13 @@ import {
   dataCreate,
   getAllData,
   handleErrorResponse,
-  GameHistory
+  GameHistory,
+  GameTime
 } from "../../index.js";
 
 export const addEditGame = async (req, res) => {
   try {
-    const { gameName, gameDuration, gameRound, gameWinningAmount, gameId, gameTimeFrom, gameTimeTo, gameMode, description } = req.body;
+    const { gameName, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount, gameId, gameTimeFrom, gameTimeTo, gameMode, description } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -44,7 +45,7 @@ export const addEditGame = async (req, res) => {
         );
       } else {
         const newGame = await dataCreate(
-          { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
+          { gameName, gameImage, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
           Game
         );
         const createGame = await newGame.save();
@@ -67,7 +68,7 @@ export const addEditGame = async (req, res) => {
     } else {
       const updateGame = await dataUpdated(
         { _id: gameId },
-        { gameName, gameImage, gameDuration, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
+        { gameName, gameImage, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
         Game
       );
       if (updateGame) {
@@ -192,7 +193,7 @@ export const getGameHistory = async (req, res) => {
   try {
     // const getGameHistory = await GameHistory.find({ is_deleted: 0 })
     //   .populate('userId', 'fullName email')
-    //   .populate('gameId', 'gameName gameImage gameDuration gameRound gameTimeFrom gameTimeTo gameWinningAmount')
+    //   .populate('gameId', 'gameName gameImage gameDurationFrom gameRound gameTimeFrom gameTimeTo gameWinningAmount')
     //   .sort({ _id: -1 })
     const getGameHistory = [
       {
@@ -205,7 +206,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 1.20,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -226,7 +228,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -247,7 +250,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -268,7 +272,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -290,7 +295,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -312,7 +318,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -334,7 +341,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -356,7 +364,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -391,7 +400,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -409,7 +419,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -430,7 +441,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -453,7 +465,8 @@ export const getGameHistory = async (req, res) => {
           "gameImage": "1692957829243awjpj.jpg",
           "gameRound": 7,
           "gameWinningAmount": 500,
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30"
         },
@@ -474,7 +487,8 @@ export const getGameHistory = async (req, res) => {
           "gameImage": "1692957829243awjpj.jpg",
           "gameRound": 7,
           "gameWinningAmount": 500,
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30"
         },
@@ -495,7 +509,8 @@ export const getGameHistory = async (req, res) => {
           "gameImage": "1692957829243awjpj.jpg",
           "gameRound": 7,
           "gameWinningAmount": 500,
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30"
         },
@@ -516,7 +531,8 @@ export const getGameHistory = async (req, res) => {
           "gameImage": "1692957829243awjpj.jpg",
           "gameRound": 7,
           "gameWinningAmount": 500,
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30"
         },
@@ -535,7 +551,8 @@ export const getGameHistory = async (req, res) => {
           "_id": "64e701c35281f931162796dd",
           "gameName": "card",
           "gameImage": "169295590571637gmsh.jpg",
-          "gameDuration": 25,
+          "gameDurationFrom": 25,
+          "gameDurationTo": 1.40,
           "gameRound": 7,
           "gameTimeFrom": "1.20",
           "gameTimeTo": "1.30",
@@ -618,7 +635,7 @@ export const getGameRules = async (req, res) => {
   try {
     const getGameRules = await GameRules.find({ is_deleted: 0 }).populate(
       "gameId",
-      "gameName gameImage gameDuration"
+      "gameName gameImage gameDurationFrom gameDurationTo"
     );
     if (getGameRules.length) {
       return sendResponse(
@@ -646,7 +663,7 @@ export const getSingleGameRules = async (req, res) => {
     const findGameRule = await GameRules.findOne({
       gameId,
       is_deleted: 0,
-    }).populate("gameId", "gameName gameImage gameDuration");
+    }).populate("gameId", "gameName gameImage gameDurationFrom gameDurationTo");
     if (findGameRule) {
       return sendResponse(
         res,
@@ -681,3 +698,48 @@ export const gameRuleDelete = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+//#region Game wise time
+export const addEditGameWiseTime = async (req, res) => {
+  try {
+    const { gameTimeId, gameId, gameTime } = req.body;
+    if (!gameTimeId) {
+      const gameTimeAlreadyExits = await getSingleData({ is_deleted: 0, gameId }, GameTime)
+      if (gameTimeAlreadyExits) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          "Game already exits",
+          []
+        );
+      }
+      const createGameTime = await dataCreate({ gameId, gameTime }, GameTime)
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        "Game time created successfully",
+        createGameTime
+      );
+    } else {
+      const gameTimeUpdated = await dataUpdated({ _id: gameTimeId, gameId }, { gameTime }, GameTime)
+      if (gameTimeUpdated) {
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          "Game time updated successfully",
+          gameTimeUpdated
+        );
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.FAILED_TO_UPDATE,
+          []
+        );
+      }
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion

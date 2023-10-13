@@ -489,28 +489,14 @@ export const checkWalletAddress = async (req, res) => {
     }
     let existingUser = await User.findOne(queryOjb);
     if (existingUser) {
-      // if (existingUser.is_deleted != 0) {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.DEACTIVATED_USER,
-      //     []
-      //   );
-      // }
-      // if (!existingUser.isActive) {
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.BAD_REQUEST,
-      //     ResponseMessage.DEACTIVATED_USER,
-      //     []
-      //   );
-      // }
       const payload = {
         user: {
           id: existingUser._id,
         },
       };
       const token = await genrateToken({ payload });
+      existingUser.walletConnected = "Yes";
+      await existingUser.save();
       return sendResponse(res, StatusCodes.OK, "", {
         ...existingUser._doc,
         token: token,

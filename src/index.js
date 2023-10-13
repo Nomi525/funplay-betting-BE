@@ -79,7 +79,8 @@ import {
   updateEmail,
   userSignUpSignInOtp,
   userGetAllGame,
-  userGetCMSDetail
+  userGetCMSDetail,
+  checkWalletAddress
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -92,7 +93,8 @@ import {
   deleteBanner,
   allBannerGet,
   getSingleGameRule,
-  getAllCurrency
+  getAllCurrency,
+  getSingleGameTime
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
@@ -121,7 +123,8 @@ import {
   getSingleGameRules,
   gameRuleDelete,
   gameActiveDeactive,
-  getGameHistory
+  getGameHistory,
+  addEditGameWiseTime
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -193,7 +196,7 @@ import {
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
-import { 
+import {
   addEditCurrencyCoin,
   getAllCurrencyCoin,
   getSingleCurrencyCoin,
@@ -230,6 +233,7 @@ import { Permission } from "./models/Permissions.js";
 import { GameHistory } from "./models/GameHistory.js";
 import { NumberBetting } from "./models/NumberBetting.js";
 import { CurrencyCoin } from "./models/CurrencyCoin.js";
+import { GameTime } from "./models/GameTime.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -257,6 +261,10 @@ import {
 dotenv.config();
 
 export {
+  getSingleGameTime,
+  GameTime,
+  checkWalletAddress,
+  addEditGameWiseTime,
   CurrencyCoin,
   addEditCurrencyCoin,
   getAllCurrencyCoin,

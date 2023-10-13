@@ -25,7 +25,11 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    gameDuration : {
+    gameDurationFrom : {
+        type: String,
+        required: false
+    },
+    gameDurationTo : {
         type: String,
         required: false
     },
