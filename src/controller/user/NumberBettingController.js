@@ -6,12 +6,12 @@ import {
 export const addNumberBet = async (req, res) => {
     try {
         const { number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
-        const totalBetAmount = betAmount * rewardsCoins
+        const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
         const createNumberBet = await dataCreate({
             userId: req.user,
-            number,
-            betAmount,
-            totalAmount: totalBetAmount,
+            number : parseInt(number),
+            betAmount : parseInt(betAmount),
+            totalAmount: parseInt(totalBetAmount),
             winAmount,
             lossAmount,
             isWin: winAmount ? true : false
