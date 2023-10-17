@@ -16,7 +16,8 @@ import {
 
 export const addEditGame = async (req, res) => {
   try {
-    const { gameName, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount, gameId, gameTimeFrom, gameTimeTo, gameMode, description } = req.body;
+    const { gameId, gameName, gameStartDate, gameEndDate, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount,
+      gameTimeFrom, gameTimeTo, gameMode, description, gameWeek, gameMinimumCoin, gameMaximumCoin } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -45,7 +46,11 @@ export const addEditGame = async (req, res) => {
         );
       } else {
         const newGame = await dataCreate(
-          { gameName, gameImage, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
+          {
+            gameName, gameStartDate, gameEndDate, gameImage, gameDurationFrom, gameDurationTo, gameRound,
+            gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description,
+            gameWeek, gameMinimumCoin, gameMaximumCoin
+          },
           Game
         );
         const createGame = await newGame.save();
@@ -68,7 +73,11 @@ export const addEditGame = async (req, res) => {
     } else {
       const updateGame = await dataUpdated(
         { _id: gameId },
-        { gameName, gameImage, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount, gameTimeFrom, gameTimeTo, gameMode, description },
+        {
+          gameName, gameStartDate, gameEndDate, gameImage, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount,
+          gameTimeFrom, gameTimeTo, gameMode, description,
+          gameWeek, gameMinimumCoin, gameMaximumCoin
+        },
         Game
       );
       if (updateGame) {
@@ -709,7 +718,7 @@ export const addEditGameWiseTime = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          "Game already exits",
+          ResponseMessage.GAME_EXIST,
           []
         );
       }
@@ -717,7 +726,7 @@ export const addEditGameWiseTime = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        "Game time created successfully",
+        ResponseMessage.GAME_TIME_CREATED,
         createGameTime
       );
     } else {
@@ -726,7 +735,7 @@ export const addEditGameWiseTime = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.OK,
-          "Game time updated successfully",
+          ResponseMessage.GAME_TIME_UPDATED,
           gameTimeUpdated
         );
       } else {
@@ -742,4 +751,31 @@ export const addEditGameWiseTime = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 }
+//#endregion
+
+//#region Get all game times
+export const getAllGameTime = async (req, res) => {
+  try {
+    const gameTimes = await GameTime.find({ is_deleted: 0 })
+              .populate('gameId','gameName gameImage')
+              .sort({ createdAt: -1 });
+    if (gameTimes.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_TIME_GET,
+        gameTimes
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.GAME_TIME_NOT_FOUND,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 //#endregion

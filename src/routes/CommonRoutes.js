@@ -1,6 +1,6 @@
 import {
     express, Auth, Upload,
-    addEditBanner, deleteBanner, allBannerGet, getSingleGameRule, getAllCurrency
+    addEditBanner, deleteBanner, allBannerGet, getSingleGameRule, getAllCurrency,getSingleGameTime
 } from "../index.js"
 const commonRoutes = express.Router();
 // Banner Api for admin and user
@@ -14,5 +14,8 @@ commonRoutes.get('/get-single-game-rule/:gameId', Auth, getSingleGameRule);
 //#region Currecny Routes
 commonRoutes.get('/get-all-currency', getAllCurrency)
 //#endregion
+
+//#region Get single game time
+commonRoutes.get('/get-single-game-time/:gameId', getSingleGameTime)
 
 export { commonRoutes }

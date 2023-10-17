@@ -41,12 +41,11 @@ import {
   userSignUpSignInOtp,
   userGetAllGame,
   userGetCMSDetail,
-  addNumberBet,
+  addEditNumberBet,
   getAllNumberBet,
   getSingleNumberBet,
   deleteNumberBet,
-  checkWalletAddress,
-  getSingleGameTime
+  checkWalletAddress
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -108,13 +107,12 @@ userRoutes.get("/dashboard", Auth, userDashboard);
 
 //#region Game
 userRoutes.get('/games', userGetAllGame)
-userRoutes.get('/get-single-game-time/:gameId', getSingleGameTime)
 
 //#region CMS
 userRoutes.get('/cms-details', userGetCMSDetail)
 
 // Number Betting Routes
-userRoutes.post('/create-number-bet', Auth, addNumberBet);
+userRoutes.post('/create-number-bet', Auth, addEditNumberBet);
 userRoutes.get('/get-number-bets', Auth, getAllNumberBet);
 userRoutes.get('/get-single-number-bet/:numberBetId', Auth, getSingleNumberBet);
 userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);

@@ -110,15 +110,15 @@ export const getAllCurrency = async (req, res) => {
 }
 //#endregion
 
-//#region Gel all game time
+//#region Gel all game time getSingleNumberBet
 export const getSingleGameTime = async (req, res) => {
     try {
         const { gameId } = req.params
         const getGameTime = await getSingleData({ gameId, is_deleted: 0 }, GameTime)
         if (getGameTime) {
-            return sendResponse(res, StatusCodes.OK, "Get game time successfully", getGameTime);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_TIME_GET, getGameTime);
         } else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, "Game time not found", []);
+            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.GAME_TIME_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);

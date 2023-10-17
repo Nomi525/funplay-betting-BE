@@ -124,7 +124,8 @@ import {
   gameRuleDelete,
   gameActiveDeactive,
   getGameHistory,
-  addEditGameWiseTime
+  addEditGameWiseTime,
+  getAllGameTime
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -189,7 +190,7 @@ import {
 
 // Number Betting
 import {
-  addNumberBet,
+  addEditNumberBet,
   getAllNumberBet,
   getSingleNumberBet,
   deleteNumberBet
@@ -261,6 +262,7 @@ import {
 dotenv.config();
 
 export {
+  getAllGameTime,
   getSingleGameTime,
   GameTime,
   checkWalletAddress,
@@ -457,7 +459,7 @@ export {
   permissionActiveDeActive,
   getAllCurrency,
   getUserWiseGameList,
-  addNumberBet,
+  addEditNumberBet,
   getAllNumberBet,
   getSingleNumberBet,
   deleteNumberBet
