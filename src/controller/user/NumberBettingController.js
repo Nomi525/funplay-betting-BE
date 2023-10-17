@@ -3,20 +3,35 @@ import {
     getSingleData, getAllData, handleErrorResponse, NumberBetting
 } from "../../index.js";
 
-export const addNumberBet = async (req, res) => {
+export const addEditNumberBet = async (req, res) => {
     try {
-        const { number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
-        const totalBetAmount = betAmount * rewardsCoins
-        const createNumberBet = await dataCreate({
-            userId: req.user,
-            number,
-            betAmount,
-            totalAmount: totalBetAmount,
-            winAmount,
-            lossAmount,
-            isWin: winAmount ? true : false
-        }, NumberBetting);
-        return sendResponse(res, StatusCodes.CREATED, ResponseMessage.NUMBER_BET_CRETED, createNumberBet)
+        let { numberBetId, number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
+        let isWin = false
+        if (winAmount) isWin = true;
+        if (!numberBetId) {
+            const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
+            const createNumberBet = await dataCreate({
+                userId: req.user,
+                number: parseInt(number),
+                betAmount: parseInt(betAmount),
+                totalAmount: parseInt(totalBetAmount),
+                winAmount,
+                lossAmount,
+                isWin
+            }, NumberBetting);
+            if (createNumberBet) {
+                return sendResponse(res, StatusCodes.CREATED, ResponseMessage.NUMBER_BET_CRETED, createNumberBet)
+            } else {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.FAILED_TO_CREATE, [])
+            }
+        } else {
+            const updateNumberBet = await dataUpdated({ _id: numberBetId, userId: req.user }, { winAmount, lossAmount, isWin }, NumberBetting)
+            if (updateNumberBet) {
+                return sendResponse(res, StatusCodes.OK, ResponseMessage.NUMBER_BET_UPDATED, updateNumberBet)
+            } else {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.FAILED_TO_UPDATE, [])
+            }
+        }
     } catch (error) {
         return handleErrorResponse(res, error);
     }

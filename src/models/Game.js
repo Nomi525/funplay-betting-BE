@@ -9,6 +9,14 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    gameStartDate: {
+        type: String,
+        required: false
+    },
+    gameEndDate: {
+        type: String,
+        required: false
+    },
     gameRound: {
         type: Number,
         required: false
@@ -17,28 +25,41 @@ const gameSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
-    gameTimeFrom : {
+    gameTimeFrom: {
         type: String,
         required: false
     },
-    gameTimeTo : {
+    gameTimeTo: {
         type: String,
         required: false
     },
-    gameDurationFrom : {
+    gameDurationFrom: {
         type: String,
         required: false
     },
-    gameDurationTo : {
+    gameDurationTo: {
         type: String,
         required: false
     },
-    gameMode : {
+    gameMode: {
         type: String,
         required: false
     },
-    description : {
+    description: {
         type: String,
+        required: false
+    },
+    // gameWeek: [{
+    //     type: String,
+    //     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    //     required: false
+    // }],
+    gameMinimumCoin: {
+        type: Number,
+        required: false
+    },
+    gameMaximumCoin: {
+        type: Number,
         required: false
     },
     isActive: {
@@ -48,7 +69,7 @@ const gameSchema = new mongoose.Schema({
     },
     is_deleted: {
         type: Number,
-        default : 0 
+        default: 0
     },
 }, { timestamps: true });
 
