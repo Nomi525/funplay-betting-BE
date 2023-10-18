@@ -11,12 +11,11 @@ export const userDashboard = async (req, res) => {
             const totalUserswhoPlacedBidsin24Hrs = 12;
             const totalBidin24Hrs = 35
             const totalWinningAmountin24Hrs = 15
-            
-            const today = new Date(); // Current date
+
+            const today = new Date();
             const oneMonthAgo = new Date();
             oneMonthAgo.setMonth(today.getMonth() - 1);
 
-            // const totalReferralCount = await getAllDataCount({ referralByCode: findUser.referralCode, is_deleted: 0 }, User);
             const totalReferralCount = await ReferralUser.countDocuments({ userId: findUser._id })
             const transactions = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
             const totalTransaction = transactions.length
@@ -43,13 +42,14 @@ export const userDashboard = async (req, res) => {
                 }
             };
             const totalRewardsDistributedToday = await Reward.countDocuments({ userId: findUser._id, is_deleted: 0, ...rewardTodayQuery });
-            // const totalBalance = transactionDeposite ? transactionDeposite.tokenDollorValue : 0;
-            const totalWithdrawalRequests = transactions.filter( tran => tran.type == "withdrawal").length
-            let totalBalance = transactionDeposite ? transactionDeposite.tokenDollorValue : 0;
-            let totalDepositeBalance = transactionDeposite ? transactionDeposite.betAmount : 0;
+            const totalWithdrawalRequests = transactions.filter(tran => tran.type == "withdrawal").length
+            let totalBalance = 0;
+            let totalDepositeBalance = 0;
             let remainingBalance = 0;
-            if(parseFloat(transactionDeposite.betAmount) > 0){
-                totalBalance = await plusLargeSmallValue(transactionDeposite.tokenDollorValue,transactionDeposite.betAmount);
+            if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
+                totalBalance = transactionDeposite.tokenDollorValue;
+                totalDepositeBalance = transactionDeposite.betAmount;
+                totalBalance = await plusLargeSmallValue(transactionDeposite.tokenDollorValue, transactionDeposite.betAmount);
                 remainingBalance = transactionDeposite.tokenDollorValue
             }
             return sendResponse(
@@ -73,6 +73,7 @@ export const userDashboard = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
+        console.log(error);
         return handleErrorResponse(res, error);
     }
 }

@@ -6,7 +6,7 @@ import {
 
 export const addEditNumberBet = async (req, res) => {
     try {
-        let { numberBetId, number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
+        let { numberBetId,gameId, number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
         let isWin = false
         if (winAmount) isWin = true;
         const findUserDeposit = await NewTransaction.findOne({ userId: req.user, is_deleted: 0 });
@@ -21,6 +21,7 @@ export const addEditNumberBet = async (req, res) => {
             const totalBetAmount = multiplicationLargeSmallValue(betAmount,rewardsCoins)
             const createNumberBet = await dataCreate({
                 userId: req.user,
+                gameId,
                 number: parseInt(number),
                 betAmount,
                 totalAmount: totalBetAmount,
