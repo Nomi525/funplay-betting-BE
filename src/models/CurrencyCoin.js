@@ -1,23 +1,27 @@
 import { mongoose } from "../index.js";
 
-
-const currencyCoinSchema = new mongoose.Schema({
+const currencyCoinSchema = new mongoose.Schema(
+  {
     currencyName: {
-        type: String,
-        required: false
+      type: String,
+      required: false,
     },
     coin: {
-        type: Number,
-        required: false
+      type: Number,
+      required: false,
+    },
+    price: {
+      type: Number,
+      required: false,
     },
     is_deleted: {
-        type: Number,
-        default: 0,
+      type: Number,
+      default: 0,
     },
-},
-    { timestamps: true }
+  },
+  { timestamps: true }
 );
 
-const CurrencyCoin = mongoose.model('CurrencyCoin', currencyCoinSchema);
+const CurrencyCoin = mongoose.model("CurrencyCoin", currencyCoinSchema);
 
-export { CurrencyCoin }
+export { CurrencyCoin };

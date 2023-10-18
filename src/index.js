@@ -204,6 +204,12 @@ import {
   currenyCoinDelete,
 } from "./controller/admin/CurrencyCoinController.js";
 
+//Colour Betting
+import {
+  addColourBet,
+  colourBetResult
+} from "./controller/user/ColourBettingController.js"
+
 // Routes
 import { adminRoutes } from "./routes/AdminRoutes.js";
 import { userRoutes } from "./routes/UserRoutes.js";
@@ -235,6 +241,7 @@ import { GameHistory } from "./models/GameHistory.js";
 import { NumberBetting } from "./models/NumberBetting.js";
 import { CurrencyCoin } from "./models/CurrencyCoin.js";
 import { GameTime } from "./models/GameTime.js";
+import { ColourBetting } from "./models/ColourBetting.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -462,5 +469,8 @@ export {
   addEditNumberBet,
   getAllNumberBet,
   getSingleNumberBet,
-  deleteNumberBet
+  deleteNumberBet,
+  ColourBetting,
+  addColourBet,
+  colourBetResult
 };
