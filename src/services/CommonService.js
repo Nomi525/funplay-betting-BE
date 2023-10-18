@@ -104,3 +104,33 @@ export const plusLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.plus(smallNumber)
 }
+
+export const multiplicationLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+    const largeNumber = new Decimal(largeNumberValue);
+    const smallNumber = new Decimal(smallNumberNalue)
+    return largeNumber.times(smallNumber)
+}
+
+export const checkDecimalValueGreaterThanOrEqual = (largeNumberValue,smallNumberNalue) => {
+    const largeNumber = new Decimal(largeNumberValue);
+    const smallNumber = new Decimal(smallNumberNalue)
+    return largeNumber.greaterThanOrEqualTo(smallNumber)
+}
+
+export const checkLargeDecimalValueGreaterThan = (largeNumberValue,smallNumberNalue) => {
+    const largeNumber = new Decimal(largeNumberValue);
+    const smallNumber = new Decimal(smallNumberNalue)
+    return largeNumber.greaterThan(smallNumber)
+}
+
+export const checkLargeDecimalValueLessThan = (largeNumberValue,smallNumberNalue) => {
+    const largeNumber = new Decimal(largeNumberValue);
+    const smallNumber = new Decimal(smallNumberNalue)
+    return largeNumber.lessThan(smallNumber)
+}
+
+export const checkLargeDecimalValueEquals = (largeNumberValue,smallNumberNalue) => {
+    const largeNumber = new Decimal(largeNumberValue);
+    const smallNumber = new Decimal(smallNumberNalue)
+    return largeNumber.equals(smallNumber)
+}

@@ -11,20 +11,20 @@ const numberBettingSchema = new mongoose.Schema({
         required: false
     },
     betAmount: {
-        type: Number,
+        type: String,
         required: false
     },
     totalAmount: {
-        type: Number,
+        type: String,
         required: false
     },
     winAmount: {
-        type: Number,
+        type: String,
         required: false,
         default: 0
     },
     lossAmount: {
-        type: Number,
+        type: String,
         required: false,
         default: 0
     },
