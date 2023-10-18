@@ -12,7 +12,7 @@ import {
 //#region Add Edit Curency Coin
 export const addEditCurrencyCoin = async (req, res) => {
     try {
-        const { currencyCoinId, currencyName, coin } = req.body;
+        const { currencyCoinId, currencyName, coin ,price } = req.body;
         const findCurrencyQuery = {
             currencyName: { $regex: "^" + currencyName + "$", $options: "i" },
             is_deleted: 0,
@@ -31,7 +31,7 @@ export const addEditCurrencyCoin = async (req, res) => {
         }
         if (!currencyCoinId) {
             const currencyCoinCreate = await dataCreate(
-                { currencyName, coin },
+                { currencyName, coin ,price},
                 CurrencyCoin
             );
             await currencyCoinCreate.save();
@@ -54,7 +54,7 @@ export const addEditCurrencyCoin = async (req, res) => {
         } else {
             const updateCurrencyCoin = await dataUpdated(
                 { _id: currencyCoinId },
-                { currencyName, coin },
+                { currencyName, coin ,price},
                 CurrencyCoin
             );
             if (updateCurrencyCoin) {
