@@ -67,6 +67,10 @@ const gameSchema = new mongoose.Schema({
         required: false,
         default: true
     },
+    gameTime: [{
+        type: String,
+        required: false
+    }],
     is_deleted: {
         type: Number,
         default: 0

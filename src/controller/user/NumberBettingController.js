@@ -1,6 +1,7 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, handleErrorResponse, NumberBetting
+    getSingleData, getAllData, handleErrorResponse, NumberBetting, NewTransaction, 
+    checkDecimalValueGreaterThanOrEqual, minusLargeSmallValue, plusLargeSmallValue,multiplicationLargeSmallValue
 } from "../../index.js";
 
 export const addEditNumberBet = async (req, res) => {
@@ -8,18 +9,33 @@ export const addEditNumberBet = async (req, res) => {
         let { numberBetId, number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
         let isWin = false
         if (winAmount) isWin = true;
+        const findUserDeposit = await NewTransaction.findOne({ userId: req.user, is_deleted: 0 });
+        if (!findUserDeposit) {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
+        }
         if (!numberBetId) {
-            const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
+            if (!checkDecimalValueGreaterThanOrEqual(findUserDeposit.tokenDollorValue, betAmount)) {
+                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
+            }
+            // const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
+            const totalBetAmount = multiplicationLargeSmallValue(betAmount,rewardsCoins)
             const createNumberBet = await dataCreate({
                 userId: req.user,
                 number: parseInt(number),
-                betAmount: parseInt(betAmount),
-                totalAmount: parseInt(totalBetAmount),
+                betAmount,
+                totalAmount: totalBetAmount,
                 winAmount,
                 lossAmount,
                 isWin
             }, NumberBetting);
             if (createNumberBet) {
+                findUserDeposit.tokenDollorValue = minusLargeSmallValue(findUserDeposit.tokenDollorValue, betAmount)
+                if (parseFloat(findUserDeposit.betAmount)) {
+                    findUserDeposit.betAmount = plusLargeSmallValue(findUserDeposit.betAmount, betAmount);
+                } else {
+                    findUserDeposit.betAmount = betAmount;
+                }
+                await findUserDeposit.save();
                 return sendResponse(res, StatusCodes.CREATED, ResponseMessage.NUMBER_BET_CRETED, createNumberBet)
             } else {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.FAILED_TO_CREATE, [])
@@ -27,6 +43,10 @@ export const addEditNumberBet = async (req, res) => {
         } else {
             const updateNumberBet = await dataUpdated({ _id: numberBetId, userId: req.user }, { winAmount, lossAmount, isWin }, NumberBetting)
             if (updateNumberBet) {
+                if (parseFloat(winAmount)) {
+                    findUserDeposit.tokenDollorValue = plusLargeSmallValue(findUserDeposit.tokenDollorValue, winAmount);
+                    await findUserDeposit.save();
+                }
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.NUMBER_BET_UPDATED, updateNumberBet)
             } else {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.FAILED_TO_UPDATE, [])
