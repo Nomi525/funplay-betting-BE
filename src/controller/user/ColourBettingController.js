@@ -63,7 +63,7 @@ export const addColourBet = async (req, res) => {
 //#region Colour betting result api
 export const colourBetResult = async (req, res) => {
   try {
-    const gameId = req.body.gameId;
+    const gameId = req.params.gameId;
     const colourBettingResult = await ColourBetting.aggregate([
       {
         $match: {

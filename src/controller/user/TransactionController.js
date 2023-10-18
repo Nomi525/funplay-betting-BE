@@ -163,7 +163,6 @@ export const addNewTransaction = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DATA_NOT_FOUND, []);
     }
   } catch (error) {
-    console.log('hiii',error);
     return handleErrorResponse(res, error);
   }
 }
@@ -363,12 +362,15 @@ export const getTotalUserAmountDiposit = async (req, res) => {
         tokenDollorValue: findUser.tokenDollorValue,
       });
     } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.USER_NOT_EXIST,
-        []
-      );
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_DEPOSIT_AMOUNT, {
+        tokenDollorValue: 0,
+      });
+      // return sendResponse(
+      //   res,
+      //   StatusCodes.BAD_REQUEST,
+      //   ResponseMessage.WALLET_NOT_EXIST,
+      //   []
+      // );
     }
   } catch (error) {
     return handleErrorResponse(res, error);
