@@ -17,7 +17,7 @@ import {
 export const addEditGame = async (req, res) => {
   try {
     const { gameId, gameName, gameStartDate, gameEndDate, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount,
-      gameTimeFrom, gameTimeTo, gameMode, description, gameWeek, gameMinimumCoin, gameMaximumCoin } = req.body;
+      gameTimeFrom, gameTimeTo, gameMode, description, gameWeek, gameMinimumCoin, gameMaximumCoin, gameTime } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -76,7 +76,7 @@ export const addEditGame = async (req, res) => {
         {
           gameName, gameStartDate, gameEndDate, gameImage, gameDurationFrom, gameDurationTo, gameRound, gameWinningAmount,
           gameTimeFrom, gameTimeTo, gameMode, description,
-          gameWeek, gameMinimumCoin, gameMaximumCoin
+          gameWeek, gameMinimumCoin, gameMaximumCoin, gameTime
         },
         Game
       );
@@ -757,8 +757,8 @@ export const addEditGameWiseTime = async (req, res) => {
 export const getAllGameTime = async (req, res) => {
   try {
     const gameTimes = await GameTime.find({ is_deleted: 0 })
-              .populate('gameId','gameName gameImage')
-              .sort({ createdAt: -1 });
+      .populate('gameId', 'gameName gameImage')
+      .sort({ createdAt: -1 });
     if (gameTimes.length) {
       return sendResponse(
         res,

@@ -55,6 +55,7 @@ const ResponseMessage = {
     OLD_MPIN_WRONG: "Please use valid old Mpin",
     INVALID_MPIN: "Invalid MPIN",
     DATA_GET: "Get data",
+    DASHBOARD_DATA_GET: "Get dashboard data successfully",
     SOME_ERROR_OCCUR: "Some error occur",
     OTP_SENT_TO_BOTH: "Otp sent successfully",
     MOBILENUMBER_ALREADY_EXIST: "Mobile number already exist ",

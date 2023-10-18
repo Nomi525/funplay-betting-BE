@@ -264,11 +264,21 @@ import {
   currencyConverter,
   minusLargeSmallValue,
   plusLargeSmallValue,
+  checkDecimalValueGreaterThanOrEqual,
+  checkLargeDecimalValueGreaterThan,
+  checkLargeDecimalValueLessThan,
+  multiplicationLargeSmallValue,
+  checkLargeDecimalValueEquals,
 } from "./services/CommonService.js";
 
 dotenv.config();
 
 export {
+  checkDecimalValueGreaterThanOrEqual,
+  multiplicationLargeSmallValue,
+  checkLargeDecimalValueGreaterThan,
+  checkLargeDecimalValueLessThan,
+  checkLargeDecimalValueEquals,
   getAllGameTime,
   getSingleGameTime,
   GameTime,
