@@ -12,6 +12,8 @@ import {
   NewTransaction,
   mongoose,
   User,
+  plusLargeSmallValue,
+  minusLargeSmallValue,
 } from "../../index.js";
 
 //#region Colour betting api
@@ -22,11 +24,19 @@ export const addColourBet = async (req, res) => {
       userId: req.user,
       is_deleted: 0,
     });
+    if (!checkBalance) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.INSUFFICIENT_BALANCE_USER,
+        []
+      );
+    }
     if (parseInt(checkBalance.tokenDollorValue) < parseInt(betAmount)) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.INSUFFICIENT_BALANCE,
+        ResponseMessage.INSUFFICIENT_BALANCE_USER,
         []
       );
     }
@@ -40,6 +50,19 @@ export const addColourBet = async (req, res) => {
       ColourBetting
     );
     if (createColourBet) {
+      checkBalance.tokenDollorValue = minusLargeSmallValue(
+        checkBalance.tokenDollorValue,
+        betAmount
+      );
+      if (parseFloat(checkBalance.betAmount)) {
+        checkBalance.betAmount = plusLargeSmallValue(
+          checkBalance.betAmount,
+          betAmount
+        );
+      } else {
+        checkBalance.betAmount = betAmount;
+      }
+      await checkBalance.save();
       return sendResponse(
         res,
         StatusCodes.CREATED,
