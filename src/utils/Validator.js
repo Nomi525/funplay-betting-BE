@@ -1,6 +1,7 @@
 import { Joi } from '../index.js'
 
 const signupValidator = Joi.object().keys({
+    fullName: Joi.string().required().description("fullName"),
     email: Joi.string().email().required().max(100).description("email"),
     password: Joi.string()
         .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])'))

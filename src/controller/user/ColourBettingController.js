@@ -14,6 +14,8 @@ import {
   User,
   plusLargeSmallValue,
   minusLargeSmallValue,
+  multiplicationLargeSmallValue,
+  GameReward,
 } from "../../index.js";
 
 //#region Colour betting api
@@ -173,6 +175,25 @@ export const colourBetResult = async (req, res) => {
           if (bet.gameDetails.gameId.toString() == gameId.toString()) {
             const winnerDetails = await User.findOne({ _id: bet.winner });
             if (winnerDetails) {
+              if (bet.bets && bet.bets.length) {
+                bet.bets.map(async (b) => {
+                  if (b.userId.toString() == winnerDetails._id.toString()) {
+                    const rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
+                    const balance = await getSingleData({ userId: winnerDetails._id }, NewTransaction)
+                    if (balance) {
+                      balance.tokenDollorValue = plusLargeSmallValue(balance.tokenDollorValue, rewardAmount)
+                      await balance.save();
+                    }
+                    await GameReward.create({
+                      userId: winnerDetails._id,
+                      gameId: bet.gameDetails.gameId,
+                      betId: b._id,
+                      betAmount: b.betAmount,
+                      rewardAmount
+                    });
+                  }
+                })
+              }
               bet.winner = winnerDetails;
             }
           }
