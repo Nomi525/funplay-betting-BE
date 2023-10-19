@@ -6,6 +6,11 @@ const numberBettingSchema = new mongoose.Schema({
         ref: "User",
         required: false
     },
+    gameId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Game",
+        required: false,
+    },
     number: {
         type: Number,
         required: false
@@ -28,7 +33,7 @@ const numberBettingSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
-    isWin : {
+    isWin: {
         type: Boolean,
         required: false,
         default: false

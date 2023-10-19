@@ -14,6 +14,7 @@ const ResponseMessage = {
     USER_LOGOUT: "User logged out",
     ADMIN_LOGOUT: "Admin logged out",
     USER_NOT_EXIST: "User not exist",
+    WALLET_NOT_EXIST: "Wallet not exist",
     ADMIN_NOT_EXIST: "Admin not exist",
     USER_LIST: "Users list fetched",
     USER_WALLET_DETAIL: "Wallet detail fetched",
