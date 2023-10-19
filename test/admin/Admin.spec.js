@@ -1,5 +1,4 @@
 import { chai, chaiHttp, appServer, expect, fs, path, ResponseMessage, Admin } from "../../src/index.js";
-import { referralWorkDummy } from "../../src/utils/DummyData.js";
 
 chai.use(chaiHttp);
 const should = chai.should();
@@ -9,7 +8,7 @@ let adminotp;
 let adminToken;
 let otp = 4444;
 let adminDetails = {
-    email: "adminTest@gmail.com",
+    email: "admintest@gmail.com",
     password: "Admin@123",
     otp: "",
     newPassword: "Admin@1234",
@@ -259,7 +258,7 @@ describe('Admin test case', () => {
     //     chai.request(appServer)
     //         .post('/api/admin/how-referral-work')
     //         .set('auth', adminToken)
-    //         .send({ referralWork : referralWorkDummy })
+    //         .send({ referralWork : ["fsjfhsk"] })
     //         .end((err, res) => {
     //             if (res.body.status == 201) {
     //                 res.body.should.have.status(201)

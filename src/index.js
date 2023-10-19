@@ -242,6 +242,7 @@ import { NumberBetting } from "./models/NumberBetting.js";
 import { CurrencyCoin } from "./models/CurrencyCoin.js";
 import { GameTime } from "./models/GameTime.js";
 import { ColourBetting } from "./models/ColourBetting.js";
+import { GameReward } from "./models/GameReward.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -272,8 +273,8 @@ import {
 } from "./services/CommonService.js";
 
 dotenv.config();
-
 export {
+  GameReward,
   checkDecimalValueGreaterThanOrEqual,
   multiplicationLargeSmallValue,
   checkLargeDecimalValueGreaterThan,

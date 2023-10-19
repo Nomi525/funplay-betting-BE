@@ -263,7 +263,7 @@ export const connectToWallet = async (req, res) => {
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { email, currency, referralByCode, registerType, type } = req.body;
+    let { fullName, email, currency, referralByCode, registerType, type } = req.body;
     const otp = 4444;
     email = email ? email.toLowerCase() : null;
     const existingUser = await getSingleData({ email }, User);
@@ -367,6 +367,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       }
       const userData = await dataCreate(
         {
+          fullName,
           email,
           currency,
           otp,
@@ -776,7 +777,7 @@ export const userCheckEmail = async (req, res) => {
 
 export const singupFromEmailPassword = async (req, res) => {
   try {
-    let { email, password, currency, referralByCode, registerType, type } = req.body;
+    let { fullName, email, password, currency, referralByCode, registerType, type } = req.body;
     email = email ? email.toLowerCase() : null;
     let userFind = await getSingleData({ email }, User);
     if (type == "login") {
@@ -886,6 +887,7 @@ export const singupFromEmailPassword = async (req, res) => {
         password = await hashedPassword(password);
         const createUser = await dataCreate(
           {
+            fullName,
             email,
             currency,
             password,
@@ -925,7 +927,6 @@ export const singupFromEmailPassword = async (req, res) => {
       );
     }
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -1836,9 +1837,9 @@ export const userGetAllGame = async (req, res) => {
       const newGames = games.map((async (game) => {
         const ratings = await Rating.find({ gameId: game._id })
         let ratingAverage
-        if(ratings.length){
+        if (ratings.length) {
           ratingAverage = ratings.reduce((sum, ratingData) => sum + ratingData.rating, 0) / ratings.length
-        }else{
+        } else {
           ratingAverage = 0
         }
         return { ...game._doc, ratingAverage }
