@@ -229,7 +229,7 @@ const ResponseMessage = {
     GAME_TIME_GET : "Get game time successfully",
     GAME_TIME_NOT_FOUND : "Get game time not found.",
     COLOUR_BET_CRETED : "Colour bet created successfully",
-    INSUFFICIENT_BALANCE:"You don't have sufficient balance",
+    INSUFFICIENT_BALANCE_USER:"You don't have sufficient balance",
     COLOUR_RESULT:"Here it is details of colour betting game"
 }
 
