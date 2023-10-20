@@ -173,17 +173,19 @@ export const colourBetResult = async (req, res) => {
       const addwinnerDetails = await Promise.all(
         colourBettingResult.map(async (bet) => {
           if (bet.gameDetails.gameId.toString() == gameId.toString()) {
-            const winnerDetails = await User.findOne({ _id: bet.winner });
+            let winnerDetails = await User.findOne({ _id: bet.winner });
+            let rewardAmount = 0;
             if (winnerDetails) {
               if (bet.bets && bet.bets.length) {
                 bet.bets.map(async (b) => {
                   if (b.userId.toString() == winnerDetails._id.toString()) {
-                    const rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
+                    rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
                     const balance = await getSingleData({ userId: winnerDetails._id }, NewTransaction)
                     if (balance) {
                       balance.tokenDollorValue = plusLargeSmallValue(balance.tokenDollorValue, rewardAmount)
                       await balance.save();
                     }
+                    await ColourBetting.updateOne({ userId: winnerDetails._id, gameId: bet.gameDetails.gameId }, { $set: { rewardAmount } })
                     await GameReward.create({
                       userId: winnerDetails._id,
                       gameId: bet.gameDetails.gameId,
@@ -194,6 +196,7 @@ export const colourBetResult = async (req, res) => {
                   }
                 })
               }
+              winnerDetails = { ...winnerDetails._doc, rewardAmount }
               bet.winner = winnerDetails;
             }
           }

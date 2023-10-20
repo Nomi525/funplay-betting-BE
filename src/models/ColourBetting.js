@@ -24,7 +24,7 @@ const colourBettingSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
-    winAmount: {
+    rewardAmount: {
       type: Number,
       required: false,
       default: 0,
