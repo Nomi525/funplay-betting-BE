@@ -231,7 +231,16 @@ const ResponseMessage = {
     GAME_TIME_NOT_FOUND : "Get game time not found.",
     COLOUR_BET_CRETED : "Colour bet created successfully",
     INSUFFICIENT_BALANCE_USER:"You don't have sufficient balance",
-    COLOUR_RESULT:"Here it is details of colour betting game"
+    NUMBER_RESULT:"Here it is details of number betting game",
+    COLOUR_RESULT:"Here it is details of colour betting game",
+    VALID_BET_AMOUNT : "Please enter valid bet amount",
+    COMMUNITY_BET_CRETED : "Comunnity betting created successfully",
+    COMMUNITY_BET_UPDATED : "Comunnity betting updated successfully",
+    COMMUNITY_BET_DELETED : "Comunnity betting deleted successfully",
+    COMMUNITY_BET_ALREADY_DELETED : "Comunnity betting already deleted.",
+    COMMUNITY_BET_GET : "Get comunnity betting successfully",
+    COMMUNITY_BET_NOT_FOUND : "Comunnity betting not found",
+    TYPE_REQUIRED : "Type is required"
 }
 
 export { ResponseMessage }
