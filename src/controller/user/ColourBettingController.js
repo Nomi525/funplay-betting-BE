@@ -148,6 +148,7 @@ async function winners(gameId, model) {
     {
       $match: {
         gameId: new mongoose.Types.ObjectId(gameId),
+        is_deleted: 0,
       },
     },
     {

@@ -13,17 +13,17 @@ import {
 export const addEditCommunityBetting = async (req, res) => {
     try {
         const { communityBettingId, startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
-            winner4, gameFromDate, gameToDate, gameMode } = req.body;
+            winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin } = req.body;
         if (!communityBettingId) {
             const createCommunityBetting = await dataCreate({
                 startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
-                winner4, gameFromDate, gameToDate, gameMode
+                winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin
             }, CommunityBetting)
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.COMMUNITY_BET_CRETED, createCommunityBetting)
         } else {
             const updateCommunityBetting = await dataUpdated({ _id: communityBettingId }, {
                 startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
-                winner4, gameFromDate, gameToDate, gameMode
+                winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin
             }, CommunityBetting)
             return sendResponse(res, StatusCodes.OK, ResponseMessage.COMMUNITY_BET_UPDATED, updateCommunityBetting)
         }
