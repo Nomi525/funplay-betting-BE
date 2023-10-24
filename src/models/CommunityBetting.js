@@ -52,6 +52,16 @@ const communityBettingSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    gameMinimumCoin: {
+        type: Number,
+        required: false,
+        default: 0
+    },
+    gameMaximumCoin: {
+        type: Number,
+        required: false,
+        default: 0
+    },
     is_deleted: {
         type: Number,
         required: false,
