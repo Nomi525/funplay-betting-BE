@@ -42,6 +42,10 @@ var upload = multer({ storage }).fields([
         name: "bannerImage",
         maxCount: Infinity,
     },
+    {
+        name: "communityBettingImage",
+        maxCount: 1,
+    },
 ]);
 
 export default function (req, res, next) {
@@ -64,6 +68,9 @@ export default function (req, res, next) {
 
                 var bannerImage = req.files.bannerImage || [];
                 req.bannerImageUrl = bannerImage.map((file) => file.filename);
+
+                var communityBettingImage = req.files.communityBettingImage ? req.files.communityBettingImage[0].filename : "";
+                req.communityBettingImageUrl = communityBettingImage;
                 next();
             } else {
                 next();

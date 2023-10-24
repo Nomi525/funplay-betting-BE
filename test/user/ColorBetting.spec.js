@@ -34,10 +34,10 @@
 //     });
 //     //#endregion
 
-//     //#region Get Single Color Bet
-//     it("Get Single Color Bet", (done) => {
+//     //#region Color bet result get winner user 
+//     it("Color Bet result", (done) => {
 //         chai.request(appServer)
-//             .get(`/api/user/colour-bet-result/${colorBetDeatils.gameId}`)
+//             .get(`/api/user/colour-bet-result/colorBetting/${colorBetDeatils.gameId}`)
 //             .set('auth', userToken)
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {
@@ -54,5 +54,5 @@
 //             })
 //     });
 //     //#endregion
-    
+
 // })
