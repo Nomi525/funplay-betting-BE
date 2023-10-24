@@ -1,6 +1,10 @@
 import { mongoose } from "./../index.js"
 
 const communityBettingSchema = new mongoose.Schema({
+    communityImage: {
+        type: String,
+        required: false
+    },
     startDate: {
         type: String,
         required: false
@@ -40,11 +44,11 @@ const communityBettingSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    gameFromDate: {
+    gameFromTime: {
         type: String,
         required: false
     },
-    gameToDate: {
+    gameToTime: {
         type: String,
         required: false
     },

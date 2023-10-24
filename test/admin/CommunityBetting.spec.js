@@ -1,26 +1,37 @@
 // import { chai, chaiHttp, appServer, expect, fs, path, ResponseMessage } from "../../src/index.js";
-// import { userToken } from "./User.spec.js";
+// import { adminToken } from "./Admin.spec.js";
 
 // chai.use(chaiHttp);
-// const numberBetDeatils = {
-//     numberBetId: null,
-//     number: 5,
-//     gameId: "652fb1c18b1bfc632822408f",
-//     betAmount: 50,
-//     rewardsCoins: 20,
-//     winAmount: 0,
-//     lossAmount: 0
+// var communityBettingImage = path.join(path.resolve(), 'test/image/profile.jpg');
+// var communityBettingId = null;
+// const communityBettingDeatils = {
+//     startDate: "24-10-2023",
+//     endDate: "24-10-2023",
+//     gameRounds: "5",
+//     winningAmount: "50",
+//     noOfWinners: 5,
+//     winner1: "winner1",
+//     winner2: "winner2",
+//     winner3: "winner3",
+//     winner4: "winner4",
+//     gameFromTime: "1:60:00",
+//     gameToTime: "1:60:00",
+//     gameMode: "auto",
+//     gameMinimumCoin: 5,
+//     gameMaximumCoin: 6,
 // }
-// describe('Number Betting test case', () => {
-//     //#region Create Bet for Number Betting
-//     it("Create Bet", (done) => {
+// describe('Community betting test case', () => {
+
+//     //#region Add community betting
+//     it("Add edit community betting", (done) => {
 //         chai.request(appServer)
-//             .post('/api/user/create-number-bet')
-//             .set('auth', userToken)
-//             .send(numberBetDeatils)
+//             .post('/api/admin/add-edit-community-betting')
+//             .set('auth', adminToken)
+//             .field(communityBettingDeatils)
+//             .attach('communityBettingImage', communityBettingImage)
 //             .end((err, res) => {
 //                 if (res.body.status == 201) {
-//                     numberBetDeatils.numberBetId = res.body.data._id
+//                     communityBettingId = res.body.data._id
 //                     expect(res.body.status).to.be.equal(201);
 //                 } else if (res.body.status == 200) {
 //                     expect(res.body.status).to.be.equal(200);
@@ -37,13 +48,20 @@
 //     });
 //     //#endregion
 
-//     //#region Get All Number Bets
-//     it("Get All Number Bets", (done) => {
+//     //#region Edit community betting
+//     it("Edit community betting", (done) => {
+//         communityBettingDeatils.communityBettingId = communityBettingId
+//         communityBettingDeatils.gameMode = "mannual"
 //         chai.request(appServer)
-//             .get('/api/user/get-number-bets')
-//             .set('auth', userToken)
+//             .post('/api/admin/add-edit-community-betting')
+//             .set('auth', adminToken)
+//             .field(communityBettingDeatils)
+//             .attach('communityBettingImage', communityBettingImage)
 //             .end((err, res) => {
-//                 if (res.body.status == 200) {
+//                 if (res.body.status == 201) {
+//                     communityBettingId = res.body.data._id
+//                     expect(res.body.status).to.be.equal(201);
+//                 } else if (res.body.status == 200) {
 //                     expect(res.body.status).to.be.equal(200);
 //                 } else if (res.body.status == 404) {
 //                     expect(res.body.status).to.be.equal(404);
@@ -58,16 +76,14 @@
 //     });
 //     //#endregion
 
-//     //#region Get Single Number Bet
-//     it("Get Single Number Bet", (done) => {
+//     //#region Get All community betting
+//     it("Get all community betting", (done) => {
 //         chai.request(appServer)
-//             .get(`/api/user/get-single-number-bet/${numberBetDeatils.numberBetId}`)
-//             .set('auth', userToken)
+//             .get('/api/admin/get-all-community-betting')
+//             .set('auth', adminToken)
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {
 //                     expect(res.body.status).to.be.equal(200);
-//                 } else if (res.body.status == 404) {
-//                     expect(res.body.status).to.be.equal(404);
 //                 } else if (res.body.status == 400) {
 //                     expect(res.body.status).to.be.equal(400);
 //                 } else {
@@ -79,16 +95,14 @@
 //     });
 //     //#endregion
 
-//     //#region Number bet result get winner user 
-//     it("Number Bet result", (done) => {
+//     //#region Get single community betting
+//     it("Get single community betting", (done) => {
 //         chai.request(appServer)
-//             .get(`/api/user/colour-bet-result/numberBetting/${numberBetDeatils.gameId}`)
-//             .set('auth', userToken)
+//             .get(`/api/admin/get-single-community-betting/${communityBettingId}`)
+//             .set('auth', adminToken)
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {
 //                     expect(res.body.status).to.be.equal(200);
-//                 } else if (res.body.status == 404) {
-//                     expect(res.body.status).to.be.equal(404);
 //                 } else if (res.body.status == 400) {
 //                     expect(res.body.status).to.be.equal(400);
 //                 } else {
@@ -100,17 +114,15 @@
 //     });
 //     //#endregion
 
-//     //#region Delete Bet
-//     it("Delete Bet", (done) => {
+//     //#region Delete community betting
+//     it("Delete community betting", (done) => {
 //         chai.request(appServer)
-//             .post(`/api/user/delete-number-bet`)
-//             .set('auth', userToken)
-//             .send({ numberBetId: numberBetDeatils.numberBetId })
+//             .post(`/api/admin/delete-community-betting`)
+//             .set('auth', adminToken)
+//             .send({ communityBettingId })
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {
 //                     expect(res.body.status).to.be.equal(200);
-//                 } else if (res.body.status == 404) {
-//                     expect(res.body.status).to.be.equal(404);
 //                 } else if (res.body.status == 400) {
 //                     expect(res.body.status).to.be.equal(400);
 //                 } else {
