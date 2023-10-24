@@ -98,7 +98,7 @@
 //     //#region Get single community betting
 //     it("Get single community betting", (done) => {
 //         chai.request(appServer)
-//             .get(`/api/admin/get-single-community-betting/${communityBettingId}`)
+//             .get(`/api/admin/get-single-community-betting`)
 //             .set('auth', adminToken)
 //             .end((err, res) => {
 //                 if (res.body.status == 200) {

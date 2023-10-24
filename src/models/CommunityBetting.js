@@ -14,7 +14,7 @@ const communityBettingSchema = new mongoose.Schema({
         required: false
     },
     gameRounds: {
-        type: String,
+        type: Number,
         required: false,
         default: 0
     },
