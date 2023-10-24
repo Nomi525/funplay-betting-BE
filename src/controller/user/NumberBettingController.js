@@ -1,12 +1,12 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, handleErrorResponse, NumberBetting, NewTransaction, 
-    checkDecimalValueGreaterThanOrEqual, minusLargeSmallValue, plusLargeSmallValue,multiplicationLargeSmallValue
+    getSingleData, getAllData, handleErrorResponse, NumberBetting, NewTransaction,
+    checkDecimalValueGreaterThanOrEqual, minusLargeSmallValue, plusLargeSmallValue, multiplicationLargeSmallValue
 } from "../../index.js";
 
 export const addEditNumberBet = async (req, res) => {
     try {
-        let { numberBetId,gameId, number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
+        let { numberBetId, gameId, number, betAmount, rewardsCoins, winAmount, lossAmount } = req.body
         let isWin = false
         if (winAmount) isWin = true;
         const findUserDeposit = await NewTransaction.findOne({ userId: req.user, is_deleted: 0 });
@@ -14,11 +14,19 @@ export const addEditNumberBet = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
         }
         if (!numberBetId) {
+            if (betAmount < 0) {
+                return sendResponse(
+                    res,
+                    StatusCodes.BAD_REQUEST,
+                    ResponseMessage.VALID_BET_AMOUNT,
+                    []
+                );
+            }
             if (!checkDecimalValueGreaterThanOrEqual(findUserDeposit.tokenDollorValue, betAmount)) {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
             }
             // const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
-            const totalBetAmount = multiplicationLargeSmallValue(betAmount,rewardsCoins)
+            const totalBetAmount = multiplicationLargeSmallValue(betAmount, rewardsCoins)
             const createNumberBet = await dataCreate({
                 userId: req.user,
                 gameId,

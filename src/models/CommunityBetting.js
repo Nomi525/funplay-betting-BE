@@ -1,0 +1,63 @@
+import { mongoose } from "./../index.js"
+
+const communityBettingSchema = new mongoose.Schema({
+    startDate: {
+        type: String,
+        required: false
+    },
+    endDate: {
+        type: String,
+        required: false
+    },
+    gameRounds: {
+        type: String,
+        required: false,
+        default: 0
+    },
+    winningAmount: {
+        type: String,
+        required: false,
+        default: 0
+    },
+    noOfWinners: {
+        type: Number,
+        required: false,
+        default: 0
+    },
+    winner1: {
+        type: String,
+        required: false
+    },
+    winner2: {
+        type: String,
+        required: false
+    },
+    winner3: {
+        type: String,
+        required: false
+    },
+    winner4: {
+        type: String,
+        required: false
+    },
+    gameFromDate: {
+        type: String,
+        required: false
+    },
+    gameToDate: {
+        type: String,
+        required: false
+    },
+    gameMode: {
+        type: String,
+        required: false
+    },
+    is_deleted: {
+        type: Number,
+        required: false,
+        default: 0
+    }
+}, { timestamps: true });
+
+const CommunityBetting = mongoose.model('CommunityBetting', communityBettingSchema)
+export { CommunityBetting }

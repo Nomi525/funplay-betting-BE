@@ -210,7 +210,16 @@ import {
   colourBetResult
 } from "./controller/user/ColourBettingController.js"
 
-// Routes
+// Coumunnity Betting
+
+import { 
+  addEditCommunityBetting,
+  getAllCommunityBetting,
+  getSingleCommunityBetting,
+  deleteCommunityBetting,
+} from "./controller/admin/CommunityBettingManagmentController.js";
+
+// *********** Routes **************** //
 import { adminRoutes } from "./routes/AdminRoutes.js";
 import { userRoutes } from "./routes/UserRoutes.js";
 import { commonRoutes } from "./routes/CommonRoutes.js";
@@ -243,6 +252,7 @@ import { CurrencyCoin } from "./models/CurrencyCoin.js";
 import { GameTime } from "./models/GameTime.js";
 import { ColourBetting } from "./models/ColourBetting.js";
 import { GameReward } from "./models/GameReward.js";
+import { CommunityBetting } from "./models/CommunityBetting.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -274,6 +284,11 @@ import {
 
 dotenv.config();
 export {
+  addEditCommunityBetting,
+  getAllCommunityBetting,
+  getSingleCommunityBetting,
+  deleteCommunityBetting,
+  CommunityBetting,
   GameReward,
   checkDecimalValueGreaterThanOrEqual,
   multiplicationLargeSmallValue,

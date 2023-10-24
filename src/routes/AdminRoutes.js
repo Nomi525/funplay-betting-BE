@@ -75,7 +75,11 @@ import {
   getSingleCurrencyCoin,
   currenyCoinDelete,
   addEditGameWiseTime,
-  getAllGameTime
+  getAllGameTime,
+  addEditCommunityBetting,
+  getAllCommunityBetting,
+  getSingleCommunityBetting,
+  deleteCommunityBetting,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -204,5 +208,11 @@ adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
 adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
 adminRoutes.get("/get-single-currency-coin/:currencyCoinId", Auth, getSingleCurrencyCoin);
 adminRoutes.post("/delete-currency-coin", Auth, currenyCoinDelete);
+
+// Community betting
+adminRoutes.post('/add-edit-community-betting', Auth, addEditCommunityBetting)
+adminRoutes.get('/get-all-community-betting', Auth, getAllCommunityBetting)
+adminRoutes.get('/get-single-community-betting/:communityBettingId', Auth, getSingleCommunityBetting)
+adminRoutes.post('/delete-community-betting', Auth, deleteCommunityBetting)
 
 export { adminRoutes };
