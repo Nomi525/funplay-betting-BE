@@ -9,26 +9,26 @@ import {
     CommunityBetting
 } from "../../index.js";
 
-//#region Add Edit Coummunity Betting
+//#region Add edit coummunity betting
 export const addEditCommunityBetting = async (req, res) => {
     try {
-        const { communityBettingId, startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
+        const { startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
             winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin } = req.body;
-        const findCommunityBetting = await getSingleData({ _id: communityBettingId }, CommunityBetting)
-        let communityImage = ''
-        if (!req.communityBettingImageUrl) {
-            communityImage = findCommunityBetting.communityImage
-        } else {
-            communityImage = req.communityBettingImageUrl
-        }
-        if (!communityBettingId) {
+        const findCommunityBetting = await getSingleData({}, CommunityBetting)
+        let communityImage = req.communityBettingImageUrl
+        if (!findCommunityBetting) {
             const createCommunityBetting = await dataCreate({
                 communityImage, startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
                 winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin
             }, CommunityBetting)
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.COMMUNITY_BET_CRETED, createCommunityBetting)
         } else {
-            const updateCommunityBetting = await dataUpdated({ _id: communityBettingId }, {
+            if (!communityImage) {
+                communityImage = findCommunityBetting.communityImage
+            } else {
+                communityImage = req.communityBettingImageUrl
+            }
+            const updateCommunityBetting = await dataUpdated({}, {
                 communityImage, startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
                 winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin
             }, CommunityBetting)
@@ -54,11 +54,10 @@ export const getAllCommunityBetting = async (req, res) => {
 }
 //#endregion
 
-//#region Get Single community betting
+//#region Get single community betting
 export const getSingleCommunityBetting = async (req, res) => {
     try {
-        const { communityBettingId } = req.params
-        const getCommunityBetting = await CommunityBetting.findOne({ _id: communityBettingId, is_deleted: 0 }).sort({ _id: -1 })
+        const getCommunityBetting = await getSingleData({}, CommunityBetting)
         if (getCommunityBetting) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.COMMUNITY_BET_GET, getCommunityBetting)
         } else {

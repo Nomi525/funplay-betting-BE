@@ -212,7 +212,7 @@ adminRoutes.post("/delete-currency-coin", Auth, currenyCoinDelete);
 // Community betting
 adminRoutes.post('/add-edit-community-betting', Auth, Upload, addEditCommunityBetting)
 adminRoutes.get('/get-all-community-betting', Auth, getAllCommunityBetting)
-adminRoutes.get('/get-single-community-betting/:communityBettingId', Auth, getSingleCommunityBetting)
+adminRoutes.get('/get-single-community-betting', Auth, getSingleCommunityBetting)
 adminRoutes.post('/delete-community-betting', Auth, deleteCommunityBetting)
 
 export { adminRoutes };
