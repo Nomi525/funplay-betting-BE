@@ -240,7 +240,8 @@ const ResponseMessage = {
     COMMUNITY_BET_ALREADY_DELETED : "Comunnity betting already deleted.",
     COMMUNITY_BET_GET : "Get comunnity betting successfully",
     COMMUNITY_BET_NOT_FOUND : "Comunnity betting not found",
-    TYPE_REQUIRED : "Type is required"
+    TYPE_REQUIRED : "Type is required.",
+    GAME_TYPE_REQUIRED : "Please use valid game type."
 }
 
 export { ResponseMessage }

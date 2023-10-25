@@ -121,7 +121,7 @@ userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);
 
 //Colour betting
 userRoutes.post('/create-colour-bet', Auth, addColourBet);
-userRoutes.get('/colour-bet-result/:type/:gameId', Auth, colourBetResult);
+userRoutes.get('/colour-bet-result/:gameType/:type/:gameId', Auth, colourBetResult);
 
 
 export { userRoutes };
