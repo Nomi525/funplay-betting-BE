@@ -22,7 +22,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount } = req.body;
+    let { gameId, colourName, betAmount, gameType } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -57,6 +57,7 @@ export const addColourBet = async (req, res) => {
         gameId: gameId,
         colourName: colourName,
         betAmount: parseInt(betAmount),
+        gameType
       },
       ColourBetting
     );
@@ -98,27 +99,31 @@ export const addColourBet = async (req, res) => {
 
 export const colourBetResult = async (req, res) => {
   try {
-    const { gameId, type } = req.params;
+    const { gameType, type, gameId } = req.params;
     if (!type) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.TYPE_REQUIRED, [])
     }
     let bettingResult = []
-    let messase = '';
+    let message = '';
 
     // Check type for number betting
-    if (type == 'numberBetting') {
-      const numberBettingResult = await winners(gameId, NumberBetting)
+    if (gameType == "number" && type == 'numberBetting') {
+      const numberBettingResult = await winners(gameType, gameId, NumberBetting)
       if (numberBettingResult.length) {
         bettingResult = numberBettingResult
-        messase = ResponseMessage.NUMBER_RESULT
+        message = ResponseMessage.NUMBER_RESULT
       }
     }
     // Check type for color betting
     if (type == 'colorBetting') {
-      const colourBettingResult = await winners(gameId, ColourBetting)
-      if (colourBettingResult.length) {
-        bettingResult = colourBettingResult
-        messase = ResponseMessage.COLOUR_RESULT
+      if ((gameType == "2colorBetting") || (gameType == "3colorBetting")) {
+        const colourBettingResult = await winners(gameType, gameId, ColourBetting)
+        if (colourBettingResult.length) {
+          bettingResult = colourBettingResult
+          message = ResponseMessage.COLOUR_RESULT
+        }
+      } else {
+        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_TYPE_REQUIRED, [])
       }
     }
 
@@ -126,11 +131,10 @@ export const colourBetResult = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.OK,
-        messase,
+        message,
         bettingResult
       );
     }
-
     return sendResponse(
       res,
       StatusCodes.BAD_REQUEST,
@@ -143,13 +147,24 @@ export const colourBetResult = async (req, res) => {
 };
 
 //#region For Winner details get
-async function winners(gameId, model) {
+async function winners(gameType, gameId, model) {
+  const query = {
+    gameId: new mongoose.Types.ObjectId(gameId),
+    is_deleted: 0,
+  }
+
+  if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+    query.gameType = gameType
+  }
   const bettingResult = await model.aggregate([
+    // {
+    //   $match: {
+    //     gameId: new mongoose.Types.ObjectId(gameId),
+    //     is_deleted: 0,
+    //   },
+    // },
     {
-      $match: {
-        gameId: new mongoose.Types.ObjectId(gameId),
-        is_deleted: 0,
-      },
+      $match: query
     },
     {
       $lookup: {
@@ -161,6 +176,12 @@ async function winners(gameId, model) {
     },
     {
       $unwind: "$game",
+    },
+    {
+      $sort: {
+        betAmount: 1,
+        createdAt: 1,
+      },
     },
     {
       $group: {
@@ -225,8 +246,8 @@ async function winners(gameId, model) {
       },
     },
   ]);
-  if (bettingResult) { 
-    return await winnerDetails(gameId,bettingResult)
+  if (bettingResult) {
+    return await winnerDetails(gameId, bettingResult)
   }
   return [];
 }

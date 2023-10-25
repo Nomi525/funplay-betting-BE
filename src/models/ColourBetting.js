@@ -34,6 +34,10 @@ const colourBettingSchema = new mongoose.Schema(
       required: false,
       default: 0,
     },
+    gameType: {
+      type: String,
+      required: false
+    },
     isWin: {
       type: Boolean,
       required: false,

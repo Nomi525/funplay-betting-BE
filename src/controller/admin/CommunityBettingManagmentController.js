@@ -23,11 +23,7 @@ export const addEditCommunityBetting = async (req, res) => {
             }, CommunityBetting)
             return sendResponse(res, StatusCodes.CREATED, ResponseMessage.COMMUNITY_BET_CRETED, createCommunityBetting)
         } else {
-            if (!communityImage) {
-                communityImage = findCommunityBetting.communityImage
-            } else {
-                communityImage = req.communityBettingImageUrl
-            }
+            if (!communityImage) communityImage = findCommunityBetting.communityImage
             const updateCommunityBetting = await dataUpdated({}, {
                 communityImage, startDate, endDate, gameRounds, winningAmount, noOfWinners, winner1, winner2, winner3,
                 winner4, gameFromTime, gameToTime, gameMode, gameMinimumCoin, gameMaximumCoin
