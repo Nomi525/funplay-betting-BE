@@ -47,7 +47,9 @@ import {
   deleteNumberBet,
   checkWalletAddress,
   addColourBet,
-  colourBetResult
+  colourBetResult,
+  getAllGameWiseWinner,
+  getSingleGameWiseWinner
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -122,6 +124,8 @@ userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);
 //Colour betting
 userRoutes.post('/create-colour-bet', Auth, addColourBet);
 userRoutes.get('/colour-bet-result/:gameType/:type/:gameId', Auth, colourBetResult);
+userRoutes.get('/get-all-color-game-winners/:gameId', Auth, getAllGameWiseWinner);
+userRoutes.get('/get-single-color-game-winners/:gameId', Auth, getSingleGameWiseWinner);
 
 
 export { userRoutes };

@@ -23,7 +23,7 @@ export const adminEditUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
-        const findUsers = await User.find({ is_deleted: 0 }).sort({ createdAt: -1 });
+        const findUsers = await User.find({ isVerified: true, is_deleted: 0 }).sort({ createdAt: -1 });
         if (findUsers.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, findUsers);
         } else {
@@ -190,7 +190,7 @@ export const acceptWithdrawalRequest = async (req, res) => {
 
         let requestStatus = ''
         let requestMessage = ''
-        
+
         // For accept
         if (status == "accept") {
             requestStatus = "accept";
@@ -214,10 +214,10 @@ export const acceptWithdrawalRequest = async (req, res) => {
             }
             findTransaction.tokenDollorValue = await plusLargeSmallValue(findTransaction.tokenDollorValue, tokenDollerValue)
         }
-        
+
         withdrawalRequest.status = requestStatus;
         await withdrawalRequest.save();
-        
+
         findTransaction.blockAmount = await minusLargeSmallValue(findTransaction.blockAmount, tokenAmount)
         findTransaction.blockDollor = await minusLargeSmallValue(findTransaction.blockDollor, tokenDollerValue)
         await findTransaction.save();

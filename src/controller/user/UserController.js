@@ -147,6 +147,7 @@ export const connectToWallet = async (req, res) => {
             walletAddress: walletArray[0].walletAddress,
             walletType: walletArray[0].walletType,
             isConnected: true,
+            isVerified: true,
           },
         },
       });
@@ -213,6 +214,7 @@ export const connectToWallet = async (req, res) => {
         walletType: walletArray[0].walletType,
         isConnected: true,
       },
+      isVerified : true,
       referralCode: referCode,
       otp,
     });
@@ -397,7 +399,6 @@ export const userSignUpSignInOtp = async (req, res) => {
       );
     }
   } catch (error) {
-    console.log(error, ":Error");
     return handleErrorResponse(res, error);
   }
 };
@@ -893,6 +894,7 @@ export const singupFromEmailPassword = async (req, res) => {
             password,
             referralCode: referCode,
             registerType,
+            isVerified : true,
             referralByCode: referralByCode ? referralByCode : null,
           },
           User

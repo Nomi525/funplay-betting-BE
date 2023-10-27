@@ -1,22 +1,22 @@
 import { mongoose } from '../index.js';
 
-const gameRewardSchema = new mongoose.Schema({
+const colourWinLossSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: false
     },
-    gameId: { 
+    gameId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Game",
-        required: false 
+        required: false
     },
-    betId: { 
+    betId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "ColourBetting",
-        required: false 
+        required: false
     },
-    colourName : {
+    colourName: {
         type: String,
         required: false,
     },
@@ -30,12 +30,17 @@ const gameRewardSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
+    isWin: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     is_deleted: {
         type: Number,
         default: 0,
     }
 }, { timestamps: true });
 
-const GameReward = mongoose.model('GameReward', gameRewardSchema);
+const ColourWinLoss = mongoose.model('ColourWinLoss', colourWinLossSchema);
 
-export { GameReward };
+export { ColourWinLoss };

@@ -17,6 +17,7 @@ import {
   multiplicationLargeSmallValue,
   GameReward,
   NumberBetting,
+  ColourWinLoss,
 } from "../../index.js";
 
 //#region Colour betting api
@@ -254,6 +255,44 @@ async function winners(gameType, gameId, model) {
 //#endregion
 
 //#region For Winner details add in winners field
+// async function winnerDetails(gameId, bettingResult) {
+//   const winner = await Promise.all(
+//     bettingResult.map(async (bet) => {
+//       if (bet.gameDetails.gameId.toString() == gameId.toString()) {
+//         let winnerDetails = await User.findOne({ _id: bet.winner });
+//         let rewardAmount = 0;
+//         if (winnerDetails) {
+//           if (bet.bets && bet.bets.length) {
+//             bet.bets.map(async (b) => {
+//               if (b.userId.toString() == winnerDetails._id.toString()) {
+//                 rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
+//                 const balance = await getSingleData({ userId: winnerDetails._id }, NewTransaction)
+//                 if (balance) {
+//                   balance.tokenDollorValue = plusLargeSmallValue(balance.tokenDollorValue, rewardAmount)
+//                   await balance.save();
+//                 }
+//                 await ColourBetting.updateOne({ userId: winnerDetails._id, gameId: bet.gameDetails.gameId }, { $set: { rewardAmount } })
+//                 await GameReward.create({
+//                   userId: winnerDetails._id,
+//                   gameId: bet.gameDetails.gameId,
+//                   betId: b._id,
+//                   betAmount: b.betAmount,
+//                   colourName: b.colourName,
+//                   rewardAmount
+//                 });
+//               }
+//             })
+//           }
+//           winnerDetails = { ...winnerDetails._doc, rewardAmount }
+//           bet.winner = winnerDetails;
+//         }
+//       }
+//       return bet;
+//     })
+//   );
+//   return winner;
+// }
+
 async function winnerDetails(gameId, bettingResult) {
   const winner = await Promise.all(
     bettingResult.map(async (bet) => {
@@ -276,8 +315,26 @@ async function winnerDetails(gameId, bettingResult) {
                   gameId: bet.gameDetails.gameId,
                   betId: b._id,
                   betAmount: b.betAmount,
+                  colourName: b.colourName,
                   rewardAmount
                 });
+                await ColourWinLoss.create({
+                  userId: winnerDetails._id,
+                  gameId: bet.gameDetails.gameId,
+                  betId: b._id,
+                  betAmount: b.betAmount,
+                  colourName: b.colourName,
+                  rewardAmount,
+                  isWin: true
+                })
+              } else {
+                await ColourWinLoss.create({
+                  userId: b.userId,
+                  gameId: bet.gameDetails.gameId,
+                  betId: b._id,
+                  betAmount: b.betAmount,
+                  colourName: b.colourName
+                })
               }
             })
           }
@@ -290,6 +347,7 @@ async function winnerDetails(gameId, bettingResult) {
   );
   return winner;
 }
+
 //#endregion
 
 //#region Old Code for only color betting
@@ -429,3 +487,156 @@ async function winnerDetails(gameId, bettingResult) {
 //   }
 // };
 //#endregion
+
+//#region Color betting winners api game wise
+// export const getAllGameWiseWinner = async (req, res) => {
+//   try {
+
+//     const { gameId } = req.params
+//     const colorUserList = await GameReward.find({ userId: { $ne: req.user }, gameId })
+//       .populate('userId', 'email fullName isLogin currency')
+//       .populate('gameId', 'gameName gameTime gameMode')
+//       .sort({ createdAt: -1 })
+//     const processedData = processData(colorUserList);
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.COLOR_USER_LIST,
+//       processedData
+//     );
+
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// }
+
+export const getAllGameWiseWinner = async (req, res) => {
+  try {
+    const { gameId } = req.params
+    const colorUserList = await ColourWinLoss.find({ userId: { $ne: req.user }, isWin: true, gameId })
+      .populate('userId', 'email fullName isLogin currency')
+      .populate('gameId', 'gameName gameTime gameMode')
+      .sort({ createdAt: -1 })
+    const processedData = processData(colorUserList);
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.COLOR_USER_LIST,
+      processedData
+    );
+
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+
+
+//#endregion
+
+//#region Color betting winners api game wise
+export const getSingleGameWiseWinner = async (req, res) => {
+  try {
+    const { gameId } = req.params
+    const colorUserList = await GameReward.find({ userId: req.user, gameId })
+      .populate('userId', 'email fullName isLogin currency')
+      .populate('gameId', 'gameName gameTime gameMode')
+      .sort({ createdAt: -1 })
+    const processedData = processData(colorUserList);
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.COLOR_USER_LIST,
+      processedData
+    );
+
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
+
+// function processData(data) {
+//   const processedData = {};
+//   data.forEach((item, i) => {
+//     const userId = item.userId._id;
+//     const betAmount = parseFloat(item.betAmount);
+//     const rewardAmount = parseFloat(item.rewardAmount);
+//     if (!processedData[userId]) {
+//       processedData[userId] = {
+//         user: item.userId,
+//         game: item.gameId,
+//         totalBetAmount: 0,
+//         totalRewardAmount: 0,
+//         betCount: 0,
+//         betDetails: {},
+//       };
+//     }
+//     if (!processedData[userId].betAmountDetails[betAmount]) {
+//       processedData[userId].betAmountDetails[betAmount] = 1;
+//     } else {
+//       processedData[userId].betAmountDetails[betAmount]++;
+//     }
+//     processedData[userId].totalBetAmount += betAmount;
+//     processedData[userId].totalRewardAmount += rewardAmount;
+//     processedData[userId].betCount++;
+//   });
+//   const result = Object.values(processedData);
+//   return result;
+// }
+
+function processData(data) {
+  const processedData = {};
+  data.forEach((item, i) => {
+    const userId = item.userId._id;
+    const betAmount = parseFloat(item.betAmount);
+    const rewardAmount = parseFloat(item.rewardAmount);
+    if (!processedData[userId]) {
+      processedData[userId] = {
+        user: item.userId,
+        game: item.gameId,
+        // totalBetAmount: 0,
+        // totalRewardAmount: 0,
+        // betCount: 0,
+        betDetails: [],
+        // betDetails: [{
+        //   betAmount: 0,
+        //   bettimes: 0,
+        //   betTotalAmount: 0
+        // }],
+      };
+    }
+    if (processedData[userId].betDetails.length) {
+      const index = processedData[userId].betDetails.findIndex(item => item.betAmount == betAmount);
+
+      if (index != -1) {
+        processedData[userId].betDetails[index].betTimes++;
+        processedData[userId].betDetails[index].betTotalAmount += betAmount;
+      } else {
+        processedData[userId].betDetails.push({
+          betAmount: betAmount,
+          betTimes: 1,
+          betTotalAmount: betAmount
+        });
+      }
+    } else {
+      processedData[userId].betDetails.push({
+        betAmount: betAmount,
+        betTimes: 1,
+        betTotalAmount: betAmount
+      });
+    }
+    // if (!processedData[userId].betDetails.betamount) {
+    //   processedData[userId].betDetails.betamount = betAmount;
+    //   processedData[userId].betDetails.bettimes = 1;
+    //   processedData[userId].betDetails.bettotalamount = betAmount;
+    // } else {
+    //   processedData[userId].betDetails.bettimes++;
+    //   processedData[userId].betDetails.bettotalamount = processedData[userId].betDetails.bettotalamount + betAmount;
+    // }
+    // processedData[userId].totalBetAmount += betAmount;
+    // processedData[userId].totalRewardAmount += rewardAmount;
+    // processedData[userId].betCount++;
+  });
+  const result = Object.values(processedData);
+  return result;
+}
