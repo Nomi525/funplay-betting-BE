@@ -241,7 +241,8 @@ const ResponseMessage = {
     COMMUNITY_BET_GET : "Get comunnity betting successfully",
     COMMUNITY_BET_NOT_FOUND : "Comunnity betting not found",
     TYPE_REQUIRED : "Type is required.",
-    GAME_TYPE_REQUIRED : "Please use valid game type."
+    GAME_TYPE_REQUIRED : "Please use valid game type.",
+    COLOR_USER_LIST : "Get color user list successfully.",
 }
 
 export { ResponseMessage }

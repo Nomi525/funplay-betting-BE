@@ -207,7 +207,9 @@ import {
 //Colour Betting
 import {
   addColourBet,
-  colourBetResult
+  colourBetResult,
+  getAllGameWiseWinner,
+  getSingleGameWiseWinner
 } from "./controller/user/ColourBettingController.js"
 
 // Coumunnity Betting
@@ -253,6 +255,7 @@ import { GameTime } from "./models/GameTime.js";
 import { ColourBetting } from "./models/ColourBetting.js";
 import { GameReward } from "./models/GameReward.js";
 import { CommunityBetting } from "./models/CommunityBetting.js";
+import { ColourWinLoss } from "./models/ColourWinLoss.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -284,6 +287,9 @@ import {
 
 dotenv.config();
 export {
+  ColourWinLoss,
+  getAllGameWiseWinner,
+  getSingleGameWiseWinner,
   addEditCommunityBetting,
   getAllCommunityBetting,
   getSingleCommunityBetting,
