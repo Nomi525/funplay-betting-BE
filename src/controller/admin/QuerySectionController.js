@@ -5,7 +5,8 @@ import {
 
 export const getAllQuery = async (req, res) => {
     try {
-        const getQuery = await getAllData({ is_deleted: 0 }, Query);
+        // const getQuery = await getAllData({ is_deleted: 0 }, Query);
+        const getQuery = await Query.find({ is_deleted: 0 }).sort({ createdAt: -1 })
         if (getQuery.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_ALL_QUERY, getQuery);
         } else {

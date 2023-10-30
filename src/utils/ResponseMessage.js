@@ -243,6 +243,7 @@ const ResponseMessage = {
     TYPE_REQUIRED : "Type is required.",
     GAME_TYPE_REQUIRED : "Please use valid game type.",
     COLOR_USER_LIST : "Get color user list successfully.",
+    TOP_WEEKLY_PLAYER : "Get top weekly players successfully.",
 }
 
 export { ResponseMessage }

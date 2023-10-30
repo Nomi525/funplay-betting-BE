@@ -147,6 +147,26 @@ export const colourBetResult = async (req, res) => {
   }
 };
 
+//#region Get data of login user
+export const getLoginUserColourBet = async (req, res) => {
+  try {
+    const findUser = await User.findOne({ _id: req.user, is_deleted: 0 }).select('_id fullName email currency')
+    const findBets = await ColourWinLoss.find({ userId: req.user }).sort({ createdAt: -1 })
+    const winAmount = findBets.filter(b => b.isWin).reduce((a, d) => a + parseFloat(d.rewardAmount), 0)
+    const lossAmount = findBets.filter(b => !b.isWin).reduce((a, d) => a + parseFloat(d.betAmount), 0)
+    const loginUser = { ...findUser._doc, winAmount, lossAmount }
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.COLOR_USER_LIST,
+      loginUser
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
+
 //#region For Winner details get
 async function winners(gameType, gameId, model) {
   const query = {
@@ -524,12 +544,10 @@ export const getAllGameWiseWinner = async (req, res) => {
       ResponseMessage.COLOR_USER_LIST,
       processedData
     );
-
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 }
-
 
 //#endregion
 
@@ -537,7 +555,7 @@ export const getAllGameWiseWinner = async (req, res) => {
 export const getSingleGameWiseWinner = async (req, res) => {
   try {
     const { gameId } = req.params
-    const colorUserList = await GameReward.find({ userId: req.user, gameId })
+    const colorUserList = await ColourWinLoss.find({ userId: req.user, gameId })
       .populate('userId', 'email fullName isLogin currency')
       .populate('gameId', 'gameName gameTime gameMode')
       .sort({ createdAt: -1 })
@@ -548,12 +566,48 @@ export const getSingleGameWiseWinner = async (req, res) => {
       ResponseMessage.COLOR_USER_LIST,
       processedData
     );
-
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 }
 //#endregion
+
+function processData(data) {
+  const processedData = {};
+  data.forEach((item, i) => {
+    const userId = item.userId._id;
+    const betAmount = parseFloat(item.betAmount);
+    const rewardAmount = parseFloat(item.rewardAmount);
+    if (!processedData[userId]) {
+      processedData[userId] = {
+        user: item.userId,
+        game: item.gameId,
+        betDetails: [],
+      };
+    }
+    if (processedData[userId].betDetails.length) {
+      const index = processedData[userId].betDetails.findIndex(item => item.betAmount == betAmount);
+      if (index != -1) {
+        processedData[userId].betDetails[index].betTimes++;
+        processedData[userId].betDetails[index].betTotalAmount += betAmount;
+      } else {
+        processedData[userId].betDetails.push({
+          betAmount: betAmount,
+          betTimes: 1,
+          betTotalAmount: betAmount
+        });
+      }
+    } else {
+      processedData[userId].betDetails.push({
+        betAmount: betAmount,
+        betTimes: 1,
+        betTotalAmount: betAmount
+      });
+    }
+  });
+  const result = Object.values(processedData);
+  return result;
+}
 
 // function processData(data) {
 //   const processedData = {};
@@ -583,60 +637,3 @@ export const getSingleGameWiseWinner = async (req, res) => {
 //   const result = Object.values(processedData);
 //   return result;
 // }
-
-function processData(data) {
-  const processedData = {};
-  data.forEach((item, i) => {
-    const userId = item.userId._id;
-    const betAmount = parseFloat(item.betAmount);
-    const rewardAmount = parseFloat(item.rewardAmount);
-    if (!processedData[userId]) {
-      processedData[userId] = {
-        user: item.userId,
-        game: item.gameId,
-        // totalBetAmount: 0,
-        // totalRewardAmount: 0,
-        // betCount: 0,
-        betDetails: [],
-        // betDetails: [{
-        //   betAmount: 0,
-        //   bettimes: 0,
-        //   betTotalAmount: 0
-        // }],
-      };
-    }
-    if (processedData[userId].betDetails.length) {
-      const index = processedData[userId].betDetails.findIndex(item => item.betAmount == betAmount);
-
-      if (index != -1) {
-        processedData[userId].betDetails[index].betTimes++;
-        processedData[userId].betDetails[index].betTotalAmount += betAmount;
-      } else {
-        processedData[userId].betDetails.push({
-          betAmount: betAmount,
-          betTimes: 1,
-          betTotalAmount: betAmount
-        });
-      }
-    } else {
-      processedData[userId].betDetails.push({
-        betAmount: betAmount,
-        betTimes: 1,
-        betTotalAmount: betAmount
-      });
-    }
-    // if (!processedData[userId].betDetails.betamount) {
-    //   processedData[userId].betDetails.betamount = betAmount;
-    //   processedData[userId].betDetails.bettimes = 1;
-    //   processedData[userId].betDetails.bettotalamount = betAmount;
-    // } else {
-    //   processedData[userId].betDetails.bettimes++;
-    //   processedData[userId].betDetails.bettotalamount = processedData[userId].betDetails.bettotalamount + betAmount;
-    // }
-    // processedData[userId].totalBetAmount += betAmount;
-    // processedData[userId].totalRewardAmount += rewardAmount;
-    // processedData[userId].betCount++;
-  });
-  const result = Object.values(processedData);
-  return result;
-}
