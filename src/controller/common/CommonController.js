@@ -46,7 +46,7 @@ export const addEditBanner = async (req, res) => {
 
 export const allBannerGet = async (req, res) => {
     try {
-        const findBanner = await getAllData({ is_deleted: 0 }, BannerModel)
+        const findBanner = await BannerModel.find({ is_deleted: 0 }).sort({ createdAt: -1 })
         if (findBanner.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.BANNER_GET, findBanner);
         } else {
