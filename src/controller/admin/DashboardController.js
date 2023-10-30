@@ -1,13 +1,14 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, getAllDataCount, NewTransaction, WalletLogin
+    getSingleData, getAllData, Rating, handleErrorResponse, User, getAllDataCount, NewTransaction, WalletLogin, plusLargeSmallValue
 } from "../../index.js";
 
 export const adminDashboard = async (req, res) => {
     try {
-        const totalUsers = await getAllDataCount({}, User);
+        const totalUsers = await getAllDataCount({ is_deleted: 0, isVerified: true }, User);
         const depositeData = await NewTransaction.find({});
-        const totalDeposit = depositeData.reduce((data, dis) => data + dis.tokenDollorValue, 0);
+        // const totalDeposit = depositeData.reduce((data, dis) => data + dis.tokenDollorValue, 0);
+        const totalDeposit = depositeData.reduce((data, dis) => plusLargeSmallValue(data, dis.tokenDollorValue), 0);
         let totalDeactivatedUsers = await getAllDataCount({ $or: [{ is_deleted: 1 }, { isActive: false }] }, User);
         let totalActiveUsers = totalUsers - totalDeactivatedUsers;
 

@@ -135,7 +135,7 @@ import {
   userDepositeWithdrawalHistory,
 } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
-import { userDashboard } from "./controller/user/DashboardController.js";
+import { userDashboard, topWeeklyMonthlyPlayers } from "./controller/user/DashboardController.js";
 import {
   acceptWithdrawalRequest,
   getSingleUserTransaction,
@@ -209,12 +209,13 @@ import {
   addColourBet,
   colourBetResult,
   getAllGameWiseWinner,
-  getSingleGameWiseWinner
+  getSingleGameWiseWinner,
+  getLoginUserColourBet
 } from "./controller/user/ColourBettingController.js"
 
 // Coumunnity Betting
 
-import { 
+import {
   addEditCommunityBetting,
   getAllCommunityBetting,
   getSingleCommunityBetting,
@@ -287,6 +288,8 @@ import {
 
 dotenv.config();
 export {
+  topWeeklyMonthlyPlayers,
+  getLoginUserColourBet,
   ColourWinLoss,
   getAllGameWiseWinner,
   getSingleGameWiseWinner,

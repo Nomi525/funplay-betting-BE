@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser,getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourWinLoss
 } from "../../index.js";
 
 
@@ -73,7 +73,53 @@ export const userDashboard = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
-        console.log(error);
         return handleErrorResponse(res, error);
     }
+}
+
+export const topWeeklyMonthlyPlayers = async (req, res) => {
+    try {
+        const weeklyUsers = await getActiveWinnerPlayers('weekly')
+        const monthlyUsers = await getActiveWinnerPlayers('monthly')
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.TOP_WEEKLY_PLAYER, { weeklyUsers, monthlyUsers });
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
+
+async function getActiveWinnerPlayers(timeRange) {
+    const currentDate = new Date();
+    let startDate, endDate;
+    if (timeRange === 'weekly') {
+        // startDate = new Date(currentDate);
+        // startDate.setHours(0, 0, 0, 0);
+        // startDate.setDate(currentDate.getDate() - currentDate.getDay());
+        // endDate = new Date(currentDate);
+        // endDate.setHours(23, 59, 59, 999);
+        endDate = new Date(currentDate);
+        startDate = new Date(currentDate);
+        startDate.setDate(currentDate.getDate() - 7);
+    } else if (timeRange === 'monthly') {
+        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    } else {
+        throw new Error('Invalid time range');
+    }
+    const query = {
+        createdAt: { $gte: startDate, $lte: endDate },
+    };
+    const result = await ColourWinLoss.aggregate([
+        { $match: query },
+        {
+            $group: {
+                _id: "$userId",
+                uniqueUsers: { $addToSet: "$userId" }
+            }
+        }
+    ]);
+    const uniqueUserIds = result.map(group => group._id);
+    const userDataResult = await User.find({ _id: { $in: uniqueUserIds } })
+        .select('fullName profile email currency')
+    return userDataResult;
 }
