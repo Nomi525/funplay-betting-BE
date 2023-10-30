@@ -559,12 +559,69 @@ export const getSingleGameWiseWinner = async (req, res) => {
       .populate('userId', 'email fullName isLogin currency')
       .populate('gameId', 'gameName gameTime gameMode')
       .sort({ createdAt: -1 })
-    const processedData = processData(colorUserList);
+    // const processedData = processData(colorUserList);
+    const processedData = {};
+    colorUserList.forEach((item, i) => {
+      const userId = item.userId._id;
+      const betAmount = parseFloat(item.betAmount);
+      const rewardAmount = parseFloat(item.rewardAmount);
+      if (!processedData[userId]) {
+        processedData[userId] = {
+          user: item.userId,
+          game: item.gameId,
+          winBetDetails: [],
+          lossBetDetails: [],
+        };
+      }
+      if (item.isWin) {
+        if (processedData[userId].winBetDetails.length) {
+          const index = processedData[userId].winBetDetails.findIndex(item => item.betAmount == betAmount);
+          if (index != -1) {
+            processedData[userId].winBetDetails[index].betTimes++;
+            processedData[userId].winBetDetails[index].betTotalAmount += betAmount;
+          } else {
+            processedData[userId].winBetDetails.push({
+              betAmount: betAmount,
+              betTimes: 1,
+              betTotalAmount: betAmount
+            });
+          }
+        } else {
+          processedData[userId].winBetDetails.push({
+            betAmount: betAmount,
+            betTimes: 1,
+            betTotalAmount: betAmount
+          });
+        }
+      } else {
+        if (processedData[userId].lossBetDetails.length) {
+          const index = processedData[userId].lossBetDetails.findIndex(item => item.betAmount == betAmount);
+          if (index != -1) {
+            processedData[userId].lossBetDetails[index].betTimes++;
+            processedData[userId].lossBetDetails[index].betTotalAmount += betAmount;
+          } else {
+            processedData[userId].lossBetDetails.push({
+              betAmount: betAmount,
+              betTimes: 1,
+              betTotalAmount: betAmount
+            });
+          }
+        } else {
+          processedData[userId].lossBetDetails.push({
+            betAmount: betAmount,
+            betTimes: 1,
+            betTotalAmount: betAmount
+          });
+        }
+      }
+    });
+    const result = Object.values(processedData);
+    // return result;
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.COLOR_USER_LIST,
-      processedData
+      result
     );
   } catch (error) {
     return handleErrorResponse(res, error);
