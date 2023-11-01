@@ -244,6 +244,13 @@ const ResponseMessage = {
     GAME_TYPE_REQUIRED : "Please use valid game type.",
     COLOR_USER_LIST : "Get color user list successfully.",
     TOP_WEEKLY_PLAYER : "Get top weekly players successfully.",
+    GAME_HISTORY : "Get game history.",
+    GAME_HISTORY_NOT_FOUND : "Game history not found.",
+    GAME_PERIOD_CRETED : "Game period created successfully",
+    GAME_PERIOD_UPDATED : "Game period updated successfully",
+    GAME_PERIOD_DELETED : "Game period deleted successfully",
+    GAME_PERIOD_GET : "Get game period successfully",
+    GAME_PERIOD_NOT_FOUND : "Game period not found",
 }
 
 export { ResponseMessage }

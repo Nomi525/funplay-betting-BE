@@ -27,7 +27,7 @@ const PermissionSchema = new mongoose.Schema(
                 default: false,
                 required: false
             },
-            View: {
+            view: {
                 type: Boolean,
                 default: false,
                 required: false

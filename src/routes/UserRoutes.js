@@ -51,7 +51,9 @@ import {
   getAllGameWiseWinner,
   getSingleGameWiseWinner,
   getLoginUserColourBet,
-  topWeeklyMonthlyPlayers
+  topWeeklyMonthlyPlayers,
+  addGamePeriod,
+  getAllGamePeriod
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -130,6 +132,10 @@ userRoutes.get('/colour-bet-result/:gameType/:type/:gameId', Auth, colourBetResu
 userRoutes.get('/get-all-color-game-winners/:gameId', Auth, getAllGameWiseWinner);
 userRoutes.get('/get-single-color-game-winners/:gameId', Auth, getSingleGameWiseWinner);
 userRoutes.get('/get-login-user-bet', Auth, getLoginUserColourBet);
+
+// Color Period
+userRoutes.post('/add-game-period', Auth, addGamePeriod)
+userRoutes.get('/get-all-game-period/:gameId', Auth, getAllGamePeriod)
 
 
 export { userRoutes };
