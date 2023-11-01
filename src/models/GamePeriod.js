@@ -3,7 +3,8 @@ import { mongoose } from "../index.js";
 
 const gamePeriodSchema = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "User",
         required: false
     },
     gameId: {

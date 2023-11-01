@@ -30,6 +30,11 @@ const colourWinLossSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
+    period: {
+        type: Number,
+        required: false,
+        default: 0
+    },
     isWin: {
         type: Boolean,
         required: false,

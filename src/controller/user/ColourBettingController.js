@@ -101,7 +101,7 @@ export const addColourBet = async (req, res) => {
 
 export const colourBetResult = async (req, res) => {
   try {
-    const { gameType, type, gameId } = req.params;
+    const { gameType, type, gameId, period } = req.params;
     if (!type) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.TYPE_REQUIRED, [])
     }
@@ -110,7 +110,7 @@ export const colourBetResult = async (req, res) => {
 
     // Check type for number betting
     if (gameType == "number" && type == 'numberBetting') {
-      const numberBettingResult = await winners(gameType, gameId, NumberBetting)
+      const numberBettingResult = await winners(gameType, gameId, period, NumberBetting)
       if (numberBettingResult.length) {
         bettingResult = numberBettingResult
         message = ResponseMessage.NUMBER_RESULT
@@ -119,7 +119,7 @@ export const colourBetResult = async (req, res) => {
     // Check type for color betting
     if (type == 'colorBetting') {
       if ((gameType == "2colorBetting") || (gameType == "3colorBetting")) {
-        const colourBettingResult = await winners(gameType, gameId, ColourBetting)
+        const colourBettingResult = await winners(gameType, gameId, period, ColourBetting)
         if (colourBettingResult.length) {
           bettingResult = colourBettingResult
           message = ResponseMessage.COLOUR_RESULT
@@ -169,7 +169,7 @@ export const getLoginUserColourBet = async (req, res) => {
 //#endregion
 
 //#region For Winner details get
-async function winners(gameType, gameId, model) {
+async function winners(gameType, gameId, period, model) {
   const query = {
     gameId: new mongoose.Types.ObjectId(gameId),
     is_deleted: 0,
@@ -269,7 +269,7 @@ async function winners(gameType, gameId, model) {
     },
   ]);
   if (bettingResult) {
-    return await winnerDetails(gameId, bettingResult)
+    return await winnerDetails(gameId, period, bettingResult)
   }
   return [];
 }
@@ -314,7 +314,7 @@ async function winners(gameType, gameId, model) {
 //   return winner;
 // }
 
-async function winnerDetails(gameId, bettingResult) {
+async function winnerDetails(gameId, period, bettingResult) {
   const winner = await Promise.all(
     bettingResult.map(async (bet) => {
       if (bet.gameDetails.gameId.toString() == gameId.toString()) {
@@ -337,7 +337,7 @@ async function winnerDetails(gameId, bettingResult) {
                   betId: b._id,
                   betAmount: b.betAmount,
                   colourName: b.colourName,
-                  rewardAmount
+                  rewardAmount,
                 });
                 await ColourWinLoss.create({
                   userId: winnerDetails._id,
@@ -346,6 +346,7 @@ async function winnerDetails(gameId, bettingResult) {
                   betAmount: b.betAmount,
                   colourName: b.colourName,
                   rewardAmount,
+                  period,
                   isWin: true
                 })
               } else {
@@ -354,7 +355,8 @@ async function winnerDetails(gameId, bettingResult) {
                   gameId: bet.gameDetails.gameId,
                   betId: b._id,
                   betAmount: b.betAmount,
-                  colourName: b.colourName
+                  colourName: b.colourName,
+                  period
                 })
               }
             })
@@ -638,22 +640,115 @@ export const addGamePeriod = async (req, res) => {
 export const getAllGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params
-    const getAllGamePeriod = await GamePeriod.find({ gameId, is_deleted: 0 }).sort({ createedAt: -1 })
-    if (getAllGamePeriod.length) {
-      return sendResponse(
-        res,
-        StatusCodes.CREATED,
-        ResponseMessage.GAME_PERIOD_GET,
-        getAllGamePeriod
-      );
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.FAILED_TO_FETCH,
-        []
-      );
-    }
+    console.log(req.user)
+    // const getAllGamePeriod = await GamePeriod.find({ gameId, is_deleted: 0 }).select('period price colorName createdAt').sort({ createdAt: -1 })
+
+    const aggregationResult = await GamePeriod.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          is_deleted: 0
+        }
+      },
+      {
+        $lookup: {
+          from: 'colourwinlosses',
+          localField: 'gameId',
+          foreignField: 'gameId',
+          as: 'winLossData'
+        }
+      },
+      {
+        $unwind: {
+          path: '$winLossData',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $match: {
+          'winLossData.userId': new mongoose.Types.ObjectId(req.user),
+          'winLossData.gameId': new mongoose.Types.ObjectId(gameId),
+          'winLossData.isWin': true
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          totalCount: { $sum: 1 },
+          period: { $first: '$period' },
+          price: { $first: '$price' },
+          createdAt: { $first: '$createdAt' },
+          colourName: { $first: '$winLossData.colourName' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          colorName: 1,
+          totalCount: 1,
+          period: 1,
+          price: 1,
+          createdAt: 1
+
+        }
+      }
+    ]);
+
+
+
+
+
+
+
+
+
+
+    // const getAllGamePeriod = await GamePeriod.aggregate([
+    //   {
+    //     $project: {
+    //       createdAt: {
+    //         $dateToString: {
+    //           format: "%Y-%m-%d %H:%M:%S",
+    //           date: "$createdAt",
+    //           timezone: "UTC"
+    //         }
+    //       },
+    //       price: 1,
+    //       colorName: 1
+    //     }
+    //   },
+    //   {
+    //     $group: {
+    //       _id: { createdAt: "$createdAt", colorName: "$colorName" },
+    //       totalPrice: { $sum: "$price" },
+    //       totalUsers: { $sum: 1 }
+    //     }
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //       createdAt: "$_id.createdAt",
+    //       colorName: "$_id.colorName",
+    //       totalPrice: 1,
+    //       totalUsers: 1
+    //     }
+    //   }
+    // ]);
+    // if (getAllGamePeriod.length) {
+    return sendResponse(
+      res,
+      StatusCodes.CREATED,
+      ResponseMessage.GAME_PERIOD_GET,
+      aggregationResult
+    );
+    // } else {
+    //   return sendResponse(
+    //     res,
+    //     StatusCodes.BAD_REQUEST,
+    //     ResponseMessage.FAILED_TO_FETCH,
+    //     []
+    //   );
+    // }
   } catch (error) {
     return handleErrorResponse(res, error);
   }

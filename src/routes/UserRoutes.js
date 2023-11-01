@@ -128,7 +128,7 @@ userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);
 
 //Colour betting
 userRoutes.post('/create-colour-bet', Auth, addColourBet);
-userRoutes.get('/colour-bet-result/:gameType/:type/:gameId', Auth, colourBetResult);
+userRoutes.get('/colour-bet-result/:gameType/:type/:gameId/:period', Auth, colourBetResult);
 userRoutes.get('/get-all-color-game-winners/:gameId', Auth, getAllGameWiseWinner);
 userRoutes.get('/get-single-color-game-winners/:gameId', Auth, getSingleGameWiseWinner);
 userRoutes.get('/get-login-user-bet', Auth, getLoginUserColourBet);
