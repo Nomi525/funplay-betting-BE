@@ -18,6 +18,7 @@ import {
   GameReward,
   NumberBetting,
   ColourWinLoss,
+  GamePeriod
 } from "../../index.js";
 
 //#region Colour betting api
@@ -508,28 +509,6 @@ async function winnerDetails(gameId, bettingResult) {
 // };
 //#endregion
 
-//#region Color betting winners api game wise
-// export const getAllGameWiseWinner = async (req, res) => {
-//   try {
-
-//     const { gameId } = req.params
-//     const colorUserList = await GameReward.find({ userId: { $ne: req.user }, gameId })
-//       .populate('userId', 'email fullName isLogin currency')
-//       .populate('gameId', 'gameName gameTime gameMode')
-//       .sort({ createdAt: -1 })
-//     const processedData = processData(colorUserList);
-//     return sendResponse(
-//       res,
-//       StatusCodes.OK,
-//       ResponseMessage.COLOR_USER_LIST,
-//       processedData
-//     );
-
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// }
-
 export const getAllGameWiseWinner = async (req, res) => {
   try {
     const { gameId } = req.params
@@ -629,6 +608,58 @@ export const getSingleGameWiseWinner = async (req, res) => {
 }
 //#endregion
 
+//#region Game Period 
+export const addGamePeriod = async (req, res) => {
+  try {
+    const { gameId, period, price, colorName, result } = req.body
+    const createPeriod = await GamePeriod.create({ userId: req.user, gameId, period, price, colorName, result });
+    if (createPeriod) {
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.GAME_PERIOD_CRETED,
+        createPeriod
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.FAILED_TO_CREATE,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
+
+//#region Get all game Period 
+export const getAllGamePeriod = async (req, res) => {
+  try {
+    const { gameId } = req.params
+    const getAllGamePeriod = await GamePeriod.find({ gameId, is_deleted: 0 }).sort({ createedAt: -1 })
+    if (getAllGamePeriod.length) {
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.GAME_PERIOD_GET,
+        getAllGamePeriod
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.FAILED_TO_FETCH,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
+
 function processData(data) {
   const processedData = {};
   data.forEach((item, i) => {
@@ -665,32 +696,3 @@ function processData(data) {
   const result = Object.values(processedData);
   return result;
 }
-
-// function processData(data) {
-//   const processedData = {};
-//   data.forEach((item, i) => {
-//     const userId = item.userId._id;
-//     const betAmount = parseFloat(item.betAmount);
-//     const rewardAmount = parseFloat(item.rewardAmount);
-//     if (!processedData[userId]) {
-//       processedData[userId] = {
-//         user: item.userId,
-//         game: item.gameId,
-//         totalBetAmount: 0,
-//         totalRewardAmount: 0,
-//         betCount: 0,
-//         betDetails: {},
-//       };
-//     }
-//     if (!processedData[userId].betAmountDetails[betAmount]) {
-//       processedData[userId].betAmountDetails[betAmount] = 1;
-//     } else {
-//       processedData[userId].betAmountDetails[betAmount]++;
-//     }
-//     processedData[userId].totalBetAmount += betAmount;
-//     processedData[userId].totalRewardAmount += rewardAmount;
-//     processedData[userId].betCount++;
-//   });
-//   const result = Object.values(processedData);
-//   return result;
-// }

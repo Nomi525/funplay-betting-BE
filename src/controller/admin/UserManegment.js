@@ -2,7 +2,7 @@ import {
     ResponseMessage, StatusCodes, sendResponse,
     getSingleData, getAllData, handleErrorResponse, User,
     NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-    GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue
+    GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourWinLoss
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -258,7 +258,9 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
 
 export const getAllTransaction = async (req, res) => {
     try {
-        const transactionHistory = await TransactionHistory.find({ is_deleted: 0 }).populate('userId')
+        const transactionHistory = await TransactionHistory.find({ is_deleted: 0 })
+            .populate('userId')
+            .sort({ createdAt: -1 })
         if (transactionHistory.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_GET, transactionHistory);
         } else {
@@ -365,40 +367,85 @@ export const getGameWiseUserList = async (req, res) => {
 //#region Get game wise user list
 export const getUserWiseGameList = async (req, res) => {
     try {
-        const { gameId } = req.params;
-        const findGameHistory = [
+        const { userId } = req.params;
+        const findGame = await ColourWinLoss.aggregate([
             {
-                "_id": "65252e9b43c1ecf214f5507c",
-                "gameId": {
-                    "gameName": "Lodo"
-                },
-                "totalBetAmount": 20,
-                "totalWinAmount": 50,
-                "totalLoseAmount": 0
+                $match: { userId: new mongoose.Types.ObjectId(userId) }
             },
             {
-                "_id": "64f87781f2b289a180d6070e",
-                "gameId": {
-                    "gameName": "One Color"
-                },
-                "totalBetAmount": 120.13131231132124,
-                "totalWinAmount": 300,
-                "totalLoseAmount": 0
+                $lookup: {
+                    from: "games",
+                    localField: "gameId",
+                    foreignField: "_id",
+                    as: "gameDetails"
+                }
             },
             {
-                "_id": "64f6e7ab22902eef672b943f",
-                "gameId": {
-                    "gameName": "2 Color"
-                },
-                "totalBetAmount": 210,
-                "totalWinAmount": 270,
-                "totalLoseAmount": 100
+                $unwind: "$gameDetails"
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "userDetails"
+                }
+            },
+            {
+                $unwind: "$userDetails"
+            },
+            {
+                $group: {
+                    _id: "$gameId",
+                    gameDetails: { $first: "$gameDetails" },
+                    userDetails: { $first: "$userDetails" },
+                    totalWinAmount: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$isWin", true] },
+                                { $add: [{ $toDouble: "$betAmount" }, { $toDouble: "$rewardAmount" }] },
+                                0
+                            ]
+                        }
+                    },
+                    totalLossAmount: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$isWin", false] },
+                                { $toDouble: "$betAmount" },
+                                0
+                            ]
+                        }
+                    },
+                    totalBetAmount: {
+                        $sum: {
+                            $toDouble: "$betAmount"
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    "_id": 0,
+                    "gameDetails._id": 1,
+                    "gameDetails.gameName": 1,
+                    "gameDetails.gameMode": 1,
+                    "gameDetails.description": 1,
+                    "userDetails._id": 1,
+                    "userDetails.fullName": 1,
+                    "userDetails.email": 1,
+                    "userDetails.currency": 1,
+                    "userDetails.profile": 1,
+                    "totalWinAmount": 1,
+                    "totalLossAmount": 1,
+                    "totalBetAmount": 1
+                }
             }
-        ];
-        if (findGameHistory.length) {
-            return sendResponse(res, StatusCodes.OK, "Get game history", findGameHistory);
+        ]);
+        if (findGame.length) {
+            return sendResponse(res, StatusCodes.OK,ResponseMessage.GAME_HISTORY, findGame);
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, "Game history not found", []);
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_HISTORY_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);

@@ -210,7 +210,9 @@ import {
   colourBetResult,
   getAllGameWiseWinner,
   getSingleGameWiseWinner,
-  getLoginUserColourBet
+  getLoginUserColourBet,
+  addGamePeriod,
+  getAllGamePeriod
 } from "./controller/user/ColourBettingController.js"
 
 // Coumunnity Betting
@@ -257,6 +259,7 @@ import { ColourBetting } from "./models/ColourBetting.js";
 import { GameReward } from "./models/GameReward.js";
 import { CommunityBetting } from "./models/CommunityBetting.js";
 import { ColourWinLoss } from "./models/ColourWinLoss.js";
+import { GamePeriod } from "./models/GamePeriod.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -288,6 +291,9 @@ import {
 
 dotenv.config();
 export {
+  getAllGamePeriod,
+  addGamePeriod,
+  GamePeriod,
   topWeeklyMonthlyPlayers,
   getLoginUserColourBet,
   ColourWinLoss,
