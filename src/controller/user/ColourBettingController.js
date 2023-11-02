@@ -24,7 +24,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType } = req.body;
+    let { gameId, colourName, betAmount, gameType ,period } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -60,6 +60,7 @@ export const addColourBet = async (req, res) => {
         colourName: colourName,
         betAmount: parseInt(betAmount),
         gameType,
+        period,
       },
       ColourBetting
     );

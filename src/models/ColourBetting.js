@@ -24,6 +24,11 @@ const colourBettingSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    period: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     rewardAmount: {
       type: Number,
       required: false,
@@ -36,7 +41,7 @@ const colourBettingSchema = new mongoose.Schema(
     },
     gameType: {
       type: String,
-      required: false
+      required: false,
     },
     isWin: {
       type: Boolean,
