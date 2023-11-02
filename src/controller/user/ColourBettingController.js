@@ -730,13 +730,23 @@ export const getAllGamePeriod = async (req, res) => {
       },
       {
         $addFields: {
-          winCount: {
+          count: {
             $cond: {
               if: { $eq: ["$winLossData", []] },
               then: 0,
               else: { $sum: "$winLossData.count" },
             },
           },
+        },
+      },
+      {
+        $project: {
+          count: 1,
+          _id: 1,
+          colourName: 1,
+          price: 1,
+          period: 1,
+          createdAt: 1,
         },
       },
     ]);
