@@ -24,7 +24,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType ,period } = req.body;
+    let { gameId, colourName, betAmount, gameType, period } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -658,11 +658,19 @@ export const getSingleGameWiseWinner = async (req, res) => {
 export const addGamePeriod = async (req, res) => {
   try {
     const { gameId, period, price, colourName, result } = req.body;
+    price = await ColourBetting.find({
+      gameId,
+      period,
+      is_deleted: 0,
+      colourName,
+    }).select("betAmount");
+    let totalAmount = result.reduce((a, b) => a + b.betAmount, 0);
+
     const createPeriod = await GamePeriod.create({
       userId: req.user,
       gameId,
       period,
-      price,
+      price: totalAmount,
       colourName,
       result,
     });
