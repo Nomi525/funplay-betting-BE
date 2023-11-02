@@ -195,24 +195,33 @@ export const getLoginUserColourBet = async (req, res) => {
 
 //#region For Winner details get
 async function winners(gameType, gameId, period, model) {
-  const query = {
-    gameId: new mongoose.Types.ObjectId(gameId),
-    is_deleted: 0,
-  };
+  // const query = {
+  //   gameId: new mongoose.Types.ObjectId(gameId),
+  //   is_deleted: 0,
+  // };
 
-  if (gameType == "2colorBetting" || gameType == "3colorBetting") {
-    query.gameType = gameType;
-  }
+  // if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+  //   query.gameType = gameType;
+  // }
   const bettingResult = await model.aggregate([
-    // {
-    //   $match: {
-    //     gameId: new mongoose.Types.ObjectId(gameId),
-    //     is_deleted: 0,
-    //   },
-    // },
     {
-      $match: query,
+      $match: {
+        gameId: new mongoose.Types.ObjectId(gameId),
+        is_deleted: 0,
+        gameType: {
+          $or: [
+            { gameType: "2colorBetting" },
+            {
+              gameType: "3colorBetting",
+            },
+          ],
+        },
+        period: period,
+      },
     },
+    // {
+    //   $match: query,
+    // },
     {
       $lookup: {
         from: "games",
@@ -300,45 +309,6 @@ async function winners(gameType, gameId, period, model) {
 }
 //#endregion
 
-//#region For Winner details add in winners field
-// async function winnerDetails(gameId, bettingResult) {
-//   const winner = await Promise.all(
-//     bettingResult.map(async (bet) => {
-//       if (bet.gameDetails.gameId.toString() == gameId.toString()) {
-//         let winnerDetails = await User.findOne({ _id: bet.winner });
-//         let rewardAmount = 0;
-//         if (winnerDetails) {
-//           if (bet.bets && bet.bets.length) {
-//             bet.bets.map(async (b) => {
-//               if (b.userId.toString() == winnerDetails._id.toString()) {
-//                 rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
-//                 const balance = await getSingleData({ userId: winnerDetails._id }, NewTransaction)
-//                 if (balance) {
-//                   balance.tokenDollorValue = plusLargeSmallValue(balance.tokenDollorValue, rewardAmount)
-//                   await balance.save();
-//                 }
-//                 await ColourBetting.updateOne({ userId: winnerDetails._id, gameId: bet.gameDetails.gameId }, { $set: { rewardAmount } })
-//                 await GameReward.create({
-//                   userId: winnerDetails._id,
-//                   gameId: bet.gameDetails.gameId,
-//                   betId: b._id,
-//                   betAmount: b.betAmount,
-//                   colourName: b.colourName,
-//                   rewardAmount
-//                 });
-//               }
-//             })
-//           }
-//           winnerDetails = { ...winnerDetails._doc, rewardAmount }
-//           bet.winner = winnerDetails;
-//         }
-//       }
-//       return bet;
-//     })
-//   );
-//   return winner;
-// }
-
 async function winnerDetails(gameId, period, bettingResult) {
   const winner = await Promise.all(
     bettingResult.map(async (bet) => {
@@ -404,145 +374,6 @@ async function winnerDetails(gameId, period, bettingResult) {
   );
   return winner;
 }
-
-//#endregion
-
-//#region Old Code for only color betting
-// export const colourBetResult = async (req, res) => {
-//   try {
-//     const gameId = req.params.gameId;
-//     const colourBettingResult = await ColourBetting.aggregate([
-//       {
-//         $match: {
-//           gameId: new mongoose.Types.ObjectId(gameId),
-//         },
-//       },
-//       {
-//         $lookup: {
-//           from: "games",
-//           localField: "gameId",
-//           foreignField: "_id",
-//           as: "game",
-//         },
-//       },
-//       {
-//         $unwind: "$game",
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             gameId: "$game._id",
-//             gameName: "$game.gameName",
-//             gameImage: "$game.gameImage",
-//             gameDuration: "$game.gameDuration",
-//             isActive: "$game.isActive",
-//             startTime: "$game.startTime",
-//             endTime: "$game.endTime",
-//             startDate: "$game.startDate",
-//             endDate: "$game.endDate",
-//           },
-//           bets: { $push: "$$ROOT" },
-//         },
-//       },
-//       {
-//         $unwind: "$bets",
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             gameId: "$_id.gameId",
-//             gameName: "$_id.gameName",
-//             gameImage: "$_id.gameImage",
-//             gameDuration: "$_id.gameDuration",
-//             isActive: "$_id.isActive",
-//             startTime: "$_id.startTime",
-//             endTime: "$_id.endTime",
-//             startDate: "$_id.startDate",
-//             endDate: "$_id.endDate",
-//             userId: "$bets.userId",
-//           },
-//           bets: { $first: "$bets" },
-//           totalBetAmount: { $sum: "$bets.betAmount" },
-//         },
-//       },
-//       {
-//         $sort: {
-//           totalBetAmount: 1,
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: null,
-//           winner: { $first: "$_id.userId" },
-//           gameDetails: {
-//             $first: {
-//               gameId: "$_id.gameId",
-//               gameName: "$_id.gameName",
-//               gameImage: "$_id.gameImage",
-//               gameDuration: "$_id.gameDuration",
-//               isActive: "$_id.isActive",
-//               startTime: "$_id.startTime",
-//               endTime: "$_id.endTime",
-//               startDate: "$_id.startDate",
-//               endDate: "$_id.endDate",
-//             },
-//           },
-//           bets: { $push: "$bets" },
-//         },
-//       },
-//     ]);
-//     if (colourBettingResult.length) {
-//       const addwinnerDetails = await Promise.all(
-//         colourBettingResult.map(async (bet) => {
-//           if (bet.gameDetails.gameId.toString() == gameId.toString()) {
-//             let winnerDetails = await User.findOne({ _id: bet.winner });
-//             let rewardAmount = 0;
-//             if (winnerDetails) {
-//               if (bet.bets && bet.bets.length) {
-//                 bet.bets.map(async (b) => {
-//                   if (b.userId.toString() == winnerDetails._id.toString()) {
-//                     rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
-//                     const balance = await getSingleData({ userId: winnerDetails._id }, NewTransaction)
-//                     if (balance) {
-//                       balance.tokenDollorValue = plusLargeSmallValue(balance.tokenDollorValue, rewardAmount)
-//                       await balance.save();
-//                     }
-//                     await ColourBetting.updateOne({ userId: winnerDetails._id, gameId: bet.gameDetails.gameId }, { $set: { rewardAmount } })
-//                     await GameReward.create({
-//                       userId: winnerDetails._id,
-//                       gameId: bet.gameDetails.gameId,
-//                       betId: b._id,
-//                       betAmount: b.betAmount,
-//                       rewardAmount
-//                     });
-//                   }
-//                 })
-//               }
-//               winnerDetails = { ...winnerDetails._doc, rewardAmount }
-//               bet.winner = winnerDetails;
-//             }
-//           }
-//           return bet;
-//         })
-//       );
-//       return sendResponse(
-//         res,
-//         StatusCodes.OK,
-//         ResponseMessage.COLOUR_RESULT,
-//         addwinnerDetails
-//       );
-//     } else {
-//       return sendResponse(
-//         res,
-//         StatusCodes.BAD_REQUEST,
-//         ResponseMessage.FAILED_TO_FETCH,
-//         []
-//       );
-//     }
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// };
 //#endregion
 
 export const getAllGameWiseWinner = async (req, res) => {
@@ -657,14 +488,14 @@ export const getSingleGameWiseWinner = async (req, res) => {
 //#region Game Period
 export const addGamePeriod = async (req, res) => {
   try {
-    const { gameId, period, price, colourName, result } = req.body;
+    let { gameId, period, price, colourName, result } = req.body;
     price = await ColourBetting.find({
       gameId,
       period,
       is_deleted: 0,
       colourName,
     }).select("betAmount");
-    let totalAmount = result.reduce((a, b) => a + b.betAmount, 0);
+    let totalAmount = price.reduce((a, b) => a + b.betAmount, 0);
     console.log(totalAmount, "totalAmount");
     const createPeriod = await GamePeriod.create({
       userId: req.user,
@@ -700,7 +531,6 @@ export const addGamePeriod = async (req, res) => {
 export const getAllGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
-    console.log(req.user);
     const aggregationResult = await GamePeriod.aggregate([
       {
         $match: {
@@ -714,6 +544,7 @@ export const getAllGamePeriod = async (req, res) => {
           let: {
             gameId: "$gameId",
             period: "$period",
+            colourName: "$colourName",
           },
           pipeline: [
             {
@@ -722,6 +553,7 @@ export const getAllGamePeriod = async (req, res) => {
                   $and: [
                     { $eq: ["$gameId", "$$gameId"] },
                     { $eq: ["$period", "$$period"] },
+                    { $eq: ["$colourName", "$$colourName"] },
                     { $eq: ["$userId", new mongoose.Types.ObjectId(req.user)] },
                     { $eq: ["$isWin", true] }, // Filter only isWin true records
                   ],
