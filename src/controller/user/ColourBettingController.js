@@ -665,7 +665,7 @@ export const addGamePeriod = async (req, res) => {
       colourName,
     }).select("betAmount");
     let totalAmount = result.reduce((a, b) => a + b.betAmount, 0);
-
+console.log(totalAmount, "totalAmount");
     const createPeriod = await GamePeriod.create({
       userId: req.user,
       gameId,
