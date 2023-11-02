@@ -20,7 +20,7 @@ const gamePeriodSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
-    colorName: {
+    colourName: {
         type: String,
         required: false
     },

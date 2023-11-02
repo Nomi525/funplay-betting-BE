@@ -18,7 +18,7 @@ import {
   GameReward,
   NumberBetting,
   ColourWinLoss,
-  GamePeriod
+  GamePeriod,
 } from "../../index.js";
 
 //#region Colour betting api
@@ -59,7 +59,7 @@ export const addColourBet = async (req, res) => {
         gameId: gameId,
         colourName: colourName,
         betAmount: parseInt(betAmount),
-        gameType
+        gameType,
       },
       ColourBetting
     );
@@ -103,39 +103,54 @@ export const colourBetResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;
     if (!type) {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.TYPE_REQUIRED, [])
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.TYPE_REQUIRED,
+        []
+      );
     }
-    let bettingResult = []
-    let message = '';
+    let bettingResult = [];
+    let message = "";
 
     // Check type for number betting
-    if (gameType == "number" && type == 'numberBetting') {
-      const numberBettingResult = await winners(gameType, gameId, period, NumberBetting)
+    if (gameType == "number" && type == "numberBetting") {
+      const numberBettingResult = await winners(
+        gameType,
+        gameId,
+        period,
+        NumberBetting
+      );
       if (numberBettingResult.length) {
-        bettingResult = numberBettingResult
-        message = ResponseMessage.NUMBER_RESULT
+        bettingResult = numberBettingResult;
+        message = ResponseMessage.NUMBER_RESULT;
       }
     }
     // Check type for color betting
-    if (type == 'colorBetting') {
-      if ((gameType == "2colorBetting") || (gameType == "3colorBetting")) {
-        const colourBettingResult = await winners(gameType, gameId, period, ColourBetting)
+    if (type == "colorBetting") {
+      if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+        const colourBettingResult = await winners(
+          gameType,
+          gameId,
+          period,
+          ColourBetting
+        );
         if (colourBettingResult.length) {
-          bettingResult = colourBettingResult
-          message = ResponseMessage.COLOUR_RESULT
+          bettingResult = colourBettingResult;
+          message = ResponseMessage.COLOUR_RESULT;
         }
       } else {
-        return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_TYPE_REQUIRED, [])
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.GAME_TYPE_REQUIRED,
+          []
+        );
       }
     }
 
     if (bettingResult.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        message,
-        bettingResult
-      );
+      return sendResponse(res, StatusCodes.OK, message, bettingResult);
     }
     return sendResponse(
       res,
@@ -151,11 +166,20 @@ export const colourBetResult = async (req, res) => {
 //#region Get data of login user
 export const getLoginUserColourBet = async (req, res) => {
   try {
-    const findUser = await User.findOne({ _id: req.user, is_deleted: 0 }).select('_id fullName email currency')
-    const findBets = await ColourWinLoss.find({ userId: req.user }).sort({ createdAt: -1 })
-    const winAmount = findBets.filter(b => b.isWin).reduce((a, d) => a + parseFloat(d.rewardAmount), 0)
-    const lossAmount = findBets.filter(b => !b.isWin).reduce((a, d) => a + parseFloat(d.betAmount), 0)
-    const loginUser = { ...findUser._doc, winAmount, lossAmount }
+    const findUser = await User.findOne({
+      _id: req.user,
+      is_deleted: 0,
+    }).select("_id fullName email currency");
+    const findBets = await ColourWinLoss.find({ userId: req.user }).sort({
+      createdAt: -1,
+    });
+    const winAmount = findBets
+      .filter((b) => b.isWin)
+      .reduce((a, d) => a + parseFloat(d.rewardAmount), 0);
+    const lossAmount = findBets
+      .filter((b) => !b.isWin)
+      .reduce((a, d) => a + parseFloat(d.betAmount), 0);
+    const loginUser = { ...findUser._doc, winAmount, lossAmount };
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -165,7 +189,7 @@ export const getLoginUserColourBet = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 //#endregion
 
 //#region For Winner details get
@@ -173,10 +197,10 @@ async function winners(gameType, gameId, period, model) {
   const query = {
     gameId: new mongoose.Types.ObjectId(gameId),
     is_deleted: 0,
-  }
+  };
 
   if (gameType == "2colorBetting" || gameType == "3colorBetting") {
-    query.gameType = gameType
+    query.gameType = gameType;
   }
   const bettingResult = await model.aggregate([
     // {
@@ -186,7 +210,7 @@ async function winners(gameType, gameId, period, model) {
     //   },
     // },
     {
-      $match: query
+      $match: query,
     },
     {
       $lookup: {
@@ -269,7 +293,7 @@ async function winners(gameType, gameId, period, model) {
     },
   ]);
   if (bettingResult) {
-    return await winnerDetails(gameId, period, bettingResult)
+    return await winnerDetails(gameId, period, bettingResult);
   }
   return [];
 }
@@ -324,13 +348,22 @@ async function winnerDetails(gameId, period, bettingResult) {
           if (bet.bets && bet.bets.length) {
             bet.bets.map(async (b) => {
               if (b.userId.toString() == winnerDetails._id.toString()) {
-                rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95)
-                const balance = await getSingleData({ userId: winnerDetails._id }, NewTransaction)
+                rewardAmount = multiplicationLargeSmallValue(b.betAmount, 0.95);
+                const balance = await getSingleData(
+                  { userId: winnerDetails._id },
+                  NewTransaction
+                );
                 if (balance) {
-                  balance.tokenDollorValue = plusLargeSmallValue(balance.tokenDollorValue, rewardAmount)
+                  balance.tokenDollorValue = plusLargeSmallValue(
+                    balance.tokenDollorValue,
+                    rewardAmount
+                  );
                   await balance.save();
                 }
-                await ColourBetting.updateOne({ userId: winnerDetails._id, gameId: bet.gameDetails.gameId }, { $set: { rewardAmount } })
+                await ColourBetting.updateOne(
+                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId },
+                  { $set: { rewardAmount } }
+                );
                 await GameReward.create({
                   userId: winnerDetails._id,
                   gameId: bet.gameDetails.gameId,
@@ -347,8 +380,8 @@ async function winnerDetails(gameId, period, bettingResult) {
                   colourName: b.colourName,
                   rewardAmount,
                   period,
-                  isWin: true
-                })
+                  isWin: true,
+                });
               } else {
                 await ColourWinLoss.create({
                   userId: b.userId,
@@ -356,12 +389,12 @@ async function winnerDetails(gameId, period, bettingResult) {
                   betId: b._id,
                   betAmount: b.betAmount,
                   colourName: b.colourName,
-                  period
-                })
+                  period,
+                });
               }
-            })
+            });
           }
-          winnerDetails = { ...winnerDetails._doc, rewardAmount }
+          winnerDetails = { ...winnerDetails._doc, rewardAmount };
           bet.winner = winnerDetails;
         }
       }
@@ -513,11 +546,15 @@ async function winnerDetails(gameId, period, bettingResult) {
 
 export const getAllGameWiseWinner = async (req, res) => {
   try {
-    const { gameId } = req.params
-    const colorUserList = await ColourWinLoss.find({ userId: { $ne: req.user }, isWin: true, gameId })
-      .populate('userId', 'email fullName isLogin currency')
-      .populate('gameId', 'gameName gameTime gameMode')
-      .sort({ createdAt: -1 })
+    const { gameId } = req.params;
+    const colorUserList = await ColourWinLoss.find({
+      userId: { $ne: req.user },
+      isWin: true,
+      gameId,
+    })
+      .populate("userId", "email fullName isLogin currency")
+      .populate("gameId", "gameName gameTime gameMode")
+      .sort({ createdAt: -1 });
     const processedData = processData(colorUserList);
     return sendResponse(
       res,
@@ -528,18 +565,18 @@ export const getAllGameWiseWinner = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 
 //#endregion
 
 //#region Color betting winners api game wise
 export const getSingleGameWiseWinner = async (req, res) => {
   try {
-    const { gameId } = req.params
+    const { gameId } = req.params;
     const colorUserList = await ColourWinLoss.find({ userId: req.user, gameId })
-      .populate('userId', 'email fullName isLogin currency')
-      .populate('gameId', 'gameName gameTime gameMode')
-      .sort({ createdAt: -1 })
+      .populate("userId", "email fullName isLogin currency")
+      .populate("gameId", "gameName gameTime gameMode")
+      .sort({ createdAt: -1 });
     // const processedData = processData(colorUserList);
     const processedData = {};
     colorUserList.forEach((item, i) => {
@@ -556,42 +593,48 @@ export const getSingleGameWiseWinner = async (req, res) => {
       }
       if (item.isWin) {
         if (processedData[userId].winBetDetails.length) {
-          const index = processedData[userId].winBetDetails.findIndex(item => item.betAmount == betAmount);
+          const index = processedData[userId].winBetDetails.findIndex(
+            (item) => item.betAmount == betAmount
+          );
           if (index != -1) {
             processedData[userId].winBetDetails[index].betTimes++;
-            processedData[userId].winBetDetails[index].betTotalAmount += betAmount;
+            processedData[userId].winBetDetails[index].betTotalAmount +=
+              betAmount;
           } else {
             processedData[userId].winBetDetails.push({
               betAmount: betAmount,
               betTimes: 1,
-              betTotalAmount: betAmount
+              betTotalAmount: betAmount,
             });
           }
         } else {
           processedData[userId].winBetDetails.push({
             betAmount: betAmount,
             betTimes: 1,
-            betTotalAmount: betAmount
+            betTotalAmount: betAmount,
           });
         }
       } else {
         if (processedData[userId].lossBetDetails.length) {
-          const index = processedData[userId].lossBetDetails.findIndex(item => item.betAmount == betAmount);
+          const index = processedData[userId].lossBetDetails.findIndex(
+            (item) => item.betAmount == betAmount
+          );
           if (index != -1) {
             processedData[userId].lossBetDetails[index].betTimes++;
-            processedData[userId].lossBetDetails[index].betTotalAmount += betAmount;
+            processedData[userId].lossBetDetails[index].betTotalAmount +=
+              betAmount;
           } else {
             processedData[userId].lossBetDetails.push({
               betAmount: betAmount,
               betTimes: 1,
-              betTotalAmount: betAmount
+              betTotalAmount: betAmount,
             });
           }
         } else {
           processedData[userId].lossBetDetails.push({
             betAmount: betAmount,
             betTimes: 1,
-            betTotalAmount: betAmount
+            betTotalAmount: betAmount,
           });
         }
       }
@@ -607,14 +650,21 @@ export const getSingleGameWiseWinner = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 //#endregion
 
-//#region Game Period 
+//#region Game Period
 export const addGamePeriod = async (req, res) => {
   try {
-    const { gameId, period, price, colorName, result } = req.body
-    const createPeriod = await GamePeriod.create({ userId: req.user, gameId, period, price, colorName, result });
+    const { gameId, period, price, colourName, result } = req.body;
+    const createPeriod = await GamePeriod.create({
+      userId: req.user,
+      gameId,
+      period,
+      price,
+      colourName,
+      result,
+    });
     if (createPeriod) {
       return sendResponse(
         res,
@@ -633,75 +683,130 @@ export const addGamePeriod = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 //#endregion
 
-//#region Get all game Period 
+//#region Get all game Period
 export const getAllGamePeriod = async (req, res) => {
   try {
-    const { gameId } = req.params
-    console.log(req.user)
-    // const getAllGamePeriod = await GamePeriod.find({ gameId, is_deleted: 0 }).select('period price colorName createdAt').sort({ createdAt: -1 })
-
+    const { gameId } = req.params;
+    console.log(req.user);
     const aggregationResult = await GamePeriod.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
-          is_deleted: 0
-        }
+          is_deleted: 0,
+        },
       },
       {
         $lookup: {
-          from: 'colourwinlosses',
-          localField: 'gameId',
-          foreignField: 'gameId',
-          as: 'winLossData'
-        }
+          from: "colourwinlosses",
+          let: {
+            gameId: "$gameId",
+            period: "$period",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$gameId", "$$gameId"] },
+                    { $eq: ["$period", "$$period"] },
+                    { $eq: ["$userId", new mongoose.Types.ObjectId(req.user)] },
+                    { $eq: ["$isWin", true] }, // Filter only isWin true records
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$colourName",
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          as: "winLossData",
+        },
       },
       {
-        $unwind: {
-          path: '$winLossData',
-          preserveNullAndEmptyArrays: true
-        }
+        $addFields: {
+          winCount: {
+            $cond: {
+              if: { $eq: ["$winLossData", []] },
+              then: 0,
+              else: { $sum: "$winLossData.count" },
+            },
+          },
+        },
       },
-      {
-        $match: {
-          'winLossData.userId': new mongoose.Types.ObjectId(req.user),
-          'winLossData.gameId': new mongoose.Types.ObjectId(gameId),
-          'winLossData.isWin': true
-        }
-      },
-      {
-        $group: {
-          _id: '$_id',
-          totalCount: { $sum: 1 },
-          period: { $first: '$period' },
-          price: { $first: '$price' },
-          createdAt: { $first: '$createdAt' },
-          colourName: { $first: '$winLossData.colourName' }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          colorName: 1,
-          totalCount: 1,
-          period: 1,
-          price: 1,
-          createdAt: 1
-
-        }
-      }
     ]);
 
+    // const aggregationResult = await GamePeriod.aggregate([
+    //   {
+    //     $match: {
+    //       gameId: new mongoose.Types.ObjectId(gameId),
+    //       is_deleted: 0,
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "colourwinlosses",
+    //       let: {
+    //         gameId: "$gameId",
+    //         period: "$period",
+    //       },
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: [
+    //                 { $eq: ["$gameId", "$$gameId"] },
+    //                 { $eq: ["$period", "$$period"] },
+    //                 { $eq: ["$userId",new mongoose.Types.ObjectId(req.user)] },
+    //               ],
+    //             },
+    //           },
+    //         },
+    //       ],
+    //       as: "winLossData",
+    //     },
+    //   },
 
-
-
-
-
-
-
-
+    //   // {
+    //   //   $unwind: {
+    //   //     path: "$winLossData",
+    //   //     preserveNullAndEmptyArrays: true,
+    //   //   },
+    //   // },
+    //   // {
+    //   //   $match: {
+    //   //     "winLossData.userId": new mongoose.Types.ObjectId(req.user),
+    //   //     "winLossData.gameId": new mongoose.Types.ObjectId(gameId),
+    //   //     "winLossData.isWin": true,
+    //   //     "winLossData.period": "$period",
+    //   //   },
+    //   // },
+    //   // {
+    //   //   $group: {
+    //   //     _id: "$_id",
+    //   //     totalCount: { $sum: 1 },
+    //   //     period: { $first: "$period" },
+    //   //     price: { $first: "$price" },
+    //   //     createdAt: { $first: "$createdAt" },
+    //   //     colourName: { $first: "$winLossData.colourName" },
+    //   //   },
+    //   // },
+    //   // {
+    //   //   $project: {
+    //   //     _id: 0,
+    //   //     colourName: 1,
+    //   //     totalCount: 1,
+    //   //     period: 1,
+    //   //     price: 1,
+    //   //     createdAt: 1,
+    //   //   },
+    //   // },
+    // ]);
 
     // const getAllGamePeriod = await GamePeriod.aggregate([
     //   {
@@ -752,7 +857,7 @@ export const getAllGamePeriod = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 //#endregion
 
 function processData(data) {
@@ -769,7 +874,9 @@ function processData(data) {
       };
     }
     if (processedData[userId].betDetails.length) {
-      const index = processedData[userId].betDetails.findIndex(item => item.betAmount == betAmount);
+      const index = processedData[userId].betDetails.findIndex(
+        (item) => item.betAmount == betAmount
+      );
       if (index != -1) {
         processedData[userId].betDetails[index].betTimes++;
         processedData[userId].betDetails[index].betTotalAmount += betAmount;
@@ -777,14 +884,14 @@ function processData(data) {
         processedData[userId].betDetails.push({
           betAmount: betAmount,
           betTimes: 1,
-          betTotalAmount: betAmount
+          betTotalAmount: betAmount,
         });
       }
     } else {
       processedData[userId].betDetails.push({
         betAmount: betAmount,
         betTimes: 1,
-        betTotalAmount: betAmount
+        betTotalAmount: betAmount,
       });
     }
   });
