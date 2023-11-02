@@ -195,33 +195,19 @@ export const getLoginUserColourBet = async (req, res) => {
 
 //#region For Winner details get
 async function winners(gameType, gameId, period, model) {
-  // const query = {
-  //   gameId: new mongoose.Types.ObjectId(gameId),
-  //   is_deleted: 0,
-  // };
+  const query = {
+    gameId: new mongoose.Types.ObjectId(gameId),
+    is_deleted: 0,
+  };
 
-  // if (gameType == "2colorBetting" || gameType == "3colorBetting") {
-  //   query.gameType = gameType;
-  // }
+  if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+    query.gameType = gameType;
+    query.period = parseInt(period);
+  }
   const bettingResult = await model.aggregate([
     {
-      $match: {
-        gameId: new mongoose.Types.ObjectId(gameId),
-        is_deleted: 0,
-        gameType: {
-          $or: [
-            { gameType: "2colorBetting" },
-            {
-              gameType: "3colorBetting",
-            },
-          ],
-        },
-        period: period,
-      },
+      $match: query,
     },
-    // {
-    //   $match: query,
-    // },
     {
       $lookup: {
         from: "games",
@@ -302,6 +288,7 @@ async function winners(gameType, gameId, period, model) {
       },
     },
   ]);
+  // return bettingResult;
   if (bettingResult) {
     return await winnerDetails(gameId, period, bettingResult);
   }
@@ -496,21 +483,33 @@ export const addGamePeriod = async (req, res) => {
       colourName,
     }).select("betAmount");
     let totalAmount = price.reduce((a, b) => a + b.betAmount, 0);
-    console.log(totalAmount, "totalAmount");
-    const createPeriod = await GamePeriod.create({
-      userId: req.user,
+    let alreadyExitsGamePeriod = await GamePeriod.findOne({
       gameId,
       period,
-      price: totalAmount,
+      is_deleted: 0,
       colourName,
-      result,
-    });
-    if (createPeriod) {
+    })
+    let createPeriod;
+    if (alreadyExitsGamePeriod) {
+      alreadyExitsGamePeriod.price = totalAmount
+      await alreadyExitsGamePeriod.save();
+    } else {
+      createPeriod = await GamePeriod.create({
+        userId: req.user,
+        gameId,
+        period,
+        price: totalAmount,
+        colourName,
+        result,
+      });
+    }
+
+    if (createPeriod || alreadyExitsGamePeriod) {
       return sendResponse(
         res,
         StatusCodes.CREATED,
         ResponseMessage.GAME_PERIOD_CRETED,
-        createPeriod
+        createPeriod ? createPeriod : alreadyExitsGamePeriod
       );
     } else {
       return sendResponse(
