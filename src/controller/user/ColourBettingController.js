@@ -665,7 +665,7 @@ export const addGamePeriod = async (req, res) => {
       colourName,
     }).select("betAmount");
     let totalAmount = result.reduce((a, b) => a + b.betAmount, 0);
-console.log(totalAmount, "totalAmount");
+    console.log(totalAmount, "totalAmount");
     const createPeriod = await GamePeriod.create({
       userId: req.user,
       gameId,
@@ -690,6 +690,7 @@ console.log(totalAmount, "totalAmount");
       );
     }
   } catch (error) {
+    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
