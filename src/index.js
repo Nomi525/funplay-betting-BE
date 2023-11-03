@@ -212,8 +212,9 @@ import {
   getSingleGameWiseWinner,
   getLoginUserColourBet,
   addGamePeriod,
-  getAllGamePeriod
-} from "./controller/user/ColourBettingController.js"
+  getAllGamePeriod,
+  getByIdGamePeriod,
+} from "./controller/user/ColourBettingController.js";
 
 // Coumunnity Betting
 
@@ -292,6 +293,7 @@ import {
 dotenv.config();
 export {
   getAllGamePeriod,
+  getByIdGamePeriod,
   addGamePeriod,
   GamePeriod,
   topWeeklyMonthlyPlayers,

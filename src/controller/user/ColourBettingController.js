@@ -53,17 +53,38 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
-    const createColourBet = await dataCreate(
-      {
-        userId: req.user,
-        gameId: gameId,
-        colourName: colourName,
-        betAmount: parseInt(betAmount),
-        gameType,
-        period,
-      },
-      ColourBetting
-    );
+    let alreadyExistBet = await ColourBetting.findOne({
+      userId: req.user,
+      gameId: gameId,
+      gameType,
+      period,
+    });
+    let createColourBet;
+    if (alreadyExistBet) {
+      createColourBet = await dataUpdated(
+        {
+          userId: req.user,
+        },
+        {
+          colourName: colourName,
+          betAmount: parseInt(betAmount),
+        },
+        ColourBetting
+      );
+    } else {
+      createColourBet = await dataCreate(
+        {
+          userId: req.user,
+          gameId: gameId,
+          colourName: colourName,
+          betAmount: parseInt(betAmount),
+          gameType,
+          period,
+        },
+        ColourBetting
+      );
+    }
+
     if (createColourBet) {
       checkBalance.tokenDollorValue = minusLargeSmallValue(
         checkBalance.tokenDollorValue,
@@ -485,13 +506,14 @@ export const addGamePeriod = async (req, res) => {
     let totalAmount = price.reduce((a, b) => a + b.betAmount, 0);
     let alreadyExitsGamePeriod = await GamePeriod.findOne({
       gameId,
+      userId: req.user,
       period,
       is_deleted: 0,
-      colourName,
-    })
+    });
     let createPeriod;
     if (alreadyExitsGamePeriod) {
-      alreadyExitsGamePeriod.price = totalAmount
+      alreadyExitsGamePeriod.price = totalAmount;
+      alreadyExitsGamePeriod.colourName = colourName;
       await alreadyExitsGamePeriod.save();
     } else {
       createPeriod = await GamePeriod.create({
@@ -591,120 +613,107 @@ export const getAllGamePeriod = async (req, res) => {
         },
       },
     ]);
-
-    // const aggregationResult = await GamePeriod.aggregate([
-    //   {
-    //     $match: {
-    //       gameId: new mongoose.Types.ObjectId(gameId),
-    //       is_deleted: 0,
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "colourwinlosses",
-    //       let: {
-    //         gameId: "$gameId",
-    //         period: "$period",
-    //       },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$gameId", "$$gameId"] },
-    //                 { $eq: ["$period", "$$period"] },
-    //                 { $eq: ["$userId",new mongoose.Types.ObjectId(req.user)] },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //       as: "winLossData",
-    //     },
-    //   },
-
-    //   // {
-    //   //   $unwind: {
-    //   //     path: "$winLossData",
-    //   //     preserveNullAndEmptyArrays: true,
-    //   //   },
-    //   // },
-    //   // {
-    //   //   $match: {
-    //   //     "winLossData.userId": new mongoose.Types.ObjectId(req.user),
-    //   //     "winLossData.gameId": new mongoose.Types.ObjectId(gameId),
-    //   //     "winLossData.isWin": true,
-    //   //     "winLossData.period": "$period",
-    //   //   },
-    //   // },
-    //   // {
-    //   //   $group: {
-    //   //     _id: "$_id",
-    //   //     totalCount: { $sum: 1 },
-    //   //     period: { $first: "$period" },
-    //   //     price: { $first: "$price" },
-    //   //     createdAt: { $first: "$createdAt" },
-    //   //     colourName: { $first: "$winLossData.colourName" },
-    //   //   },
-    //   // },
-    //   // {
-    //   //   $project: {
-    //   //     _id: 0,
-    //   //     colourName: 1,
-    //   //     totalCount: 1,
-    //   //     period: 1,
-    //   //     price: 1,
-    //   //     createdAt: 1,
-    //   //   },
-    //   // },
-    // ]);
-
-    // const getAllGamePeriod = await GamePeriod.aggregate([
-    //   {
-    //     $project: {
-    //       createdAt: {
-    //         $dateToString: {
-    //           format: "%Y-%m-%d %H:%M:%S",
-    //           date: "$createdAt",
-    //           timezone: "UTC"
-    //         }
-    //       },
-    //       price: 1,
-    //       colorName: 1
-    //     }
-    //   },
-    //   {
-    //     $group: {
-    //       _id: { createdAt: "$createdAt", colorName: "$colorName" },
-    //       totalPrice: { $sum: "$price" },
-    //       totalUsers: { $sum: 1 }
-    //     }
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 0,
-    //       createdAt: "$_id.createdAt",
-    //       colorName: "$_id.colorName",
-    //       totalPrice: 1,
-    //       totalUsers: 1
-    //     }
-    //   }
-    // ]);
-    // if (getAllGamePeriod.length) {
     return sendResponse(
       res,
       StatusCodes.CREATED,
       ResponseMessage.GAME_PERIOD_GET,
       aggregationResult
     );
-    // } else {
-    //   return sendResponse(
-    //     res,
-    //     StatusCodes.BAD_REQUEST,
-    //     ResponseMessage.FAILED_TO_FETCH,
-    //     []
-    //   );
-    // }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Get all game Period
+export const getByIdGamePeriod = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const aggregationResult = await GamePeriod.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user),
+          gameId: new mongoose.Types.ObjectId(gameId),
+          is_deleted: 0,
+        },
+      },
+      {
+        $lookup: {
+          from: "colourbettings",
+          let: {
+            gameId: "$gameId",
+            period: "$period",
+            colourName: "$colourName",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$gameId", "$$gameId"] },
+                    { $eq: ["$period", "$$period"] },
+                    { $eq: ["$colourName", "$$colourName"] },
+                    { $eq: ["$userId", new mongoose.Types.ObjectId(req.user)] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "betting",
+        },
+      },
+      {
+        $unwind: {
+          path: "$betting",
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "colourwinlosses",
+      //     let: {
+      //       gameId: "$gameId",
+      //       period: "$period",
+      //       colourName: "$colourName",
+      //     },
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: {
+      //             $and: [
+      //               { $eq: ["$gameId", "$$gameId"] },
+      //               { $eq: ["$period", "$$period"] },
+      //               { $eq: ["$colourName", "$$colourName"] },
+      //               { $eq: ["$userId", new mongoose.Types.ObjectId(req.user)] },
+      //               { $eq: ["$isWin", true] }, // Filter only isWin true records
+      //             ],
+      //           },
+      //         },
+      //       },
+      //     ],
+      //     as: "winLossData",
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     count: 1,
+      //     _id: 1,
+      //     colourName: 1,
+      //     period: 1,
+      //     createdAt: 1,
+      //     userId: 1,
+      //     winLossData: 1,
+      //     // "winLossData.price": 1,
+      //     // "betting.betAmount": 1,
+      //   },
+      // },
+    ]);
+
+    return sendResponse(
+      res,
+      StatusCodes.CREATED,
+      ResponseMessage.GAME_PERIOD_GET,
+      aggregationResult
+    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
