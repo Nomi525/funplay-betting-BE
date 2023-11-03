@@ -561,7 +561,7 @@ export const getAllGamePeriod = async (req, res) => {
       },
       {
         $lookup: {
-          from: "colourwinlosses",
+          from: "colourbettings",
           let: {
             gameId: "$gameId",
             period: "$period",
@@ -667,45 +667,7 @@ export const getByIdGamePeriod = async (req, res) => {
           path: "$betting",
         },
       },
-      // {
-      //   $lookup: {
-      //     from: "colourwinlosses",
-      //     let: {
-      //       gameId: "$gameId",
-      //       period: "$period",
-      //       colourName: "$colourName",
-      //     },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               { $eq: ["$gameId", "$$gameId"] },
-      //               { $eq: ["$period", "$$period"] },
-      //               { $eq: ["$colourName", "$$colourName"] },
-      //               { $eq: ["$userId", new mongoose.Types.ObjectId(req.user)] },
-      //               { $eq: ["$isWin", true] }, // Filter only isWin true records
-      //             ],
-      //           },
-      //         },
-      //       },
-      //     ],
-      //     as: "winLossData",
-      //   },
-      // },
-      // {
-      //   $project: {
-      //     count: 1,
-      //     _id: 1,
-      //     colourName: 1,
-      //     period: 1,
-      //     createdAt: 1,
-      //     userId: 1,
-      //     winLossData: 1,
-      //     // "winLossData.price": 1,
-      //     // "betting.betAmount": 1,
-      //   },
-      // },
+   
     ]);
 
     return sendResponse(

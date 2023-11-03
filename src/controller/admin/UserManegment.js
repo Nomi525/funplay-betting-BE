@@ -112,60 +112,6 @@ export const getUserReferralBySignIn = async (req, res) => {
         return handleErrorResponse(req, error);
     }
 }
-
-// export const acceptWithdrawalRequest = async (req, res) => {
-//     try {
-//         const { status, withdrawalRequestId } = req.body;
-//         const withdrawalRequest = await getSingleData({ _id: withdrawalRequestId, status: "pendding" }, WithdrawalRequest);
-//         if (!withdrawalRequest) {
-//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid withdrawal request", []);
-//         }
-
-//         const findTransaction = await getSingleData({ userId: withdrawalRequest.userId }, NewTransaction);
-
-//         if (!findTransaction) {
-//             return sendResponse(res, StatusCodes.BAD_REQUEST, "Transaction not found", []);
-//         }
-//         if (status == "reject") {
-//             withdrawalRequest.status = "reject";
-//             await withdrawalRequest.save();
-//             const dollor = findTransaction.blockDollor;
-//             const amount = findTransaction.blockAmount;
-//             if (withdrawalRequest.tokenName == "Binance USD") {
-//                 findTransaction.tokenBUSD += amount;
-//             } else if (withdrawalRequest.tokenName == "Tether") {
-//                 if (withdrawalRequest.tetherType == "PolygonUSDT") {
-//                     findTransaction.tokenPolygonUSDT += amount;
-//                 } else if (withdrawalRequest.tetherType == "EthereumUSDT") {
-//                     findTransaction.tokenEthereumUSDT += amount;
-//                 } else {
-//                     return sendResponse(res, StatusCodes.OK, "Invalid status", []);
-//                 }
-//             } else {
-//                 findTransaction[`token${withdrawalRequest.tokenName}`] += amount;
-//             }
-//             findTransaction.blockDollor = 0;
-//             findTransaction.blockAmount = 0;
-//             findTransaction.tokenDollorValue += dollor;
-
-//             await findTransaction.save();
-//             return sendResponse(res, StatusCodes.OK, "Reject request", []);
-
-//         }
-//         if (status == "accept") {
-//             withdrawalRequest.status = "accept";
-//             await withdrawalRequest.save();
-//             findTransaction.blockDollor = 0;
-//             findTransaction.blockAmount = 0;
-//             await findTransaction.save();
-//             return sendResponse(res, StatusCodes.OK, "Accept request", []);
-//         }
-//         return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
-//     } catch (error) {
-//         return handleErrorResponse(res, error);
-//     }
-// }
-
 export const acceptWithdrawalRequest = async (req, res) => {
     try {
         const { status, withdrawalRequestId } = req.body;
