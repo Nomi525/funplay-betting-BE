@@ -120,7 +120,6 @@ export const addColourBet = async (req, res) => {
 //#endregion
 
 //#region Colour betting result api
-
 export const colourBetResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;
@@ -406,7 +405,6 @@ export const getAllGameWiseWinner = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 //#endregion
 
 //#region Color betting winners api game wise

@@ -80,6 +80,7 @@ import {
   getAllCommunityBetting,
   getSingleCommunityBetting,
   deleteCommunityBetting,
+  getNumberGameTotal,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -88,7 +89,7 @@ const adminRoutes = express.Router();
 adminRoutes.post("/login", adminLogin);
 adminRoutes.post("/forgot-password", adminForgetPassword);
 adminRoutes.post("/verify-otp", adminVerifyOtp);
-adminRoutes.post('/resend-otp', adminResendOtp);
+adminRoutes.post("/resend-otp", adminResendOtp);
 adminRoutes.post("/reset-password", adminResetPassword);
 adminRoutes.post("/change-password", Auth, adminChangePassword);
 adminRoutes.get("/profile", Auth, getAdminProfile);
@@ -102,10 +103,14 @@ adminRoutes.get("/get-roles", Auth, getListRole);
 adminRoutes.post("/delete-role", Auth, deleteRole);
 
 //#region Permission Routes
-adminRoutes.post("/permission-add-edit", Auth, addEditPermission)
-adminRoutes.get("/get-all-permission", Auth, getAllPermission)
-adminRoutes.get("/get-single-permission/:permissionId", Auth, permissionGetById)
-adminRoutes.post("/permission-active-deactive", Auth, permissionActiveDeActive)
+adminRoutes.post("/permission-add-edit", Auth, addEditPermission);
+adminRoutes.get("/get-all-permission", Auth, getAllPermission);
+adminRoutes.get(
+  "/get-single-permission/:permissionId",
+  Auth,
+  permissionGetById
+);
+adminRoutes.post("/permission-active-deactive", Auth, permissionActiveDeActive);
 
 //#region Subadmin routes
 adminRoutes.post("/add-subadmin", Auth, addSubadmin);
@@ -115,7 +120,6 @@ adminRoutes.post("/delete-subadmin", Auth, deleteSubadmin);
 adminRoutes.get("/get-login-subadmin", Auth, getLoginSubadmin);
 adminRoutes.post("/active-deactive-subadmin", Auth, subadminActiveDeactive);
 //#endregion
-
 
 // ********* CMS Api ************ //
 adminRoutes.post("/cms/add-edit-privacy-policy", Auth, addEditPrivacyPolicy);
@@ -143,8 +147,8 @@ adminRoutes.post("/user-delete", Auth, adminDeleteUser);
 adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser);
 adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction);
 adminRoutes.get("/get-game-wise-user-list/:gameId", Auth, getGameWiseUserList);
-adminRoutes.get("/get-user-wise-game-list/:userId", Auth, getUserWiseGameList)
-adminRoutes.get("/get-game-history", Auth, getGameHistory)
+adminRoutes.get("/get-user-wise-game-list/:userId", Auth, getUserWiseGameList);
+adminRoutes.get("/get-game-history", Auth, getGameHistory);
 
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);
@@ -177,8 +181,6 @@ adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
 adminRoutes.post("/add-edit-game-wise-time", Auth, addEditGameWiseTime);
 adminRoutes.get("/get-all-game-time", Auth, getAllGameTime);
 
-
-
 // Game Rules Routes
 adminRoutes.get("/game-rules", Auth, getGameRules);
 adminRoutes.post("/single-game-rules", Auth, getSingleGameRules);
@@ -202,17 +204,32 @@ adminRoutes.post("/notification-delete", Auth, deleteNotification);
 adminRoutes.post("/currency-convert", allCurrencyConverter);
 //#endregion
 
-
 // Currency Coin Routes
 adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
 adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
-adminRoutes.get("/get-single-currency-coin/:currencyCoinId", Auth, getSingleCurrencyCoin);
+adminRoutes.get(
+  "/get-single-currency-coin/:currencyCoinId",
+  Auth,
+  getSingleCurrencyCoin
+);
 adminRoutes.post("/delete-currency-coin", Auth, currenyCoinDelete);
 
 // Community betting
-adminRoutes.post('/add-edit-community-betting', Auth, Upload, addEditCommunityBetting)
-adminRoutes.get('/get-all-community-betting', Auth, getAllCommunityBetting)
-adminRoutes.get('/get-single-community-betting', Auth, getSingleCommunityBetting)
-adminRoutes.post('/delete-community-betting', Auth, deleteCommunityBetting)
+adminRoutes.post(
+  "/add-edit-community-betting",
+  Auth,
+  Upload,
+  addEditCommunityBetting
+);
+adminRoutes.get("/get-all-community-betting", Auth, getAllCommunityBetting);
+adminRoutes.get(
+  "/get-single-community-betting",
+  Auth,
+  getSingleCommunityBetting
+);
+adminRoutes.post("/delete-community-betting", Auth, deleteCommunityBetting);
+
+//Number betting
+adminRoutes.post("/get-number-total", Auth, getNumberGameTotal);
 
 export { adminRoutes };
