@@ -149,7 +149,8 @@ import {
   adminDeleteUser,
   changeStatusOfUser,
   getGameWiseUserList,
-  getUserWiseGameList
+  getUserWiseGameList,
+  getNumberGameTotal
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -509,5 +510,6 @@ export {
   deleteNumberBet,
   ColourBetting,
   addColourBet,
-  colourBetResult
+  colourBetResult,
+  getNumberGameTotal,
 };

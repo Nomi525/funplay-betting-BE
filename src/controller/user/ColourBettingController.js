@@ -22,7 +22,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType, period } = req.body;
+    let { gameId, colourName, betAmount, gameType, period,count } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -56,6 +56,7 @@ export const addColourBet = async (req, res) => {
       gameId: gameId,
       gameType,
       period,
+      count,
     });
     let createColourBet;
     if (alreadyExistBet) {
@@ -78,6 +79,7 @@ export const addColourBet = async (req, res) => {
           betAmount: parseInt(betAmount),
           gameType,
           period,
+          count
         },
         ColourBetting
       );
@@ -118,7 +120,6 @@ export const addColourBet = async (req, res) => {
 //#endregion
 
 //#region Colour betting result api
-
 export const colourBetResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;
@@ -385,7 +386,6 @@ export const getAllGameWiseWinner = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 //#endregion
 
 //#region Color betting winners api game wise

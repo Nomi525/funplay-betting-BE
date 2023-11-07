@@ -30,7 +30,6 @@ export const addEditPrivacyPolicy = async (req, res) => {
                 // let privacyPolicyData = await CMS.find({ deletedStatus: 0 });
                 if (privacyPolicyData) {
                     return sendResponse(res, StatusCodes.CREATED, ResponseMessage.PRIVACY_POLICY_ADDED, privacyPolicyData);
-
                 } else {
                     return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.DATA_NOT_FOUND, []);
                 }

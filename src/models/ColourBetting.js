@@ -24,6 +24,10 @@ const colourBettingSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    count: {
+      type: Number,
+      required: false,
+    },
     period: {
       type: Number,
       required: false,
