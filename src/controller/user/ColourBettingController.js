@@ -340,7 +340,7 @@ async function winnerDetails(gameId, period, bettingResult) {
                   await balance.save();
                 }
                 await ColourBetting.updateOne(
-                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId },
+                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
                   { $set: { rewardAmount, isWin: true } }
                 );
                 await GameReward.create({
