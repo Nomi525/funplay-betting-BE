@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourWinLoss
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourBetting
 } from "../../index.js";
 
 
@@ -108,8 +108,9 @@ async function getActiveWinnerPlayers(timeRange) {
     }
     const query = {
         createdAt: { $gte: startDate, $lte: endDate },
+        isWin : true
     };
-    const result = await ColourWinLoss.aggregate([
+    const result = await ColourBetting.aggregate([
         { $match: query },
         {
             $group: {

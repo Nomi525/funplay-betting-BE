@@ -1,22 +1,8 @@
 import {
-  ResponseMessage,
-  StatusCodes,
-  sendResponse,
-  getSingleData,
-  getAllData,
-  handleErrorResponse,
-  User,
-  NewTransaction,
-  WithdrawalRequest,
-  TransactionHistory,
-  currencyConverter,
-  ReferralUser,
-  GameHistory,
-  mongoose,
-  plusLargeSmallValue,
-  minusLargeSmallValue,
-  ColourWinLoss,
-  NumberBetting,
+    ResponseMessage, StatusCodes, sendResponse,
+    getSingleData, getAllData, handleErrorResponse, User,
+    NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
+    GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -486,105 +472,30 @@ export const getGameWiseUserList = async (req, res) => {
 
 //#region Get game wise user list
 export const getUserWiseGameList = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const findGame = await ColourWinLoss.aggregate([
-      {
-        $match: { userId: new mongoose.Types.ObjectId(userId) },
-      },
-      {
-        $lookup: {
-          from: "games",
-          localField: "gameId",
-          foreignField: "_id",
-          as: "gameDetails",
-        },
-      },
-      {
-        $unwind: "$gameDetails",
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "userDetails",
-        },
-      },
-      {
-        $unwind: "$userDetails",
-      },
-      {
-        $group: {
-          _id: "$gameId",
-          gameDetails: { $first: "$gameDetails" },
-          userDetails: { $first: "$userDetails" },
-          totalWinAmount: {
-            $sum: {
-              $cond: [
-                { $eq: ["$isWin", true] },
-                {
-                  $add: [
-                    { $toDouble: "$betAmount" },
-                    { $toDouble: "$rewardAmount" },
-                  ],
-                },
-                0,
-              ],
-            },
-          },
-          totalLossAmount: {
-            $sum: {
-              $cond: [
-                { $eq: ["$isWin", false] },
-                { $toDouble: "$betAmount" },
-                0,
-              ],
-            },
-          },
-          totalBetAmount: {
-            $sum: {
-              $toDouble: "$betAmount",
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          "gameDetails._id": 1,
-          "gameDetails.gameName": 1,
-          "gameDetails.gameMode": 1,
-          "gameDetails.description": 1,
-          "userDetails._id": 1,
-          "userDetails.fullName": 1,
-          "userDetails.email": 1,
-          "userDetails.currency": 1,
-          "userDetails.profile": 1,
-          totalWinAmount: 1,
-          totalLossAmount: 1,
-          totalBetAmount: 1,
-        },
-      },
-    ]);
-    if (findGame.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.GAME_HISTORY,
-        findGame
-      );
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.GAME_HISTORY_NOT_FOUND,
-        []
-      );
+    try {
+        const { userId } = req.params;
+        const colourBetting = await ColourBetting.find({ is_deleted: 0 })
+        let totalBetAmount = 0;
+        let totalWinAmount = 0;
+        let totalLossAmount = 0;
+        
+        if (colourBetting.length) {
+            colourBetting.map((data) => {
+                totalBetAmount += data.betAmount
+                if (data.isWin) {
+                    totalWinAmount = totalWinAmount + data.rewardAmount + data.betAmount
+                } else {
+                    totalLossAmount = totalLossAmount + data.betAmount
+                }
+            })
+        }
+
+        return sendResponse(res, StatusCodes.OK,ResponseMessage.GAME_HISTORY, {
+            totalBetAmount,totalWinAmount,totalLossAmount
+        });
+    } catch (error) {
+        return handleErrorResponse(res, error);
     }
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
 };
 //#endregion
 //#region Get game wise user list

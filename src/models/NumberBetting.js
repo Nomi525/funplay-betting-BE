@@ -17,8 +17,8 @@ const numberBettingSchema = new mongoose.Schema(
       required: false,
     },
     betAmount: {
-      type: Number,
-      required: false,
+        type: Number,
+        required: false
     },
     totalAmount: {
       type: Number,
@@ -28,6 +28,11 @@ const numberBettingSchema = new mongoose.Schema(
       type: Number,
       required: false,
       default: 0,
+    },
+    rewardAmount: {
+        type: Number,
+        required: false,
+        default: 0,
     },
     lossAmount: {
       type: Number,
