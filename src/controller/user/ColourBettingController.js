@@ -24,7 +24,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType, period } = req.body;
+    let { gameId, colourName, betAmount, gameType, period,count } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -58,6 +58,7 @@ export const addColourBet = async (req, res) => {
       gameId: gameId,
       gameType,
       period,
+      count,
     });
     let createColourBet;
     if (alreadyExistBet) {
@@ -80,6 +81,7 @@ export const addColourBet = async (req, res) => {
           betAmount: parseInt(betAmount),
           gameType,
           period,
+          count
         },
         ColourBetting
       );
@@ -386,7 +388,7 @@ async function winnerDetails(gameId, period, bettingResult) {
 export const getAllGameWiseWinner = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const colorUserList = await ColourWinLoss.find({
+    const colorUserList = await ColourBetting.find({
       userId: { $ne: req.user },
       isWin: true,
       gameId,
@@ -411,7 +413,7 @@ export const getAllGameWiseWinner = async (req, res) => {
 export const getSingleGameWiseWinner = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const colorUserList = await ColourWinLoss.find({ userId: req.user, gameId })
+    const colorUserList = await ColourBetting.find({ userId: req.user, gameId })
       .populate("userId", "email fullName isLogin currency")
       .populate("gameId", "gameName gameTime gameMode")
       .sort({ createdAt: -1 });
