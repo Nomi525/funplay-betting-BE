@@ -1,4 +1,4 @@
-import { mongoose } from "./../index.js"
+import { mongoose } from "./../index.js";
 
 const numberBettingSchema = new mongoose.Schema(
   {
@@ -17,8 +17,8 @@ const numberBettingSchema = new mongoose.Schema(
       required: false,
     },
     betAmount: {
-        type: Number,
-        required: false
+      type: Number,
+      required: false,
     },
     totalAmount: {
       type: Number,
@@ -29,10 +29,20 @@ const numberBettingSchema = new mongoose.Schema(
       required: false,
       default: 0,
     },
+    count: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    period: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     rewardAmount: {
-        type: Number,
-        required: false,
-        default: 0,
+      type: Number,
+      required: false,
+      default: 0,
     },
     lossAmount: {
       type: Number,
@@ -53,5 +63,5 @@ const numberBettingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const NumberBetting = mongoose.model('NumberBetting', numberBettingSchema)
-export { NumberBetting }
+const NumberBetting = mongoose.model("NumberBetting", numberBettingSchema);
+export { NumberBetting };

@@ -22,7 +22,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType, period,count } = req.body;
+    let { gameId, colourName, betAmount, gameType, period, count } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -79,7 +79,7 @@ export const addColourBet = async (req, res) => {
           betAmount: parseInt(betAmount),
           gameType,
           period,
-          count
+          count,
         },
         ColourBetting
       );
@@ -350,7 +350,7 @@ async function winnerDetails(gameId, period, bettingResult) {
                   colourName: b.colourName,
                   rewardAmount,
                 });
-              } 
+              }
             });
           }
           winnerDetails = { ...winnerDetails._doc, rewardAmount };
@@ -471,7 +471,6 @@ export const getSingleGameWiseWinner = async (req, res) => {
 };
 //#endregion
 
-
 //#region Get all game Period
 export const getAllGamePeriod = async (req, res) => {
   try {
@@ -481,7 +480,7 @@ export const getAllGamePeriod = async (req, res) => {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
           is_deleted: 0,
-        }
+        },
       },
       {
         $project: {
@@ -490,71 +489,12 @@ export const getAllGamePeriod = async (req, res) => {
           colourName: 1,
           price: "$betAmount",
           period: 1,
-          createdAt: 1
+          createdAt: 1,
+          count: 1,
         },
       },
     ]);
-    // const aggregationResult = await GamePeriod.aggregate([
-    //   {
-    //     $match: {
-    //       gameId: new mongoose.Types.ObjectId(gameId),
-    //       is_deleted: 0,
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "colourbettings",
-    //       let: {
-    //         gameId: "$gameId",
-    //         period: "$period",
-    //         colourName: "$colourName",
-    //       },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$gameId", "$$gameId"] },
-    //                 { $eq: ["$period", "$$period"] },
-    //                 { $eq: ["$colourName", "$$colourName"] },
-    //                 { $eq: ["$userId", new mongoose.Types.ObjectId(req.user)] },
-    //                 { $eq: ["$isWin", true] }, // Filter only isWin true records
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $group: {
-    //             _id: "$colourName",
-    //             count: { $sum: 1 },
-    //           },
-    //         },
-    //       ],
-    //       as: "winLossData",
-    //     },
-    //   },
-    //   {
-    //     $addFields: {
-    //       count: {
-    //         $cond: {
-    //           if: { $eq: ["$winLossData", []] },
-    //           then: 0,
-    //           else: { $sum: "$winLossData.count" },
-    //         },
-    //       },
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       count: 1,
-    //       _id: 1,
-    //       colourName: 1,
-    //       price: 1,
-    //       period: 1,
-    //       createdAt: 1,
-    //     },
-    //   },
-    // ]);
+    
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -578,7 +518,7 @@ export const getByIdGamePeriod = async (req, res) => {
           gameId: new mongoose.Types.ObjectId(gameId),
           is_deleted: 0,
         },
-      }
+      },
     ]);
 
     return sendResponse(
