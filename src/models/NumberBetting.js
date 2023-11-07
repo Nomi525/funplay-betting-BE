@@ -16,7 +16,7 @@ const numberBettingSchema = new mongoose.Schema({
         required: false
     },
     betAmount: {
-        type: String,
+        type: Number,
         required: false
     },
     totalAmount: {
@@ -27,6 +27,11 @@ const numberBettingSchema = new mongoose.Schema({
         type: String,
         required: false,
         default: 0
+    },
+    rewardAmount: {
+        type: Number,
+        required: false,
+        default: 0,
     },
     lossAmount: {
         type: String,

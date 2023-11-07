@@ -52,7 +52,6 @@ import {
   getSingleGameWiseWinner,
   getLoginUserColourBet,
   topWeeklyMonthlyPlayers,
-  addGamePeriod,
   getAllGamePeriod,
   getByIdGamePeriod,
 } from "./../index.js";
@@ -135,7 +134,6 @@ userRoutes.get('/get-single-color-game-winners/:gameId', Auth, getSingleGameWise
 userRoutes.get('/get-login-user-bet', Auth, getLoginUserColourBet);
 
 // Color Period
-userRoutes.post('/add-game-period', Auth, addGamePeriod)
 userRoutes.get('/get-all-game-period/:gameId', Auth, getAllGamePeriod)
 userRoutes.get("/get-by-id-game-period/:gameId", Auth, getByIdGamePeriod);
 
