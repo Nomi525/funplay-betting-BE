@@ -31,6 +31,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
+    period = `${period}${count}`
     const checkBalance = await NewTransaction.findOne({
       userId: req.user,
       is_deleted: 0,
