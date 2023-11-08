@@ -73,7 +73,7 @@ export const addEditCommunityBets = async (req, res) => {
                 );
             }
         } else {
-            const updateBet = await dataUpdated({ userId: req.user, gameId }, { betAmount, period, count }, CommunityBetting)
+            const updateBet = await dataUpdated({ _id: communityBetId, userId: req.user, gameId }, { betAmount, period, count }, CommunityBetting)
             if (updateBet) {
                 return sendResponse(
                     res,
@@ -96,6 +96,32 @@ export const addEditCommunityBets = async (req, res) => {
 }
 //#endregion
 
+//#region Get login user community bet 
+export const getLoginUserCommunityBets = async (req, res) => {
+    try {
+        const { gameId } = req.params
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const getLoginUserBet = await CommunityBetting.find({
+            userId: req.user,
+            gameId,
+            createdAt: { $gte: twentyFourHoursAgo },
+            is_deleted: 0
+        })
+            .populate('userId', 'fullName email')
+            .populate('gameId', 'gameName gameImage')
+            .sort({ updatedAt: -1, createdAt: -1 })
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.CMMUNITY_BET_GET,
+            getLoginUserBet
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error)
+    }
+}
+//#endregion
+
 //#region Get all live community bets
 export const getAllLiveCommunityBets = async (req, res) => {
     try {
@@ -104,7 +130,7 @@ export const getAllLiveCommunityBets = async (req, res) => {
         const getAllLiveBet = await CommunityBetting.find({ gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
             .populate('userId', 'fullName email')
             .populate('gameId', 'gameName gameImage')
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1, createdAt: -1 })
         return sendResponse(
             res,
             StatusCodes.OK,
@@ -128,7 +154,6 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
         startOfYesterday.setHours(0, 0, 0, 0);
         const endOfYesterday = new Date(yesterday);
         endOfYesterday.setHours(23, 59, 59, 999);
-        console.log(startOfYesterday,endOfYesterday,'pppppppppppp');
         const getLastDayWinners = await CommunityBetting.find({
             gameId,
             isWin: true,
@@ -137,7 +162,7 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
         })
             .populate('userId', 'fullName email')
             .populate('gameId', 'gameName gameImage')
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1, createdAt: -1 })
         return sendResponse(
             res,
             StatusCodes.OK,

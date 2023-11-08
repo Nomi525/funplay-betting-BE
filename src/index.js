@@ -224,7 +224,7 @@ import {
   getSingleCommunityBetting,
   deleteCommunityBetting,
 } from "./controller/admin/CommunityBettingManagmentController.js";
-import { addEditCommunityBets, getAllLiveCommunityBets,getAllLastDayCommunityBettingWinners } from "./controller/user/CommunityController.js";
+import { addEditCommunityBets, getAllLiveCommunityBets, getAllLastDayCommunityBettingWinners, getLoginUserCommunityBets } from "./controller/user/CommunityController.js";
 import { getAllWinnersUser } from "./controller/admin/GameWinnerController.js";
 
 // *********** Routes **************** //
@@ -293,6 +293,7 @@ import {
 dotenv.config();
 export {
   getAllWinnersUser,
+  getLoginUserCommunityBets,
   getAllLastDayCommunityBettingWinners,
   getAllLiveCommunityBets,
   addEditCommunityBets,

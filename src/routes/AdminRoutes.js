@@ -237,6 +237,6 @@ adminRoutes.post("/get-number-total", Auth, getNumberGameTotal);
 
 
 // All winners
-adminRoutes.post('/get-all-and-upate-winners-user', Auth, getAllWinnersUser)
+adminRoutes.post('/get-all-and-update-winners-user', Auth, getAllWinnersUser)
 
 export { adminRoutes };

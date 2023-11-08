@@ -58,7 +58,7 @@ export const getAllWinnersUser = async (req, res) => {
             return sendResponse(
                 res,
                 StatusCodes.OK,
-                "Game wiiner updated",
+                "Game winner updated",
                 updateWinner
             );
         }
