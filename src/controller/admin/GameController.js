@@ -12,6 +12,7 @@ import {
   handleErrorResponse,
   GameHistory,
   GameTime,
+  CommunityBetting,
 } from "../../index.js";
 
 export const addEditGame = async (req, res) => {
@@ -863,6 +864,30 @@ export const updateCommunityGame = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.GAME_NOT_FOUND,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+//#region Get all game times
+export const getCommunityGameList = async (req, res) => {
+  try {
+    const gameList = await CommunityBetting.find();
+    if (gameList) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_GET,
+        gameList
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.GAME_GET,
         []
       );
     }
