@@ -81,7 +81,6 @@ import {
   getSingleCommunityBetting,
   deleteCommunityBetting,
   getNumberGameTotal,
-  updateCommunityGame,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -233,6 +232,7 @@ adminRoutes.post("/delete-community-betting", Auth, deleteCommunityBetting);
 //Number betting
 adminRoutes.post("/get-number-total", Auth, getNumberGameTotal);
 
-adminRoutes.post("/edit-game", Auth, updateCommunityGame);
+
+
 
 export { adminRoutes };
