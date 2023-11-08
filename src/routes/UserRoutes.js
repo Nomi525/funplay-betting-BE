@@ -54,6 +54,7 @@ import {
   topWeeklyMonthlyPlayers,
   getAllGamePeriod,
   getByIdGamePeriod,
+  addEditCommunityBets,
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -136,6 +137,9 @@ userRoutes.get('/get-login-user-bet', Auth, getLoginUserColourBet);
 // Color Period
 userRoutes.get('/get-all-game-period/:gameId', Auth, getAllGamePeriod)
 userRoutes.get("/get-by-id-game-period/:gameId", Auth, getByIdGamePeriod);
+
+// Community Betting Routes
+userRoutes.post('/add-edit-community-bets', Auth, addEditCommunityBets)
 
 
 
