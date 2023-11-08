@@ -6,11 +6,11 @@ import {
 //#region Get All winners user
 export const getAllWinnersUser = async (req, res) => {
     try {
-        const { id, gameId, period, gameType } = req.body;
+        const { userId, gameId, period, gameType } = req.body;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         let getWinners = [];
         let updateWinner
-        if (!id) {
+        if (!userId) {
             if (gameType == 'number') {
                 getWinners = await NumberBetting.find({ gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
                     .populate('userId', 'fullName profile email')
@@ -42,11 +42,11 @@ export const getAllWinnersUser = async (req, res) => {
             );
         } else {
             if (gameType == 'number') {
-                updateWinner = await dataUpdated({ userId: id, gameId }, { period, isWin: true }, NumberBetting)
+                updateWinner = await dataUpdated({ userId: userId, gameId }, { period, isWin: true }, NumberBetting)
             } else if (gameType == 'colourBetting') {
-                updateWinner = await dataUpdated({ userId: id, gameId }, { period, isWin: true }, ColourBetting)
+                updateWinner = await dataUpdated({ userId: userId, gameId }, { period, isWin: true }, ColourBetting)
             } else if (gameType == 'communityBetting') {
-                updateWinner = await dataUpdated({ userId: id, gameId }, { period, isWin: true }, CommunityBetting)
+                updateWinner = await dataUpdated({ userId: userId, gameId }, { period, isWin: true }, CommunityBetting)
             } else {
                 return sendResponse(
                     res,
