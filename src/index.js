@@ -224,6 +224,7 @@ import {
   getSingleCommunityBetting,
   deleteCommunityBetting,
 } from "./controller/admin/CommunityBettingManagmentController.js";
+import { addEditCommunityBets } from "./controller/user/CommunityController.js";
 
 // *********** Routes **************** //
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -290,6 +291,7 @@ import {
 
 dotenv.config();
 export {
+  addEditCommunityBets,
   getAllGamePeriod,
   getByIdGamePeriod,
   topWeeklyMonthlyPlayers,

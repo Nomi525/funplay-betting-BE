@@ -257,7 +257,12 @@ const ResponseMessage = {
   GAME_PERIOD_GET: "Get game period successfully",
   GAME_PERIOD_NOT_FOUND: "Game period not found",
   GAME_UPDATED: "Game updated successfully",
-  GAME_NOT_FOUND:"Game not found"
+  GAME_NOT_FOUND:"Game not found",
+  CMMUNITY_BET_CRETED: "Community bet created successfully",
+  CMMUNITY_BET_UPDATED: "Community bet updated successfully",
+  CMMUNITY_BET_DELETED: "Community bet deleted successfully",
+  CMMUNITY_BET_GET: "Get Community bet successfully",
+  CMMUNITY_BET_NOT_FOUND: "Community bet not found",
 };
 
 export { ResponseMessage }
