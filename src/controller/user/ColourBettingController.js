@@ -31,6 +31,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
+    period = `${period}${count}`
     const checkBalance = await NewTransaction.findOne({
       userId: req.user,
       is_deleted: 0,
@@ -339,7 +340,7 @@ async function winnerDetails(gameId, period, bettingResult) {
                   await balance.save();
                 }
                 await ColourBetting.updateOne(
-                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId },
+                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
                   { $set: { rewardAmount, isWin: true } }
                 );
                 await GameReward.create({
@@ -494,7 +495,7 @@ export const getAllGamePeriod = async (req, res) => {
         },
       },
     ]);
-    
+
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -511,21 +512,14 @@ export const getAllGamePeriod = async (req, res) => {
 export const getByIdGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const aggregationResult = await ColourBetting.aggregate([
-      {
-        $match: {
-          userId: new mongoose.Types.ObjectId(req.user),
-          gameId: new mongoose.Types.ObjectId(gameId),
-          is_deleted: 0,
-        },
-      },
-    ]);
-
+    const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, is_deleted: 0 })
+      .populate('userId', 'fullName profile email')
+      .sort({ count: -1 })
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      aggregationResult
+      getGamePeriodById
     );
   } catch (error) {
     return handleErrorResponse(res, error);
