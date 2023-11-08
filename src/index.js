@@ -125,7 +125,8 @@ import {
   gameActiveDeactive,
   getGameHistory,
   addEditGameWiseTime,
-  getAllGameTime
+  getAllGameTime,
+  updateCommunityGame,
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -512,4 +513,5 @@ export {
   addColourBet,
   colourBetResult,
   getNumberGameTotal,
+  updateCommunityGame,
 };

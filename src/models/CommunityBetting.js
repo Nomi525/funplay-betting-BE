@@ -1,77 +1,65 @@
-import { mongoose } from "./../index.js"
+import { mongoose } from "./../index.js";
 
-const communityBettingSchema = new mongoose.Schema({
-    communityImage: {
-        type: String,
-        required: false
+const communityBettingSchema = new mongoose.Schema(
+  {
+    period: {
+      type: Number,
+      required: false,
+    },
+    count: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     startDate: {
-        type: String,
-        required: false
+      type: Date,
+      required: false,
+    },
+    betAmount: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     endDate: {
-        type: String,
-        required: false
+      type: Date,
+      required: false,
     },
     gameRounds: {
-        type: Number,
-        required: false,
-        default: 0
+      type: Number,
+      required: false,
+      default: 0,
     },
     winningAmount: {
-        type: String,
-        required: false,
-        default: 0
+      type: Number,
+      required: false,
+      default: 0,
     },
     noOfWinners: {
-        type: Number,
-        required: false,
-        default: 0
+      type: Number,
+      required: false,
+      default: 0,
     },
-    winner1: {
-        type: String,
-        required: false
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      ref: "User",
     },
-    winner2: {
-        type: String,
-        required: false
-    },
-    winner3: {
-        type: String,
-        required: false
-    },
-    winner4: {
-        type: String,
-        required: false
-    },
-    gameFromTime: {
-        type: String,
-        required: false
-    },
-    gameToTime: {
-        type: String,
-        required: false
-    },
-    gameMode: {
-        type: String,
-        required: false
-    },
-    gameMinimumCoin: {
-        type: Number,
-        required: false,
-        default: 0
-    },
-    gameMaximumCoin: {
-        type: Number,
-        required: false,
-        default: 0
+    gameId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      ref: "Game",
     },
     is_deleted: {
-        type: Number,
-        required: false,
-        default: 0
-    }
-}, { timestamps: true });
+      type: Number,
+      required: false,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
 
-const CommunityBetting = mongoose.model('CommunityBetting', communityBettingSchema)
-export { CommunityBetting }
+const CommunityBetting = mongoose.model(
+  "CommunityBetting",
+  communityBettingSchema
+);
+export { CommunityBetting };
