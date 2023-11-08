@@ -107,8 +107,8 @@ export const getLoginUserCommunityBets = async (req, res) => {
             createdAt: { $gte: twentyFourHoursAgo },
             is_deleted: 0
         })
-            .populate('userId', 'fullName email')
-            .populate('gameId', 'gameName gameImage')
+            .populate('userId', 'fullName profile email')
+            .populate('gameId', 'gameName gameImage gameMode')
             .sort({ updatedAt: -1, createdAt: -1 })
         return sendResponse(
             res,
@@ -128,8 +128,8 @@ export const getAllLiveCommunityBets = async (req, res) => {
         const { gameId } = req.params
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const getAllLiveBet = await CommunityBetting.find({ gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
-            .populate('userId', 'fullName email')
-            .populate('gameId', 'gameName gameImage')
+            .populate('userId', 'fullName profile email')
+            .populate('gameId', 'gameName gameImage gameMode')
             .sort({ updatedAt: -1, createdAt: -1 })
         return sendResponse(
             res,
@@ -160,8 +160,8 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
             createdAt: { $gte: startOfYesterday, $lte: endOfYesterday },
             is_deleted: 0
         })
-            .populate('userId', 'fullName email')
-            .populate('gameId', 'gameName gameImage')
+            .populate('userId', 'fullName profile email')
+            .populate('gameId', 'gameName gameImage gameMode')
             .sort({ updatedAt: -1, createdAt: -1 })
         return sendResponse(
             res,

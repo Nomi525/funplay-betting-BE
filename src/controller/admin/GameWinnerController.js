@@ -69,3 +69,38 @@ export const getAllWinnersUser = async (req, res) => {
     }
 }
 //#endregion
+
+//#region Get All winners user
+export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
+    try {
+        const { gameId } = req.params
+        let totalBetCoins = 0
+        let totalUsers = 0
+        const getAllUsers = await CommunityBetting.find({ gameId, is_deleted: 0 })
+            .populate('userId', 'fullName profile email')
+            .populate('gameId', 'gameName gameImage gameMode')
+            .sort({ createdAt: -1 })
+        const getAllWinners = await CommunityBetting.find({ gameId, isWin: true, is_deleted: 0 })
+            .populate('userId', 'fullName profile email')
+            .populate('gameId', 'gameName gameImage gameMode')
+            .sort({ createdAt: -1 })
+
+        totalBetCoins = getAllUsers.reduce((sum, data) => sum + data.betAmount, 0)
+        totalUsers = getAllUsers.length
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            "Get all community betting users",
+            {
+                totalBetCoins,
+                totalUsers,
+                getAllUsers,
+                getAllWinners
+            }
+        );
+
+    } catch (error) {
+        return handleErrorResponse(res, error)
+    }
+}
+//#endregion
