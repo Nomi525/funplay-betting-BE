@@ -49,6 +49,11 @@ const communityBettingSchema = new mongoose.Schema(
       required: false,
       ref: "Game",
     },
+    isWin: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     is_deleted: {
       type: Number,
       required: false,

@@ -22,7 +22,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType, period, count } = req.body;
+    let { gameId, colourName, betAmount, gameType, period, count, selectedTime } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -81,6 +81,7 @@ export const addColourBet = async (req, res) => {
           gameType,
           period,
           count,
+          selectedTime
         },
         ColourBetting
       );
@@ -476,10 +477,12 @@ export const getSingleGameWiseWinner = async (req, res) => {
 export const getAllGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const aggregationResult = await ColourBetting.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
           is_deleted: 0,
         },
       },
@@ -512,8 +515,10 @@ export const getAllGamePeriod = async (req, res) => {
 export const getByIdGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, is_deleted: 0 })
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
       .populate('userId', 'fullName profile email')
+      .populate('gameId', 'gameName gameImage gameMode')
       .sort({ count: -1 })
     return sendResponse(
       res,

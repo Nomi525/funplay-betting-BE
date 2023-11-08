@@ -81,6 +81,7 @@ import {
   getSingleCommunityBetting,
   deleteCommunityBetting,
   getNumberGameTotal,
+  getAllWinnersUser,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -234,5 +235,8 @@ adminRoutes.post("/get-number-total", Auth, getNumberGameTotal);
 
 
 
+
+// All winners
+adminRoutes.post('/get-all-and-upate-winners-user', Auth, getAllWinnersUser)
 
 export { adminRoutes };
