@@ -35,7 +35,6 @@ export const getAllWinnersUser = async (req, res) => {
       });
       let communityBetting = await CommunityBetting.find({
         gameId,
-        createdAt: { $gte: twentyFourHoursAgo },
         is_deleted: 0,
       })
     
