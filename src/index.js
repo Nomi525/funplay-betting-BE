@@ -16,7 +16,7 @@ import Joi from "joi";
 import crypto from "crypto";
 import axios from "axios";
 import CurrencyConverter from "currency-converter-lt";
-import Decimal from 'decimal.js'
+import Decimal from "decimal.js";
 Decimal.set({ precision: 100 });
 
 // Common
@@ -29,7 +29,7 @@ import {
   getAllData,
   getAllDataCount,
   deleteById,
-  createReward
+  createReward,
 } from "./services/QueryService.js";
 import { validatorRequest } from "./utils/Validator.js";
 import { validatorMiddlware } from "./middleware/Validation.js";
@@ -51,7 +51,7 @@ import {
   getSingleGameRating,
   deleteRating,
   getAdminSetting,
-  adminResendOtp
+  adminResendOtp,
 } from "./controller/admin/AdminController.js";
 import {
   logout,
@@ -80,7 +80,7 @@ import {
   userSignUpSignInOtp,
   userGetAllGame,
   userGetCMSDetail,
-  checkWalletAddress
+  checkWalletAddress,
 } from "./controller/user/UserController.js";
 import {
   addEditPrivacyPolicy,
@@ -94,7 +94,7 @@ import {
   allBannerGet,
   getSingleGameRule,
   getAllCurrency,
-  getSingleGameTime
+  getSingleGameTime,
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
@@ -103,7 +103,7 @@ import {
 import {
   getAllQuery,
   getSingleQuery,
-  adminDeleteQuery
+  adminDeleteQuery,
 } from "./controller/admin/QuerySectionController.js";
 import {
   addEditRating,
@@ -135,7 +135,10 @@ import {
   userDepositeWithdrawalHistory,
 } from "./controller/user/TransactionController.js";
 import { adminDashboard } from "./controller/admin/DashboardController.js";
-import { userDashboard, topWeeklyMonthlyPlayers } from "./controller/user/DashboardController.js";
+import {
+  userDashboard,
+  topWeeklyMonthlyPlayers,
+} from "./controller/user/DashboardController.js";
 import {
   acceptWithdrawalRequest,
   getSingleUserTransaction,
@@ -150,7 +153,7 @@ import {
   changeStatusOfUser,
   getGameWiseUserList,
   getUserWiseGameList,
-  getNumberGameTotal
+  getNumberGameTotal,
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -169,7 +172,7 @@ import {
   addEditRole,
   getRole,
   getListRole,
-  deleteRole
+  deleteRole,
 } from "./controller/admin/RoleCotroller.js";
 
 // Permission
@@ -177,7 +180,7 @@ import {
   addEditPermission,
   getAllPermission,
   permissionGetById,
-  permissionActiveDeActive
+  permissionActiveDeActive,
 } from "./controller/admin/PermissionController.js";
 
 import {
@@ -186,7 +189,7 @@ import {
   getLoginSubadmin,
   subadminActiveDeactive,
   getSingleSubadmin,
-  getAllSubadmin
+  getAllSubadmin,
 } from "./controller/admin/SubadminController.js";
 
 // Number Betting
@@ -194,7 +197,7 @@ import {
   addEditNumberBet,
   getAllNumberBet,
   getSingleNumberBet,
-  deleteNumberBet
+  deleteNumberBet,
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
@@ -214,6 +217,7 @@ import {
   getLoginUserColourBet,
   getAllGamePeriod,
   getByIdGamePeriod,
+  getCommunityWinList,
 } from "./controller/user/ColourBettingController.js";
 
 // Coumunnity Betting
@@ -224,10 +228,15 @@ import {
   getSingleCommunityBetting,
   deleteCommunityBetting,
 } from "./controller/admin/CommunityBettingManagmentController.js";
-import { addEditCommunityBets, getAllLiveCommunityBets, getAllLastDayCommunityBettingWinners, getLoginUserCommunityBets } from "./controller/user/CommunityController.js";
+import {
+  addEditCommunityBets,
+  getAllLiveCommunityBets,
+  getAllLastDayCommunityBettingWinners,
+  getLoginUserCommunityBets,
+} from "./controller/user/CommunityController.js";
 import {
   getAllWinnersUser,
-  getAllUsersAndWinnersCommunityBetting
+  getAllUsersAndWinnersCommunityBetting,
 } from "./controller/admin/GameWinnerController.js";
 
 // *********** Routes **************** //
@@ -523,4 +532,5 @@ export {
   addColourBet,
   colourBetResult,
   getNumberGameTotal,
+  getCommunityWinList,
 };

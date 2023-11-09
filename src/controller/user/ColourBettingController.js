@@ -17,6 +17,7 @@ import {
   multiplicationLargeSmallValue,
   GameReward,
   NumberBetting,
+  CommunityBetting,
 } from "../../index.js";
 
 //#region Colour betting api
@@ -570,3 +571,34 @@ function processData(data) {
   const result = Object.values(processedData);
   return result;
 }
+
+export const getCommunityWinList = async (req, res) => {
+  try {
+    const currentDate = new Date(); // Get the current date and time
+    currentDate.setUTCHours(0, 0, 0, 0); // Set the time to midnight in UTC for accurate comparison
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setUTCHours(0, 0, 0, 0);
+    threeDaysAgo.setDate(currentDate.getDate() - 3); 
+    console.log(threeDaysAgo);
+    const getGamePeriodById = await CommunityBetting.find({
+      is_deleted: 0,
+      isWin: true,
+      createdAt: {
+        $gte: threeDaysAgo,
+        $lt: currentDate,
+      },
+    })
+      .populate("userId", "fullName profile email")
+      .populate("gameId", "gameName gameImage gameMode")
+      .sort({ count: -1 });
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      getGamePeriodById
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+

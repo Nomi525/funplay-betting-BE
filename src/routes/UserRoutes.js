@@ -58,6 +58,7 @@ import {
   getLoginUserCommunityBets,
   getAllLiveCommunityBets,
   getAllLastDayCommunityBettingWinners,
+  getCommunityWinList
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -146,6 +147,12 @@ userRoutes.post('/add-edit-community-bets', Auth, addEditCommunityBets)
 userRoutes.get('/get-login-user-community-bets/:gameId', Auth, getLoginUserCommunityBets)
 userRoutes.get('/get-all-live-community-bets/:gameId', Auth, getAllLiveCommunityBets)
 userRoutes.get('/get-all-last-day-community-betting-winners/:gameId', Auth, getAllLastDayCommunityBettingWinners)
+
+userRoutes.get(
+  "/community-winners",Auth,
+  getCommunityWinList
+);
+
 
 
 
