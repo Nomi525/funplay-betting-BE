@@ -1,3 +1,4 @@
+import { LENGTH_REQUIRED } from "http-status-codes";
 import {
   ResponseMessage,
   StatusCodes,
@@ -19,31 +20,167 @@ export const getAllWinnersUser = async (req, res) => {
   try {
     const { userId, gameId, period, gameType } = req.body;
     // const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    let getWinners = [];
-    let data
+
     let updateWinner;
     if (!userId) {
-      let numberBetting = await NumberBetting.find({ is_deleted: 0 })
-
-      let threeColourBetting = await ColourBetting.find({
-        is_deleted: 0,
-        gameType: "3colorBetting",
-      });
-      let twoColourBetting = await ColourBetting.find({
-        is_deleted: 0,
-        gameType: "2colorBetting",
-      });
-      let communityBetting = await CommunityBetting.find({
-        gameId,
-        is_deleted: 0,
-      })
-    
-
+      let numberBettingPipeline = [
+        {
+          $match: {
+            is_deleted: 0,
+          },
+        },
+        {
+          $lookup: {
+            from: "games", // Replace 'games' with the actual name of the games collection
+            localField: "gameId",
+            foreignField: "_id",
+            as: "game",
+          },
+        },
+        {
+          $unwind: "$game",
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            betAmount: { $sum: "$betAmount" },
+            gameName: { $first: "$game.gameName" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            gameName: 1,
+            betAmount: 1,
+            count: 1,
+          },
+        },
+      ];
+      let numberBetting = await NumberBetting.aggregate(numberBettingPipeline);
+      let threeColourBettingResults = [
+        {
+          $match: {
+            is_deleted: 0,
+            gameType: "3colorBetting",
+          },
+        },
+        {
+          $lookup: {
+            from: "games", // Replace 'games' with the actual name of the games collection
+            localField: "gameId",
+            foreignField: "_id",
+            as: "game",
+          },
+        },
+        {
+          $unwind: "$game",
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            betAmount: { $sum: "$betAmount" },
+            gameName: { $first: "$game.gameName" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            gameName: 1,
+            betAmount: 1,
+            count: 1,
+          },
+        },
+      ];
+      threeColourBettingResults = await ColourBetting.aggregate(
+        threeColourBettingResults
+      );
+      let twoColourBettingResults = [
+        {
+          $match: {
+            is_deleted: 0,
+            gameType: "2colorBetting",
+          },
+        },
+        {
+          $lookup: {
+            from: "games", // Replace 'games' with the actual name of the games collection
+            localField: "gameId",
+            foreignField: "_id",
+            as: "game",
+          },
+        },
+        {
+          $unwind: "$game",
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            betAmount: { $sum: "$betAmount" },
+            gameName: { $first: "$game.gameName" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            gameName: 1,
+            betAmount: 1,
+            count: 1,
+          },
+        },
+      ];
+      twoColourBettingResults = await ColourBetting.aggregate(
+        twoColourBettingResults
+      );
+      let communityBettingResults = [
+        {
+          $match: {
+            is_deleted: 0,
+          },
+        },
+        {
+          $lookup: {
+            from: "games", // Replace 'games' with the actual name of the games collection
+            localField: "gameId",
+            foreignField: "_id",
+            as: "game",
+          },
+        },
+        {
+          $unwind: "$game",
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            betAmount: { $sum: "$betAmount" },
+            gameName: { $first: "$game.gameName" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            gameName: 1,
+            betAmount: 1,
+            count: 1,
+          },
+        },
+      ];
+      communityBettingResults = await CommunityBetting.aggregate(
+        communityBettingResults
+      );
       return sendResponse(
         res,
         StatusCodes.OK,
         ResponseMessage.CMMUNITY_BET_GET,
-        getWinners
+        {
+          numberBetting,
+          threeColourBettingResults,
+          twoColourBettingResults,
+          communityBettingResults,
+        }
       );
     } else {
       if (gameType == "number") {
