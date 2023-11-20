@@ -126,6 +126,7 @@ import {
   getGameHistory,
   addEditGameWiseTime,
   getAllGameTime,
+  gameIsRepeat,
 } from "./controller/admin/GameController.js";
 import {
   addNewTransaction,
@@ -198,6 +199,8 @@ import {
   getAllNumberBet,
   getSingleNumberBet,
   deleteNumberBet,
+  getAllNumberGamePeriod,
+  getNumberGamePeriodById
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
@@ -233,10 +236,13 @@ import {
   getAllLiveCommunityBets,
   getAllLastDayCommunityBettingWinners,
   getLoginUserCommunityBets,
+  getCommunityGamePeriodById,
+  getAllCommunityGamePeriod
 } from "./controller/user/CommunityController.js";
 import {
   getAllWinnersUser,
   getAllUsersAndWinnersCommunityBetting,
+  declareWinnerOfCommunityBetting,
 } from "./controller/admin/GameWinnerController.js";
 
 // *********** Routes **************** //
@@ -304,6 +310,12 @@ import {
 
 dotenv.config();
 export {
+  getCommunityGamePeriodById,
+  getAllCommunityGamePeriod,
+  getAllNumberGamePeriod,
+  getNumberGamePeriodById,
+  gameIsRepeat,
+  declareWinnerOfCommunityBetting,
   getAllUsersAndWinnersCommunityBetting,
   getAllWinnersUser,
   getLoginUserCommunityBets,

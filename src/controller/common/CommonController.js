@@ -29,7 +29,7 @@ export const addEditBanner = async (req, res) => {
             } else {
                 const findBanner = await getSingleData({ _id: req.body.bannerId }, BannerModel)
                 if (findBanner) {
-                    req.body.bannerImage = req.bannerImageUrl ? req.bannerImageUrl : findBanner.bannerImage;
+                    req.body.bannerImage = req.bannerImageUrl.length ? req.bannerImageUrl : req.body.bannerImage;
                     const updatedBanner = await dataUpdated({ _id: req.body.bannerId }, req.body, BannerModel)
                     return sendResponse(res, StatusCodes.OK, ResponseMessage.BANNER_UPDATED, updatedBanner);
                 } else {

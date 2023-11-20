@@ -25,6 +25,10 @@ const gameSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    gameHours: {
+        type: String,
+        required: false
+    },
     gameTimeFrom: {
         type: String,
         required: false
@@ -71,6 +75,15 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     }],
+    isRepeat: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    iconImage: {
+        type: String,
+        required: false
+    },
     is_deleted: {
         type: Number,
         default: 0
