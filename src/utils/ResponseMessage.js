@@ -113,6 +113,8 @@ const ResponseMessage = {
   GAME_NOT_FOUND: "Game not found successfully",
   GAME_ACTIVE: "Game activated successfully",
   GAME_DEACTIVE: "Game deactivated successfully",
+  GAME_REPEAT: "Game repeat activated successfully",
+  GAME_NOT_REPEAT: "Game repeat deactivated successfully",
   GAME_MAX_LIMIT: "You have reached maximum game limit",
   GAME_ACTIVE_LIMIT: "You have reached maximum activated game limit",
   GAME_RULES_CREATED: "Game rules created successfully",

@@ -34,6 +34,8 @@ export const addEditGame = async (req, res) => {
       gameMinimumCoin,
       gameMaximumCoin,
       gameTime,
+      isRepeat,
+      gameHours
     } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
@@ -81,6 +83,7 @@ export const addEditGame = async (req, res) => {
             gameWeek,
             gameMinimumCoin,
             gameMaximumCoin,
+            gameHours
           },
           Game
         );
@@ -121,6 +124,7 @@ export const addEditGame = async (req, res) => {
           gameMinimumCoin,
           gameMaximumCoin,
           gameTime,
+          gameHours
         },
         Game
       );
@@ -205,6 +209,31 @@ export const gameActiveDeactive = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
+
+//#region game repeat active and deactive
+export const gameIsRepeat = async (req, res) => {
+  try {
+    const { gameId } = req.body;
+    const findGame = await getSingleData({ _id: gameId, isActive: true, is_deleted: 0 }, Game)
+    if (findGame) {
+      let message;
+      if (findGame.isRepeat) {
+        findGame.isRepeat = false
+        message = ResponseMessage.GAME_NOT_REPEAT
+      } else {
+        findGame.isRepeat = true
+        message = ResponseMessage.GAME_REPEAT
+      }
+      await findGame.save()
+      return sendResponse(res, StatusCodes.OK, message, []);
+    } else {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_NOT_FOUND, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
 //#endregion
 
 //#region Get all games
@@ -872,6 +901,7 @@ export const updateCommunityGame = async (req, res) => {
   }
 };
 //#endregion
+
 //#region Get all game times
 export const getCommunityGameList = async (req, res) => {
   try {
