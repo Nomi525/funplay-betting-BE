@@ -220,12 +220,12 @@ export const getLoginUserColourBet = async (req, res) => {
 async function winners(gameType, gameId, period, model) {
   const query = {
     gameId: new mongoose.Types.ObjectId(gameId),
+    period : parseInt(period),
     is_deleted: 0,
   };
 
   if (gameType == "2colorBetting" || gameType == "3colorBetting") {
     query.gameType = gameType;
-    query.period = parseInt(period);
   }
   const bettingResult = await model.aggregate([
     {
@@ -313,13 +313,13 @@ async function winners(gameType, gameId, period, model) {
   ]);
   // return bettingResult;
   if (bettingResult) {
-    return await winnerDetails(gameId, period, bettingResult);
+    return await winnerDetails(gameType, gameId, period, bettingResult);
   }
   return [];
 }
 //#endregion
 
-async function winnerDetails(gameId, period, bettingResult) {
+async function winnerDetails(gameType, gameId, period, bettingResult) {
   const winner = await Promise.all(
     bettingResult.map(async (bet) => {
       if (bet.gameDetails.gameId.toString() == gameId.toString()) {
@@ -341,10 +341,17 @@ async function winnerDetails(gameId, period, bettingResult) {
                   );
                   await balance.save();
                 }
-                await ColourBetting.updateOne(
-                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
-                  { $set: { rewardAmount, isWin: true } }
-                );
+                if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+                  await ColourBetting.updateOne(
+                    { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
+                    { $set: { rewardAmount, isWin: true } }
+                  );
+                }else{
+                  await NumberBetting.updateOne(
+                    { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
+                    { $set: { rewardAmount, isWin: true } }
+                  );
+                }
                 await GameReward.create({
                   userId: winnerDetails._id,
                   gameId: bet.gameDetails.gameId,
@@ -633,7 +640,7 @@ export const getCommunityWinList = async (req, res) => {
     currentDate.setUTCHours(0, 0, 0, 0); // Set the time to midnight in UTC for accurate comparison
     const threeDaysAgo = new Date();
     threeDaysAgo.setUTCHours(0, 0, 0, 0);
-    threeDaysAgo.setDate(currentDate.getDate() - 3); 
+    threeDaysAgo.setDate(currentDate.getDate() - 3);
     console.log(threeDaysAgo);
     const getGamePeriodById = await CommunityBetting.find({
       is_deleted: 0,
