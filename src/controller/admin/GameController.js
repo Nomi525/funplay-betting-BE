@@ -124,7 +124,8 @@ export const addEditGame = async (req, res) => {
           gameMinimumCoin,
           gameMaximumCoin,
           gameTime,
-          gameHours
+          gameHours,
+          isRepeat
         },
         Game
       );
