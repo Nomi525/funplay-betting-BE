@@ -55,7 +55,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: 1,
             betAmount: 1,
             count: 1,
-            gameId:1
+            gameId: 1,
           },
         },
       ];
@@ -93,7 +93,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: 1,
             betAmount: 1,
             count: 1,
-            gameId:1
+            gameId: 1,
           },
         },
       ];
@@ -133,7 +133,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: 1,
             betAmount: 1,
             count: 1,
-            gameId:1
+            gameId: 1,
           },
         },
       ];
@@ -172,7 +172,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: 1,
             betAmount: 1,
             count: 1,
-            gameId:1
+            gameId: 1,
           },
         },
       ];
@@ -241,21 +241,92 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
   try {
     let totalBetCoins = 0;
     let totalUsers = 0;
+    let getAllUsers;
+    let getAllWinners;
+    const { gameName } = req.params;
+    if (gameName === "CommunityBetting") {
+      getAllUsers = await CommunityBetting.find({ is_deleted: 0 })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllWinners = await CommunityBetting.find({
+        isWin: true,
+        is_deleted: 0,
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
 
-    const getAllUsers = await CommunityBetting.find({ is_deleted: 0 })
-      .populate("userId", "fullName profile email")
-      .populate("gameId", "gameName gameImage gameMode")
-      .sort({ createdAt: -1 });
-    const getAllWinners = await CommunityBetting.find({
-      isWin: true,
-      is_deleted: 0,
-    })
-      .populate("userId", "fullName profile email")
-      .populate("gameId", "gameName gameImage gameMode")
-      .sort({ createdAt: -1 });
+      totalBetCoins = getAllUsers.reduce(
+        (sum, data) => sum + data.betAmount,
+        0
+      );
+      totalUsers = getAllUsers.length;
+    } else if (gameName === "2ColorBetting") {
+      getAllUsers = await ColourBetting.find({
+        is_deleted: 0,
+        gameType: "2colorBetting",
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllWinners = await ColourBetting.find({
+        isWin: true,
+        is_deleted: 0,
+        gameType: "2colorBetting",
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
 
-    totalBetCoins = getAllUsers.reduce((sum, data) => sum + data.betAmount, 0);
-    totalUsers = getAllUsers.length;
+      totalBetCoins = getAllUsers.reduce(
+        (sum, data) => sum + data.betAmount,
+        0
+      );
+      totalUsers = getAllUsers.length;
+    } else if (gameName === "3ColorBetting") {
+      getAllUsers = await ColourBetting.find({
+        is_deleted: 0,
+        gameType: "3colorBetting",
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllWinners = await ColourBetting.find({
+        isWin: true,
+        is_deleted: 0,
+        gameType: "3colorBetting",
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+
+      totalBetCoins = getAllUsers.reduce(
+        (sum, data) => sum + data.betAmount,
+        0
+      );
+      totalUsers = getAllUsers.length;
+    } else if (gameName === "NumberBetting") {
+      getAllUsers = await NumberBetting.find({
+        is_deleted: 0,
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllWinners = await NumberBetting.find({
+        isWin: true,
+        is_deleted: 0,
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+
+      totalBetCoins = getAllUsers.reduce(
+        (sum, data) => sum + data.betAmount,
+        0
+      );
+      totalUsers = getAllUsers.length;
+    }
     return sendResponse(
       res,
       StatusCodes.OK,
