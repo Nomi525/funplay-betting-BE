@@ -220,12 +220,12 @@ export const getLoginUserColourBet = async (req, res) => {
 async function winners(gameType, gameId, period, model) {
   const query = {
     gameId: new mongoose.Types.ObjectId(gameId),
+    period : parseInt(period),
     is_deleted: 0,
   };
 
   if (gameType == "2colorBetting" || gameType == "3colorBetting") {
     query.gameType = gameType;
-    query.period = parseInt(period);
   }
   const bettingResult = await model.aggregate([
     {
@@ -313,13 +313,13 @@ async function winners(gameType, gameId, period, model) {
   ]);
   // return bettingResult;
   if (bettingResult) {
-    return await winnerDetails(gameId, period, bettingResult);
+    return await winnerDetails(gameType, gameId, period, bettingResult);
   }
   return [];
 }
 //#endregion
 
-async function winnerDetails(gameId, period, bettingResult) {
+async function winnerDetails(gameType, gameId, period, bettingResult) {
   const winner = await Promise.all(
     bettingResult.map(async (bet) => {
       if (bet.gameDetails.gameId.toString() == gameId.toString()) {
@@ -337,14 +337,21 @@ async function winnerDetails(gameId, period, bettingResult) {
                 if (balance) {
                   balance.tokenDollorValue = plusLargeSmallValue(
                     balance.tokenDollorValue,
-                    rewardAmount
+                    b.betAmount + rewardAmount
                   );
                   await balance.save();
                 }
-                await ColourBetting.updateOne(
-                  { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
-                  { $set: { rewardAmount, isWin: true } }
-                );
+                if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+                  await ColourBetting.updateOne(
+                    { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
+                    { $set: { rewardAmount, isWin: true } }
+                  );
+                }else{
+                  await NumberBetting.updateOne(
+                    { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
+                    { $set: { rewardAmount, isWin: true } }
+                  );
+                }
                 await GameReward.create({
                   userId: winnerDetails._id,
                   gameId: bet.gameDetails.gameId,
@@ -488,16 +495,35 @@ export const getAllGamePeriod = async (req, res) => {
         },
       },
       {
+        $group: {
+          _id: "$period",
+          totalUsers: { $sum: 1 },
+          winColour: {
+            $max: {
+              $cond: [
+                { $eq: ['$isWin', true] },
+                "$colourName",
+                null
+              ]
+            }
+          },
+          period: { $first: '$period' }
+        }
+      },
+      {
+        $sort: {
+          period: -1
+        }
+      },
+      {
         $project: {
-          // count: 1,
-          _id: 1,
-          colourName: 1,
+          _id: 0,
+          totalUsers: 1,
           price: "$betAmount",
           period: 1,
-          createdAt: 1,
-          count: 1,
+          winColour: 1,
         },
-      },
+      }
     ]);
 
     return sendResponse(
@@ -510,6 +536,42 @@ export const getAllGamePeriod = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+// export const getAllGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const aggregationResult = await ColourBetting.aggregate([
+//       {
+//         $match: {
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           createdAt: { $gte: twentyFourHoursAgo },
+//           is_deleted: 0,
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           colourName: 1,
+//           price: "$betAmount",
+//           period: 1,
+//           createdAt: 1,
+//           count: 1,
+//         },
+//       },
+//     ]);
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       aggregationResult
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 //#endregion
 
 //#region Get all game Period
@@ -578,7 +640,7 @@ export const getCommunityWinList = async (req, res) => {
     currentDate.setUTCHours(0, 0, 0, 0); // Set the time to midnight in UTC for accurate comparison
     const threeDaysAgo = new Date();
     threeDaysAgo.setUTCHours(0, 0, 0, 0);
-    threeDaysAgo.setDate(currentDate.getDate() - 3); 
+    threeDaysAgo.setDate(currentDate.getDate() - 3);
     console.log(threeDaysAgo);
     const getGamePeriodById = await CommunityBetting.find({
       is_deleted: 0,

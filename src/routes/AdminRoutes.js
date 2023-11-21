@@ -83,6 +83,8 @@ import {
   getNumberGameTotal,
   getAllWinnersUser,
   getAllUsersAndWinnersCommunityBetting,
+  declareWinnerOfCommunityBetting,
+  gameIsRepeat,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -182,6 +184,7 @@ adminRoutes.post("/game/delete", Auth, gameDelete);
 adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
 adminRoutes.post("/add-edit-game-wise-time", Auth, addEditGameWiseTime);
 adminRoutes.get("/get-all-game-time", Auth, getAllGameTime);
+adminRoutes.post("/game-repeat", Auth, gameIsRepeat);
 
 // Game Rules Routes
 adminRoutes.get("/game-rules", Auth, getGameRules);
@@ -234,15 +237,13 @@ adminRoutes.post("/delete-community-betting", Auth, deleteCommunityBetting);
 //Number betting
 adminRoutes.post("/get-number-total", Auth, getNumberGameTotal);
 
-
-
-
 // All winners
-adminRoutes.post('/get-all-and-update-winners-user', Auth, getAllWinnersUser)
+adminRoutes.post("/get-all-and-update-winners-user", Auth, getAllWinnersUser);
 adminRoutes.get(
   "/get-all-users-and-winners-community-betting/:gameName",
   Auth,
   getAllUsersAndWinnersCommunityBetting
 );
+adminRoutes.post("/declare-winner", Auth, declareWinnerOfCommunityBetting);
 
 export { adminRoutes };

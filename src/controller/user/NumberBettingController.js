@@ -13,6 +13,7 @@ import {
   minusLargeSmallValue,
   plusLargeSmallValue,
   multiplicationLargeSmallValue,
+  mongoose
 } from "../../index.js";
 
 export const addEditNumberBet = async (req, res) => {
@@ -29,6 +30,7 @@ export const addEditNumberBet = async (req, res) => {
       period,
     } = req.body;
     let isWin = false;
+    period = `${period}${count}`
     if (winAmount) isWin = true;
     const findUserDeposit = await NewTransaction.findOne({
       userId: req.user,
@@ -42,34 +44,54 @@ export const addEditNumberBet = async (req, res) => {
         []
       );
     }
-    if (!numberBetId) {
-      if (betAmount < 0) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.VALID_BET_AMOUNT,
-          []
-        );
-      }
-      if (
-        !checkDecimalValueGreaterThanOrEqual(
-          findUserDeposit.tokenDollorValue,
-          betAmount
-        )
-      ) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.INSUFFICIENT_BALANCE,
-          []
-        );
-      }
-      // const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
-      const totalBetAmount = multiplicationLargeSmallValue(
-        betAmount,
-        rewardsCoins
+    // if (!numberBetId) {
+    if (betAmount < 0) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.VALID_BET_AMOUNT,
+        []
       );
-      const createNumberBet = await dataCreate(
+    }
+    if (
+      !checkDecimalValueGreaterThanOrEqual(
+        findUserDeposit.tokenDollorValue,
+        betAmount
+      )
+    ) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.INSUFFICIENT_BALANCE,
+        []
+      );
+    }
+    // const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
+    const totalBetAmount = multiplicationLargeSmallValue(
+      betAmount,
+      rewardsCoins
+    );
+
+    let alreadyExistBet = await NumberBetting.findOne({
+      userId: req.user,
+      gameId: gameId,
+      period,
+      count,
+    });
+    let createNumberBet;
+    if (alreadyExistBet) {
+      createNumberBet = await dataUpdated(
+        {
+          userId: req.user,
+        },
+        {
+          number: parseInt(number),
+          betAmount: parseInt(betAmount)
+        },
+        NumberBetting
+      );
+    } else {
+      createNumberBet = await dataCreate(
         {
           userId: req.user,
           gameId,
@@ -84,63 +106,66 @@ export const addEditNumberBet = async (req, res) => {
         },
         NumberBetting
       );
-      if (createNumberBet) {
-        findUserDeposit.tokenDollorValue = minusLargeSmallValue(
-          findUserDeposit.tokenDollorValue,
+    }
+
+    if (createNumberBet) {
+      findUserDeposit.tokenDollorValue = minusLargeSmallValue(
+        findUserDeposit.tokenDollorValue,
+        betAmount
+      );
+      if (parseFloat(findUserDeposit.betAmount)) {
+        findUserDeposit.betAmount = plusLargeSmallValue(
+          findUserDeposit.betAmount,
           betAmount
         );
-        if (parseFloat(findUserDeposit.betAmount)) {
-          findUserDeposit.betAmount = plusLargeSmallValue(
-            findUserDeposit.betAmount,
-            betAmount
-          );
-        } else {
-          findUserDeposit.betAmount = betAmount;
-        }
-        await findUserDeposit.save();
-        return sendResponse(
-          res,
-          StatusCodes.CREATED,
-          ResponseMessage.NUMBER_BET_CRETED,
-          createNumberBet
-        );
       } else {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.FAILED_TO_CREATE,
-          []
-        );
+        findUserDeposit.betAmount = betAmount;
       }
-    } else {
-      const updateNumberBet = await dataUpdated(
-        { _id: numberBetId, userId: req.user },
-        { winAmount, lossAmount, isWin },
-        NumberBetting
+      await findUserDeposit.save();
+      return sendResponse(
+        res,
+        StatusCodes.CREATED,
+        ResponseMessage.NUMBER_BET_CRETED,
+        createNumberBet
       );
-      if (updateNumberBet) {
-        if (parseFloat(winAmount)) {
-          findUserDeposit.tokenDollorValue = plusLargeSmallValue(
-            findUserDeposit.tokenDollorValue,
-            winAmount
-          );
-          await findUserDeposit.save();
-        }
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.NUMBER_BET_UPDATED,
-          updateNumberBet
-        );
-      } else {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.FAILED_TO_UPDATE,
-          []
-        );
-      }
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.FAILED_TO_CREATE,
+        []
+      );
     }
+
+    // } else {
+    //   const updateNumberBet = await dataUpdated(
+    //     { _id: numberBetId, userId: req.user },
+    //     { winAmount, lossAmount, isWin },
+    //     NumberBetting
+    //   );
+    //   if (updateNumberBet) {
+    //     if (parseFloat(winAmount)) {
+    //       findUserDeposit.tokenDollorValue = plusLargeSmallValue(
+    //         findUserDeposit.tokenDollorValue,
+    //         winAmount
+    //       );
+    //       await findUserDeposit.save();
+    //     }
+    //     return sendResponse(
+    //       res,
+    //       StatusCodes.OK,
+    //       ResponseMessage.NUMBER_BET_UPDATED,
+    //       updateNumberBet
+    //     );
+    //   } else {
+    //     return sendResponse(
+    //       res,
+    //       StatusCodes.BAD_REQUEST,
+    //       ResponseMessage.FAILED_TO_UPDATE,
+    //       []
+    //     );
+    //   }
+    // }
   } catch (error) {
     return handleErrorResponse(res, error);
   }
@@ -242,3 +267,112 @@ export const deleteNumberBet = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+export const getNumberGamePeriodById = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const getGamePeriodById = await NumberBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+      .populate('userId', 'fullName profile email')
+      .populate('gameId', 'gameName gameImage gameMode')
+      .sort({ count: -1 })
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      getGamePeriodById
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+
+export const getAllNumberGamePeriod = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const aggregationResult = await NumberBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$period",
+          totalUsers: { $sum: 1 },
+          winNumber: {
+            $max: {
+              $cond: [
+                { $eq: ['$isWin', true] },
+                "$number",
+                null
+              ]
+            }
+          },
+          period: { $first: '$period' }
+        }
+      },
+      {
+        $sort: {
+          period: -1
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalUsers: 1,
+          price: "$betAmount",
+          period: 1,
+          winNumber: 1,
+        },
+      },
+    ]);
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      aggregationResult
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+// export const getAllNumberGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const aggregationResult = await NumberBetting.aggregate([
+//       {
+//         $match: {
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           createdAt: { $gte: twentyFourHoursAgo },
+//           is_deleted: 0,
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           number: 1,
+//           price: "$betAmount",
+//           period: 1,
+//           createdAt: 1,
+//           count: 1,
+//         },
+//       },
+//     ]);
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       aggregationResult
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };

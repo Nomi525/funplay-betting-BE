@@ -41,55 +41,81 @@ export const addEditCommunityBets = async (req, res) => {
                 []
             );
         }
-        period = `${period}${count}`
-        if (!communityBetId) {
-            const createBet = await dataCreate({ userId: req.user, gameId, betAmount, period, count }, CommunityBetting);
-            if (createBet) {
-                checkBalance.tokenDollorValue = minusLargeSmallValue(
-                    checkBalance.tokenDollorValue,
+        period = `${period}${count}`;
+        let alreadyExistBet = await CommunityBetting.findOne({
+            userId: req.user,
+            gameId: gameId,
+            period,
+            count,
+        });
+        let createCommunityBet;
+        // if (!communityBetId) {
+        if (alreadyExistBet) {
+            createCommunityBet = await dataUpdated(
+                {
+                    userId: req.user,
+                },
+                {
+                    betAmount: parseInt(betAmount)
+                },
+                CommunityBetting
+            );
+        } else {
+            createCommunityBet = await dataCreate({
+                userId: req.user,
+                gameId,
+                betAmount,
+                period,
+                count
+            }, CommunityBetting);
+        }
+
+        if (createCommunityBet) {
+            checkBalance.tokenDollorValue = minusLargeSmallValue(
+                checkBalance.tokenDollorValue,
+                betAmount
+            );
+            if (parseFloat(checkBalance.betAmount)) {
+                checkBalance.betAmount = plusLargeSmallValue(
+                    checkBalance.betAmount,
                     betAmount
                 );
-                if (parseFloat(checkBalance.betAmount)) {
-                    checkBalance.betAmount = plusLargeSmallValue(
-                        checkBalance.betAmount,
-                        betAmount
-                    );
-                } else {
-                    checkBalance.betAmount = betAmount;
-                }
-                await checkBalance.save();
-                return sendResponse(
-                    res,
-                    StatusCodes.CREATED,
-                    ResponseMessage.CMMUNITY_BET_CRETED,
-                    createBet
-                );
             } else {
-                return sendResponse(
-                    res,
-                    StatusCodes.BAD_REQUEST,
-                    ResponseMessage.FAILED_TO_CREATE,
-                    []
-                );
+                checkBalance.betAmount = betAmount;
             }
+            await checkBalance.save();
+            return sendResponse(
+                res,
+                StatusCodes.CREATED,
+                ResponseMessage.CMMUNITY_BET_CRETED,
+                createCommunityBet
+            );
         } else {
-            const updateBet = await dataUpdated({ _id: communityBetId, userId: req.user, gameId }, { betAmount, period, count }, CommunityBetting)
-            if (updateBet) {
-                return sendResponse(
-                    res,
-                    StatusCodes.OK,
-                    ResponseMessage.CMMUNITY_BET_UPDATED,
-                    updateBet
-                );
-            } else {
-                return sendResponse(
-                    res,
-                    StatusCodes.BAD_REQUEST,
-                    ResponseMessage.FAILED_TO_UPDATE,
-                    []
-                );
-            }
+            return sendResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                ResponseMessage.FAILED_TO_CREATE,
+                []
+            );
         }
+        // } else {
+        //     const updateBet = await dataUpdated({ _id: communityBetId, userId: req.user, gameId }, { betAmount, period, count }, CommunityBetting)
+        //     if (updateBet) {
+        //         return sendResponse(
+        //             res,
+        //             StatusCodes.OK,
+        //             ResponseMessage.CMMUNITY_BET_UPDATED,
+        //             updateBet
+        //         );
+        //     } else {
+        //         return sendResponse(
+        //             res,
+        //             StatusCodes.BAD_REQUEST,
+        //             ResponseMessage.FAILED_TO_UPDATE,
+        //             []
+        //         );
+        //     }
+        // }
     } catch (error) {
         return handleErrorResponse(res, error)
     }
@@ -173,4 +199,118 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
         return handleErrorResponse(res, error)
     }
 }
+//#endregion
+
+//#region Get single communty game period recordes
+export const getCommunityGamePeriodById = async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const getGamePeriodById = await CommunityBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+            .populate('userId', 'fullName profile email')
+            .populate('gameId', 'gameName gameImage gameMode')
+            .sort({ count: -1 })
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GAME_PERIOD_GET,
+            getGamePeriodById
+        );
+
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
+
+//#region  Get all community game period recodes
+export const getAllCommunityGamePeriod = async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const aggregationResult = await CommunityBetting.aggregate([
+            {
+                $match: {
+                    gameId: new mongoose.Types.ObjectId(gameId),
+                    createdAt: { $gte: twentyFourHoursAgo },
+                    is_deleted: 0,
+                },
+            },
+            {
+                $group: {
+                    _id: "$period",
+                    totalUsers: { $sum: 1 },
+                    winBet: {
+                        $max: {
+                            $cond: [
+                                { $eq: ['$isWin', true] },
+                                "$betAmount",
+                                null
+                            ]
+                        }
+                    },
+                    period: { $first: '$period' }
+                }
+            },
+            {
+                $sort: {
+                    period: -1
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    totalUsers: 1,
+                    price: "$betAmount",
+                    period: 1,
+                    winBet: 1,
+                },
+            },
+        ]);
+
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GAME_PERIOD_GET,
+            aggregationResult
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+};
+
+// export const getAllCommunityGamePeriod = async (req, res) => {
+//     try {
+//         const { gameId } = req.params;
+//         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//         const aggregationResult = await CommunityBetting.aggregate([
+//             {
+//                 $match: {
+//                     gameId: new mongoose.Types.ObjectId(gameId),
+//                     createdAt: { $gte: twentyFourHoursAgo },
+//                     is_deleted: 0,
+//                 },
+//             },
+//             {
+//                 $project: {
+//                     _id: 1,
+//                     number: 1,
+//                     price: "$betAmount",
+//                     period: 1,
+//                     createdAt: 1,
+//                     count: 1,
+//                 },
+//             },
+//         ]);
+
+//         return sendResponse(
+//             res,
+//             StatusCodes.OK,
+//             ResponseMessage.GAME_PERIOD_GET,
+//             aggregationResult
+//         );
+//     } catch (error) {
+//         return handleErrorResponse(res, error);
+//     }
+// };
 //#endregion

@@ -343,3 +343,41 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
   }
 };
 //#endregion
+
+//#region 
+export const declareWinnerOfCommunityBetting = async (req, res) => {
+    try {
+        const { userIds, gameId, period } = req.body;
+        await Promise.all(userIds.map(async (userId) => {
+            const findCommunityBetting = await getSingleData({ userId, gameId, is_deleted: 0 }, CommunityBetting)
+            if (findCommunityBetting) {
+                // await dataUpdated({ userId, gameId, is_deleted: 0 }, { isWin: true }, CommunityBetting)
+                // let rewardAmount = multiplicationLargeSmallValue(findCommunityBetting.betAmount, 0.95);
+                let rewardAmount = findCommunityBetting.betAmount * 0.95;
+                findCommunityBetting.isWin = true
+                findCommunityBetting.rewardAmount = rewardAmount
+                await findCommunityBetting.save();
+                const balance = await getSingleData(
+                    { userId: userId },
+                    NewTransaction
+                );
+                if (balance) {
+                    balance.tokenDollorValue = plusLargeSmallValue(
+                        balance.tokenDollorValue,
+                        findCommunityBetting.betAmount + rewardAmount
+                    );
+                    await balance.save();
+                }
+            }
+        }))
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            "Winner added succcessfully",
+            []
+        )
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion

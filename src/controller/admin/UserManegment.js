@@ -1,8 +1,8 @@
 import {
-    ResponseMessage, StatusCodes, sendResponse,
-    getSingleData, getAllData, handleErrorResponse, User,
-    NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-    GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting
+  ResponseMessage, StatusCodes, sendResponse,
+  getSingleData, getAllData, handleErrorResponse, User, dataUpdated,
+  NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
+  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -187,6 +187,7 @@ export const getUserReferralBySignIn = async (req, res) => {
     return handleErrorResponse(req, error);
   }
 };
+
 export const acceptWithdrawalRequest = async (req, res) => {
   try {
     const { status, withdrawalRequestId } = req.body;
@@ -472,30 +473,30 @@ export const getGameWiseUserList = async (req, res) => {
 
 //#region Get game wise user list
 export const getUserWiseGameList = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const colourBetting = await ColourBetting.find({ is_deleted: 0 })
-        let totalBetAmount = 0;
-        let totalWinAmount = 0;
-        let totalLossAmount = 0;
-        
-        if (colourBetting.length) {
-            colourBetting.map((data) => {
-                totalBetAmount += data.betAmount
-                if (data.isWin) {
-                    totalWinAmount = totalWinAmount + data.rewardAmount + data.betAmount
-                } else {
-                    totalLossAmount = totalLossAmount + data.betAmount
-                }
-            })
-        }
+  try {
+    const { userId } = req.params;
+    const colourBetting = await ColourBetting.find({ is_deleted: 0 })
+    let totalBetAmount = 0;
+    let totalWinAmount = 0;
+    let totalLossAmount = 0;
 
-        return sendResponse(res, StatusCodes.OK,ResponseMessage.GAME_HISTORY, {
-            totalBetAmount,totalWinAmount,totalLossAmount
-        });
-    } catch (error) {
-        return handleErrorResponse(res, error);
+    if (colourBetting.length) {
+      colourBetting.map((data) => {
+        totalBetAmount += data.betAmount
+        if (data.isWin) {
+          totalWinAmount = totalWinAmount + data.rewardAmount + data.betAmount
+        } else {
+          totalLossAmount = totalLossAmount + data.betAmount
+        }
+      })
     }
+
+    return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_HISTORY, {
+      totalBetAmount, totalWinAmount, totalLossAmount
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
 };
 //#endregion
 //#region Get game wise user list

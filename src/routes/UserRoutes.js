@@ -58,7 +58,11 @@ import {
   getLoginUserCommunityBets,
   getAllLiveCommunityBets,
   getAllLastDayCommunityBettingWinners,
-  getCommunityWinList
+  getCommunityWinList,
+  getAllNumberGamePeriod,
+  getNumberGamePeriodById,
+  getCommunityGamePeriodById,
+  getAllCommunityGamePeriod
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -130,6 +134,8 @@ userRoutes.post('/create-number-bet', Auth, addEditNumberBet);
 userRoutes.get('/get-number-bets', Auth, getAllNumberBet);
 userRoutes.get('/get-single-number-bet/:numberBetId', Auth, getSingleNumberBet);
 userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);
+userRoutes.get('/get-single-number-game-period/:gameId', Auth, getNumberGamePeriodById);
+userRoutes.get('/get-all-number-game-period/:gameId', Auth, getAllNumberGamePeriod);
 
 //Colour betting
 userRoutes.post('/create-colour-bet', Auth, addColourBet);
@@ -152,6 +158,9 @@ userRoutes.get(
   "/community-winners",Auth,
   getCommunityWinList
 );
+
+userRoutes.get('/get-single-community-game-period/:gameId',Auth,getCommunityGamePeriodById);
+userRoutes.get('/get-all-community-game-period/:gameId',Auth,getAllCommunityGamePeriod);
 
 
 
