@@ -10,11 +10,11 @@ const gameSchema = new mongoose.Schema({
         required: false
     },
     gameStartDate: {
-        type: String,
+        type: Date,
         required: false
     },
     gameEndDate: {
-        type: String,
+        type: Date,
         required: false
     },
     gameRound: {

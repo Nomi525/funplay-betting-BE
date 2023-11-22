@@ -1,3 +1,4 @@
+import moment from "moment";
 import {
   Game,
   GameRules,
@@ -109,8 +110,8 @@ export const addEditGame = async (req, res) => {
         { _id: gameId },
         {
           gameName,
-          gameStartDate,
-          gameEndDate,
+          gameStartDate : moment(gameStartDate).format('YYYY-MM-DD'),
+          gameEndDate : moment(gameEndDate).format('YYYY-MM-DD'),
           gameImage,
           gameDurationFrom,
           gameDurationTo,

@@ -17,6 +17,7 @@ import crypto from "crypto";
 import axios from "axios";
 import CurrencyConverter from "currency-converter-lt";
 import Decimal from "decimal.js";
+import cron from 'node-cron';
 Decimal.set({ precision: 100 });
 
 // Common
@@ -200,7 +201,9 @@ import {
   getSingleNumberBet,
   deleteNumberBet,
   getAllNumberGamePeriod,
-  getNumberGamePeriodById
+  getNumberGamePeriodById,
+  createGamePeriodFromCronJob,
+  getPeriod
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
@@ -279,6 +282,7 @@ import { GameTime } from "./models/GameTime.js";
 import { ColourBetting } from "./models/ColourBetting.js";
 import { GameReward } from "./models/GameReward.js";
 import { CommunityBetting } from "./models/CommunityBetting.js";
+import { Period } from "./models/Period.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -310,6 +314,10 @@ import {
 
 dotenv.config();
 export {
+  getPeriod,
+  Period,
+  cron,
+  createGamePeriodFromCronJob,
   getCommunityGamePeriodById,
   getAllCommunityGamePeriod,
   getAllNumberGamePeriod,

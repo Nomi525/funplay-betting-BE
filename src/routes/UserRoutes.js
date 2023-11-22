@@ -62,7 +62,8 @@ import {
   getAllNumberGamePeriod,
   getNumberGamePeriodById,
   getCommunityGamePeriodById,
-  getAllCommunityGamePeriod
+  getAllCommunityGamePeriod,
+  getPeriod
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -155,12 +156,13 @@ userRoutes.get('/get-all-live-community-bets/:gameId', Auth, getAllLiveCommunity
 userRoutes.get('/get-all-last-day-community-betting-winners/:gameId', Auth, getAllLastDayCommunityBettingWinners)
 
 userRoutes.get(
-  "/community-winners",Auth,
+  "/community-winners", Auth,
   getCommunityWinList
 );
 
-userRoutes.get('/get-single-community-game-period/:gameId',Auth,getCommunityGamePeriodById);
-userRoutes.get('/get-all-community-game-period/:gameId',Auth,getAllCommunityGamePeriod);
+userRoutes.get('/get-single-community-game-period/:gameId', Auth, getCommunityGamePeriodById);
+userRoutes.get('/get-all-community-game-period/:gameId', Auth, getAllCommunityGamePeriod);
+userRoutes.get('/get-period/:gameId', Auth, getPeriod)
 
 
 
