@@ -29,11 +29,6 @@ const numberBettingSchema = new mongoose.Schema(
       required: false,
       default: 0,
     },
-    count: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     period: {
       type: Number,
       required: false,

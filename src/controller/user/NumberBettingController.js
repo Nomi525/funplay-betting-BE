@@ -29,11 +29,9 @@ export const addEditNumberBet = async (req, res) => {
       rewardsCoins,
       winAmount,
       lossAmount,
-      count,
       period,
     } = req.body;
     let isWin = false;
-    period = `${period}${count}`
     if (winAmount) isWin = true;
     const findUserDeposit = await NewTransaction.findOne({
       userId: req.user,
@@ -79,7 +77,6 @@ export const addEditNumberBet = async (req, res) => {
       userId: req.user,
       gameId: gameId,
       period,
-      count,
     });
     let createNumberBet;
     if (alreadyExistBet) {
@@ -104,7 +101,6 @@ export const addEditNumberBet = async (req, res) => {
           winAmount,
           lossAmount,
           isWin,
-          count,
           period,
         },
         NumberBetting
@@ -170,6 +166,7 @@ export const addEditNumberBet = async (req, res) => {
     //   }
     // }
   } catch (error) {
+    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -382,6 +379,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
 
 export const createGamePeriodFromCronJob = async () => {
   try {
+    const currentTime = moment().format('HH:mm');
     const todayDate = moment().format('YYYY-MM-DD');
     const currentDate = new Date();
     const year = currentDate.getFullYear();
@@ -394,19 +392,52 @@ export const createGamePeriodFromCronJob = async () => {
       is_deleted: 0
     });
     for (const game of findGame) {
+
+      // console.log(moment().isSame(moment(game.gameEndDate), 'day'),'kkkk');
+      // return
       let findPeriod = await Period.findOne({
         gameId: game._id,
       });
       const startTime = moment().format('hh:mm');
-      const endTime = moment().add(game.gameHours, 'hours').format('hh:mm');
-      if (findPeriod) {
-        const lastIndex = await Period.find({ gameId: game._id, is_deleted: 0 }).sort({ createdAt: -1 }).limit(1);
-        if (startTime >= lastIndex[0].endTime) {
-          if (game.isRepeat) {
+      const endTime = moment().utcOffset("+05:30").add(game.gameHours, 'minutes').format('HH:MM');
+      // console.log(endTime,'hiii');
+      // return
+      // console.log('startTime',startTime,game.gameDurationFrom,moment(game.gameDurationFrom, 'h:mm A').format('HH:mm'));
+      if (moment(game.gameDurationFrom, 'h:mm A').format('HH:mm') <= startTime) {
+        // if (moment(game.gameDurationFrom, 'h:mm A').format('HH:mm') == startTime) {
+        if (findPeriod) {
+          const lastIndex = await Period.find({ gameId: game._id, is_deleted: 0 }).sort({ createdAt: -1 }).limit(1);
+          if ((startTime == lastIndex[0].endTime) && game.isRepeat) {
             const periodCount = await Period.countDocuments({
               gameId: game._id,
             });
             const period = formattedDate + (periodCount + 1).toString().padStart(4, '0');
+            if (moment(game.gameDurationTo, 'h:mm A').format('HH:mm') >= endTime && todayDate.isSame(game.gameEndDate, 'day')) {
+              await Period.create({
+                gameId: game._id,
+                period,
+                startTime,
+                endTime,
+                date: todayDate
+              });
+              console.log('first');
+            } else if (todayDate.isSameOrBefore(game.gameEndDate) && endTime >= moment(game.gameDurationTo, 'h:mm A').format('HH:mm')) {
+              await dataUpdated({ _id: lastIndex[0]._id }, { isTimeUp: true }, Period)
+              await Period.create({
+                gameId: game._id,
+                period,
+                startTime,
+                endTime,
+                date: todayDate
+              });
+            }
+          }
+        } else {
+          let findPeriod = await Period.findOne({
+            gameId: game._id,
+          });
+          if (!findPeriod) {
+            const period = formattedDate + '0001';
             await Period.create({
               gameId: game._id,
               period,
@@ -415,23 +446,6 @@ export const createGamePeriodFromCronJob = async () => {
               date: todayDate
             });
           }
-        } else {
-          await dataUpdated({ _id: lastIndex[0]._id }, { isTimeUp: true }, Period)
-        }
-      } else {
-        console.log('else');
-        let findPeriod = await Period.findOne({
-          gameId: game._id,
-        });
-        if (!findPeriod) {
-          const period = formattedDate + '0001';
-          await Period.create({
-            gameId: game._id,
-            period,
-            startTime,
-            endTime,
-            date: todayDate
-          });
         }
       }
     }

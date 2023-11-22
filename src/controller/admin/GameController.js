@@ -70,8 +70,8 @@ export const addEditGame = async (req, res) => {
         const newGame = await dataCreate(
           {
             gameName,
-            gameStartDate,
-            gameEndDate,
+            gameStartDate : moment(gameStartDate).format('YYYY-MM-DD'),
+            gameEndDate : moment(gameEndDate).format('YYYY-MM-DD'),
             gameImage,
             gameDurationFrom,
             gameDurationTo,
