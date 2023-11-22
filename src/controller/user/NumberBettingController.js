@@ -1,3 +1,4 @@
+import moment from "moment/moment.js";
 import {
   ResponseMessage,
   StatusCodes,
@@ -13,7 +14,9 @@ import {
   minusLargeSmallValue,
   plusLargeSmallValue,
   multiplicationLargeSmallValue,
-  mongoose
+  mongoose,
+  Game,
+  Period
 } from "../../index.js";
 
 export const addEditNumberBet = async (req, res) => {
@@ -376,3 +379,87 @@ export const getAllNumberGamePeriod = async (req, res) => {
 //     return handleErrorResponse(res, error);
 //   }
 // };
+
+export const createGamePeriodFromCronJob = async () => {
+  try {
+    const todayDate = moment().format('YYYY-MM-DD');
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    const formattedDate = `${year}${month}${day}`;
+    const findGame = await Game.find({
+      gameStartDate: { $lte: todayDate },
+      gameEndDate: { $gte: todayDate },
+      is_deleted: 0
+    });
+    for (const game of findGame) {
+      let findPeriod = await Period.findOne({
+        gameId: game._id,
+      });
+      const startTime = moment().format('hh:mm');
+      const endTime = moment().add(game.gameHours, 'hours').format('hh:mm');
+      if (findPeriod) {
+        const lastIndex = await Period.find({ gameId: game._id, is_deleted: 0 }).sort({ createdAt: -1 }).limit(1);
+        if (startTime >= lastIndex[0].endTime) {
+          if (game.isRepeat) {
+            const periodCount = await Period.countDocuments({
+              gameId: game._id,
+            });
+            const period = formattedDate + (periodCount + 1).toString().padStart(4, '0');
+            await Period.create({
+              gameId: game._id,
+              period,
+              startTime,
+              endTime,
+              date: todayDate
+            });
+          }
+        } else {
+          await dataUpdated({ _id: lastIndex[0]._id }, { isTimeUp: true }, Period)
+        }
+      } else {
+        console.log('else');
+        let findPeriod = await Period.findOne({
+          gameId: game._id,
+        });
+        if (!findPeriod) {
+          const period = formattedDate + '0001';
+          await Period.create({
+            gameId: game._id,
+            period,
+            startTime,
+            endTime,
+            date: todayDate
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getPeriod = async (req, res) => {
+  try {
+    const { gameId } = req.params
+    const getAllPeriod = await Period.findOne({ date: moment().format('YYYY-MM-DD'), gameId, isTimeUp: false, is_deleted: 0 })
+    if (getAllPeriod) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_PERIOD_GET,
+        getAllPeriod
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_PERIOD_GET,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
