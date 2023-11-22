@@ -35,9 +35,9 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-cron.schedule('* * * * * *', () => {
-   createGamePeriodFromCronJob();
-});
+// cron.schedule('* * * * * *', () => {
+//    createGamePeriodFromCronJob();
+// });
 
 const appServer = app.listen(process.env.PORT, () => {
   dbConnection();
