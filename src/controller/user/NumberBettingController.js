@@ -16,7 +16,7 @@ import {
   multiplicationLargeSmallValue,
   mongoose,
   Game,
-  Period
+  Period,
 } from "../../index.js";
 
 export const addEditNumberBet = async (req, res) => {
@@ -86,7 +86,7 @@ export const addEditNumberBet = async (req, res) => {
         },
         {
           number: parseInt(number),
-          betAmount: parseInt(betAmount)
+          betAmount: parseInt(betAmount),
         },
         NumberBetting
       );
@@ -272,10 +272,15 @@ export const getNumberGamePeriodById = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const getGamePeriodById = await NumberBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
-      .populate('userId', 'fullName profile email')
-      .populate('gameId', 'gameName gameImage gameMode')
-      .sort({ count: -1 })
+    const getGamePeriodById = await NumberBetting.find({
+      userId: req.user,
+      gameId,
+      createdAt: { $gte: twentyFourHoursAgo },
+      is_deleted: 0,
+    })
+      .populate("userId", "fullName profile email")
+      .populate("gameId", "gameName gameImage gameMode")
+      .sort({ count: -1 });
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -285,7 +290,7 @@ export const getNumberGamePeriodById = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 
 export const getAllNumberGamePeriod = async (req, res) => {
   try {
@@ -305,20 +310,16 @@ export const getAllNumberGamePeriod = async (req, res) => {
           totalUsers: { $sum: 1 },
           winNumber: {
             $max: {
-              $cond: [
-                { $eq: ['$isWin', true] },
-                "$number",
-                null
-              ]
-            }
+              $cond: [{ $eq: ["$isWin", true] }, "$number", null],
+            },
           },
-          period: { $first: '$period' }
-        }
+          period: { $first: "$period" },
+        },
       },
       {
         $sort: {
-          period: -1
-        }
+          period: -1,
+        },
       },
       {
         $project: {
@@ -379,71 +380,89 @@ export const getAllNumberGamePeriod = async (req, res) => {
 
 export const createGamePeriodFromCronJob = async () => {
   try {
-    const currentTime = moment().format('HH:mm');
-    const todayDate = moment().format('YYYY-MM-DD');
+    const todayDate = moment().format("YYYY-MM-DD");
     const currentDate = new Date();
     const year = currentDate.getFullYear();
-    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-    const day = currentDate.getDate().toString().padStart(2, '0');
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+    const day = currentDate.getDate().toString().padStart(2, "0");
     const formattedDate = `${year}${month}${day}`;
     const findGame = await Game.find({
       gameStartDate: { $lte: todayDate },
       gameEndDate: { $gte: todayDate },
-      is_deleted: 0
+      is_deleted: 0,
     });
     for (const game of findGame) {
-
-      // console.log(moment().isSame(moment(game.gameEndDate), 'day'),'kkkk');
-      // return
       let findPeriod = await Period.findOne({
         gameId: game._id,
       });
-      const startTime = moment().format('hh:mm');
-      const endTime = moment().utcOffset("+05:30").add(game.gameHours, 'minutes').format('HH:MM');
-      // console.log(endTime,'hiii');
-      // return
-      // console.log('startTime',startTime,game.gameDurationFrom,moment(game.gameDurationFrom, 'h:mm A').format('HH:mm'));
-      if (moment(game.gameDurationFrom, 'h:mm A').format('HH:mm') <= startTime) {
-        // if (moment(game.gameDurationFrom, 'h:mm A').format('HH:mm') == startTime) {
+      const startTime = moment().format("HH:mm");
+      const endTime = moment()
+        .utcOffset("+05:30")
+        .add(game.gameHours, "minutes")
+        .format("HH:mm");
+      if (
+        moment(game.gameDurationFrom, "h:mm A").format("HH:mm") <= startTime &&
+        game.gameName === "Number Betting"
+      ) {
         if (findPeriod) {
-          const lastIndex = await Period.find({ gameId: game._id, is_deleted: 0 }).sort({ createdAt: -1 }).limit(1);
-          if ((startTime == lastIndex[0].endTime) && game.isRepeat) {
+          const lastIndex = await Period.find({
+            gameId: game._id,
+            is_deleted: 0,
+          })
+            .sort({ createdAt: -1 })
+            .limit(1);
+          if (startTime == lastIndex[0].endTime && game.isRepeat) {
             const periodCount = await Period.countDocuments({
               gameId: game._id,
             });
-            const period = formattedDate + (periodCount + 1).toString().padStart(4, '0');
-            if (moment(game.gameDurationTo, 'h:mm A').format('HH:mm') >= endTime && todayDate.isSame(game.gameEndDate, 'day')) {
-              await Period.create({
+            const period =
+              formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            let originalStartDate = moment(game.gameStartDate);
+            let originalEndDate = moment(game.gameEndDate);
+            let gameDurationFrom = moment(game.gameDurationFrom, "hh:mm A");
+            let gameDurationTo = moment(game.gameDurationTo, "hh:mm A");
+            const newStartDate = originalStartDate
+              .add(gameDurationFrom.hours(), "hours")
+              .add(gameDurationFrom.minutes(), "minutes")
+              .subtract("5:30", "hours");
+            const newEndDate = originalEndDate
+              .add(gameDurationTo.hours(), "hours")
+              .add(gameDurationTo.minutes(), "minutes")
+              .subtract("5:30", "hours");
+            let newwwDate = moment();
+            if (
+              newwwDate >= newStartDate &&
+              (newEndDate >= newwwDate || newEndDate <= newwwDate)
+            ) {
+              await Period.updateMany({
                 gameId: game._id,
-                period,
-                startTime,
-                endTime,
-                date: todayDate
+                is_deleted: 0,
+                isTimeUp: true,
               });
-              console.log('first');
-            } else if (todayDate.isSameOrBefore(game.gameEndDate) && endTime >= moment(game.gameDurationTo, 'h:mm A').format('HH:mm')) {
-              await dataUpdated({ _id: lastIndex[0]._id }, { isTimeUp: true }, Period)
-              await Period.create({
-                gameId: game._id,
-                period,
-                startTime,
-                endTime,
-                date: todayDate
-              });
+              if (newEndDate >= newwwDate) {
+                await Period.create({
+                  gameId: game._id,
+                  period,
+                  startTime,
+                  endTime,
+                  date: todayDate,
+                });
+              }
             }
           }
         } else {
           let findPeriod = await Period.findOne({
             gameId: game._id,
+            isTimeUp: false
           });
           if (!findPeriod) {
-            const period = formattedDate + '0001';
+            const period = formattedDate + "0001";
             await Period.create({
               gameId: game._id,
               period,
               startTime,
               endTime,
-              date: todayDate
+              date: todayDate,
             });
           }
         }
@@ -456,8 +475,13 @@ export const createGamePeriodFromCronJob = async () => {
 
 export const getPeriod = async (req, res) => {
   try {
-    const { gameId } = req.params
-    const getAllPeriod = await Period.findOne({ date: moment().format('YYYY-MM-DD'), gameId, isTimeUp: false, is_deleted: 0 })
+    const { gameId } = req.params;
+    const getAllPeriod = await Period.findOne({
+      date: moment().format("YYYY-MM-DD"),
+      gameId,
+      isTimeUp: false,
+      is_deleted: 0,
+    });
     if (getAllPeriod) {
       return sendResponse(
         res,
@@ -476,4 +500,4 @@ export const getPeriod = async (req, res) => {
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
