@@ -382,7 +382,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
   try {
     const { userIds, gameId, period } = req.body;
     await Promise.all(userIds.map(async (userId) => {
-      const findCommunityBetting = await getSingleData({ userId, gameId, is_deleted: 0 }, CommunityBetting)
+      const findCommunityBetting = await getSingleData({ gameId, is_deleted: 0 }, CommunityBetting)
       if (findCommunityBetting) {
         // await dataUpdated({ userId, gameId, is_deleted: 0 }, { isWin: true }, CommunityBetting)
         // let rewardAmount = multiplicationLargeSmallValue(findCommunityBetting.betAmount, 0.95);
