@@ -317,7 +317,9 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
     const transactionHistory = await TransactionHistory.find({
       userId,
       is_deleted: 0,
-    }).populate("userId");
+    })
+      .populate("userId")
+      .sort({createdAt : -1})
     if (transactionHistory.length) {
       return sendResponse(
         res,

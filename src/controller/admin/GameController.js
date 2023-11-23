@@ -40,16 +40,21 @@ export const addEditGame = async (req, res) => {
     } = req.body;
     let originalStartDate = moment(gameTimeFrom);
     let originalEndDate = moment(gameTimeTo);
+    let durationFrom = moment(gameDurationFrom, "hh:mm A");
+    let durationTo = moment(gameDurationTo, "hh:mm A");
+    console.log('durationFrom',durationFrom);
+    console.log('durationTo',durationTo);
     const newStartDate = originalStartDate
-      .add(gameDurationFrom.hours(), "hours")
-      .add(gameDurationFrom.minutes(), "minutes")
-      .subtract("5:30", "hours");
+      .add(durationFrom.hours(), "hours")
+      .add(durationFrom.minutes(), "minutes")
+      .subtract("5:30", "hours")
     const newEndDate = originalEndDate
-      .add(gameDurationTo.hours(), "hours")
-      .add(gameDurationTo.minutes(), "minutes")
+      .add(durationTo.hours(), "hours")
+      .add(durationTo.minutes(), "minutes")
       .subtract("5:30", "hours");
+    console.log('newStartDate',newStartDate);
+    console.log('newEndDate',newEndDate);
 
-    gameTimeFrom = moment(gameDurationFrom).format("YYYY-MM-DD");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,

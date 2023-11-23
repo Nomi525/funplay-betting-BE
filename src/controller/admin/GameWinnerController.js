@@ -244,9 +244,17 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
     let totalUsers = 0;
     let getAllUsers;
     let getAllWinners;
+    let getAllNotWinner;
     const { gameName } = req.params;
     if (gameName === "CommunityBetting") {
       getAllUsers = await CommunityBetting.find({ is_deleted: 0 })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllNotWinner = await CommunityBetting.find({
+        isWin: false,
+        is_deleted: 0,
+      })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
         .sort({ createdAt: -1 });
@@ -265,6 +273,14 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       totalUsers = getAllUsers.length;
     } else if (gameName === "2ColorBetting") {
       getAllUsers = await ColourBetting.find({
+        is_deleted: 0,
+        gameType: "2colorBetting",
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllNotWinner = await ColourBetting.find({
+        isWin: false,
         is_deleted: 0,
         gameType: "2colorBetting",
       })
@@ -293,6 +309,14 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
         .sort({ createdAt: -1 });
+      getAllNotWinner = await ColourBetting.find({
+        isWin: false,
+        is_deleted: 0,
+        gameType: "3colorBetting",
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
       getAllWinners = await ColourBetting.find({
         isWin: true,
         is_deleted: 0,
@@ -309,6 +333,13 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       totalUsers = getAllUsers.length;
     } else if (gameName === "NumberBetting") {
       getAllUsers = await NumberBetting.find({
+        is_deleted: 0,
+      })
+        .populate("userId", "fullName profile email")
+        .populate("gameId", "gameName gameImage gameMode")
+        .sort({ createdAt: -1 });
+      getAllNotWinner = await NumberBetting.find({
+        isWin: false,
         is_deleted: 0,
       })
         .populate("userId", "fullName profile email")
@@ -337,6 +368,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         totalUsers,
         getAllUsers,
         getAllWinners,
+        getAllNotWinner
       }
     );
   } catch (error) {
@@ -387,7 +419,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
 export const declareWinnerOfNumberBetting = async (req, res) => {
   try {
     const { gameId, userId, winNumber, period } = req.body
-    const findNumberBetting = await getSingleData({ userId, gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
+    const findNumberBetting = await getSingleData({ gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
     if (findNumberBetting) {
       let rewardAmount = findNumberBetting.betAmount * 0.95;
       findNumberBetting.isWin = true
