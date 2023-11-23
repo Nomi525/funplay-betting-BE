@@ -246,7 +246,8 @@ import {
   getAllWinnersUser,
   getAllUsersAndWinnersCommunityBetting,
   declareWinnerOfCommunityBetting,
-  declareWinnerOfNumberBetting
+  declareWinnerOfNumberBetting,
+  declareWinnerOfColorBetting
 } from "./controller/admin/GameWinnerController.js";
 
 // *********** Routes **************** //
@@ -315,6 +316,7 @@ import {
 
 dotenv.config();
 export {
+  declareWinnerOfColorBetting,
   declareWinnerOfNumberBetting,
   getPeriod,
   Period,
