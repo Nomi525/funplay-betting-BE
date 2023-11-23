@@ -30,11 +30,11 @@ const gameSchema = new mongoose.Schema({
         required: false
     },
     gameTimeFrom: {
-        type: String,
+        type: Date,
         required: false
     },
     gameTimeTo: {
-        type: String,
+        type: Date,
         required: false
     },
     gameDurationFrom: {
