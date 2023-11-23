@@ -447,3 +447,37 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 }
+
+//#region Winner declare of 2 color
+export const declareWinnerOfColorBetting = async (req, res) => {
+  try {
+    const { gameId, userId, winColour, period } = req.body
+    const findColorBetting = await getSingleData({ gameId, colourName: winColour, is_deleted: 0 }, ColourBetting)
+    if (findColorBetting) {
+      let rewardAmount = findColorBetting.betAmount * 0.95;
+      findColorBetting.isWin = true
+      findColorBetting.rewardAmount = rewardAmount
+      await findColorBetting.save();
+      const balance = await getSingleData(
+        { userId: userId },
+        NewTransaction
+      );
+      if (balance) {
+        balance.tokenDollorValue = plusLargeSmallValue(
+          balance.tokenDollorValue,
+          findColorBetting.betAmount + rewardAmount
+        );
+        await balance.save();
+      }
+    }
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "Winner added succcessfully",
+      []
+    )
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion

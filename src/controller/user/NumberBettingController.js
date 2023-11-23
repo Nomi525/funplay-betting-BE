@@ -476,8 +476,9 @@ export const createGamePeriodFromCronJob = async () => {
 export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
+    const date = moment().format("YYYY-MM-DD");
     const getAllPeriod = await Period.findOne({
-      date: moment().format("YYYY-MM-DD"),
+      date: `${date}T00:00:00.000+00:00`,
       gameId,
       isTimeUp: false,
       is_deleted: 0,

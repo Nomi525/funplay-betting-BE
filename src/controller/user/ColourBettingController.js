@@ -220,7 +220,7 @@ export const getLoginUserColourBet = async (req, res) => {
 async function winners(gameType, gameId, period, model) {
   const query = {
     gameId: new mongoose.Types.ObjectId(gameId),
-    period : parseInt(period),
+    period: parseInt(period),
     is_deleted: 0,
   };
 
@@ -320,6 +320,7 @@ async function winners(gameType, gameId, period, model) {
 //#endregion
 
 async function winnerDetails(gameType, gameId, period, bettingResult) {
+  // console.log(bettingResult,'bettingResult');
   const winner = await Promise.all(
     bettingResult.map(async (bet) => {
       if (bet.gameDetails.gameId.toString() == gameId.toString()) {
@@ -346,7 +347,7 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
                     { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
                     { $set: { rewardAmount, isWin: true } }
                   );
-                }else{
+                } else {
                   await NumberBetting.updateOne(
                     { userId: winnerDetails._id, gameId: bet.gameDetails.gameId, period },
                     { $set: { rewardAmount, isWin: true } }
@@ -363,7 +364,9 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
               }
             });
           }
-          winnerDetails = { ...winnerDetails._doc, rewardAmount };
+          const winBet = bet.bets.find(item => bet.winner.toString() == item.userId.toString())
+          const winColor = winBet ? winBet.colourName : '';
+          winnerDetails = { ...winnerDetails._doc, winColor, rewardAmount };
           bet.winner = winnerDetails;
         }
       }
