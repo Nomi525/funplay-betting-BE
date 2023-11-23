@@ -392,6 +392,8 @@ export const createGamePeriodFromCronJob = async () => {
       is_deleted: 0,
     });
     for (const game of findGame) {
+      const newStartDate = moment(game.gameTimeFrom).utcOffset("+5:30");
+      const newEndDate = moment(game.gameTimeTo).utcOffset("+5:30");
       let findPeriod = await Period.findOne({
         gameId: game._id,
       });
