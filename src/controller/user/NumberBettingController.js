@@ -392,8 +392,7 @@ export const createGamePeriodFromCronJob = async () => {
       is_deleted: 0,
     });
     for (const game of findGame) {
-      const newStartDate = moment(game.gameTimeFrom).utcOffset("+5:30");
-      const newEndDate = moment(game.gameTimeTo).utcOffset("+5:30");
+    
       let findPeriod = await Period.findOne({
         gameId: game._id,
       });
@@ -419,6 +418,19 @@ export const createGamePeriodFromCronJob = async () => {
             });
             const period =
               formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            let originalStartDate = moment(game.gameStartDate);
+            let originalEndDate = moment(game.gameEndDate);
+            let gameDurationFrom = moment(game.gameDurationFrom, "hh:mm A");
+            let gameDurationTo = moment(game.gameDurationTo, "hh:mm A");
+            const newStartDate = originalStartDate
+              .add(gameDurationFrom.hours(), "hours")
+              .add(gameDurationFrom.minutes(), "minutes")
+              .subtract("5:30", "hours");
+            const newEndDate = originalEndDate
+              .add(gameDurationTo.hours(), "hours")
+              .add(gameDurationTo.minutes(), "minutes")
+              .subtract("5:30", "hours");
+
             let latestDate = moment();
             if (
               latestDate >= newStartDate &&
@@ -466,9 +478,8 @@ export const createGamePeriodFromCronJob = async () => {
 export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const date = moment().format("YYYY-MM-DD");
     const getAllPeriod = await Period.findOne({
-      date: `${date}T00:00:00.000+00:00`,
+      date: moment().format("YYYY-MM-DD"),
       gameId,
       isTimeUp: false,
       is_deleted: 0,

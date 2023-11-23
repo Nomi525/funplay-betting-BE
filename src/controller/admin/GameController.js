@@ -39,16 +39,16 @@ export const addEditGame = async (req, res) => {
       gameHours,
       gameSecond 
     } = req.body;
-    let originalStartDate = moment(gameTimeFrom);
-    let originalEndDate = moment(gameTimeTo);
-    let durationFrom = moment(gameDurationFrom, "hh:mm A");
-    let durationTo = moment(gameDurationTo, "hh:mm A");
-    const newStartDate = originalStartDate
-      .add(durationFrom.hours(), "hours")
-      .add(durationFrom.minutes(), "minutes");
-    const newEndDate = originalEndDate
-      .add(durationTo.hours(), "hours")
-      .add(durationTo.minutes(), "minutes");
+    // let originalStartDate = moment(gameTimeFrom);
+    // let originalEndDate = moment(gameTimeTo);
+    // let durationFrom = moment(gameDurationFrom, "hh:mm A");
+    // let durationTo = moment(gameDurationTo, "hh:mm A");
+    // const newStartDate = originalStartDate
+    //   .add(durationFrom.hours(), "hours")
+    //   .add(durationFrom.minutes(), "minutes");
+    // const newEndDate = originalEndDate
+    //   .add(durationTo.hours(), "hours")
+    //   .add(durationTo.minutes(), "minutes");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -88,8 +88,8 @@ export const addEditGame = async (req, res) => {
             gameDurationTo,
             gameRound,
             gameWinningAmount,
-            gameTimeFrom: newStartDate,
-            gameTimeTo: newEndDate,
+            gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
+            gameTimeTo: moment(gameTimeTo).format("YYYY-MM-DD"),
             gameMode,
             description,
             gameWeek,
@@ -129,8 +129,8 @@ export const addEditGame = async (req, res) => {
           gameDurationTo,
           gameRound,
           gameWinningAmount,
-          gameTimeFrom: newStartDate,
-          gameTimeTo: newEndDate,
+          gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
+          gameTimeTo: moment(gameTimeTo).format("YYYY-MM-DD"),
           gameMode,
           description,
           gameWeek,
