@@ -85,6 +85,7 @@ import {
   getAllUsersAndWinnersCommunityBetting,
   declareWinnerOfCommunityBetting,
   declareWinnerOfNumberBetting,
+  declareWinnerOfColorBetting,
   gameIsRepeat,
 } from "./../index.js";
 const adminRoutes = express.Router();
@@ -247,5 +248,6 @@ adminRoutes.get(
 );
 adminRoutes.post("/declare-winner", Auth, declareWinnerOfCommunityBetting);
 adminRoutes.post("/declare-number-betting-winner", Auth, declareWinnerOfNumberBetting);
+adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBetting);
 
 export { adminRoutes };
