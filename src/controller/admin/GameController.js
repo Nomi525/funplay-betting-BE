@@ -36,8 +36,20 @@ export const addEditGame = async (req, res) => {
       gameMaximumCoin,
       gameTime,
       isRepeat,
-      gameHours
+      gameHours,
     } = req.body;
+    let originalStartDate = moment(gameTimeFrom);
+    let originalEndDate = moment(gameTimeTo);
+    const newStartDate = originalStartDate
+      .add(gameDurationFrom.hours(), "hours")
+      .add(gameDurationFrom.minutes(), "minutes")
+      .subtract("5:30", "hours");
+    const newEndDate = originalEndDate
+      .add(gameDurationTo.hours(), "hours")
+      .add(gameDurationTo.minutes(), "minutes")
+      .subtract("5:30", "hours");
+
+    gameTimeFrom = moment(gameDurationFrom).format("YYYY-MM-DD");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -70,21 +82,21 @@ export const addEditGame = async (req, res) => {
         const newGame = await dataCreate(
           {
             gameName,
-            gameStartDate : moment(gameStartDate).format('YYYY-MM-DD'),
-            gameEndDate : moment(gameEndDate).format('YYYY-MM-DD'),
+            gameStartDate: moment(gameStartDate).format("YYYY-MM-DD"),
+            gameEndDate: moment(gameEndDate).format("YYYY-MM-DD"),
             gameImage,
             gameDurationFrom,
             gameDurationTo,
             gameRound,
             gameWinningAmount,
-            gameTimeFrom,
-            gameTimeTo,
+            gameTimeFrom: newStartDate,
+            gameTimeTo: newEndDate,
             gameMode,
             description,
             gameWeek,
             gameMinimumCoin,
             gameMaximumCoin,
-            gameHours
+            gameHours,
           },
           Game
         );
@@ -110,15 +122,15 @@ export const addEditGame = async (req, res) => {
         { _id: gameId },
         {
           gameName,
-          gameStartDate : moment(gameStartDate).format('YYYY-MM-DD'),
-          gameEndDate : moment(gameEndDate).format('YYYY-MM-DD'),
+          gameStartDate: moment(gameStartDate).format("YYYY-MM-DD"),
+          gameEndDate: moment(gameEndDate).format("YYYY-MM-DD"),
           gameImage,
           gameDurationFrom,
           gameDurationTo,
           gameRound,
           gameWinningAmount,
-          gameTimeFrom,
-          gameTimeTo,
+          gameTimeFrom: newStartDate,
+          gameTimeTo: newEndDate,
           gameMode,
           description,
           gameWeek,
@@ -126,7 +138,7 @@ export const addEditGame = async (req, res) => {
           gameMaximumCoin,
           gameTime,
           gameHours,
-          isRepeat
+          isRepeat,
         },
         Game
       );
@@ -217,25 +229,33 @@ export const gameActiveDeactive = async (req, res) => {
 export const gameIsRepeat = async (req, res) => {
   try {
     const { gameId } = req.body;
-    const findGame = await getSingleData({ _id: gameId, isActive: true, is_deleted: 0 }, Game)
+    const findGame = await getSingleData(
+      { _id: gameId, isActive: true, is_deleted: 0 },
+      Game
+    );
     if (findGame) {
       let message;
       if (findGame.isRepeat) {
-        findGame.isRepeat = false
-        message = ResponseMessage.GAME_NOT_REPEAT
+        findGame.isRepeat = false;
+        message = ResponseMessage.GAME_NOT_REPEAT;
       } else {
-        findGame.isRepeat = true
-        message = ResponseMessage.GAME_REPEAT
+        findGame.isRepeat = true;
+        message = ResponseMessage.GAME_REPEAT;
       }
-      await findGame.save()
+      await findGame.save();
       return sendResponse(res, StatusCodes.OK, message, []);
     } else {
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_NOT_FOUND, []);
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_NOT_FOUND,
+        []
+      );
     }
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
 //#endregion
 
 //#region Get all games
