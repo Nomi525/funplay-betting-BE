@@ -387,8 +387,8 @@ export const createGamePeriodFromCronJob = async () => {
     const day = currentDate.getDate().toString().padStart(2, "0");
     const formattedDate = `${year}${month}${day}`;
     const findGame = await Game.find({
-      gameStartDate: { $lte: todayDate },
-      gameEndDate: { $gte: todayDate },
+      gameTimeFrom: { $lte: todayDate },
+      gameTimeTo: { $gte: todayDate },
       is_deleted: 0,
     });
     for (const game of findGame) {
@@ -417,29 +417,17 @@ export const createGamePeriodFromCronJob = async () => {
             });
             const period =
               formattedDate + (periodCount + 1).toString().padStart(4, "0");
-            let originalStartDate = moment(game.gameStartDate);
-            let originalEndDate = moment(game.gameEndDate);
-            let gameDurationFrom = moment(game.gameDurationFrom, "hh:mm A");
-            let gameDurationTo = moment(game.gameDurationTo, "hh:mm A");
-            const newStartDate = originalStartDate
-              .add(gameDurationFrom.hours(), "hours")
-              .add(gameDurationFrom.minutes(), "minutes")
-              .subtract("5:30", "hours");
-            const newEndDate = originalEndDate
-              .add(gameDurationTo.hours(), "hours")
-              .add(gameDurationTo.minutes(), "minutes")
-              .subtract("5:30", "hours");
-            let newwwDate = moment();
+            let latestDate = moment();
             if (
-              newwwDate >= newStartDate &&
-              (newEndDate >= newwwDate || newEndDate <= newwwDate)
+              latestDate >= newStartDate &&
+              (newEndDate >= latestDate || newEndDate <= latestDate)
             ) {
               await Period.updateMany({
                 gameId: game._id,
                 is_deleted: 0,
                 isTimeUp: true,
               });
-              if (newEndDate >= newwwDate) {
+              if (newEndDate >= latestDate) {
                 await Period.create({
                   gameId: game._id,
                   period,
@@ -453,7 +441,7 @@ export const createGamePeriodFromCronJob = async () => {
         } else {
           let findPeriod = await Period.findOne({
             gameId: game._id,
-            isTimeUp: false
+            isTimeUp: false,
           });
           if (!findPeriod) {
             const period = formattedDate + "0001";
