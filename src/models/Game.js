@@ -75,6 +75,10 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     }],
+    gameSecond: [{
+        type: String,
+        required: false
+    }],
     isRepeat: {
         type: Boolean,
         required: false,

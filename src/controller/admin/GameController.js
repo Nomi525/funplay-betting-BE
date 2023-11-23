@@ -37,6 +37,7 @@ export const addEditGame = async (req, res) => {
       gameTime,
       isRepeat,
       gameHours,
+      gameSecond 
     } = req.body;
     let originalStartDate = moment(gameTimeFrom);
     let originalEndDate = moment(gameTimeTo);
@@ -95,6 +96,7 @@ export const addEditGame = async (req, res) => {
             gameMinimumCoin,
             gameMaximumCoin,
             gameHours,
+            gameSecond
           },
           Game
         );
@@ -136,6 +138,7 @@ export const addEditGame = async (req, res) => {
           gameMaximumCoin,
           gameTime,
           gameHours,
+          gameSecond,
           isRepeat,
         },
         Game
