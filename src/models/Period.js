@@ -26,6 +26,11 @@ const periodSchema = new mongoose.Schema({
         required: false,
         default: false
     },
+    isSlotGrater: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     is_deleted: {
         type: Number,
         default: 0,
