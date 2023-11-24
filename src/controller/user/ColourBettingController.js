@@ -364,9 +364,15 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
               }
             });
           }
+          let winColour;
+          let winNumber;
           const winBet = bet.bets.find(item => bet.winner.toString() == item.userId.toString())
-          const winColor = winBet ? winBet.colourName : '';
-          winnerDetails = { ...winnerDetails._doc, winColor, rewardAmount };
+          if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+            winColour = winBet ? winBet.colourName : '';
+          } else {
+            winNumber = winBet ? winBet.number : 0;
+          }
+          winnerDetails = { ...winnerDetails._doc, winColour, winNumber, rewardAmount };
           bet.winner = winnerDetails;
         }
       }
