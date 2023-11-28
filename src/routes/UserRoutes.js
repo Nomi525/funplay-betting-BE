@@ -1,12 +1,13 @@
 import { getAllGamePeriodData } from "../controller/user/CommunityController.js";
+import { updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   express,
   logout,
   editProfile,
   Upload,
   connectToWallet,
-  updateEmail,
-  userCheckEmail,
+  // updateEmail,
+  // userCheckEmail,
   verifyOtp,
   loginFromMpin,
   Auth,

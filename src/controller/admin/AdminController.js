@@ -3,6 +3,8 @@ import {
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting, ReferralWork,
     Rating, Wallet, hashedPassword, handleErrorResponse, NewTransaction, ReferralUser
 } from "./../../index.js";
+
+//#region admin login
 export const adminLogin = async (req, res) => {
     try {
         const findAdmin = await getSingleData({ email: req.body.email, is_deleted: 0 }, Admin);
@@ -124,27 +126,7 @@ export const adminChangePassword = async (req, res) => {
 }
 //#endregion
 
-//#region admin resend otp
-// export const adminResendOtp = async (req, res) => {
-//     try {
-//         let { adminId } = req.body;
-//         const otp = 4444;
-//         // const otp = generateOtp();
-//         const findAdmin = await getSingleData({ _id: adminId, is_deleted: 0 }, Admin);
-//         if (findAdmin) {
-//             const updateOtp = await dataUpdated({ _id: adminId }, { otp }, Admin)
-//             let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-//             await sendMail(findAdmin.email, "Verify Otp", mailInfo);
-//             return sendResponse(res, StatusCodes.OK, ResponseMessage.OTP_RESEND, []);
-//         } else {
-//             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_FOUND, []);
-//         }
-//     } catch (error) {
-//         return handleErrorResponse(res, error);
-//     }
-// }
-//#endregion
-
+//#region admin forget password
 export const adminForgetPassword = async (req, res) => {
     try {
         const { email } = req.body
@@ -304,6 +286,24 @@ export const adminWithdrawalRequest = async (req, res) => {
 }
 //#endregion
 
+//#region Get user transaction list
+export const getTransactionList = async (req, res) => {
+    try {
+        const { type } = req.body;
+        if (type) {
+            const findTranscation = await getAllData({ type }, DummyTransaction)
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findTranscation);
+        }
+        const findAllTranscation = await getAllData({}, DummyTransaction)
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findAllTranscation);
+
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
+
+//#region How to work referral code Details add and edit
 export const howToReferralWork = async (req, res) => {
     try {
         const { referralWork } = req.body
@@ -331,7 +331,7 @@ export const showRating = async (req, res) => {
         if (ratings.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, ratings);
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.RATING_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -349,7 +349,7 @@ export const getSingleGameRating = async (req, res) => {
         if (rating) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, rating);
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.RATING_NOT_FOUND, []);
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
         }
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -362,9 +362,26 @@ export const deleteRating = async (req, res) => {
     try {
         const { ratingId } = req.body;
         const deleteRating = await dataUpdated({ _id: ratingId }, { is_deleted: 1 }, Rating)
-        console.log(deleteRating);
         if (deleteRating) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.RATING_DELETED, []);
+        } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_RATING_NOT_FOUND, []);
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
+
+//#region Get Withdrawal List
+export const getWithdrawalList = async (req, res) => {
+    try {
+        const { gameId } = req.body;
+        const rating = await Rating.findOne({ gameId, is_deleted: 0 })
+            .populate("userId", "fullName email mobileNumber referralCode profile address currency")
+            .populate("gameId", "gameName gameImage gameDuration")
+        if (rating) {
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.GET_RATING, rating);
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.RATING_NOT_FOUND, []);
         }
@@ -372,3 +389,5 @@ export const deleteRating = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
+

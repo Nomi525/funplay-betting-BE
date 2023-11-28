@@ -17,7 +17,7 @@ import crypto from "crypto";
 import axios from "axios";
 import CurrencyConverter from "currency-converter-lt";
 import Decimal from "decimal.js";
-import cron from 'node-cron';
+import cron from "node-cron";
 Decimal.set({ precision: 100 });
 
 // Common
@@ -59,7 +59,7 @@ import {
   editProfile,
   connectToWallet,
   updateLoginStatus,
-  userCheckEmail,
+  // userCheckEmail,
   verifyOtp,
   loginFromMpin,
   singupFromEmailPassword,
@@ -93,19 +93,12 @@ import {
   addEditBanner,
   deleteBanner,
   allBannerGet,
-  getSingleGameRule,
-  getAllCurrency,
-  getSingleGameTime,
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
   deleteQuery,
 } from "./controller/user/QuerySectionController.js";
-import {
-  getAllQuery,
-  getSingleQuery,
-  adminDeleteQuery,
-} from "./controller/admin/QuerySectionController.js";
+import { getAllQuery } from "./controller/admin/QuerySectionController.js";
 import {
   addEditRating,
   gameRatingAverage,
@@ -120,10 +113,52 @@ import {
   getGameRules,
   gameDelete,
   getAllGame,
+  gameActiveDeactive,
   getSingleGame,
   getSingleGameRules,
   gameRuleDelete,
-  gameActiveDeactive,
+} from "./controller/admin/GameController.js";
+// import {
+//   addEditPrivacyPolicy,
+//   addEditAboutUs,
+//   addEditTermsAndCondition,
+//   getCMSDetail,
+// } from "./controller/admin/CmsController.js";
+import {
+  //   addEditBanner,
+  //   deleteBanner,
+  //   allBannerGet,
+  getSingleGameRule,
+  getAllCurrency,
+  getSingleGameTime,
+} from "./controller/common/CommonController.js";
+// import {
+//   addEditQuery,
+//   deleteQuery,
+// } from "./controller/user/QuerySectionController.js";
+import {
+  //   getAllQuery,
+  getSingleQuery,
+  adminDeleteQuery,
+} from "./controller/admin/QuerySectionController.js";
+// import {
+//   addEditRating,
+//   gameRatingAverage,
+// } from "./controller/user/RatingController.js";
+// import {
+//   walletCreate,
+//   disconnectWallet,
+// } from "./controller/user/WalletLoginController.js";
+import {
+  // addEditGame,
+  // addEditGameRule,
+  // getGameRules,
+  // gameDelete,
+  // getAllGame,
+  // getSingleGame,
+  // getSingleGameRules,
+  // gameRuleDelete,
+  // gameActiveDeactive,
   getGameHistory,
   addEditGameWiseTime,
   getAllGameTime,
@@ -203,7 +238,7 @@ import {
   getAllNumberGamePeriod,
   getNumberGamePeriodById,
   createGamePeriodFromCronJob,
-  getPeriod
+  getPeriod,
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
@@ -240,14 +275,14 @@ import {
   getAllLastDayCommunityBettingWinners,
   getLoginUserCommunityBets,
   getCommunityGamePeriodById,
-  getAllCommunityGamePeriod
+  getAllCommunityGamePeriod,
 } from "./controller/user/CommunityController.js";
 import {
   getAllWinnersUser,
   getAllUsersAndWinnersCommunityBetting,
   declareWinnerOfCommunityBetting,
   declareWinnerOfNumberBetting,
-  declareWinnerOfColorBetting
+  declareWinnerOfColorBetting,
 } from "./controller/admin/GameWinnerController.js";
 
 // *********** Routes **************** //
@@ -433,8 +468,8 @@ export {
   editProfile,
   logout,
   connectToWallet,
-  updateEmail,
-  userCheckEmail,
+  // updateEmail,
+  // userCheckEmail,
   verifyOtp,
   loginFromMpin,
   forgotPassword,
@@ -557,4 +592,5 @@ export {
   colourBetResult,
   getNumberGameTotal,
   getCommunityWinList,
+  // updateEmail,
 };
