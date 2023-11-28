@@ -1,92 +1,94 @@
+import { getTransactionList, getwithdrwalcheck } from "../controller/admin/AdminController.js";
+import { getAllGamePeriodData, getAllNumberBettingPeriodDetails } from "../controller/admin/GameController.js";
 import {
-  express,
   Auth,
   Upload,
-  adminLogin,
-  adminEditProfile,
-  adminChangePassword,
-  adminForgetPassword,
-  adminVerifyOtp,
-  adminResetPassword,
-  adminLogout,
-  addEditPrivacyPolicy,
-  addEditAboutUs,
-  addEditTermsAndCondition,
-  getCMSDetail,
-  adminSetting,
-  adminWithdrawalRequest,
-  howToReferralWork,
-  adminEditUser,
-  adminDeleteUser,
-  getAllQuery,
-  showRating,
-  addEditGame,
-  gameDelete,
-  getAllGame,
-  addEditGameRule,
-  getGameRules,
-  getSingleGame,
-  getSingleGameRules,
-  gameRuleDelete,
-  getAllUsers,
-  getAdminProfile,
-  adminDashboard,
-  getAdminSingleUser,
-  changeStatusOfUser,
-  getUserReferralBySignIn,
   acceptWithdrawalRequest,
-  getSingleUserTransaction,
-  gelAllUserDepositeAndWithdrawal,
-  getAllTransaction,
-  getSingleGameRating,
-  deleteRating,
-  notificationAddEdit,
-  getAllNotification,
-  getSingleNotification,
-  deleteNotification,
-  allCurrencyConverter,
-  gameActiveDeactive,
+  addEditAboutUs,
   addEditCoinSetting,
-  getCoinSetting,
-  getListCoinSetting,
-  getAdminSetting,
-  getSingleQuery,
-  adminDeleteQuery,
-  addEditRole,
-  getRole,
-  getListRole,
-  deleteRole,
-  adminResendOtp,
-  addSubadmin,
-  deleteSubadmin,
-  getLoginSubadmin,
-  subadminActiveDeactive,
-  getSingleSubadmin,
-  getAllSubadmin,
-  addEditPermission,
-  getAllPermission,
-  permissionGetById,
-  permissionActiveDeActive,
-  getGameWiseUserList,
-  getGameHistory,
-  getUserWiseGameList,
-  addEditCurrencyCoin,
-  getAllCurrencyCoin,
-  getSingleCurrencyCoin,
-  currenyCoinDelete,
-  addEditGameWiseTime,
-  getAllGameTime,
   addEditCommunityBetting,
-  getAllCommunityBetting,
-  getSingleCommunityBetting,
-  deleteCommunityBetting,
-  getNumberGameTotal,
-  getAllWinnersUser,
-  getAllUsersAndWinnersCommunityBetting,
+  addEditCurrencyCoin,
+  addEditGame,
+  addEditGameRule,
+  addEditGameWiseTime,
+  addEditPermission,
+  addEditPrivacyPolicy,
+  addEditRole,
+  addEditTermsAndCondition,
+  addSubadmin,
+  adminChangePassword,
+  adminDashboard,
+  adminDeleteQuery,
+  adminDeleteUser,
+  adminEditProfile,
+  adminEditUser,
+  adminForgetPassword,
+  adminLogin,
+  adminLogout,
+  adminResendOtp,
+  adminResetPassword,
+  adminSetting,
+  adminVerifyOtp,
+  adminWithdrawalRequest,
+  allCurrencyConverter,
+  changeStatusOfUser,
+  currenyCoinDelete,
+  declareWinnerOfColorBetting,
   declareWinnerOfCommunityBetting,
   declareWinnerOfNumberBetting,
-  declareWinnerOfColorBetting,
+  deleteCommunityBetting,
+  deleteNotification,
+  deleteRating,
+  deleteRole,
+  deleteSubadmin,
+  express,
+  gameActiveDeactive,
+  gameDelete,
   gameIsRepeat,
+  gameRuleDelete,
+  gelAllUserDepositeAndWithdrawal,
+  getAdminProfile,
+  getAdminSetting,
+  getAdminSingleUser,
+  getAllCommunityBetting,
+  getAllCurrencyCoin,
+  getAllGame,
+  getAllGameTime,
+  getAllNotification,
+  getAllPermission,
+  getAllQuery,
+  getAllSubadmin,
+  getAllTransaction,
+  getAllUsers,
+  getAllUsersAndWinnersCommunityBetting,
+  getAllWinnersUser,
+  getCMSDetail,
+  getCoinSetting,
+  getGameHistory,
+  getGameRules,
+  getGameWiseUserList,
+  getListCoinSetting,
+  getListRole,
+  getLoginSubadmin,
+  getNumberGameTotal,
+  getRole,
+  getSingleCommunityBetting,
+  getSingleCurrencyCoin,
+  getSingleGame,
+  getSingleGameRating,
+  getSingleGameRules,
+  getSingleNotification,
+  getSingleQuery,
+  getSingleSubadmin,
+  getSingleUserTransaction,
+  getUserReferralBySignIn,
+  getUserWiseGameList,
+  howToReferralWork,
+  notificationAddEdit,
+  permissionActiveDeActive,
+  permissionGetById,
+  showRating,
+  subadminActiveDeactive,
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -133,7 +135,9 @@ adminRoutes.post("/cms/about-us", Auth, addEditAboutUs);
 adminRoutes.post("/cms/terms-and-condition", Auth, addEditTermsAndCondition);
 adminRoutes.get("/cms", Auth, getCMSDetail);
 
-adminRoutes.post("/how-referral-work", Auth, howToReferralWork);
+adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
+adminRoutes.post("/transaction", Auth, getTransactionList)
+adminRoutes.post("/how-referral-work", Auth, howToReferralWork)
 
 // -------- Setting -------- //
 adminRoutes.get("/setting-get", Auth, getAdminSetting);
@@ -156,15 +160,23 @@ adminRoutes.get("/get-game-wise-user-list/:gameId", Auth, getGameWiseUserList);
 adminRoutes.get("/get-user-wise-game-list/:userId", Auth, getUserWiseGameList);
 adminRoutes.get("/get-game-history", Auth, getGameHistory);
 
+// ------ User Manegment
+adminRoutes.get('/users', Auth, getAllUsers);
+adminRoutes.post('/single-user', Auth, getAdminSingleUser);
+adminRoutes.post('/user-edit', Auth, Upload, adminEditUser);
+adminRoutes.post('/user-delete', Auth, adminDeleteUser);
+adminRoutes.post("/user/activate/deactivate", Auth, changeStatusOfUser)
+adminRoutes.post("/single-user/transaction", Auth, getSingleUserTransaction)
+
 // User Query
 adminRoutes.get("/queries", Auth, getAllQuery);
 adminRoutes.post("/get-single-query", Auth, getSingleQuery);
 adminRoutes.post("/query-delete", Auth, adminDeleteQuery);
 
 // Rating
-adminRoutes.get("/game/ratings", Auth, showRating);
-adminRoutes.post("/single-game-rating", Auth, getSingleGameRating);
-adminRoutes.post("/rating-delete", Auth, deleteRating);
+adminRoutes.get('/game/ratings', Auth, showRating)
+adminRoutes.post('/single-game-rating', Auth, getSingleGameRating)
+adminRoutes.post('/rating-delete', Auth, deleteRating)
 
 // Get WithdrwalList
 adminRoutes.post(
@@ -182,6 +194,7 @@ adminRoutes.post(
 adminRoutes.post("/game/add-edit", Auth, Upload, addEditGame);
 adminRoutes.get("/games", Auth, getAllGame);
 adminRoutes.post("/single-game", Auth, getSingleGame);
+adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
 adminRoutes.post("/game/delete", Auth, gameDelete);
 adminRoutes.post("/game-active-deactive", Auth, gameActiveDeactive);
 adminRoutes.post("/add-edit-game-wise-time", Auth, addEditGameWiseTime);
@@ -202,11 +215,16 @@ adminRoutes.post("/user-signin-by-referral", Auth, getUserReferralBySignIn);
 adminRoutes.get("/get-all-transaction", Auth, getAllTransaction);
 
 //#region Notification
-adminRoutes.post("/notification-add-edit", Auth, notificationAddEdit);
-adminRoutes.get("/notifications", Auth, getAllNotification);
-adminRoutes.post("/single-notification", Auth, getSingleNotification);
-adminRoutes.post("/notification-delete", Auth, deleteNotification);
+adminRoutes.post('/notification-add-edit', Auth, notificationAddEdit)
+adminRoutes.get('/notifications', Auth, getAllNotification)
+adminRoutes.post('/single-notification', Auth, getSingleNotification)
+adminRoutes.post('/notification-delete', Auth, deleteNotification)
 //#endregion
+
+//#region 
+adminRoutes.post('/currency-convert',allCurrencyConverter);
+//#endregion
+
 
 adminRoutes.post("/currency-convert", allCurrencyConverter);
 //#endregion
@@ -250,4 +268,7 @@ adminRoutes.post("/declare-winner", Auth, declareWinnerOfCommunityBetting);
 adminRoutes.post("/declare-number-betting-winner", Auth, declareWinnerOfNumberBetting);
 adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBetting);
 
+adminRoutes.get("/get-all-game-periods/:gameId", Auth, getAllGamePeriodData);
+adminRoutes.get("/get-all-number-betting-periods-details/:gameId", Auth, getAllNumberBettingPeriodDetails);
 export { adminRoutes };
+

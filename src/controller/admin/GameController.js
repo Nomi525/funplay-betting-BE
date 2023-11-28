@@ -1,21 +1,23 @@
 import moment from "moment";
 import {
+  ColourBetting,
+  CommunityBetting,
   Game,
   GameRules,
-  sendResponse,
-  StatusCodes,
-  createError,
-  ResponseMessage,
-  getSingleData,
-  dataUpdated,
-  dataCreate,
-  getAllData,
-  handleErrorResponse,
-  GameHistory,
   GameTime,
-  CommunityBetting,
+  NumberBetting,
+  Period,
+  ResponseMessage,
+  StatusCodes,
+  dataCreate,
+  dataUpdated,
+  getSingleData,
+  handleErrorResponse,
+  mongoose,
+  sendResponse,
 } from "../../index.js";
 
+//#region Game add and edit
 export const addEditGame = async (req, res) => {
   try {
     const {
@@ -37,7 +39,7 @@ export const addEditGame = async (req, res) => {
       gameTime,
       isRepeat,
       gameHours,
-      gameSecond 
+      gameSecond,
     } = req.body;
     // let originalStartDate = moment(gameTimeFrom);
     // let originalEndDate = moment(gameTimeTo);
@@ -96,7 +98,7 @@ export const addEditGame = async (req, res) => {
             gameMinimumCoin,
             gameMaximumCoin,
             gameHours,
-            gameSecond
+            gameSecond,
           },
           Game
         );
@@ -164,66 +166,66 @@ export const addEditGame = async (req, res) => {
   }
 };
 
-export const gameDelete = async (req, res) => {
-  try {
-    const { gameId } = req.body;
-    await dataUpdated({ _id: gameId }, { is_deleted: 1 }, Game);
-    return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DELETED, []);
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
+// export const gameDelete = async (req, res) => {
+//   try {
+//     const { gameId } = req.body;
+//     await dataUpdated({ _id: gameId }, { is_deleted: 1 }, Game);
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DELETED, []);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
 
 //#region Game delete
-export const gameActiveDeactive = async (req, res) => {
-  try {
-    const { gameId } = req.body;
-    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
-    if (findGame) {
-      if (findGame.isActive == false) {
-        const checkGameCount = await Game.countDocuments({
-          $or: [{ isActive: true, is_deleted: 0 }],
-        });
-        if (checkGameCount >= 6) {
-          return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.GAME_ACTIVE_LIMIT,
-            []
-          );
-        }
-      }
-      if (findGame.isActive) {
-        findGame.isActive = false;
-        await findGame.save();
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.GAME_DEACTIVE,
-          []
-        );
-      } else {
-        findGame.isActive = true;
-        await findGame.save();
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.GAME_ACTIVE,
-          []
-        );
-      }
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.GAME_NOT_FOUND,
-        []
-      );
-    }
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
+// export const gameActiveDeactive = async (req, res) => {
+//   try {
+//     const { gameId } = req.body;
+//     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+//     if (findGame) {
+//       if (findGame.isActive == false) {
+//         const checkGameCount = await Game.countDocuments({
+//           $or: [{ isActive: true, is_deleted: 0 }],
+//         });
+//         if (checkGameCount >= 6) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.GAME_ACTIVE_LIMIT,
+//             []
+//           );
+//         }
+//       }
+//       if (findGame.isActive) {
+//         findGame.isActive = false;
+//         await findGame.save();
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.GAME_DEACTIVE,
+//           []
+//         );
+//       } else {
+//         findGame.isActive = true;
+//         await findGame.save();
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.GAME_ACTIVE,
+//           []
+//         );
+//       }
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.GAME_NOT_FOUND,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
 //#endregion
 
 //#region game repeat active and deactive
@@ -707,6 +709,75 @@ export const getGameHistory = async (req, res) => {
 };
 //#endregion
 
+//#region Game delete
+export const gameDelete = async (req, res) => {
+  try {
+    const { gameId } = req.body;
+    const deleteGame = await dataUpdated(
+      { _id: gameId },
+      { is_deleted: 1 },
+      Game
+    );
+    if (deleteGame) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_DELETED,
+        []
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.GAME_DELETED,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Game delete
+export const gameActiveDeactive = async (req, res) => {
+  try {
+    const { gameId } = req.body;
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame) {
+      if (findGame.isActive) {
+        findGame.isActive = false;
+        await findGame.save();
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.GAME_DEACTIVE,
+          []
+        );
+      } else {
+        findGame.isActive = true;
+        await findGame.save();
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.GAME_ACTIVE,
+          []
+        );
+      }
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.GAME_NOT_FOUND,
+        []
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
 // Games Rules CRUD
 export const addEditGameRule = async (req, res) => {
   try {
@@ -944,6 +1015,138 @@ export const getCommunityGameList = async (req, res) => {
         []
       );
     }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Get list of game periods by gameId
+export const getAllGamePeriodData = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const numberBattingAggregationResult = await Period.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId)
+        },
+      },
+      {
+        $lookup: {
+          from: "numberbettings",
+          localField: "period",
+          foreignField: "period",
+          as: "numberBettingsData",
+          },  
+      },
+      {
+        $unwind: "$numberBettingsData", // Unwind the array to apply $match on each element
+      },
+      {
+        $match: {
+          "numberBettingsData.isWin": false,
+        },
+      },
+       {
+        $group: {
+          _id: "$numberBettingsData.period",
+          period: { $first: "$period" },
+          numberBettingsData: { $push: "$numberBettingsData" },
+        },
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          price: "$betAmount",
+          period: 1,
+          numberBettingsData: 1,
+        },
+      },
+    ]);
+
+
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      numberBattingAggregationResult
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Get list of number betting periods details
+export const getAllNumberBettingPeriodDetails = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const aggregationResult = await NumberBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "users",
+        },
+      },
+      {
+        $unwind: "$users",
+      },
+      {
+        $group: {
+          _id: "$period",
+          totalUsers: { $sum: 1 },
+          users: { $push: "$users" },
+          winNumber: {
+            $max: {
+              $cond: [{ $eq: ["$isWin", true] }, "$number", null],
+            },
+          },
+          totalBetAmount: { $sum: "$betAmount" },
+          period: { $first: "$period" },
+          bets: { $push: "$$ROOT" },
+        },
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalUsers: 1,
+          totalBetAmount: 1,
+          price: "$betAmount",
+          period: 1,
+          winNumber: 1,
+          users: { _id: 1, fullName: 1, email: 1, profile: 1 },
+          bets: 1,
+        },
+      },
+    ]);
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      aggregationResult
+    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }

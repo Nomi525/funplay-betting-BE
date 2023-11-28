@@ -1,69 +1,70 @@
+import { updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
-  express,
-  logout,
-  editProfile,
-  Upload,
-  connectToWallet,
-  updateEmail,
-  userCheckEmail,
-  verifyOtp,
-  loginFromMpin,
   Auth,
-  forgotPassword,
-  resetPassword,
-  verifyForgotOtp,
-  resendOtp,
-  changePassword,
-  getProfile,
-  userEditProfile,
+  Upload,
   accountDeactivate,
+  addColourBet,
+  addEditCommunityBets,
+  addEditNumberBet,
   addEditQuery,
-  deleteQuery,
   addEditRating,
-  gameRatingAverage,
-  singupFromEmailPassword,
-  singInFromEmailPassword,
-  walletCreate,
-  disconnectWallet,
-  validatorMiddlware,
-  setMpin,
-  changeMpin,
-  emailVerify,
-  setPassword,
-  userDashboard,
   addNewTransaction,
-  getUserNewTransaction,
+  changeMpin,
+  changePassword,
+  checkWalletAddress,
+  colourBetResult,
+  connectToWallet,
+  deleteNumberBet,
+  deleteQuery,
+  disconnectWallet,
+  editProfile,
+  emailVerify,
+  express,
+  forgotPassword,
+  gameRatingAverage,
+  getAllCommunityGamePeriod,
+  getAllGamePeriod,
+  getAllGameWiseWinner,
+  getAllLastDayCommunityBettingWinners,
+  getAllLiveCommunityBets,
+  getAllNumberBet,
+  getAllNumberGamePeriod,
+  getByIdGamePeriod,
+  getCommunityGamePeriodById,
+  getCommunityWinList,
+  getLoginUserColourBet,
+  getLoginUserCommunityBets,
+  getNumberGamePeriodById,
+  getPeriod,
+  getProfile,
+  getSingleGameWiseWinner,
+  getSingleNumberBet,
   getTotalUserAmountDiposit,
-  withdrawalRequest,
-  userDepositeWithdrawalHistory,
+  getUserNewTransaction,
+  loginFromMpin,
+  logout,
+  resendOtp,
+  resetPassword,
+  setMpin,
+  setPassword,
+  singInFromEmailPassword,
   singInWalletAddress,
+  singupFromEmailPassword,
+  topWeeklyMonthlyPlayers,
   updateLoginStatus,
-  userSignUpSignInOtp,
+  userDashboard,
+  userDepositeWithdrawalHistory,
+  userEditProfile,
   userGetAllGame,
   userGetCMSDetail,
-  addEditNumberBet,
-  getAllNumberBet,
-  getSingleNumberBet,
-  deleteNumberBet,
-  checkWalletAddress,
-  addColourBet,
-  colourBetResult,
-  getAllGameWiseWinner,
-  getSingleGameWiseWinner,
-  getLoginUserColourBet,
-  topWeeklyMonthlyPlayers,
-  getAllGamePeriod,
-  getByIdGamePeriod,
-  addEditCommunityBets,
-  getLoginUserCommunityBets,
-  getAllLiveCommunityBets,
-  getAllLastDayCommunityBettingWinners,
-  getCommunityWinList,
-  getAllNumberGamePeriod,
-  getNumberGamePeriodById,
-  getCommunityGamePeriodById,
-  getAllCommunityGamePeriod,
-  getPeriod
+  userSignUpSignInOtp,
+  validatorMiddlware,
+  verifyForgotOtp,
+  // updateEmail,
+  // userCheckEmail,
+  verifyOtp,
+  walletCreate,
+  withdrawalRequest,
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -125,46 +126,82 @@ userRoutes.get("/dashboard", Auth, userDashboard);
 userRoutes.get("/get-top-weekly-monthly-users", topWeeklyMonthlyPlayers);
 
 //#region Game
-userRoutes.get('/games', userGetAllGame)
+userRoutes.get("/games", userGetAllGame);
 
 //#region CMS
-userRoutes.get('/cms-details', userGetCMSDetail)
+userRoutes.get("/cms-details", userGetCMSDetail);
 
 // Number Betting Routes
-userRoutes.post('/create-number-bet', Auth, addEditNumberBet);
-userRoutes.get('/get-number-bets', Auth, getAllNumberBet);
-userRoutes.get('/get-single-number-bet/:numberBetId', Auth, getSingleNumberBet);
-userRoutes.post('/delete-number-bet', Auth, deleteNumberBet);
-userRoutes.get('/get-single-number-game-period/:gameId', Auth, getNumberGamePeriodById);
-userRoutes.get('/get-all-number-game-period/:gameId', Auth, getAllNumberGamePeriod);
+userRoutes.post("/create-number-bet", Auth, addEditNumberBet);
+userRoutes.get("/get-number-bets", Auth, getAllNumberBet);
+userRoutes.get("/get-single-number-bet/:numberBetId", Auth, getSingleNumberBet);
+userRoutes.post("/delete-number-bet", Auth, deleteNumberBet);
+userRoutes.get(
+  "/get-single-number-game-period/:gameId",
+  Auth,
+  getNumberGamePeriodById
+);
+userRoutes.get(
+  "/get-all-number-game-period/:gameId",
+  Auth,
+  getAllNumberGamePeriod
+);
 
 //Colour betting
-userRoutes.post('/create-colour-bet', Auth, addColourBet);
-userRoutes.get('/colour-bet-result/:gameType/:type/:gameId/:period', Auth, colourBetResult);
-userRoutes.get('/get-all-color-game-winners/:gameId', Auth, getAllGameWiseWinner);
-userRoutes.get('/get-single-color-game-winners/:gameId', Auth, getSingleGameWiseWinner);
-userRoutes.get('/get-login-user-bet', Auth, getLoginUserColourBet);
+userRoutes.post("/create-colour-bet", Auth, addColourBet);
+userRoutes.get(
+  "/colour-bet-result/:gameType/:type/:gameId/:period",
+  Auth,
+  colourBetResult
+);
+userRoutes.get(
+  "/get-all-color-game-winners/:gameId",
+  Auth,
+  getAllGameWiseWinner
+);
+userRoutes.get(
+  "/get-single-color-game-winners/:gameId",
+  Auth,
+  getSingleGameWiseWinner
+);
+userRoutes.get("/get-login-user-bet", Auth, getLoginUserColourBet);
 
 // Color Period
-userRoutes.get('/get-all-game-period/:gameId', Auth, getAllGamePeriod)
+userRoutes.get("/get-all-game-period/:gameId", Auth, getAllGamePeriod);
 userRoutes.get("/get-by-id-game-period/:gameId", Auth, getByIdGamePeriod);
 
 // Community Betting Routes
-userRoutes.post('/add-edit-community-bets', Auth, addEditCommunityBets)
-userRoutes.get('/get-login-user-community-bets/:gameId', Auth, getLoginUserCommunityBets)
-userRoutes.get('/get-all-live-community-bets/:gameId', Auth, getAllLiveCommunityBets)
-userRoutes.get('/get-all-last-day-community-betting-winners/:gameId', Auth, getAllLastDayCommunityBettingWinners)
-
+userRoutes.post("/add-edit-community-bets", Auth, addEditCommunityBets);
 userRoutes.get(
-  "/community-winners", Auth,
-  getCommunityWinList
+  "/get-login-user-community-bets/:gameId",
+  Auth,
+  getLoginUserCommunityBets
+);
+userRoutes.get(
+  "/get-all-live-community-bets/:gameId",
+  Auth,
+  getAllLiveCommunityBets
+);
+userRoutes.get(
+  "/get-all-last-day-community-betting-winners/:gameId",
+  Auth,
+  getAllLastDayCommunityBettingWinners
 );
 
-userRoutes.get('/get-single-community-game-period/:gameId', Auth, getCommunityGamePeriodById);
-userRoutes.get('/get-all-community-game-period/:gameId', Auth, getAllCommunityGamePeriod);
-userRoutes.get('/get-period/:gameId', Auth, getPeriod)
+userRoutes.get("/community-winners", Auth, getCommunityWinList);
 
-
+userRoutes.get(
+  "/get-single-community-game-period/:gameId",
+  Auth,
+  getCommunityGamePeriodById
+);
+userRoutes.get(
+  "/get-all-community-game-period/:gameId",
+  Auth,
+  getAllCommunityGamePeriod
+);
+userRoutes.get("/get-period/:gameId", Auth, getPeriod);
 
 
 export { userRoutes };
+

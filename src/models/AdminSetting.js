@@ -26,6 +26,16 @@ const adminSettingSchema = new mongoose.Schema(
             type: String,
             required : false
         },
+        oneCoinRupes: {
+            type: Number,
+            required : false,
+            default : 0
+        },
+        oneRupesCoin: {
+            type: Number,
+            required : false,
+            default : 0
+        },
         currency: {
             type: String,
             required: false
