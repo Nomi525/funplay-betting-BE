@@ -16,6 +16,7 @@ import {
   CommunityBetting,
 } from "../../index.js";
 
+//#region Game add and edit
 export const addEditGame = async (req, res) => {
   try {
     const {
@@ -164,66 +165,66 @@ export const addEditGame = async (req, res) => {
   }
 };
 
-export const gameDelete = async (req, res) => {
-  try {
-    const { gameId } = req.body;
-    await dataUpdated({ _id: gameId }, { is_deleted: 1 }, Game);
-    return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DELETED, []);
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
+// export const gameDelete = async (req, res) => {
+//   try {
+//     const { gameId } = req.body;
+//     await dataUpdated({ _id: gameId }, { is_deleted: 1 }, Game);
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DELETED, []);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
 
 //#region Game delete
-export const gameActiveDeactive = async (req, res) => {
-  try {
-    const { gameId } = req.body;
-    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
-    if (findGame) {
-      if (findGame.isActive == false) {
-        const checkGameCount = await Game.countDocuments({
-          $or: [{ isActive: true, is_deleted: 0 }],
-        });
-        if (checkGameCount >= 6) {
-          return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.GAME_ACTIVE_LIMIT,
-            []
-          );
-        }
-      }
-      if (findGame.isActive) {
-        findGame.isActive = false;
-        await findGame.save();
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.GAME_DEACTIVE,
-          []
-        );
-      } else {
-        findGame.isActive = true;
-        await findGame.save();
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.GAME_ACTIVE,
-          []
-        );
-      }
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.GAME_NOT_FOUND,
-        []
-      );
-    }
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
+// export const gameActiveDeactive = async (req, res) => {
+//   try {
+//     const { gameId } = req.body;
+//     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+//     if (findGame) {
+//       if (findGame.isActive == false) {
+//         const checkGameCount = await Game.countDocuments({
+//           $or: [{ isActive: true, is_deleted: 0 }],
+//         });
+//         if (checkGameCount >= 6) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.GAME_ACTIVE_LIMIT,
+//             []
+//           );
+//         }
+//       }
+//       if (findGame.isActive) {
+//         findGame.isActive = false;
+//         await findGame.save();
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.GAME_DEACTIVE,
+//           []
+//         );
+//       } else {
+//         findGame.isActive = true;
+//         await findGame.save();
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.GAME_ACTIVE,
+//           []
+//         );
+//       }
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.GAME_NOT_FOUND,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
 //#endregion
 
 //#region game repeat active and deactive
@@ -705,6 +706,47 @@ export const getGameHistory = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
+
+//#region Game delete
+export const gameDelete = async (req, res) => {
+  try {
+    const { gameId } = req.body;
+    const deleteGame = await dataUpdated({ _id: gameId }, { is_deleted: 1 }, Game)
+    if (deleteGame) {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DELETED, []);
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_DELETED, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+//#endregion
+
+
+//#region Game delete
+export const gameActiveDeactive = async (req, res) => {
+  try {
+    const { gameId } = req.body;
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame) {
+      if (findGame.isActive) {
+        findGame.isActive = false;
+        await findGame.save();
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DEACTIVE, []);
+      } else {
+        findGame.isActive = true;
+        await findGame.save();
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_ACTIVE, []);
+      }
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
 //#endregion
 
 // Games Rules CRUD
