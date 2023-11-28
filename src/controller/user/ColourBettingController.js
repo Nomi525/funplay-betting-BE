@@ -591,7 +591,7 @@ export const getByIdGamePeriod = async (req, res) => {
     const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
       .populate('userId', 'fullName profile email')
       .populate('gameId', 'gameName gameImage gameMode')
-      .sort({ count: -1 })
+      .sort({ period: -1 })
     return sendResponse(
       res,
       StatusCodes.OK,
