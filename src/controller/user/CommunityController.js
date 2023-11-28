@@ -1,8 +1,6 @@
 import {
-  ColourBetting,
   CommunityBetting,
   NewTransaction,
-  NumberBetting,
   ResponseMessage,
   StatusCodes,
   dataCreate,
@@ -11,7 +9,7 @@ import {
   minusLargeSmallValue,
   mongoose,
   plusLargeSmallValue,
-  sendResponse,
+  sendResponse
 } from "../../index.js";
 
 //#region Add edit community betting
@@ -319,161 +317,3 @@ export const getAllCommunityGamePeriod = async (req, res) => {
 // };
 //#endregion
 
-export const getAllGamePeriodData = async (req, res) => {
-  try {
-    const { gameId } = req.params;
-    // const { gameType } = req.query;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const numberBattingAggregationResult = await NumberBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0,
-          number: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$period",
-          totalUsers: { $sum: 1 },
-          winNumber: {
-            $max: {
-              $cond: [{ $eq: ["$isWin", true] }, "$number", null],
-            },
-          },
-          period: { $first: "$period" },
-        },
-      },
-      {
-        $sort: {
-          period: -1,
-        },
-      },
-      {
-        $lookup: {
-          from: "periods",
-          localField: "period",
-          foreignField: "period",
-          as: "periodData",
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          totalUsers: 1,
-          price: "$betAmount",
-          period: 1,
-          winNumber: 1,
-          periodData: 1,
-        },
-      },
-    ]);
-
-    const colorAggregationResult = await ColourBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$period",
-          totalUsers: { $sum: 1 },
-          winColour: {
-            $max: {
-              $cond: [{ $eq: ["$isWin", true] }, "$colourName", null],
-            },
-          },
-          period: { $first: "$period" },
-        },
-      },
-      {
-        $sort: {
-          period: -1,
-        },
-      },
-      {
-        $lookup: {
-          from: "periods",
-          localField: "period",
-          foreignField: "period",
-          as: "periodData",
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          totalUsers: 1,
-          price: "$betAmount",
-          period: 1,
-          winColour: 1,
-          periodData: 1,
-        },
-      },
-    ]);
-
-    const communityAggregationResult = await CommunityBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$periods",
-          totalUsers: { $sum: 1 },
-          winBet: {
-            $max: {
-              $cond: [{ $eq: ["$isWin", true] }, "$betAmount", null],
-            },
-          },
-          period: { $first: "$period" },
-        },
-      },
-      {
-        $sort: {
-          period: -1,
-        },
-      },
-      {
-        $lookup: {
-          from: "periods",
-          localField: "period",
-          foreignField: "period",
-          as: "periodData",
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          totalUsers: 1,
-          price: "$betAmount",
-          period: 1,
-          winBet: 1,
-          periodData: 1,
-        },
-      },
-    ]);
-
-    const combinedResults = [
-      ...numberBattingAggregationResult,
-      ...colorAggregationResult,
-      ...communityAggregationResult,
-    ];
-
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      combinedResults
-    );
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};

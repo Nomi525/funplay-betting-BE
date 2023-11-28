@@ -1,19 +1,19 @@
 import moment from "moment";
 import {
+  ColourBetting,
+  CommunityBetting,
   Game,
   GameRules,
-  sendResponse,
-  StatusCodes,
-  createError,
-  ResponseMessage,
-  getSingleData,
-  dataUpdated,
-  dataCreate,
-  getAllData,
-  handleErrorResponse,
-  GameHistory,
   GameTime,
-  CommunityBetting,
+  NumberBetting,
+  ResponseMessage,
+  StatusCodes,
+  dataCreate,
+  dataUpdated,
+  getSingleData,
+  handleErrorResponse,
+  mongoose,
+  sendResponse,
 } from "../../index.js";
 
 //#region Game add and edit
@@ -986,6 +986,146 @@ export const getCommunityGameList = async (req, res) => {
         []
       );
     }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Get list of game periods by gameId
+export const getAllGamePeriodData = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const numberBattingAggregationResult = await NumberBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$period",
+          totalUsers: { $sum: 1 },
+          period: { $first: "$period" },
+        },
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalUsers: 1,
+          price: "$betAmount",
+          period: 1,
+          periodData: 1,
+        },
+      },
+    ]);
+
+    const colorAggregationResult = await ColourBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$period",
+          totalUsers: { $sum: 1 },
+          period: { $first: "$period" },
+        },
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalUsers: 1,
+          price: "$betAmount",
+          period: 1,
+          periodData: 1,
+        },
+      },
+    ]);
+
+    const communityAggregationResult = await CommunityBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$periods",
+          totalUsers: { $sum: 1 },
+          period: { $first: "$period" },
+        },
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalUsers: 1,
+          price: "$betAmount",
+          period: 1,
+          periodData: 1,
+        },
+      },
+    ]);
+
+    const combinedResults = [
+      ...numberBattingAggregationResult,
+      ...colorAggregationResult,
+      ...communityAggregationResult,
+    ];
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      combinedResults
+    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
