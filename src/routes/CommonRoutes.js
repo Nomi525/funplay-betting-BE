@@ -1,8 +1,21 @@
-import { express, Auth, Upload, addEditBanner,deleteBanner,allBannerGet } from "../index.js"
+import {
+    express, Auth, Upload,
+    addEditBanner, deleteBanner, allBannerGet, getSingleGameRule, getAllCurrency,getSingleGameTime
+} from "../index.js"
 const commonRoutes = express.Router();
 // Banner Api for admin and user
 commonRoutes.post('/banner-add-edit', Auth, Upload, addEditBanner);
-commonRoutes.get('/banners', Auth, allBannerGet);
+commonRoutes.get('/banners', allBannerGet);
 commonRoutes.post('/banner-delete', Auth, deleteBanner);
+
+//#region Get Game Rules
+commonRoutes.get('/get-single-game-rule/:gameId', Auth, getSingleGameRule);
+
+//#region Currecny Routes
+commonRoutes.get('/get-all-currency', getAllCurrency)
+//#endregion
+
+//#region Get single game time
+commonRoutes.get('/get-single-game-time/:gameId', getSingleGameTime)
 
 export { commonRoutes }

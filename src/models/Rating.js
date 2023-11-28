@@ -15,9 +15,9 @@ const ratingSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
-    is_deleted: {
+    is_deleted : {
         type: Number,
-        default: 0
+        default: 0,
     }
 }, { timestamps: true });
 

@@ -14,7 +14,8 @@
 // };
 
 // describe('Admin Query test case', () => {
-//     it("Add query", (done) => {
+//     //#region Get all queries
+//     it("Get All query", (done) => {
 //         chai.request(appServer)
 //             .get('/api/admin/queries')
 //             .set('auth', adminToken)
@@ -22,7 +23,10 @@
 //                 if (res.body.status == 201) {
 //                     expect(res.body.status).to.be.equal(201);
 //                 } else if (res.body.status == 200) {
+//                     queryId = res.body?.data[0]
 //                     expect(res.body.status).to.be.equal(200);
+//                 } else if (res.body.status == 400) {
+//                     expect(res.body.status).to.be.equal(400);
 //                 } else if (res.body.status == 404) {
 //                     expect(res.body.status).to.be.equal(404);
 //                 } else {
@@ -32,4 +36,53 @@
 //                 done();
 //             })
 //     });
+//     //#endregion
+
+//     //#region Get single query
+//     it("Get single query", (done) => {
+//         chai.request(appServer)
+//             .post('/api/admin/get-single-query')
+//             .set('auth', adminToken)
+//             .send({ queryId })
+//             .end((err, res) => {
+//                 if (res.body.status == 201) {
+//                     expect(res.body.status).to.be.equal(201);
+//                 } else if (res.body.status == 200) {
+//                     expect(res.body.status).to.be.equal(200);
+//                 } else if (res.body.status == 400) {
+//                     expect(res.body.status).to.be.equal(400);
+//                 } else if (res.body.status == 404) {
+//                     expect(res.body.status).to.be.equal(404);
+//                 } else {
+//                     expect(res.body.status).to.be.equal(500);
+//                 }
+//                 expect(res.body).to.have.all.keys('status', 'message', 'data')
+//                 done();
+//             })
+//     });
+//     //#endregion
+
+//     //#region delete single query
+//     it("Delete query", (done) => {
+//         chai.request(appServer)
+//             .post('/api/admin/query-delete')
+//             .set('auth', adminToken)
+//             .send({ queryId })
+//             .end((err, res) => {
+//                 if (res.body.status == 201) {
+//                     expect(res.body.status).to.be.equal(201);
+//                 } else if (res.body.status == 200) {
+//                     expect(res.body.status).to.be.equal(200);
+//                 } else if (res.body.status == 400) {
+//                     expect(res.body.status).to.be.equal(400);
+//                 } else if (res.body.status == 404) {
+//                     expect(res.body.status).to.be.equal(404);
+//                 } else {
+//                     expect(res.body.status).to.be.equal(500);
+//                 }
+//                 expect(res.body).to.have.all.keys('status', 'message', 'data')
+//                 done();
+//             })
+//     });
+//     //#endregion
 // })

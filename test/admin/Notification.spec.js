@@ -9,7 +9,7 @@
 //     description: "dummt notificaton"
 // }
 
-// describe("Admin notification test case", () => {
+// describe("Admin, Notification test case", () => {
 
 //     //#region Create notification
 //     it("Create notification", (done) => {
@@ -18,7 +18,6 @@
 //             .set('auth', adminToken)
 //             .send({ title: notificationDetails.title, description: notificationDetails.description })
 //             .end((error, res) => {
-//                 console.log(res.body);
 //                 if (res.body.status == 201) {
 //                     notificationDetails.notificationId = res.body.data._id
 //                     expect(res.body.status).to.be.equal(201);

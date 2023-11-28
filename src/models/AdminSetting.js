@@ -36,6 +36,18 @@ const adminSettingSchema = new mongoose.Schema(
             required : false,
             default : 0
         },
+        currency: {
+            type: String,
+            required: false
+        },
+        currencyValue: {
+            type: Number,
+            required: false
+        },
+        coin: {
+            type: Number,
+            required: false
+        },
         is_deleted: {
             type: Number,
             default: 0,

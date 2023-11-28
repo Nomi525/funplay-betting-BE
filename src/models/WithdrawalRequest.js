@@ -18,6 +18,14 @@ const withdrawalRequestSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    tokenValue: {
+        type: String,
+        required: false
+    },
+    tetherType :{
+        type: String,
+        required: false
+    },
     status : {
         type : String,
         enum : ['pendding','accept','reject'],

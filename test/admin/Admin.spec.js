@@ -189,67 +189,89 @@ describe('Admin test case', () => {
     //         });
     // });
 
-    //  *********  Admin Setting *********** //
-    // it('**** Admin Setting ****', (done) => {
-    //     chai.request(appServer)
-    //         .post('/api/admin/setting')
-    //         .set('auth', adminToken)
-    //         .end((err, res) => {
-    //             if (res.body.status == 201) {
-    //                 res.body.should.have.status(201)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.DATA_CREATED);
-    //             } else if (res.body.status == 200) {
-    //                 res.body.should.have.status(200)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.DATA_UPDATED);
-    //             }else {
-    //                 res.body.should.have.status(500)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.INTERNAL_SERVER_ERROR);
-    //             }
-    //             done();
-    //         });
-    // });
- 
-    //  *********  Admin Setting *********** //
-    // it('**** Admin withdrawal-request ****', (done) => {
-    //     chai.request(appServer)
-    //         .post('/api/admin/withdrawal-request')
-    //         .set('auth', adminToken)
-    //         .send({ transactionId: "64c22c267467ab958dfd333e", requestType: "reject" })
-    //         .end((err, res) => {
-    //             if (res.body.status == 200) {
-    //                 res.body.should.have.status(200)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.DATA_UPDATED);
-    //             } else if (res.body.status == 404) {
-    //                 res.body.should.have.status(404)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.USER_NOT_FOUND);
-    //             } else {
-    //                 res.body.should.have.status(500)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.INTERNAL_SERVER_ERROR);
-    //             }
-    //             done();
-    //         });
-    // });
+//     //  *********  Admin Setting *********** //
+//     // it('**** Admin Setting ****', (done) => {
+//     //     chai.request(appServer)
+//     //         .post('/api/admin/setting')
+//     //         .set('auth', adminToken)
+//     //         .end((err, res) => {
+//     //             if (res.body.status == 201) {
+//     //                 res.body.should.have.status(201)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.DATA_CREATED);
+//     //             } else if (res.body.status == 200) {
+//     //                 res.body.should.have.status(200)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.DATA_UPDATED);
+//     //             }else {
+//     //                 res.body.should.have.status(500)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.INTERNAL_SERVER_ERROR);
+//     //             }
+//     //             done();
+//     //         });
+//     // });
 
-    //  *********  Admin how-referral-work *********** //  
-    // it('**** Admin how-referral-work ****', (done) => {
-    //     chai.request(appServer)
-    //         .post('/api/admin/how-referral-work')
-    //         .set('auth', adminToken)
-    //         .send({ referralWork : referralWorkDummy })
-    //         .end((err, res) => {
-    //             if (res.body.status == 201) {
-    //                 res.body.should.have.status(201)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.HOW_TO_WORK_REFERRAL_CREATED);
-    //             } else if (res.body.status == 200) {
-    //                 res.body.should.have.status(200)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.HOW_TO_WORK_REFERRAL_UPDATED);
-    //             } else {
-    //                 res.body.should.have.status(500)
-    //                 res.body.should.have.property("message").eql(ResponseMessage.INTERNAL_SERVER_ERROR);
-    //             }
-    //             done();
-    //         });
-    // });
+//     //  *********  Admin Setting Get *********** //
+//     // it('**** Admin Setting Get ****', (done) => {
+//     //     chai.request(appServer)
+//     //         .get('/api/admin/setting-get')
+//     //         .set('auth', adminToken)
+//     //         .end((err, res) => {
+//     //             if (res.body.status == 201) {
+//     //                 expect(res.body.status).to.be.equal(201);
+//     //             } else if (res.body.status == 200) {
+//     //                 expect(res.body.status).to.be.equal(200);
+//     //             } else if (res.body.status == 400) {
+//     //                 expect(res.body.status).to.be.equal(400);
+//     //             } else if (res.body.status == 404) {
+//     //                 expect(res.body.status).to.be.equal(404);
+//     //             } else {
+//     //                 expect(res.body.status).to.be.equal(500);
+//     //             }
+//     //             expect(res.body).to.have.all.keys('status', 'message', 'data')
+//     //             done();
+//     //         });
+//     // });
+
+//     //  *********  Admin withdrawal-request *********** //
+//     // it('**** Admin withdrawal-request ****', (done) => {
+//     //     chai.request(appServer)
+//     //         .post('/api/admin/withdrawal-request')
+//     //         .set('auth', adminToken)
+//     //         .send({ transactionId: "64c22c267467ab958dfd333e", requestType: "reject" })
+//     //         .end((err, res) => {
+//     //             if (res.body.status == 200) {
+//     //                 res.body.should.have.status(200)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.DATA_UPDATED);
+//     //             } else if (res.body.status == 404) {
+//     //                 res.body.should.have.status(404)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.USER_NOT_FOUND);
+//     //             } else {
+//     //                 res.body.should.have.status(500)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.INTERNAL_SERVER_ERROR);
+//     //             }
+//     //             done();
+//     //         });
+//     // });
+
+//     //  *********  Admin how-referral-work *********** //  
+//     // it('**** Admin how-referral-work ****', (done) => {
+//     //     chai.request(appServer)
+//     //         .post('/api/admin/how-referral-work')
+//     //         .set('auth', adminToken)
+//     //         .send({ referralWork : ["fsjfhsk"] })
+//     //         .end((err, res) => {
+//     //             if (res.body.status == 201) {
+//     //                 res.body.should.have.status(201)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.HOW_TO_WORK_REFERRAL_CREATED);
+//     //             } else if (res.body.status == 200) {
+//     //                 res.body.should.have.status(200)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.HOW_TO_WORK_REFERRAL_UPDATED);
+//     //             } else {
+//     //                 res.body.should.have.status(500)
+//     //                 res.body.should.have.property("message").eql(ResponseMessage.INTERNAL_SERVER_ERROR);
+//     //             }
+//     //             done();
+//     //         });
+//     // });
 
     //  *********  Admin User Update *********** //
     // it('**** Admin Edit User ****', (done) => {

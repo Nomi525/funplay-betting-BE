@@ -33,7 +33,19 @@ var upload = multer({ storage }).fields([
     {
         name: "gameImage",
         maxCount: 1,
-    }
+    },
+    {
+        name: "queryDocument",
+        maxCount: 1,
+    },
+    {
+        name: "bannerImage",
+        maxCount: Infinity,
+    },
+    {
+        name: "communityBettingImage",
+        maxCount: 1,
+    },
 ]);
 
 export default function (req, res, next) {
@@ -50,6 +62,15 @@ export default function (req, res, next) {
 
                 var gameImage = req.files.gameImage ? req.files.gameImage[0].filename : "";
                 req.gameImageUrl = gameImage;
+
+                var queryDocument = req.files.queryDocument ? req.files.queryDocument[0].filename : "";
+                req.queryDocumentUrl = queryDocument;
+
+                var bannerImage = req.files.bannerImage || [];
+                req.bannerImageUrl = bannerImage.map((file) => file.filename);
+
+                var communityBettingImage = req.files.communityBettingImage ? req.files.communityBettingImage[0].filename : "";
+                req.communityBettingImageUrl = communityBettingImage;
                 next();
             } else {
                 next();
