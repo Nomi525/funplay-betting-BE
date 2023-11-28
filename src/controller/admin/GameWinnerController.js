@@ -1,15 +1,19 @@
+import { LENGTH_REQUIRED } from "http-status-codes";
 import {
-  ColourBetting,
-  CommunityBetting,
-  NewTransaction,
-  NumberBetting,
   ResponseMessage,
   StatusCodes,
+  sendResponse,
+  dataCreate,
   dataUpdated,
   getSingleData,
+  getAllData,
   handleErrorResponse,
+  getAllDataCount,
   plusLargeSmallValue,
-  sendResponse
+  ColourBetting,
+  NumberBetting,
+  CommunityBetting,
+  NewTransaction,
 } from "../../index.js";
 
 //#region Get All winners user
@@ -260,7 +264,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 })
 
       totalBetCoins = getAllUsers.reduce(
         (sum, data) => sum + data.betAmount,
@@ -290,7 +294,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 })
 
       totalBetCoins = getAllUsers.reduce(
         (sum, data) => sum + data.betAmount,
@@ -347,7 +351,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 })
 
       totalBetCoins = getAllUsers.reduce(
         (sum, data) => sum + data.betAmount,
@@ -376,18 +380,24 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
 //#region 
 export const declareWinnerOfCommunityBetting = async (req, res) => {
   try {
-    const { userIds, gameId, period } = req.body;
-    await Promise.all(userIds.map(async (userId) => {
-      const findCommunityBetting = await getSingleData({ userId, gameId, is_deleted: 0 }, CommunityBetting)
+    const { winnerIds, gameId, period } = req.body;
+    if (!winnerIds) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        "winnerIds is required.",
+        []
+      )
+    }
+    await Promise.all(winnerIds.map(async (winnerId) => {
+      const findCommunityBetting = await getSingleData({ _id: winnerId, gameId, is_deleted: 0 }, CommunityBetting)
       if (findCommunityBetting) {
-        // await dataUpdated({ userId, gameId, is_deleted: 0 }, { isWin: true }, CommunityBetting)
-        // let rewardAmount = multiplicationLargeSmallValue(findCommunityBetting.betAmount, 0.95);
         let rewardAmount = findCommunityBetting.betAmount * 0.95;
         findCommunityBetting.isWin = true
         findCommunityBetting.rewardAmount = rewardAmount
         await findCommunityBetting.save();
         const balance = await getSingleData(
-          { userId: userId },
+          { userId: findCommunityBetting.userId },
           NewTransaction
         );
         if (balance) {
@@ -411,28 +421,39 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
 }
 //#endregion
 
-
+//#region Winner declare of Number Betting
 export const declareWinnerOfNumberBetting = async (req, res) => {
   try {
-    const { gameId, userId, winNumber, period } = req.body
-    const findNumberBetting = await getSingleData({ gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
-    if (findNumberBetting) {
-      let rewardAmount = findNumberBetting.betAmount * 0.95;
-      findNumberBetting.isWin = true
-      findNumberBetting.rewardAmount = rewardAmount
-      await findNumberBetting.save();
-      const balance = await getSingleData(
-        { userId: userId },
-        NewTransaction
-      );
-      if (balance) {
-        balance.tokenDollorValue = plusLargeSmallValue(
-          balance.tokenDollorValue,
-          findNumberBetting.betAmount + rewardAmount
-        );
-        await balance.save();
-      }
+    const { gameId, winnerIds, userId, winNumber, period } = req.body
+    if (!winnerIds) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        "winnerIds is required.",
+        []
+      )
     }
+    await Promise.all(winnerIds.map(async (winnerId) => {
+      // const findNumberBetting = await getSingleData({ gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
+      const findNumberBetting = await getSingleData({ _id: winnerId, gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
+      if (findNumberBetting) {
+        let rewardAmount = findNumberBetting.betAmount * 0.95;
+        findNumberBetting.isWin = true
+        findNumberBetting.rewardAmount = rewardAmount
+        await findNumberBetting.save();
+        const balance = await getSingleData(
+          { userId: findNumberBetting.userId },
+          NewTransaction
+        );
+        if (balance) {
+          balance.tokenDollorValue = plusLargeSmallValue(
+            balance.tokenDollorValue,
+            findNumberBetting.betAmount + rewardAmount
+          );
+          await balance.save();
+        }
+      }
+    }))
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -443,29 +464,41 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 }
+//#endregion
 
-//#region Winner declare of 2 color
+//#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, userId, winColour, period } = req.body
-    const findColorBetting = await getSingleData({ gameId, colourName: winColour, is_deleted: 0 }, ColourBetting)
-    if (findColorBetting) {
-      let rewardAmount = findColorBetting.betAmount * 0.95;
-      findColorBetting.isWin = true
-      findColorBetting.rewardAmount = rewardAmount
-      await findColorBetting.save();
-      const balance = await getSingleData(
-        { userId: userId },
-        NewTransaction
-      );
-      if (balance) {
-        balance.tokenDollorValue = plusLargeSmallValue(
-          balance.tokenDollorValue,
-          findColorBetting.betAmount + rewardAmount
-        );
-        await balance.save();
-      }
+    const { gameId, winnerIds, userId, winColour, period } = req.body
+    if (!winnerIds) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        "winnerIds is required.",
+        []
+      )
     }
+    await Promise.all(winnerIds.map(async (winnerId) => {
+      // const findColorBetting = await getSingleData({ gameId, colourName: winColour, is_deleted: 0 }, ColourBetting)
+      const findColorBetting = await getSingleData({ _id: winnerId, gameId, colourName: winColour, is_deleted: 0 }, ColourBetting)
+      if (findColorBetting) {
+        let rewardAmount = findColorBetting.betAmount * 0.95;
+        findColorBetting.isWin = true
+        findColorBetting.rewardAmount = rewardAmount
+        await findColorBetting.save();
+        const balance = await getSingleData(
+          { userId: findColorBetting.userId },
+          NewTransaction
+        );
+        if (balance) {
+          balance.tokenDollorValue = plusLargeSmallValue(
+            balance.tokenDollorValue,
+            findColorBetting.betAmount + rewardAmount
+          );
+          await balance.save();
+        }
+      }
+    }))
     return sendResponse(
       res,
       StatusCodes.OK,
