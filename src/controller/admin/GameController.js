@@ -1,11 +1,9 @@
 import moment from "moment";
 import {
-  ColourBetting,
   CommunityBetting,
   Game,
   GameRules,
   GameTime,
-  NumberBetting,
   Period,
   ResponseMessage,
   StatusCodes,
@@ -14,7 +12,7 @@ import {
   getSingleData,
   handleErrorResponse,
   mongoose,
-  sendResponse,
+  sendResponse
 } from "../../index.js";
 
 //#region Game add and edit
@@ -1025,11 +1023,10 @@ export const getCommunityGameList = async (req, res) => {
 export const getAllGamePeriodData = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const numberBattingAggregationResult = await Period.aggregate([
       {
         $match: {
-          gameId: new mongoose.Types.ObjectId(gameId)
+          gameId: new mongoose.Types.ObjectId(gameId),
         },
       },
       {
@@ -1038,39 +1035,46 @@ export const getAllGamePeriodData = async (req, res) => {
           localField: "period",
           foreignField: "period",
           as: "numberBettingsData",
-          },  
+        },
       },
       {
-        $unwind: "$numberBettingsData", // Unwind the array to apply $match on each element
+        $unwind: "$numberBettingsData",
       },
       {
         $match: {
           "numberBettingsData.isWin": false,
         },
       },
-       {
+      {
         $group: {
-          _id: "$numberBettingsData.period",
-          period: { $first: "$period" },
-          numberBettingsData: { $push: "$numberBettingsData" },
+          _id: {
+            period: "$period",
+            number: "$numberBettingsData.number",
+          },
+          totalUser: { $addToSet: "$numberBettingsData.userId" },
+          totalBetAmount: { $sum: "$numberBettingsData.betAmount" },
         },
       },
       {
-        $sort: {
-          period: -1,
+        $group: {
+          _id: "$_id.period",
+          numberBettingsData: {
+            $push: {
+              number: "$_id.number",
+              totalUser: { $sum: { $size: "$totalUser" } },
+              totalBetAmount: { $sum: "$totalBetAmount" },
+            },
+          },
         },
       },
       {
         $project: {
           _id: 0,
-          price: "$betAmount",
-          period: 1,
+          period: "$_id",
           numberBettingsData: 1,
         },
       },
     ]);
-
-
 
     return sendResponse(
       res,
@@ -1082,73 +1086,4 @@ export const getAllGamePeriodData = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-//#endregion
 
-//#region Get list of number betting periods details
-export const getAllNumberBettingPeriodDetails = async (req, res) => {
-  try {
-    const { gameId } = req.params;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const aggregationResult = await NumberBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "users",
-        },
-      },
-      {
-        $unwind: "$users",
-      },
-      {
-        $group: {
-          _id: "$period",
-          totalUsers: { $sum: 1 },
-          users: { $push: "$users" },
-          winNumber: {
-            $max: {
-              $cond: [{ $eq: ["$isWin", true] }, "$number", null],
-            },
-          },
-          totalBetAmount: { $sum: "$betAmount" },
-          period: { $first: "$period" },
-          bets: { $push: "$$ROOT" },
-        },
-      },
-      {
-        $sort: {
-          period: -1,
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          totalUsers: 1,
-          totalBetAmount: 1,
-          price: "$betAmount",
-          period: 1,
-          winNumber: 1,
-          users: { _id: 1, fullName: 1, email: 1, profile: 1 },
-          bets: 1,
-        },
-      },
-    ]);
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      aggregationResult
-    );
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
-//#endregion
