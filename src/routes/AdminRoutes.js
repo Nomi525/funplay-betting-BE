@@ -1,5 +1,5 @@
 import { getTransactionList, getwithdrwalcheck } from "../controller/admin/AdminController.js";
-import { getAllGamePeriodData, getAllNumberBettingPeriodDetails } from "../controller/admin/GameController.js";
+import { getAllGamePeriodData } from "../controller/admin/GameController.js";
 import {
   Auth,
   Upload,
@@ -269,6 +269,5 @@ adminRoutes.post("/declare-number-betting-winner", Auth, declareWinnerOfNumberBe
 adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBetting);
 
 adminRoutes.get("/get-all-game-periods/:gameId", Auth, getAllGamePeriodData);
-adminRoutes.get("/get-all-number-betting-periods-details/:gameId", Auth, getAllNumberBettingPeriodDetails);
 export { adminRoutes };
 
