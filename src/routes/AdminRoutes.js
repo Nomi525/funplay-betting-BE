@@ -268,6 +268,6 @@ adminRoutes.post("/declare-winner", Auth, declareWinnerOfCommunityBetting);
 adminRoutes.post("/declare-number-betting-winner", Auth, declareWinnerOfNumberBetting);
 adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBetting);
 
-adminRoutes.get("/get-all-game-periods/:gameId", Auth, getAllGamePeriodData);
+adminRoutes.get("/get-all-game-periods/:gameType/:gameId", Auth, getAllGamePeriodData);
 export { adminRoutes };
 
