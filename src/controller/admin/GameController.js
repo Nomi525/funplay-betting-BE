@@ -1022,8 +1022,10 @@ export const getCommunityGameList = async (req, res) => {
 //#region Get list of game periods by gameId
 export const getAllGamePeriodData = async (req, res) => {
   try {
-    const { gameId } = req.params;
-    const numberBattingAggregationResult = await Period.aggregate([
+    const { gameId,gameType } = req.params;
+    let battingAggregationResult;
+    if(gameType === 'NumberBetting'){
+     battingAggregationResult = await Period.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
@@ -1075,12 +1077,68 @@ export const getAllGamePeriodData = async (req, res) => {
         },
       },
     ]);
+  }else if(gameType === '3colorBetting'){
+    battingAggregationResult = await Period.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+        },
+      },
+      {
+        $lookup: {
+          from: "colourbettings",
+          localField: "period",
+          foreignField: "period",
+          as: "colourbettingsData",
+        },
+      },
+      {
+        $unwind: "$colourbettingsData",
+      },
+      {
+        $match: {
+          "colourbettingsData.isWin": false,
+          "colourbettingsData.gameType": gameType,
+
+        },
+      },
+      {
+        $group: {
+          _id: {
+            period: "$period",
+            colourName: "$colourbettingsData.colourName",
+          },
+          totalUser: { $addToSet: "$colourbettingsData.userId" },
+          totalBetAmount: { $sum: "$colourbettingsData.betAmount" },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.period",
+          colourbettingsData: {
+            $push: {
+              colourName: "$_id.colourName",
+              totalUser: { $sum: { $size: "$totalUser" } },
+              totalBetAmount: { $sum: "$totalBetAmount" },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          period: "$_id",
+          colourbettingsData: 1,
+        },
+      },
+    ]);
+  }
 
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      numberBattingAggregationResult
+      battingAggregationResult
     );
   } catch (error) {
     return handleErrorResponse(res, error);
