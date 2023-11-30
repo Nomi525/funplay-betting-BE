@@ -136,7 +136,15 @@ export const colourBetResult = async (req, res) => {
     }
     let bettingResult = [];
     let message = "";
-
+    const findGameMode = await getSingleData({ gameId, gameMode: "Manual", is_deleted: 0 });
+    if(findGameMode){
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_MANUAL,
+        []
+      );
+    }
     // Check type for number betting
     if (gameType == "number" && type == "numberBetting") {
       const numberBettingResult = await winners(
