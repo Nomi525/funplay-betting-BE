@@ -1074,6 +1074,7 @@ export const getAllGamePeriodData = async (req, res) => {
           _id: 0,
           period: "$_id",
           numberBettingsData: 1,
+          _id: 0,
         },
       },
     ]);
