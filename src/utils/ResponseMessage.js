@@ -155,6 +155,8 @@ const ResponseMessage = {
     NOTIFICATION_NOT_FOUND : "Notification not found",
     USER_DISABLE_BY_ADMIN : "User disable by admin",
     CURRENCY_CONVERTED : "Currency converted successfully",
+    WINNER_DECLARE_MANUAL : "Winner will be announced soon",
+    WINNER_DECLARE_AUTO : "Winner will declare automatically",
 }
 
 export { ResponseMessage };
