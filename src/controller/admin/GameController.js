@@ -1,11 +1,9 @@
 import moment from "moment";
 import {
-  ColourBetting,
   CommunityBetting,
   Game,
   GameRules,
   GameTime,
-  NumberBetting,
   Period,
   ResponseMessage,
   StatusCodes,
@@ -14,7 +12,7 @@ import {
   getSingleData,
   handleErrorResponse,
   mongoose,
-  sendResponse,
+  sendResponse
 } from "../../index.js";
 
 //#region Game add and edit
@@ -1024,8 +1022,10 @@ export const getCommunityGameList = async (req, res) => {
 //#region Get list of game periods by gameId
 export const getAllGamePeriodData = async (req, res) => {
   try {
-    const { gameId } = req.params;
-    const numberBattingAggregationResult = await Period.aggregate([
+    const { gameId,gameType } = req.params;
+    let battingAggregationResult;
+    if(gameType === 'NumberBetting'){
+     battingAggregationResult = await Period.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
@@ -1063,98 +1063,86 @@ export const getAllGamePeriodData = async (req, res) => {
           numberBettingsData: {
             $push: {
               number: "$_id.number",
-              totalUser: { $size: "$totalUser" },
-              totalBetAmount: "$totalBetAmount",
+              totalUser: { $sum: { $size: "$totalUser" } },
+              totalBetAmount: { $sum: "$totalBetAmount" },
             },
           },
         },
       },
       {
         $project: {
+          _id: 0,
           period: "$_id",
           numberBettingsData: 1,
           _id: 0,
         },
       },
     ]);
-
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      numberBattingAggregationResult
-    );
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
-//#endregion
-
-//#region Get list of number betting periods details
-export const getAllNumberBettingPeriodDetails = async (req, res) => {
-  try {
-    const { gameId } = req.params;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const aggregationResult = await NumberBetting.aggregate([
+  }else if(gameType === '3colorBetting'){
+    battingAggregationResult = await Period.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
-          createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0,
         },
       },
       {
         $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "users",
+          from: "colourbettings",
+          localField: "period",
+          foreignField: "period",
+          as: "colourbettingsData",
         },
       },
       {
-        $unwind: "$users",
+        $unwind: "$colourbettingsData",
+      },
+      {
+        $match: {
+          "colourbettingsData.isWin": false,
+          "colourbettingsData.gameType": gameType,
+
+        },
       },
       {
         $group: {
-          _id: "$period",
-          totalUsers: { $sum: 1 },
-          users: { $push: "$users" },
-          winNumber: {
-            $max: {
-              $cond: [{ $eq: ["$isWin", true] }, "$number", null],
-            },
+          _id: {
+            period: "$period",
+            colourName: "$colourbettingsData.colourName",
           },
-          totalBetAmount: { $sum: "$betAmount" },
-          period: { $first: "$period" },
-          bets: { $push: "$$ROOT" },
+          totalUser: { $addToSet: "$colourbettingsData.userId" },
+          totalBetAmount: { $sum: "$colourbettingsData.betAmount" },
         },
       },
       {
-        $sort: {
-          period: -1,
+        $group: {
+          _id: "$_id.period",
+          colourbettingsData: {
+            $push: {
+              colourName: "$_id.colourName",
+              totalUser: { $sum: { $size: "$totalUser" } },
+              totalBetAmount: { $sum: "$totalBetAmount" },
+            },
+          },
         },
       },
       {
         $project: {
           _id: 0,
-          totalUsers: 1,
-          totalBetAmount: 1,
-          price: "$betAmount",
-          period: 1,
-          winNumber: 1,
-          users: { _id: 1, fullName: 1, email: 1, profile: 1 },
-          bets: 1,
+          period: "$_id",
+          colourbettingsData: 1,
         },
       },
     ]);
+  }
+
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      aggregationResult
+      battingAggregationResult
     );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
-//#endregion
+
