@@ -433,6 +433,15 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
         []
       )
     }
+    const findGameMode = await getSingleData({ gameId, gameMode: "Auto", is_deleted: 0 });
+    if(findGameMode){
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_AUTO,
+        []
+      );
+    }
     await Promise.all(winnerIds.map(async (winnerId) => {
       // const findNumberBetting = await getSingleData({ gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
       const findNumberBetting = await getSingleData({ _id: winnerId, gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
