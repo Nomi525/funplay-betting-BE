@@ -1025,11 +1025,10 @@ export const getCommunityGameList = async (req, res) => {
 export const getAllGamePeriodData = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const numberBattingAggregationResult = await Period.aggregate([
       {
         $match: {
-          gameId: new mongoose.Types.ObjectId(gameId)
+          gameId: new mongoose.Types.ObjectId(gameId),
         },
       },
       {
@@ -1038,39 +1037,46 @@ export const getAllGamePeriodData = async (req, res) => {
           localField: "period",
           foreignField: "period",
           as: "numberBettingsData",
-          },  
+        },
       },
       {
-        $unwind: "$numberBettingsData", // Unwind the array to apply $match on each element
+        $unwind: "$numberBettingsData",
       },
       {
         $match: {
           "numberBettingsData.isWin": false,
         },
       },
-       {
+      {
         $group: {
-          _id: "$numberBettingsData.period",
-          period: { $first: "$period" },
-          numberBettingsData: { $push: "$numberBettingsData" },
+          _id: {
+            period: "$period",
+            number: "$numberBettingsData.number",
+          },
+          totalUser: { $addToSet: "$numberBettingsData.userId" },
+          totalBetAmount: { $sum: "$numberBettingsData.betAmount" },
         },
       },
       {
-        $sort: {
-          period: -1,
+        $group: {
+          _id: "$_id.period",
+          numberBettingsData: {
+            $push: {
+              number: "$_id.number",
+              totalUser: { $size: "$totalUser" },
+              totalBetAmount: "$totalBetAmount",
+            },
+          },
         },
       },
       {
         $project: {
-          _id: 0,
-          price: "$betAmount",
-          period: 1,
+          period: "$_id",
           numberBettingsData: 1,
+          _id: 0,
         },
       },
     ]);
-
-
 
     return sendResponse(
       res,
