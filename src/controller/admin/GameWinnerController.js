@@ -14,6 +14,7 @@ import {
   NumberBetting,
   CommunityBetting,
   NewTransaction,
+  Game,
 } from "../../index.js";
 
 //#region Get All winners user
@@ -433,8 +434,8 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
         []
       )
     }
-    const findGameMode = await getSingleData({ gameId, gameMode: "Auto", is_deleted: 0 });
-    if(findGameMode){
+    const findGameMode = await getSingleData({ _id: gameId, gameMode: "Auto", is_deleted: 0 }, Game);
+    if (findGameMode) {
       return sendResponse(
         res,
         StatusCodes.OK,
