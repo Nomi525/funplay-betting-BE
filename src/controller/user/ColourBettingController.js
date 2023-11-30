@@ -136,8 +136,8 @@ export const colourBetResult = async (req, res) => {
     }
     let bettingResult = [];
     let message = "";
-    const findGameMode = await getSingleData({ gameId, gameMode: "Manual", is_deleted: 0 });
-    if(findGameMode){
+    const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
+    if (findGameMode) {
       return sendResponse(
         res,
         StatusCodes.OK,
