@@ -23,7 +23,7 @@ import {
 //#region Colour betting api
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType, period, count, selectedTime } = req.body;
+    let { gameId, colourName, betAmount, gameType, period, selectedTime } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -32,7 +32,6 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
-    period = `${period}${count}`
     const checkBalance = await NewTransaction.findOne({
       userId: req.user,
       is_deleted: 0,
@@ -58,7 +57,6 @@ export const addColourBet = async (req, res) => {
       gameId: gameId,
       gameType,
       period,
-      count,
     });
     let createColourBet;
     if (alreadyExistBet) {
@@ -81,7 +79,6 @@ export const addColourBet = async (req, res) => {
           betAmount: parseInt(betAmount),
           gameType,
           period,
-          count,
           selectedTime
         },
         ColourBetting

@@ -4,6 +4,7 @@ import {
   Game,
   GameRules,
   GameTime,
+  NumberBetting,
   Period,
   ResponseMessage,
   StatusCodes,
@@ -1050,14 +1051,30 @@ export const getAllGamePeriodData = async (req, res) => {
               number: '$numberBettingsData.number',
               periodId: '$_id',
             },
-            anyWinTrue: { $max: '$numberBettingsData.isWin' }, // Check if any record has isWin: true
+            anyWinTrue: { $max: '$numberBettingsData.isWin' },
             totalUser: { $addToSet: '$numberBettingsData.userId' },
             totalBetAmount: { $sum: '$numberBettingsData.betAmount' },
           },
         },
         {
           $match: {
-            anyWinTrue: { $ne: true }, // Exclude if any record has isWin: true
+            anyWinTrue: { $ne: true },
+          },
+        },
+        {
+          $lookup: {
+            from: 'numberbettings',
+            localField: '_id.period',
+            foreignField: 'period',
+            as: 'checkWinData',
+          },
+        },
+        {
+          $unwind: '$checkWinData',
+        },
+        {
+          $match: {
+            'checkWinData.isWin': { $ne: true },
           },
         },
         {
@@ -1082,6 +1099,26 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         },
       ]);
+
+//   // Assuming that isWinTruePeriodIds is an array of periodIds with isWin: true
+//   const isWinTruePeriodIds = await NumberBetting.distinct('period', { isWin: true });
+
+//   // Convert isWinTruePeriodIds to a Set for faster lookup
+//   const isWinTruePeriodIdsSet = new Set(isWinTruePeriodIds.map(String));
+
+//   console.log({isWinTruePeriodIdsSet});
+
+// // Filter out periods with isWin: true from the result
+// battingAggregationResult = battingAggregationResult.filter(item => {
+//   const periodIdString = String(item.periodId);
+//   const isWinPeriod = isWinTruePeriodIdsSet.has(periodIdString);
+//   console.log(periodIdString, isWinPeriod); // Log for debugging
+//   return !isWinPeriod;
+});
+
+
+      console.log(battingAggregationResult);
+
     } else if (gameType === '3colorBetting') {
       battingAggregationResult = await Period.aggregate([
         {
@@ -1105,15 +1142,16 @@ export const getAllGamePeriodData = async (req, res) => {
             _id: {
               period: '$period',
               colourName: '$colourbettingsData.colourName',
+              periodId: '$_id',
             },
-            anyWinTrue: { $max: '$colourbettingsData.isWin' }, // Check if any record has isWin: true
+            anyWinTrue: { $max: '$colourbettingsData.isWin' },
             totalUser: { $addToSet: '$colourbettingsData.userId' },
             totalBetAmount: { $sum: '$colourbettingsData.betAmount' },
           },
         },
         {
           $match: {
-            anyWinTrue: { $ne: true }, // Exclude if any record has isWin: true
+            anyWinTrue: { $ne: true },
           },
         },
         {
@@ -1140,6 +1178,7 @@ export const getAllGamePeriodData = async (req, res) => {
       ]);
     }
 
+
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -1150,6 +1189,6 @@ export const getAllGamePeriodData = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
+//#endregion
 
 
