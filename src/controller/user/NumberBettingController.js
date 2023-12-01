@@ -399,7 +399,7 @@ export const createGamePeriodFromCronJob = async () => {
         const gameEndTime = moment(game.gameDurationTo, "h:mm A").format(
           "HH:mm"
         );
-        const currentTime = moment().format("HH:mm");
+        const currentTime = moment().utcOffset("+05:30").format("HH:mm");
         var currentTimestamp = moment(
           `${currentDate2} ${currentTime}:00`,
           "YYYY-MM-DD HH:mm:ss"
@@ -550,7 +550,7 @@ export const createGamePeriodFromCronJob = async () => {
         const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
           "HH:mm:ss"
         );
-        const currentTime = moment().format("HH:mm:ss");
+        const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
         var currentTimestamp = moment(
           `${currentDate2} ${currentTime}`,
           "YYYY-MM-DD HH:mm:ss"
@@ -635,7 +635,7 @@ export const createGamePeriodFromCronJob = async () => {
               })
                 .sort({ createdAt: 1 })
                 .limit(1);
-             if (!checkSlot.length) {
+              if (!checkSlot.length) {
                 // generate slow if first slot is not generated
                 const lastIndex = await Period.find({
                   gameId: game._id,
@@ -712,17 +712,10 @@ export const getPeriod = async (req, res) => {
       gameId,
       is_deleted: 0,
     }).sort({ createdAt: -1 }).limit(1);
-    let getAllPeriod = getGamePeriod[0];
-    console.log(moment(getAllPeriod.date).format("YYYY-MM-DD"), "period date");
-    console.log(moment(getAllPeriod.date).format("YYYY-MM-DD"), "today date");
-    console.log(getAllPeriod.endTime, "period time");
-    console.log(currentTime, "current time");
-    console.log(moment(getAllPeriod.date).format("YYYY-MM-DD") ==
-      moment().format("YYYY-MM-DD") &&
-      getAllPeriod.endTime > currentTime, "check condition");
 
+    let getAllPeriod = getGamePeriod[0];
     if (
-      moment(getAllPeriod.date).format("YYYY-MM-DD") ==
+      getGamePeriod.length && moment(getAllPeriod.date).format("YYYY-MM-DD") ==
       moment().format("YYYY-MM-DD") &&
       getAllPeriod.endTime > currentTime
     ) {
@@ -742,7 +735,6 @@ export const getPeriod = async (req, res) => {
       // if (endTimestamp >= currentTimestamp) {
       //   getAllPeriod = [];
       // }
-      console.log(getAllPeriod, "getAllPeriod");
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -757,6 +749,24 @@ export const getPeriod = async (req, res) => {
         []
       );
     }
+  } catch (error) {
+    // console.log(error,'eee');
+    return handleErrorResponse(res, error);
+  }
+};
+
+export const getPeriodsDetailsForAllGame = async (req, res) => {
+  try {
+    // const { gameId, gameType } = req.params;
+    const getAllPeriod = await Period.find({ is_deleted: 0 })
+      .populate('gameId', 'gameName gameImage')
+      .sort({ createdAt: -1 })
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      getAllPeriod
+    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
