@@ -65,6 +65,7 @@ import {
   verifyOtp,
   walletCreate,
   withdrawalRequest,
+  getPeriodsDetailsForAllGame
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -201,6 +202,7 @@ userRoutes.get(
   getAllCommunityGamePeriod
 );
 userRoutes.get("/get-period/:gameId", Auth, getPeriod);
+userRoutes.get("/get-periods-details-all-game", Auth, getPeriodsDetailsForAllGame);
 
 
 export { userRoutes };
