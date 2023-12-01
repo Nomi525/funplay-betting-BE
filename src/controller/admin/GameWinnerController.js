@@ -14,7 +14,6 @@ import {
   NumberBetting,
   CommunityBetting,
   NewTransaction,
-  Game,
 } from "../../index.js";
 
 //#region Get All winners user
@@ -453,36 +452,30 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
 //#region Winner declare of Number Betting
 export const declareWinnerOfNumberBetting = async (req, res) => {
   try {
-    const { gameId, winnerIds, userId, winNumber, period } = req.body
-    if (!winnerIds) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        "winnerIds is required.",
-        []
-      )
+    const { gameId, winnerId, userId, winNumber, period } = req.body;
+
+    if (!winnerId) {
+      return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
-    const findGameMode = await getSingleData({ _id: gameId, gameMode: "Auto", is_deleted: 0 }, Game);
-    if (findGameMode) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.WINNER_DECLARE_AUTO,
-        []
-      );
-    }
-    await Promise.all(winnerIds.map(async (winnerId) => {
-      // const findNumberBetting = await getSingleData({ gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
-      const findNumberBetting = await getSingleData({ _id: winnerId, gameId, number: winNumber, is_deleted: 0 }, NumberBetting)
-      if (findNumberBetting) {
+
+    const findNumberBettingArray = await getAllData(
+      { gameId, period: winnerId, number: winNumber, is_deleted: 0, isWin: false },
+      NumberBetting
+    );
+    const savedInstances = [];
+
+    for (const findNumberBetting of findNumberBettingArray) {
+      if (findNumberBetting instanceof NumberBetting) {
         let rewardAmount = findNumberBetting.betAmount * 0.95;
-        findNumberBetting.isWin = true
-        findNumberBetting.rewardAmount = rewardAmount
+        findNumberBetting.isWin = true;
+        findNumberBetting.rewardAmount = rewardAmount;
         await findNumberBetting.save();
+
         const balance = await getSingleData(
           { userId: findNumberBetting.userId },
           NewTransaction
         );
+
         if (balance) {
           balance.tokenDollorValue = plusLargeSmallValue(
             balance.tokenDollorValue,
@@ -490,18 +483,28 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
           );
           await balance.save();
         }
+
+        savedInstances.push(findNumberBetting);
+      } else {
+        // Log an error or handle the case where the document is not an instance of NumberBetting
+        console.error("Document is not an instance of NumberBetting:", findNumberBetting);
       }
-    }))
+    }
+
     return sendResponse(
       res,
       StatusCodes.OK,
-      "Winner added succcessfully",
-      []
-    )
+      "Winners added successfully",
+      savedInstances
+    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
-}
+};
+
+
+
+
 //#endregion
 
 //#region Winner declare of color
