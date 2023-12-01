@@ -43,12 +43,18 @@ export const getAllWinnersUser = async (req, res) => {
           $unwind: "$game",
         },
         {
+          $addFields: {
+            gameType: "numberBetting",
+          },
+        },
+        {
           $group: {
             _id: null,
             count: { $sum: 1 },
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
+            gameType: { $first:"$gameType"}
           },
         },
         {
@@ -58,6 +64,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: 1,
             count: 1,
             gameId: 1,
+            gameType: 1,
           },
         },
       ];
@@ -81,12 +88,18 @@ export const getAllWinnersUser = async (req, res) => {
           $unwind: "$game",
         },
         {
+          $addFields: {
+            gameType: "3colorBetting",
+          },
+        },
+        {
           $group: {
             _id: null,
             count: { $sum: 1 },
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
+            gameType: { $first:"$gameType"}
           },
         },
         {
@@ -96,6 +109,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: 1,
             count: 1,
             gameId: 1,
+             gameType: 1,
           },
         },
       ];
@@ -121,12 +135,18 @@ export const getAllWinnersUser = async (req, res) => {
           $unwind: "$game",
         },
         {
+          $addFields: {
+            gameType: "2colorBetting",
+          },
+        },
+        {
           $group: {
             _id: null,
             count: { $sum: 1 },
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
+            gameType: { $first:"$gameType"}
           },
         },
         {
@@ -136,6 +156,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: 1,
             count: 1,
             gameId: 1,
+            gameType: 1,
           },
         },
       ];
@@ -160,12 +181,18 @@ export const getAllWinnersUser = async (req, res) => {
           $unwind: "$game",
         },
         {
+          $addFields: {
+            gameType: "communityBetting",
+        },
+        },
+        {
           $group: {
             _id: null,
             count: { $sum: 1 },
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
+            gameType: { $first:"$gameType"}
           },
         },
         {
@@ -175,6 +202,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: 1,
             count: 1,
             gameId: 1,
+            gameType: 1,
           },
         },
       ];

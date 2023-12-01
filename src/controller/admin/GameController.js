@@ -1019,12 +1019,12 @@ export const getCommunityGameList = async (req, res) => {
 };
 //#endregion
 
-//#region Get list of game periods by gameId
+//#region Get list of game periods by gameId and gameType
 export const getAllGamePeriodData = async (req, res) => {
   try {
     const { gameId,gameType } = req.params;
     let battingAggregationResult;
-    if(gameType === 'NumberBetting'){
+    if(gameType === 'numberBetting'){
      battingAggregationResult = await Period.aggregate([
       {
         $match: {
