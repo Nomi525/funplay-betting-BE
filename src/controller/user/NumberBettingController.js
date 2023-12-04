@@ -1176,7 +1176,7 @@ export const numberBettingWinnerResult = async (req, res) => {
           // return res.send(getAllNumberBets)
           return sendResponse(
             res,
-            StatusCodes.BAD_REQUEST,
+            StatusCodes.OK,
             "Winner number",
             getAllNumberBets
           );
