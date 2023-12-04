@@ -1,9 +1,11 @@
 import moment from "moment";
 import {
+  ColourBetting,
   CommunityBetting,
   Game,
   GameRules,
   GameTime,
+  NumberBetting,
   Period,
   ResponseMessage,
   StatusCodes,
@@ -1025,18 +1027,36 @@ export const getAllGamePeriodData = async (req, res) => {
     const { gameId, gameType } = req.params;
     let battingAggregationResult;
 
+    // Find periods with isWin: true in the numberbettings collection
+    const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct('period', { isWin: true });
+
+    // Find periods with isWin: true in the colourbettings collection
+    const isWinTruePeriodsforColourBetting = await ColourBetting.distinct('period', { isWin: true });
+
     if (gameType === 'numberBetting') {
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
+            period: { $nin: isWinTruePeriodsforNumberBetting }, // Exclude periods with isWin: true
           },
         },
         {
           $lookup: {
             from: 'numberbettings',
-            localField: 'period',
-            foreignField: 'period',
+            let: { periodId: '$period' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$period', '$$periodId'] },
+                      { $ne: ['$isWin', true] },
+                    ],
+                  },
+                },
+              },
+            ],
             as: 'numberBettingsData',
           },
         },
@@ -1050,20 +1070,22 @@ export const getAllGamePeriodData = async (req, res) => {
               number: '$numberBettingsData.number',
               periodId: '$_id',
             },
-            anyWinTrue: { $max: '$numberBettingsData.isWin' }, // Check if any record has isWin: true
+            anyWinTrue: { $max: '$numberBettingsData.isWin' },
             totalUser: { $addToSet: '$numberBettingsData.userId' },
             totalBetAmount: { $sum: '$numberBettingsData.betAmount' },
           },
         },
         {
           $match: {
-            anyWinTrue: { $ne: true }, // Exclude if any record has isWin: true
+            anyWinTrue: { $ne: true },
           },
         },
         {
           $group: {
-            _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
+            _id: {
+              period: '$_id.period',
+              periodId: '$_id.periodId',
+            },
             numberBettingsData: {
               $push: {
                 number: '$_id.number',
@@ -1076,8 +1098,8 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $project: {
             _id: 0,
-            period: '$_id',
-            periodId: 1,
+            period: '$_id.period',
+            periodId: '$_id.periodId',
             numberBettingsData: 1,
           },
         },
@@ -1087,6 +1109,7 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
+            period: { $nin: isWinTruePeriodsforColourBetting }, // Exclude periods with isWin: true
           },
         },
         {
@@ -1105,15 +1128,16 @@ export const getAllGamePeriodData = async (req, res) => {
             _id: {
               period: '$period',
               colourName: '$colourbettingsData.colourName',
+              periodId: '$_id',
             },
-            anyWinTrue: { $max: '$colourbettingsData.isWin' }, // Check if any record has isWin: true
+            anyWinTrue: { $max: '$colourbettingsData.isWin' },
             totalUser: { $addToSet: '$colourbettingsData.userId' },
             totalBetAmount: { $sum: '$colourbettingsData.betAmount' },
           },
         },
         {
           $match: {
-            anyWinTrue: { $ne: true }, // Exclude if any record has isWin: true
+            anyWinTrue: { $ne: true },
           },
         },
         {
@@ -1138,8 +1162,8 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         },
       ]);
-    }
 
+    }
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -1150,6 +1174,6 @@ export const getAllGamePeriodData = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
+//#endregion
 
 
