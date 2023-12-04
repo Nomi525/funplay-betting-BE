@@ -32,7 +32,7 @@ export const addEditCommunityBets = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.INSUFFICIENT_BALANCE_USER,
+        ResponseMessage.INSUFFICIENT_BALANCE,
         []
       );
     }
