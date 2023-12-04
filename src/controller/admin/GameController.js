@@ -1,5 +1,6 @@
 import moment from "moment";
 import {
+  ColourBetting,
   CommunityBetting,
   Game,
   GameRules,
@@ -1026,18 +1027,36 @@ export const getAllGamePeriodData = async (req, res) => {
     const { gameId, gameType } = req.params;
     let battingAggregationResult;
 
+    // Find periods with isWin: true in the numberbettings collection
+    const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct('period', { isWin: true });
+
+    // Find periods with isWin: true in the colourbettings collection
+    const isWinTruePeriodsforColourBetting = await ColourBetting.distinct('period', { isWin: true });
+
     if (gameType === 'numberBetting') {
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
+            period: { $nin: isWinTruePeriodsforNumberBetting }, // Exclude periods with isWin: true
           },
         },
         {
           $lookup: {
             from: 'numberbettings',
-            localField: 'period',
-            foreignField: 'period',
+            let: { periodId: '$period' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$period', '$$periodId'] },
+                      { $ne: ['$isWin', true] },
+                    ],
+                  },
+                },
+              },
+            ],
             as: 'numberBettingsData',
           },
         },
@@ -1062,25 +1081,11 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         },
         {
-          $lookup: {
-            from: 'numberbettings',
-            localField: '_id.period',
-            foreignField: 'period',
-            as: 'checkWinData',
-          },
-        },
-        {
-          $unwind: '$checkWinData',
-        },
-        {
-          $match: {
-            'checkWinData.isWin': { $ne: true },
-          },
-        },
-        {
           $group: {
-            _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
+            _id: {
+              period: '$_id.period',
+              periodId: '$_id.periodId',
+            },
             numberBettingsData: {
               $push: {
                 number: '$_id.number',
@@ -1093,37 +1098,18 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $project: {
             _id: 0,
-            period: '$_id',
-            periodId: 1,
+            period: '$_id.period',
+            periodId: '$_id.periodId',
             numberBettingsData: 1,
           },
         },
       ]);
-
-//   // Assuming that isWinTruePeriodIds is an array of periodIds with isWin: true
-//   const isWinTruePeriodIds = await NumberBetting.distinct('period', { isWin: true });
-
-//   // Convert isWinTruePeriodIds to a Set for faster lookup
-//   const isWinTruePeriodIdsSet = new Set(isWinTruePeriodIds.map(String));
-
-//   console.log({isWinTruePeriodIdsSet});
-
-// // Filter out periods with isWin: true from the result
-// battingAggregationResult = battingAggregationResult.filter(item => {
-//   const periodIdString = String(item.periodId);
-//   const isWinPeriod = isWinTruePeriodIdsSet.has(periodIdString);
-//   console.log(periodIdString, isWinPeriod); // Log for debugging
-//   return !isWinPeriod;
-});
-
-
-      console.log(battingAggregationResult);
-
     } else if (gameType === '3colorBetting') {
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
+            period: { $nin: isWinTruePeriodsforColourBetting }, // Exclude periods with isWin: true
           },
         },
         {
@@ -1176,9 +1162,8 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         },
       ]);
+
     }
-
-
     return sendResponse(
       res,
       StatusCodes.OK,
