@@ -1116,7 +1116,7 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         },
         {
-          $sort: { createdAt: -1 }, // Sort by created time in descending order
+          $sort: { createdAt: -1 },
         },
         {
           $lookup: {
