@@ -885,7 +885,7 @@ export const createGamePeriodFromCronJob = async () => {
             gameId: game._id,
             date: currentDate2,
           }).sort({ createdAt: -1 });
-          if (findPeriod2) {
+          if (findPeriod2) { 
             if (game.isRepeat) {
               const lastIndex = await Period.find({
                 gameId: game._id,
