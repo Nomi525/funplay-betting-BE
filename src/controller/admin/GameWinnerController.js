@@ -504,49 +504,6 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#endregion
 
 //#region Winner declare of color
-// export const declareWinnerOfColorBetting = async (req, res) => {
-//   try {
-//     const { gameId, winnerIds, userId, winColour, period } = req.body
-//     if (!winnerIds) {
-//       return sendResponse(
-//         res,
-//         StatusCodes.OK,
-//         "winnerIds is required.",
-//         []
-//       )
-//     }
-//     await Promise.all(winnerIds.map(async (winnerId) => {
-//       // const findColorBetting = await getSingleData({ gameId, colourName: winColour, is_deleted: 0 }, ColourBetting)
-//       const findColorBetting = await getSingleData({ _id: winnerId, gameId, colourName: winColour, is_deleted: 0 }, ColourBetting)
-//       if (findColorBetting) {
-//         let rewardAmount = findColorBetting.betAmount * 0.95;
-//         findColorBetting.isWin = true
-//         findColorBetting.rewardAmount = rewardAmount
-//         await findColorBetting.save();
-//         const balance = await getSingleData(
-//           { userId: findColorBetting.userId },
-//           NewTransaction
-//         );
-//         if (balance) {
-//           balance.tokenDollorValue = plusLargeSmallValue(
-//             balance.tokenDollorValue,
-//             findColorBetting.betAmount + rewardAmount
-//           );
-//           await balance.save();
-//         }
-//       }
-//     }))
-//     return sendResponse(
-//       res,
-//       StatusCodes.OK,
-//       "Winner added succcessfully",
-//       []
-//     )
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// }
-
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
     const { gameId, winnerId, userId, winColour, period } = req.body;
@@ -562,33 +519,32 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       ColourBetting
     );
 
-    // for (const findColorBetting of findColorBettingArray) {
-    //   if (findColorBetting instanceof ColourBetting) {
-    //     let rewardAmount = findColorBetting.betAmount * 0.95;
-    //     findColorBetting.isWin = true;
-    //     findColorBetting.rewardAmount = rewardAmount;
-    //     await findColorBetting.save();
+    for (const findColorBetting of findColorBettingArray) {
+      if (findColorBetting instanceof ColourBetting) {
+        let rewardAmount = findColorBetting.betAmount * 0.95;
+        findColorBetting.isWin = true;
+        findColorBetting.rewardAmount = rewardAmount;
+        await findColorBetting.save();
 
-    //     const balance = await getSingleData(
-    //       { userId: findColorBetting.userId },
-    //       NewTransaction
-    //     );
+        const balance = await getSingleData(
+          { userId: findColorBetting.userId },
+          NewTransaction
+        );
 
-    //     if (balance) {
-    //       balance.tokenDollorValue = plusLargeSmallValue(
-    //         balance.tokenDollorValue,
-    //         findColorBetting.betAmount + rewardAmount
-    //       );
-    //       await balance.save();
-    //     }
+        if (balance) {
+          balance.tokenDollorValue = plusLargeSmallValue(
+            balance.tokenDollorValue,
+            findColorBetting.betAmount + rewardAmount
+          );
+          await balance.save();
+        }
 
-    //     savedInstances.push(findColorBetting);
-    //   } else {
-    //     // Log an error or handle the case where the document is not an instance of ColourBetting
-    //     console.error("Document is not an instance of ColourBetting:", findColorBetting);
-    //   }
-    // }
-   console.log({findColorBettingArray});
+        savedInstances.push(findColorBetting);
+      } else {
+        // Log an error or handle the case where the document is not an instance of ColourBetting
+        console.error("Document is not an instance of ColourBetting:", findColorBetting);
+      }
+    }
     return sendResponse(
       res,
       StatusCodes.OK,
