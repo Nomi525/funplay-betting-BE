@@ -17,6 +17,7 @@ import {
   mongoose,
   Game,
   Period,
+  ColourBetting
 } from "../../index.js";
 
 export const addEditNumberBet = async (req, res) => {
@@ -706,7 +707,6 @@ export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     let currentTime = moment().utcOffset("+05:30").format("HH:mm");
-    console.log("das", moment().format("YYYY-MM-DD"));
     let getGamePeriod = await Period.find({
       date: moment().format("YYYY-MM-DD"),
       gameId,
@@ -731,10 +731,6 @@ export const getPeriod = async (req, res) => {
         `${currentDate} ${findGame.gameDurationTo}:00`,
         "YYYY-MM-DD HH:mm:ss"
       ).unix();
-      console.log(currentTimestamp, endTimestamp, "645456564");
-      // if (endTimestamp >= currentTimestamp) {
-      //   getAllPeriod = [];
-      // }
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -744,7 +740,7 @@ export const getPeriod = async (req, res) => {
     } else {
       return sendResponse(
         res,
-        StatusCodes.NO_CONTENT,
+        StatusCodes.BAD_REQUEST,
         ResponseMessage.GAME_PERIOD_OVER,
         []
       );
@@ -755,19 +751,318 @@ export const getPeriod = async (req, res) => {
   }
 };
 
+// export const getPeriodsDetailsForAllGame = async (req, res) => {
+//   try {
+//     // const getPeriods = await Period.aggregate([
+//     //   {
+//     //     $lookup: {
+//     //       from: 'numberbettings',
+//     //       localField: 'period',
+//     //       foreignField: 'period',
+//     //       as: 'numberBettingsData'
+//     //     }
+//     //   },
+//     //   {
+//     //     $lookup: {
+//     //       from: 'games',
+//     //       localField: 'gameId',
+//     //       foreignField: '_id',
+//     //       as: 'game'
+//     //     }
+//     //   },
+//     //   {
+//     //     $unwind : "$game"
+//     //   }
+//     // ])
+//     // // console.log('getPeriods',getPeriods);
+//     // return res.send(getPeriods)
+//     // For Number Period
+//     const getAllNumberPeriods = await Period.aggregate([
+//       {
+//         $lookup: {
+//           from: 'numberbettings',
+//           localField: 'period',
+//           foreignField: 'period',
+//           as: 'numberBettingsData'
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: {
+//             period: "$period",
+//             gameId: "$gameId"
+//           },
+//           totalNumberBettingsUsers: {
+//             $sum: {
+//               $cond: {
+//                 if: { $isArray: "$numberBettingsData" },
+//                 then: { $size: "$numberBettingsData" },
+//                 else: 0
+//               }
+//             }
+//           },
+//           totalBetAmount: {
+//             $sum: {
+//               $ifNull: [{ $sum: "$numberBettingsData.betAmount" }, 0]
+//             }
+//           }
+//         }
+//       },
+//       {
+//         $addFields: { gameName: "Number Betting" }
+//       },
+//       {
+//         $project: {
+//           period: "$_id.period",
+//           game: 1,
+//           totalNumberBettingsUsers: 1,
+//           totalBetAmount: 1,
+//           gameName: 1,
+//           _id: 0
+//         }
+//       }
+//     ]);
+
+//     // For 3 Colour Period
+//     const getAll3ColourPeriods = await Period.aggregate([
+//       {
+//         $lookup: {
+//           from: 'colourbettings',
+//           localField: 'period',
+//           foreignField: 'period',
+//           as: '3colourbettingsData'
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: {
+//             period: "$period",
+//             gameId: "$gameId"
+//           },
+//           totalColourBettingUsers: {
+//             $sum: {
+//               $cond: {
+//                 if: { $isArray: "$3colourbettingsData" },
+//                 then: { $size: "$3colourbettingsData" },
+//                 else: 0
+//               }
+//             }
+//           },
+//           totalBetAmount: {
+//             $sum: {
+//               $ifNull: [{ $sum: "$3colourbettingsData.betAmount" }, 0]
+//             }
+//           }
+//         }
+//       },
+//       {
+//         $addFields: { gameName: "3 Color Betting" }
+//       },
+//       {
+//         $project: {
+//           period: "$_id.period",
+//           totalColourBettingUsers: 1,
+//           totalBetAmount: 1,
+//           gameName: 1,
+//           _id: 0
+//         }
+//       }
+//     ]);
+
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       {
+//         getAllNumberPeriods,
+//         getAll3ColourPeriods
+//       }
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getPeriodsDetailsForAllGame = async (req, res) => {
   try {
-    // const { gameId, gameType } = req.params;
-    const getAllPeriod = await Period.find({ is_deleted: 0 })
-      .populate('gameId', 'gameName gameImage')
-      .sort({ createdAt: -1 })
+    const getAllPeriod = await Period.aggregate([
+      { $match: { is_deleted: 0 } },
+      {
+        $project: {
+          _id: 0,
+          gameId: "$gameId",
+          period: "$period",
+        },
+      },
+      {
+        $lookup: {
+          from: 'games',
+          localField: 'gameId',
+          foreignField: '_id',
+          as: 'game',
+        }
+      },
+      { $unwind: "$game" },
+      {
+        $project: {
+          gameName: "$game.gameName",
+          gameId: "$gameId",
+          period: "$period",
+        }
+      },
+      {
+        $sort: {
+          gameId: 1,
+          period: -1,
+        },
+      }
+    ]);
+
+    const gamePeriod = [];
+    if (getAllPeriod.length) {
+      await Promise.all(
+        getAllPeriod.map(async (item) => {
+          if (item.gameName == "Number Betting") {
+            const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
+            gamePeriod.push({
+              period: item.period,
+              gameName: item.gameName,
+              totalUsers: findNumbers.length,
+              totalBetAmount: findNumbers.reduce((sum, data) => sum + data.betAmount, 0),
+            })
+          } else if (item.gameName == "3 Color Betting" || item.gameName == "2 Color Betting") {
+            let gameType = item.gameName == "3 Color Betting" ? "3colorBetting" : "2colorBetting";
+            const findColours = await ColourBetting.find({ gameType, gameId: item.gameId, period: item.period, is_deleted: 0 })
+            gamePeriod.push({
+              period: item.period,
+              gameName: item.gameName,
+              totalUsers: findColours.length,
+              totalBetAmount: findColours.reduce((sum, data) => sum + data.betAmount, 0),
+            })
+          }
+        })
+      )
+    }
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      getAllPeriod
+      gamePeriod
     );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
+
+export const numberBettingWinnerResult = async (req, res) => {
+  try {
+    const { gameType, type, gameId, period } = req.params;
+    const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
+    if (findGameMode) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_MANUAL,
+        []
+      );
+    }
+    const totalUserInPeriod = await NumberBetting.find({ gameId, period: Number(period), is_deleted: 0 })
+    if (totalUserInPeriod.length) {
+      if (totalUserInPeriod.length > 1) {
+        const getAllNumberBets = await NumberBetting.aggregate([
+          {
+            $match: { period: Number(period) }
+          },
+          {
+            $group: {
+              _id: "$number",
+              period: { $first: "$period" },
+              totalUser: { $sum: 1 },
+              userIds: { $push: "$userId" },
+              totalBetAmount: { $sum: "$betAmount" }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              period: 1,
+              number: "$_id",
+              totalUser: 1,
+              userIds: 1,
+              totalBetAmount: 1,
+            }
+          },
+          {
+            $sort: { totalBetAmount: 1 }
+          },
+          {
+            $limit: 1
+          }
+        ])
+        if (getAllNumberBets.length) {
+          await Promise.all(
+            getAllNumberBets.map(async (item) => {
+              item.userIds.map(async (userId) => {
+                const findUser = await NumberBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
+                if (findUser) {
+                  let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, process.env.WINNER_AMOUNT);
+                  findUser.isWin = true
+                  findUser.rewardAmount = rewardAmount
+                  await findUser.save();
+                  const balance = await getSingleData(
+                    { userId },
+                    NewTransaction
+                  );
+                  if (balance) {
+                    balance.tokenDollorValue = plusLargeSmallValue(
+                      balance.tokenDollorValue,
+                      findUser.betAmount + rewardAmount
+                    );
+                    await balance.save();
+                  }
+                } else {
+                  return sendResponse(
+                    res,
+                    StatusCodes.BAD_REQUEST,
+                    "User not found",
+                    []
+                  );
+                }
+              })
+            })
+          )
+          // return res.send(getAllNumberBets)
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            "Winner number",
+            getAllNumberBets
+          );
+        } else {
+          return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.LOSSER,
+            []
+          );
+        }
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.LOSSER,
+          []
+        );
+      }
+    }
+    return sendResponse(
+      res,
+      StatusCodes.BAD_REQUEST,
+      "User not found",
+      []
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}

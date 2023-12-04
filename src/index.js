@@ -239,7 +239,8 @@ import {
   getNumberGamePeriodById,
   createGamePeriodFromCronJob,
   getPeriod,
-  getPeriodsDetailsForAllGame
+  getPeriodsDetailsForAllGame,
+  numberBettingWinnerResult
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
@@ -352,6 +353,7 @@ import {
 
 dotenv.config();
 export {
+  numberBettingWinnerResult,
   getPeriodsDetailsForAllGame,
   declareWinnerOfColorBetting,
   declareWinnerOfNumberBetting,
