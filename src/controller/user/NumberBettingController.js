@@ -438,6 +438,7 @@ export const createGamePeriodFromCronJob = async () => {
         ) {
           let findPeriod2 = await Period.findOne({
             gameId: game._id,
+            date: currentDate2,
           }).sort({ createdAt: -1 });
           if (findPeriod2) {
             if (game.isRepeat) {
@@ -447,7 +448,7 @@ export const createGamePeriodFromCronJob = async () => {
               })
                 .sort({ createdAt: -1 })
                 .limit(1);
-              if (currentTime >= lastIndex[0].endTime) {
+              if (currentTime >= lastIndex[0].endTime) {  
                 const periodCount = await Period.countDocuments({
                   gameId: game._id,
                 });
