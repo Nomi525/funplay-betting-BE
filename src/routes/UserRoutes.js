@@ -65,7 +65,8 @@ import {
   verifyOtp,
   walletCreate,
   withdrawalRequest,
-  getPeriodsDetailsForAllGame
+  getPeriodsDetailsForAllGame,
+  numberBettingWinnerResult
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -147,6 +148,7 @@ userRoutes.get(
   Auth,
   getAllNumberGamePeriod
 );
+userRoutes.get('/get-number-betting-winner/:gameId/:period', Auth, numberBettingWinnerResult)
 
 //Colour betting
 userRoutes.post("/create-colour-bet", Auth, addColourBet);
