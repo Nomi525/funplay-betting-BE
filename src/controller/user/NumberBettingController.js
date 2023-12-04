@@ -20,6 +20,159 @@ import {
   ColourBetting
 } from "../../index.js";
 
+// export const addEditNumberBet = async (req, res) => {
+//   try {
+//     let {
+//       numberBetId,
+//       gameId,
+//       number,
+//       betAmount,
+//       rewardsCoins,
+//       winAmount,
+//       lossAmount,
+//       period,
+//     } = req.body;
+//     let isWin = false;
+//     if (winAmount) isWin = true;
+//     const findUserDeposit = await NewTransaction.findOne({
+//       userId: req.user,
+//       is_deleted: 0,
+//     });
+//     if (!findUserDeposit) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+//     // if (!numberBetId) {
+//     if (betAmount < 0) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.VALID_BET_AMOUNT,
+//         []
+//       );
+//     }
+//     if (
+//       !checkDecimalValueGreaterThanOrEqual(
+//         findUserDeposit.tokenDollorValue,
+//         betAmount
+//       )
+//     ) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+//     // const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
+//     const totalBetAmount = multiplicationLargeSmallValue(
+//       betAmount,
+//       rewardsCoins
+//     );
+
+//     let alreadyExistBet = await NumberBetting.findOne({
+//       userId: req.user,
+//       gameId: gameId,
+//       period,
+//     });
+//     let createNumberBet;
+//     if (alreadyExistBet) {
+//       createNumberBet = await dataUpdated(
+//         {
+//           userId: req.user,
+//         },
+//         {
+//           number: parseInt(number),
+//           betAmount: parseInt(betAmount),
+//         },
+//         NumberBetting
+//       );
+//     } else {
+//       createNumberBet = await dataCreate(
+//         {
+//           userId: req.user,
+//           gameId,
+//           number: parseInt(number),
+//           betAmount,
+//           totalAmount: totalBetAmount,
+//           winAmount,
+//           lossAmount,
+//           isWin,
+//           period,
+//         },
+//         NumberBetting
+//       );
+//     }
+
+//     if (createNumberBet) {
+//       findUserDeposit.tokenDollorValue = minusLargeSmallValue(
+//         findUserDeposit.tokenDollorValue,
+//         betAmount
+//       );
+//       if (parseFloat(findUserDeposit.betAmount)) {
+//         findUserDeposit.betAmount = plusLargeSmallValue(
+//           findUserDeposit.betAmount,
+//           betAmount
+//         );
+//       } else {
+//         findUserDeposit.betAmount = betAmount;
+//       }
+//       await findUserDeposit.save();
+//       return sendResponse(
+//         res,
+//         StatusCodes.CREATED,
+//         ResponseMessage.NUMBER_BET_CRETED,
+//         createNumberBet
+//       );
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.FAILED_TO_CREATE,
+//         []
+//       );
+//     }
+
+//     // } else {
+//     //   const updateNumberBet = await dataUpdated(
+//     //     { _id: numberBetId, userId: req.user },
+//     //     { winAmount, lossAmount, isWin },
+//     //     NumberBetting
+//     //   );
+//     //   if (updateNumberBet) {
+//     //     if (parseFloat(winAmount)) {
+//     //       findUserDeposit.tokenDollorValue = plusLargeSmallValue(
+//     //         findUserDeposit.tokenDollorValue,
+//     //         winAmount
+//     //       );
+//     //       await findUserDeposit.save();
+//     //     }
+//     //     return sendResponse(
+//     //       res,
+//     //       StatusCodes.OK,
+//     //       ResponseMessage.NUMBER_BET_UPDATED,
+//     //       updateNumberBet
+//     //     );
+//     //   } else {
+//     //     return sendResponse(
+//     //       res,
+//     //       StatusCodes.BAD_REQUEST,
+//     //       ResponseMessage.FAILED_TO_UPDATE,
+//     //       []
+//     //     );
+//     //   }
+//     // }
+//   } catch (error) {
+//     console.log(error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+
 export const addEditNumberBet = async (req, res) => {
   try {
     let {
@@ -68,45 +221,63 @@ export const addEditNumberBet = async (req, res) => {
         []
       );
     }
-    // const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
-    const totalBetAmount = multiplicationLargeSmallValue(
-      betAmount,
-      rewardsCoins
-    );
+    const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
 
-    let alreadyExistBet = await NumberBetting.findOne({
-      userId: req.user,
-      gameId: gameId,
-      period,
-    });
-    let createNumberBet;
-    if (alreadyExistBet) {
-      createNumberBet = await dataUpdated(
-        {
-          userId: req.user,
-        },
-        {
-          number: parseInt(number),
-          betAmount: parseInt(betAmount),
-        },
-        NumberBetting
-      );
-    } else {
-      createNumberBet = await dataCreate(
-        {
-          userId: req.user,
-          gameId,
-          number: parseInt(number),
-          betAmount,
-          totalAmount: totalBetAmount,
-          winAmount,
-          lossAmount,
-          isWin,
-          period,
-        },
-        NumberBetting
-      );
-    }
+    // const totalBetAmount = multiplicationLargeSmallValue(
+    //   betAmount,
+    //   rewardsCoins
+    // );
+
+    // let alreadyExistBet = await NumberBetting.findOne({
+    //   userId: req.user,
+    //   gameId: gameId,
+    //   period,
+    // });
+    // let createNumberBet;
+    // if (alreadyExistBet) {
+    //   createNumberBet = await dataUpdated(
+    //     {
+    //       userId: req.user,
+    //     },
+    //     {
+    //       number: parseInt(number),
+    //       betAmount: parseInt(betAmount),
+    //     },
+    //     NumberBetting
+    //   );
+    // } else {
+    //   createNumberBet = await dataCreate(
+    //     {
+    //       userId: req.user,
+    //       gameId,
+    //       number: parseInt(number),
+    //       betAmount,
+    //       totalAmount: totalBetAmount,
+    //       winAmount,
+    //       lossAmount,
+    //       isWin,
+    //       period,
+    //     },
+    //     NumberBetting
+    //   );
+    // }
+
+    // createNumberBet = await dataCreate(
+    
+    let createNumberBet = await dataCreate(
+      {
+        userId: req.user,
+        gameId,
+        number: parseInt(number),
+        betAmount,
+        totalAmount: totalBetAmount,
+        winAmount,
+        lossAmount,
+        isWin,
+        period,
+      },
+      NumberBetting
+    );
 
     if (createNumberBet) {
       findUserDeposit.tokenDollorValue = minusLargeSmallValue(
@@ -136,38 +307,7 @@ export const addEditNumberBet = async (req, res) => {
         []
       );
     }
-
-    // } else {
-    //   const updateNumberBet = await dataUpdated(
-    //     { _id: numberBetId, userId: req.user },
-    //     { winAmount, lossAmount, isWin },
-    //     NumberBetting
-    //   );
-    //   if (updateNumberBet) {
-    //     if (parseFloat(winAmount)) {
-    //       findUserDeposit.tokenDollorValue = plusLargeSmallValue(
-    //         findUserDeposit.tokenDollorValue,
-    //         winAmount
-    //       );
-    //       await findUserDeposit.save();
-    //     }
-    //     return sendResponse(
-    //       res,
-    //       StatusCodes.OK,
-    //       ResponseMessage.NUMBER_BET_UPDATED,
-    //       updateNumberBet
-    //     );
-    //   } else {
-    //     return sendResponse(
-    //       res,
-    //       StatusCodes.BAD_REQUEST,
-    //       ResponseMessage.FAILED_TO_UPDATE,
-    //       []
-    //     );
-    //   }
-    // }
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -1006,7 +1146,7 @@ export const numberBettingWinnerResult = async (req, res) => {
               item.userIds.map(async (userId) => {
                 const findUser = await NumberBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
                 if (findUser) {
-                  let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, process.env.WINNER_AMOUNT);
+                  let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
                   findUser.isWin = true
                   findUser.rewardAmount = rewardAmount
                   await findUser.save();

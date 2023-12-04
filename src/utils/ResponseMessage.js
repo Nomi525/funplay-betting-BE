@@ -157,8 +157,9 @@ const ResponseMessage = {
     CURRENCY_CONVERTED : "Currency converted successfully",
     WINNER_DECLARE_MANUAL : "Winner will be announced soon",
     WINNER_DECLARE_AUTO : "Winner will declare automatically",
-    INSUFFICIENT_BALANCE_USER : "Insufficient balance in your account.",
+    INSUFFICIENT_BALANCE : "Insufficient balance in your account.",
     GAME_PERIOD_OVER : "Game period not found.",
+    GAME_PERIOD_GET : "Get game period.",
     LOSSER : "You are losser",
 }
 
