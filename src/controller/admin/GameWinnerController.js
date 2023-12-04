@@ -462,6 +462,12 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
       { gameId, period: winnerId, number: winNumber, is_deleted: 0, isWin: false },
       NumberBetting
     );
+    // console.log({findNumberBettingArray});
+
+    if(findNumberBettingArray.winNumber != winNumber){
+      return sendResponse(res, StatusCodes.OK, `No record found for this ${winNumber} number`);
+    }
+    
     const savedInstances = [];
 
     for (const findNumberBetting of findNumberBettingArray) {
@@ -511,14 +517,15 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
-
     const savedInstances = [];
-
     const findColorBettingArray = await getAllData(
       { period: winnerId, gameId: gameId, colourName: winColour, is_deleted: 0, isWin: false },
       ColourBetting
     );
 
+  if(findColorBettingArray.winColour != winColour){
+    return sendResponse(res, StatusCodes.OK, `No record found for this ${winColour} colour`);
+  }
     for (const findColorBetting of findColorBettingArray) {
       if (findColorBetting instanceof ColourBetting) {
         let rewardAmount = findColorBetting.betAmount * 0.95;
@@ -530,7 +537,6 @@ export const declareWinnerOfColorBetting = async (req, res) => {
           { userId: findColorBetting.userId },
           NewTransaction
         );
-
         if (balance) {
           balance.tokenDollorValue = plusLargeSmallValue(
             balance.tokenDollorValue,
