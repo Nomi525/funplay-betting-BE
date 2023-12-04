@@ -18,9 +18,107 @@ import {
   GameReward,
   NumberBetting,
   CommunityBetting,
+  checkDecimalValueGreaterThanOrEqual
 } from "../../index.js";
 
 //#region Colour betting api
+// export const addColourBet = async (req, res) => {
+//   try {
+//     let { gameId, colourName, betAmount, gameType, period, selectedTime } = req.body;
+//     if (betAmount < 0) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.VALID_BET_AMOUNT,
+//         []
+//       );
+//     }
+//     const checkBalance = await NewTransaction.findOne({
+//       userId: req.user,
+//       is_deleted: 0,
+//     });
+//     if (!checkBalance) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+//     if (parseInt(checkBalance.tokenDollorValue) < parseInt(betAmount)) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+//     let alreadyExistBet = await ColourBetting.findOne({
+//       userId: req.user,
+//       gameId: gameId,
+//       gameType,
+//       period,
+//     });
+//     let createColourBet;
+//     if (alreadyExistBet) {
+//       createColourBet = await dataUpdated(
+//         {
+//           userId: req.user,
+//         },
+//         {
+//           colourName: colourName,
+//           betAmount: parseInt(betAmount),
+//         },
+//         ColourBetting
+//       );
+//     } else {
+//       createColourBet = await dataCreate(
+//         {
+//           userId: req.user,
+//           gameId: gameId,
+//           colourName: colourName,
+//           betAmount: parseInt(betAmount),
+//           gameType,
+//           period,
+//           selectedTime
+//         },
+//         ColourBetting
+//       );
+//     }
+
+//     if (createColourBet) {
+//       checkBalance.tokenDollorValue = minusLargeSmallValue(
+//         checkBalance.tokenDollorValue,
+//         betAmount
+//       );
+//       if (parseFloat(checkBalance.betAmount)) {
+//         checkBalance.betAmount = plusLargeSmallValue(
+//           checkBalance.betAmount,
+//           betAmount
+//         );
+//       } else {
+//         checkBalance.betAmount = betAmount;
+//       }
+//       await checkBalance.save();
+//       return sendResponse(
+//         res,
+//         StatusCodes.CREATED,
+//         ResponseMessage.COLOUR_BET_CRETED,
+//         createColourBet
+//       );
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.FAILED_TO_CREATE,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const addColourBet = async (req, res) => {
   try {
     let { gameId, colourName, betAmount, gameType, period, selectedTime } = req.body;
@@ -40,7 +138,7 @@ export const addColourBet = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.INSUFFICIENT_BALANCE_USER,
+        ResponseMessage.INSUFFICIENT_BALANCE,
         []
       );
     }
@@ -48,42 +146,70 @@ export const addColourBet = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        ResponseMessage.INSUFFICIENT_BALANCE_USER,
+        ResponseMessage.INSUFFICIENT_BALANCE,
         []
       );
     }
-    let alreadyExistBet = await ColourBetting.findOne({
-      userId: req.user,
-      gameId: gameId,
-      gameType,
-      period,
-    });
-    let createColourBet;
-    if (alreadyExistBet) {
-      createColourBet = await dataUpdated(
-        {
-          userId: req.user,
-        },
-        {
-          colourName: colourName,
-          betAmount: parseInt(betAmount),
-        },
-        ColourBetting
-      );
-    } else {
-      createColourBet = await dataCreate(
-        {
-          userId: req.user,
-          gameId: gameId,
-          colourName: colourName,
-          betAmount: parseInt(betAmount),
-          gameType,
-          period,
-          selectedTime
-        },
-        ColourBetting
+
+    if (
+      !checkDecimalValueGreaterThanOrEqual(
+        checkBalance.tokenDollorValue,
+        betAmount
+      )
+    ) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.INSUFFICIENT_BALANCE,
+        []
       );
     }
+
+    // let alreadyExistBet = await ColourBetting.findOne({
+    //   userId: req.user,
+    //   gameId: gameId,
+    //   gameType,
+    //   period,
+    // });
+    // let createColourBet;
+    // if (alreadyExistBet) {
+    //   createColourBet = await dataUpdated(
+    //     {
+    //       userId: req.user,
+    //     },
+    //     {
+    //       colourName: colourName,
+    //       betAmount: parseInt(betAmount),
+    //     },
+    //     ColourBetting
+    //   );
+    // } else {
+    //   createColourBet = await dataCreate(
+    //     {
+    //       userId: req.user,
+    //       gameId: gameId,
+    //       colourName: colourName,
+    //       betAmount: parseInt(betAmount),
+    //       gameType,
+    //       period,
+    //       selectedTime
+    //     },
+    //     ColourBetting
+    //   );
+    // }
+
+    let createColourBet = await dataCreate(
+      {
+        userId: req.user,
+        gameId: gameId,
+        colourName: colourName,
+        betAmount: parseInt(betAmount),
+        gameType,
+        period,
+        selectedTime
+      },
+      ColourBetting
+    );
 
     if (createColourBet) {
       checkBalance.tokenDollorValue = minusLargeSmallValue(
@@ -117,6 +243,7 @@ export const addColourBet = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 //#endregion
 
 //#region Colour betting result api
@@ -677,4 +804,120 @@ export const getCommunityWinList = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+//#region Game Winner api
+export const colourBettingWinnerResult = async (req, res) => {
+  try {
+      let { gameType, gameId, period } = req.params;
+      const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
+      if (findGameMode) {
+          return sendResponse(
+              res,
+              StatusCodes.OK,
+              ResponseMessage.WINNER_DECLARE_MANUAL,
+              []
+          );
+      }
+      const totalUserInPeriod = await ColourBetting.find({ gameType, gameId, period: Number(period), is_deleted: 0 })
+      if (totalUserInPeriod.length) {
+          if (totalUserInPeriod.length > 1) {
+              const getAllBets = await ColourBetting.aggregate([
+                  {
+                      $match: {
+                          period: Number(period),
+                          gameType
+                      }
+                  },
+                  {
+                      $group: {
+                          _id: "$colourName",
+                          period: { $first: "$period" },
+                          totalUser: { $sum: 1 },
+                          userIds: { $push: "$userId" },
+                          totalBetAmount: { $sum: "$betAmount" }
+                      }
+                  },
+                  {
+                      $project: {
+                          _id: 0,
+                          period: 1,
+                          colourName: "$_id",
+                          totalUser: 1,
+                          userIds: 1,
+                          totalBetAmount: 1,
+                      }
+                  },
+                  {
+                      $sort: { totalBetAmount: 1 }
+                  },
+                  {
+                      $limit: 1
+                  }
+              ])
+              if (getAllBets.length) {
+                  await Promise.all(
+                      getAllBets.map(async (item) => {
+                          item.userIds.map(async (userId) => {
+                              const findUser = await ColourBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
+                              if (findUser) {
+                                  let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                                  findUser.isWin = true
+                                  findUser.rewardAmount = rewardAmount
+                                  await findUser.save();
+                                  const balance = await getSingleData(
+                                      { userId },
+                                      NewTransaction
+                                  );
+                                  if (balance) {
+                                      balance.tokenDollorValue = plusLargeSmallValue(
+                                          balance.tokenDollorValue,
+                                          findUser.betAmount + rewardAmount
+                                      );
+                                      await balance.save();
+                                  }
+                              } else {
+                                  return sendResponse(
+                                      res,
+                                      StatusCodes.BAD_REQUEST,
+                                      "User not found",
+                                      []
+                                  );
+                              }
+                          })
+                      })
+                  )
+                  return sendResponse(
+                      res,
+                      StatusCodes.OK,
+                      "Winner color",
+                      getAllBets
+                  );
+              } else {
+                  return sendResponse(
+                      res,
+                      StatusCodes.OK,
+                      ResponseMessage.LOSSER,
+                      []
+                  );
+              }
+          } else {
+              return sendResponse(
+                  res,
+                  StatusCodes.OK,
+                  ResponseMessage.LOSSER,
+                  []
+              );
+          }
+      }
+      return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          "User not found",
+          []
+      );
+  } catch (error) {
+      return handleErrorResponse(res, error);
+  }
+}
+//#endregion
 

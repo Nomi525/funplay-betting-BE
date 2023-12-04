@@ -261,6 +261,7 @@ import {
   getAllGamePeriod,
   getByIdGamePeriod,
   getCommunityWinList,
+  colourBettingWinnerResult
 } from "./controller/user/ColourBettingController.js";
 
 // Coumunnity Betting
@@ -353,6 +354,7 @@ import {
 
 dotenv.config();
 export {
+  colourBettingWinnerResult,
   numberBettingWinnerResult,
   getPeriodsDetailsForAllGame,
   declareWinnerOfColorBetting,

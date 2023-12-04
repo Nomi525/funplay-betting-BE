@@ -66,7 +66,8 @@ import {
   walletCreate,
   withdrawalRequest,
   getPeriodsDetailsForAllGame,
-  numberBettingWinnerResult
+  numberBettingWinnerResult,
+  colourBettingWinnerResult
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -168,6 +169,9 @@ userRoutes.get(
   getSingleGameWiseWinner
 );
 userRoutes.get("/get-login-user-bet", Auth, getLoginUserColourBet);
+
+//#region Winner api
+userRoutes.get('/get-color-betting-winner/:gameType/:gameId/:period', Auth, colourBettingWinnerResult)
 
 // Color Period
 userRoutes.get("/get-all-game-period/:gameId", Auth, getAllGamePeriod);

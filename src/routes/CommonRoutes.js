@@ -1,6 +1,5 @@
 import {
-    express, Auth, Upload,
-    addEditBanner, deleteBanner, allBannerGet, getSingleGameRule, getAllCurrency,getSingleGameTime
+    express, Auth, Upload, addEditBanner, deleteBanner, allBannerGet, getSingleGameRule, getAllCurrency, getSingleGameTime
 } from "../index.js"
 const commonRoutes = express.Router();
 // Banner Api for admin and user
