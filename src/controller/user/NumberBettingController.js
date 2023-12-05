@@ -263,7 +263,7 @@ export const addEditNumberBet = async (req, res) => {
     // }
 
     // createNumberBet = await dataCreate(
-    
+
     let createNumberBet = await dataCreate(
       {
         userId: req.user,
@@ -449,6 +449,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
         $group: {
           _id: "$period",
           totalUsers: { $sum: 1 },
+          betAmount: { $sum: "$betAmount" },
           winNumber: {
             $max: {
               $cond: [{ $eq: ["$isWin", true] }, "$number", null],
@@ -463,17 +464,50 @@ export const getAllNumberGamePeriod = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        }
+      },
+      {
         $project: {
           _id: 0,
           totalUsers: 1,
           price: "$betAmount",
           period: 1,
           winNumber: 1,
+          createdAt: 1,
+          periodData: {
+            $filter: {
+              input: "$periodData",
+              as: "pd",
+              cond: {
+                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
+              }
+            }
+          },
         },
+      },
+      {
+        $unwind: "$periodData"
       },
       {
         $match: {
           winNumber: { $ne: null }
+        }
+      },
+      {
+        $project: {
+          totalUsers: 1,
+          winNumber: 1,
+          period: 1,
+          price: 1,
+          date: "$periodData.date",
+          startTime: "$periodData.startTime",
+          endTime: "$periodData.endTime",
+          createdAt: "$periodData.createdAt",
         }
       }
     ]);
@@ -488,6 +522,63 @@ export const getAllNumberGamePeriod = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+// export const getAllNumberGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const aggregationResult = await NumberBetting.aggregate([
+//       {
+//         $match: {
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           createdAt: { $gte: twentyFourHoursAgo },
+//           is_deleted: 0,
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$period",
+//           totalUsers: { $sum: 1 },
+//           betAmount: { $sum: "$betAmount" },
+//           winNumber: {
+//             $max: {
+//               $cond: [{ $eq: ["$isWin", true] }, "$number", null],
+//             },
+//           },
+//           period: { $first: "$period" },
+//         },
+//       },
+//       {
+//         $sort: {
+//           period: -1,
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           totalUsers: 1,
+//           price: "$betAmount",
+//           period: 1,
+//           winNumber: 1,
+//         },
+//       },
+//       {
+//         $match: {
+//           winNumber: { $ne: null }
+//         }
+//       }
+//     ]);
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       aggregationResult
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
 
 // export const getAllNumberGamePeriod = async (req, res) => {
 //   try {
@@ -588,7 +679,7 @@ export const createGamePeriodFromCronJob = async () => {
               })
                 .sort({ createdAt: -1 })
                 .limit(1);
-              if (currentTime >= lastIndex[0].endTime) {  
+              if (currentTime >= lastIndex[0].endTime) {
                 const periodCount = await Period.countDocuments({
                   gameId: game._id,
                 });
@@ -838,7 +929,7 @@ export const createGamePeriodFromCronJob = async () => {
             }
           }
         }
-      }else if (game.gameName == "2 Color Betting") {
+      } else if (game.gameName == "2 Color Betting") {
         const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
           "HH:mm:ss"
         );
@@ -885,7 +976,7 @@ export const createGamePeriodFromCronJob = async () => {
             gameId: game._id,
             date: currentDate2,
           }).sort({ createdAt: -1 });
-          if (findPeriod2) { 
+          if (findPeriod2) {
             if (game.isRepeat) {
               const lastIndex = await Period.find({
                 gameId: game._id,
@@ -1046,210 +1137,6 @@ export const getPeriod = async (req, res) => {
   }
 };
 
-// export const getPeriodsDetailsForAllGame = async (req, res) => {
-//   try {
-//     // const getPeriods = await Period.aggregate([
-//     //   {
-//     //     $lookup: {
-//     //       from: 'numberbettings',
-//     //       localField: 'period',
-//     //       foreignField: 'period',
-//     //       as: 'numberBettingsData'
-//     //     }
-//     //   },
-//     //   {
-//     //     $lookup: {
-//     //       from: 'games',
-//     //       localField: 'gameId',
-//     //       foreignField: '_id',
-//     //       as: 'game'
-//     //     }
-//     //   },
-//     //   {
-//     //     $unwind : "$game"
-//     //   }
-//     // ])
-//     // // console.log('getPeriods',getPeriods);
-//     // return res.send(getPeriods)
-//     // For Number Period
-//     const getAllNumberPeriods = await Period.aggregate([
-//       {
-//         $lookup: {
-//           from: 'numberbettings',
-//           localField: 'period',
-//           foreignField: 'period',
-//           as: 'numberBettingsData'
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             period: "$period",
-//             gameId: "$gameId"
-//           },
-//           totalNumberBettingsUsers: {
-//             $sum: {
-//               $cond: {
-//                 if: { $isArray: "$numberBettingsData" },
-//                 then: { $size: "$numberBettingsData" },
-//                 else: 0
-//               }
-//             }
-//           },
-//           totalBetAmount: {
-//             $sum: {
-//               $ifNull: [{ $sum: "$numberBettingsData.betAmount" }, 0]
-//             }
-//           }
-//         }
-//       },
-//       {
-//         $addFields: { gameName: "Number Betting" }
-//       },
-//       {
-//         $project: {
-//           period: "$_id.period",
-//           game: 1,
-//           totalNumberBettingsUsers: 1,
-//           totalBetAmount: 1,
-//           gameName: 1,
-//           _id: 0
-//         }
-//       }
-//     ]);
-
-//     // For 3 Colour Period
-//     const getAll3ColourPeriods = await Period.aggregate([
-//       {
-//         $lookup: {
-//           from: 'colourbettings',
-//           localField: 'period',
-//           foreignField: 'period',
-//           as: '3colourbettingsData'
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             period: "$period",
-//             gameId: "$gameId"
-//           },
-//           totalColourBettingUsers: {
-//             $sum: {
-//               $cond: {
-//                 if: { $isArray: "$3colourbettingsData" },
-//                 then: { $size: "$3colourbettingsData" },
-//                 else: 0
-//               }
-//             }
-//           },
-//           totalBetAmount: {
-//             $sum: {
-//               $ifNull: [{ $sum: "$3colourbettingsData.betAmount" }, 0]
-//             }
-//           }
-//         }
-//       },
-//       {
-//         $addFields: { gameName: "3 Color Betting" }
-//       },
-//       {
-//         $project: {
-//           period: "$_id.period",
-//           totalColourBettingUsers: 1,
-//           totalBetAmount: 1,
-//           gameName: 1,
-//           _id: 0
-//         }
-//       }
-//     ]);
-
-
-//     return sendResponse(
-//       res,
-//       StatusCodes.OK,
-//       ResponseMessage.GAME_PERIOD_GET,
-//       {
-//         getAllNumberPeriods,
-//         getAll3ColourPeriods
-//       }
-//     );
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// };
-
-export const getPeriodsDetailsForAllGame = async (req, res) => {
-  try {
-    const getAllPeriod = await Period.aggregate([
-      { $match: { is_deleted: 0 } },
-      {
-        $project: {
-          _id: 0,
-          gameId: "$gameId",
-          period: "$period",
-        },
-      },
-      {
-        $lookup: {
-          from: 'games',
-          localField: 'gameId',
-          foreignField: '_id',
-          as: 'game',
-        }
-      },
-      { $unwind: "$game" },
-      {
-        $project: {
-          gameName: "$game.gameName",
-          gameId: "$gameId",
-          period: "$period",
-        }
-      },
-      {
-        $sort: {
-          gameId: 1,
-          period: -1,
-        },
-      }
-    ]);
-
-    const gamePeriod = [];
-    if (getAllPeriod.length) {
-      await Promise.all(
-        getAllPeriod.map(async (item) => {
-          if (item.gameName == "Number Betting") {
-            const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
-            gamePeriod.push({
-              period: item.period,
-              gameName: item.gameName,
-              totalUsers: findNumbers.length,
-              totalBetAmount: findNumbers.reduce((sum, data) => sum + data.betAmount, 0),
-            })
-          } else if (item.gameName == "3 Color Betting" || item.gameName == "2 Color Betting") {
-            let gameType = item.gameName == "3 Color Betting" ? "3colorBetting" : "2colorBetting";
-            const findColours = await ColourBetting.find({ gameType, gameId: item.gameId, period: item.period, is_deleted: 0 })
-            gamePeriod.push({
-              period: item.period,
-              gameName: item.gameName,
-              totalUsers: findColours.length,
-              totalBetAmount: findColours.reduce((sum, data) => sum + data.betAmount, 0),
-            })
-          }
-        })
-      )
-    }
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      gamePeriod
-    );
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
-};
-
 export const numberBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;
@@ -1262,7 +1149,22 @@ export const numberBettingWinnerResult = async (req, res) => {
         []
       );
     }
-    const totalUserInPeriod = await NumberBetting.find({ gameId, period: Number(period), is_deleted: 0 })
+    // const totalUserInPeriod = await NumberBetting.find({ gameId, period: Number(period), is_deleted: 0 })
+    const totalUserInPeriod = await NumberBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          period: Number(period),
+          is_deleted: 0
+        }
+      },
+      {
+        $group: {
+          _id: "$userId",
+          userTotalBets: { $sum: 1 }
+        }
+      }
+    ])
     if (totalUserInPeriod.length) {
       if (totalUserInPeriod.length > 1) {
         const getAllNumberBets = await NumberBetting.aggregate([
@@ -1331,7 +1233,7 @@ export const numberBettingWinnerResult = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.OK,
-            "Winner number",
+            ResponseMessage.NUMBER_WINNER + " " + getAllNumberBets[0].number,
             getAllNumberBets
           );
         } else {

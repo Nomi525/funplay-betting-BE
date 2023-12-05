@@ -208,7 +208,7 @@ userRoutes.get(
   getAllCommunityGamePeriod
 );
 userRoutes.get("/get-period/:gameId", Auth, getPeriod);
-userRoutes.get("/get-periods-details-all-game", Auth, getPeriodsDetailsForAllGame);
+// userRoutes.get("/get-periods-details-all-game", Auth, getPeriodsDetailsForAllGame);
 
 
 export { userRoutes };
