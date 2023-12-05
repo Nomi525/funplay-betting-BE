@@ -93,6 +93,8 @@ import {
   addEditBanner,
   deleteBanner,
   allBannerGet,
+  getPeriodsDetailsForAllGame,
+  getAllGameRecodesGameWise
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
@@ -239,7 +241,6 @@ import {
   getNumberGamePeriodById,
   createGamePeriodFromCronJob,
   getPeriod,
-  getPeriodsDetailsForAllGame,
   numberBettingWinnerResult
 } from "./controller/user/NumberBettingController.js";
 
@@ -357,6 +358,7 @@ export {
   colourBettingWinnerResult,
   numberBettingWinnerResult,
   getPeriodsDetailsForAllGame,
+  getAllGameRecodesGameWise,
   declareWinnerOfColorBetting,
   declareWinnerOfNumberBetting,
   getPeriod,

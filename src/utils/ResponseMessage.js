@@ -161,6 +161,8 @@ const ResponseMessage = {
     GAME_PERIOD_OVER : "Game period not found.",
     GAME_PERIOD_GET : "Get game period.",
     LOSSER : "You are losser",
+    NUMBER_WINNER : "Victory Alert! The Winning number is",
+    COLOUR_WINNER : "Victory Alert! The Winning Color is",
 }
 
 export { ResponseMessage };
