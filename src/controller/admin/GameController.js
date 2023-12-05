@@ -1130,6 +1130,11 @@ export const getAllGamePeriodData = async (req, res) => {
           $unwind: '$colourbettingsData',
         },
         {
+          $match: {
+            'colourbettingsData.gameType': gameType,
+          },
+        },
+        {
           $group: {
             _id: {
               period: '$period',
@@ -1169,6 +1174,7 @@ export const getAllGamePeriodData = async (req, res) => {
         },
       ]);
     }
+    
     return sendResponse(
       res,
       StatusCodes.OK,
