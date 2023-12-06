@@ -1,5 +1,6 @@
+import mongoose from "mongoose";
 import { Currency } from "../../models/Currency.js";
-import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting } from "./../../index.js";
+import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -120,6 +121,269 @@ export const getSingleGameTime = async (req, res) => {
         } else {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.GAME_TIME_NOT_FOUND, []);
         }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+//#endregion
+
+//#region Get All Game Periods
+export const getPeriodsDetailsForAllGame = async (req, res) => {
+    try {
+        const getAllPeriod = await Period.aggregate([
+            { $match: { is_deleted: 0 } },
+            {
+                $project: {
+                    _id: 0,
+                    gameId: "$gameId",
+                    period: "$period",
+                },
+            },
+            {
+                $lookup: {
+                    from: 'games',
+                    localField: 'gameId',
+                    foreignField: '_id',
+                    as: 'game',
+                }
+            },
+            { $unwind: "$game" },
+            {
+                $project: {
+                    gameName: "$game.gameName",
+                    gameId: "$gameId",
+                    period: "$period",
+                }
+            },
+            {
+                $sort: {
+                    gameId: 1,
+                    period: -1,
+                },
+            }
+        ]);
+
+        const gamePeriod = [];
+        if (getAllPeriod.length) {
+            await Promise.all(
+                getAllPeriod.map(async (item) => {
+                    if (item.gameName == "Number Betting") {
+                        const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        const findWinNumber = findNumbers.find((data) => data.isWin)
+                        let winner = '';
+                        if(findWinNumber){
+                            winner = findWinNumber.number
+                        }
+                        gamePeriod.push({
+                            period: item.period,
+                            gameName: item.gameName,
+                            totalUsers: findNumbers.length,
+                            totalBetAmount: findNumbers.reduce((sum, data) => sum + data.betAmount, 0),
+                            winner
+                        })
+                    } else if (item.gameName == "3 Color Betting" || item.gameName == "2 Color Betting") {
+                        let gameType = item.gameName == "3 Color Betting" ? "3colorBetting" : "2colorBetting";
+                        const findColours = await ColourBetting.find({ gameType, gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        const findWinColour = findColours.find((data) => data.isWin)
+                        let winner = '';
+                        if(findWinColour){
+                            winner = findWinColour.colourName
+                        }
+                        gamePeriod.push({
+                            period: item.period,
+                            gameName: item.gameName,
+                            totalUsers: findColours.length,
+                            totalBetAmount: findColours.reduce((sum, data) => sum + data.betAmount, 0),
+                            winner
+                        })
+                    }
+                })
+            )
+        }
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GAME_PERIOD_GET,
+            gamePeriod
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+};
+//#endregion
+
+//#region Get All game period Game wise
+export const getAllGameRecodesGameWise = async (req, res) => {
+    try {
+        const { gameId, gameType } = req.params;
+        let getAllGamePeriod = [];
+
+        if (gameType == "numberBetting") {
+            // For Number Betting
+            getAllGamePeriod = await NumberBetting.aggregate([
+                {
+                    $match: {
+                        gameId: new mongoose.Types.ObjectId(gameId),
+                        is_deleted: 0,
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$period",
+                        totalUsers: { $sum: 1 },
+                        betAmount: { $sum: "$betAmount" },
+                        winNumber: {
+                            $max: {
+                                $cond: [{ $eq: ["$isWin", true] }, "$number", null],
+                            },
+                        },
+                        period: { $first: "$period" },
+                        createdAt: { $first: "$createdAt" }
+                    },
+                },
+                {
+                    $sort: {
+                        period: -1,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "periods",
+                        localField: "period",
+                        foreignField: "period",
+                        as: "periodData",
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        totalUsers: 1,
+                        price: "$betAmount",
+                        period: 1,
+                        winNumber: 1,
+                        createdAt: 1,
+                        periodData: {
+                            $filter: {
+                                input: "$periodData",
+                                as: "pd",
+                                cond: {
+                                    $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
+                                }
+                            }
+                        },
+                    },
+                },
+                {
+                    $unwind: "$periodData"
+                },
+                {
+                    $match: {
+                        winNumber: { $ne: null }
+                    }
+                },
+                {
+                    $project: {
+                        totalUsers: 1,
+                        winNumber: 1,
+                        period: 1,
+                        price: 1,
+                        date: "$periodData.date",
+                        startTime: "$periodData.startTime",
+                        endTime: "$periodData.endTime",
+                        createdAt: "$periodData.createdAt",
+                    }
+                }
+            ]);
+        } else if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+            // For Color Betting
+            getAllGamePeriod = await ColourBetting.aggregate([
+                {
+                    $match: {
+                        gameId: new mongoose.Types.ObjectId(gameId),
+                        is_deleted: 0,
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$period",
+                        totalUsers: { $sum: 1 },
+                        betAmount: { $sum: "$betAmount" },
+                        winColor: {
+                            $max: {
+                                $cond: [{ $eq: ["$isWin", true] }, "$colourName", null],
+                            },
+                        },
+                        period: { $first: "$period" },
+                        createdAt: { $first: "$createdAt" }
+                    },
+                },
+                {
+                    $sort: {
+                        period: -1,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "periods",
+                        localField: "period",
+                        foreignField: "period",
+                        as: "periodData",
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        totalUsers: 1,
+                        price: "$betAmount",
+                        period: 1,
+                        winColor: 1,
+                        createdAt: 1,
+                        periodData: {
+                            $filter: {
+                                input: "$periodData",
+                                as: "pd",
+                                cond: {
+                                    $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
+                                }
+                            }
+                        },
+                    },
+                },
+                {
+                    $unwind: "$periodData"
+                },
+                {
+                    $match: {
+                        winColor: { $ne: null }
+                    }
+                },
+                {
+                    $project: {
+                        totalUsers: 1,
+                        winColor: 1,
+                        period: 1,
+                        price: 1,
+                        date: "$periodData.date",
+                        startTime: "$periodData.startTime",
+                        endTime: "$periodData.endTime",
+                        createdAt: "$periodData.createdAt",
+                    }
+                }
+            ]);
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                "Please use valid game type",
+                []
+            );
+        }
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GAME_PERIOD_GET,
+            getAllGamePeriod
+        );
     } catch (error) {
         return handleErrorResponse(res, error);
     }
