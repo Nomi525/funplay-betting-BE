@@ -1,5 +1,4 @@
 import { chai, chaiHttp, appServer, expect, fs, path, ResponseMessage, Admin } from "../../src/index.js";
-import { referralWorkDummy } from "../../src/utils/DummyData.js";
 
 chai.use(chaiHttp);
 const should = chai.should();

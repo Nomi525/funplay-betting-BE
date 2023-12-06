@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourBetting
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourBetting, minusLargeSmallValue
 } from "../../index.js";
 
 
@@ -42,16 +42,21 @@ export const userDashboard = async (req, res) => {
                 }
             };
             const totalRewardsDistributedToday = await Reward.countDocuments({ userId: findUser._id, is_deleted: 0, ...rewardTodayQuery });
-            const totalWithdrawalRequests = transactions.filter(tran => tran.type == "withdrawal").length
+            const totalWithdrawal = transactions.filter(tran => tran.type == "withdrawal")
+            const totalDeposit = transactions.filter(tran => tran.type == "deposit")
             let totalBalance = 0;
             let totalDepositeBalance = 0;
             let remainingBalance = 0;
+            let totalDepositAmount = totalDeposit.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
+            let totalWithdrawalAmount = totalWithdrawal.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
             if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
                 totalBalance = transactionDeposite.tokenDollorValue;
                 totalDepositeBalance = transactionDeposite.betAmount;
-                totalBalance = await plusLargeSmallValue(transactionDeposite.tokenDollorValue, transactionDeposite.betAmount);
-                remainingBalance = transactionDeposite.tokenDollorValue
+                // totalBalance = await plusLargeSmallValue(transactionDeposite.tokenDollorValue, transactionDeposite.betAmount);
+                // remainingBalance = transactionDeposite.tokenDollorValue
+                // totalDeposit = transactions.filter(tran => tran.type == "withdrawal")
             }
+            // console.log(totalDepositAmount,totalWithdrawalAmount);
             return sendResponse(
                 res,
                 StatusCodes.OK,
@@ -64,15 +69,17 @@ export const userDashboard = async (req, res) => {
                     totalTransaction,
                     totalRewardsDistributedOneMonth,
                     totalRewardsDistributedToday,
-                    totalWithdrawalRequests,
-                    totalBalance,
-                    remainingBalance,
-                    totalDepositeBalance
+                    totalWithdrawalRequests: totalWithdrawal.length,
+                    totalBalance : transactionDeposite ? transactionDeposite.tokenDollorValue : 0,
+                    // remainingBalance,
+                    // totalDepositeBalance,
+                    totalDepositAmount: minusLargeSmallValue(totalDepositAmount, totalWithdrawalAmount)
                 });
         } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
         }
     } catch (error) {
+        console.log('error', error);
         return handleErrorResponse(res, error);
     }
 }
@@ -108,7 +115,7 @@ async function getActiveWinnerPlayers(timeRange) {
     }
     const query = {
         createdAt: { $gte: startDate, $lte: endDate },
-        isWin : true
+        isWin: true
     };
     const result = await ColourBetting.aggregate([
         { $match: query },
