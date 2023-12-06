@@ -653,7 +653,7 @@ export const createGamePeriodFromCronJob = async () => {
         const formattedDate = currentDate2.split("-").join("");
         let endTime2 = moment()
           .utcOffset("+05:30")
-          .add(game.gameHours, "minutes")
+          .add(game.gameHours, "hours")
           .format("HH:mm");
         var endTimestamp = moment(
           `${currentDate2} ${endTime2}:00`,
