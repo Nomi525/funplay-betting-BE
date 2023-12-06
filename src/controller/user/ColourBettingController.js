@@ -827,10 +827,66 @@ export const getByIdGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
-      .populate('userId', 'fullName profile email')
-      .populate('gameId', 'gameName gameImage gameMode')
-      .sort({ period: -1 })
+    // const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+    //   .populate('userId', 'fullName profile email')
+    //   .populate('gameId', 'gameName gameImage gameMode')
+    //   .sort({ period: -1 })
+    const getGamePeriodById = await ColourBetting.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user),
+          gameId: new mongoose.Types.ObjectId(gameId),
+          // createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0
+        }
+      },
+      {
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          price: "$betAmount",
+          colourName: 1,
+          period: 1,
+          isWin: 1,
+          periodData: {
+            $filter: {
+              input: "$periodData",
+              as: "pd",
+              cond: {
+                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
+              }
+            }
+          },
+        },
+      },
+      {
+        $unwind: "$periodData"
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $project: {
+          period: 1,
+          price: 1,
+          colourName: 1,
+          isWin: 1,
+          date: "$periodData.date",
+          startTime: "$periodData.startTime",
+          endTime: "$periodData.endTime",
+          createdAt: "$periodData.createdAt",
+        }
+      }
+    ])
     return sendResponse(
       res,
       StatusCodes.OK,
