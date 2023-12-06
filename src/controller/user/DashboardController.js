@@ -71,6 +71,7 @@ export const userDashboard = async (req, res) => {
                     totalRewardsDistributedToday,
                     totalWithdrawalRequests: totalWithdrawal.length,
                     totalBalance : transactionDeposite ? transactionDeposite.tokenDollorValue : 0,
+                    totalCoin: transactionDeposite ? transactionDeposite.totalCoin : 0,
                     // remainingBalance,
                     // totalDepositeBalance,
                     totalDepositAmount: minusLargeSmallValue(totalDepositAmount, totalWithdrawalAmount)

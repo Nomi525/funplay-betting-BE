@@ -142,7 +142,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
-    if (parseInt(checkBalance.tokenDollorValue) < parseInt(betAmount)) {
+    if (parseInt(checkBalance.totalCoin) < parseInt(betAmount)) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -153,7 +153,7 @@ export const addColourBet = async (req, res) => {
 
     if (
       !checkDecimalValueGreaterThanOrEqual(
-        checkBalance.tokenDollorValue,
+        checkBalance.totalCoin,
         betAmount
       )
     ) {
@@ -212,8 +212,8 @@ export const addColourBet = async (req, res) => {
     );
 
     if (createColourBet) {
-      checkBalance.tokenDollorValue = minusLargeSmallValue(
-        checkBalance.tokenDollorValue,
+      checkBalance.totalCoin = minusLargeSmallValue(
+        checkBalance.totalCoin,
         betAmount
       );
       if (parseFloat(checkBalance.betAmount)) {
@@ -468,8 +468,8 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
                   NewTransaction
                 );
                 if (balance) {
-                  balance.tokenDollorValue = plusLargeSmallValue(
-                    balance.tokenDollorValue,
+                  balance.totalCoin = plusLargeSmallValue(
+                    balance.totalCoin,
                     b.betAmount + rewardAmount
                   );
                   await balance.save();
@@ -1048,10 +1048,15 @@ export const colourBettingWinnerResult = async (req, res) => {
                     NewTransaction
                   );
                   if (balance) {
-                    balance.tokenDollorValue = plusLargeSmallValue(
-                      balance.tokenDollorValue,
-                      findUser.betAmount + rewardAmount
-                    );
+                    // balance.tokenDollorValue = plusLargeSmallValue(
+                      //   balance.tokenDollorValue,
+                      //   findUser.betAmount + rewardAmount
+                      // );
+                      // await balance.save();
+                    console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
+                    let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                    balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
+                    console.log(balance.totalCoin,"winingamount")
                     await balance.save();
                   }
                 } else {

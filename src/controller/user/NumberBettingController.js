@@ -210,7 +210,7 @@ export const addEditNumberBet = async (req, res) => {
     }
     if (
       !checkDecimalValueGreaterThanOrEqual(
-        findUserDeposit.tokenDollorValue,
+        findUserDeposit.totalCoin,
         betAmount
       )
     ) {
@@ -280,8 +280,8 @@ export const addEditNumberBet = async (req, res) => {
     );
 
     if (createNumberBet) {
-      findUserDeposit.tokenDollorValue = minusLargeSmallValue(
-        findUserDeposit.tokenDollorValue,
+      findUserDeposit.totalCoin = minusLargeSmallValue(
+        findUserDeposit.totalCoin,
         betAmount
       );
       if (parseFloat(findUserDeposit.betAmount)) {
@@ -1421,10 +1421,14 @@ export const numberBettingWinnerResult = async (req, res) => {
                     NewTransaction
                   );
                   if (balance) {
-                    balance.tokenDollorValue = plusLargeSmallValue(
-                      balance.tokenDollorValue,
-                      findUser.betAmount + rewardAmount
-                    );
+                    console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
+                    let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                    balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
+                    // balance.tokenDollorValue = plusLargeSmallValue(
+                    //   +(balance.tokenDollorValue), 
+                    //   +(findUser.betAmount + rewardAmount)
+                    // );
+                    console.log(balance.totalCoin,"winingamount")
                     await balance.save();
                   }
                 } else {

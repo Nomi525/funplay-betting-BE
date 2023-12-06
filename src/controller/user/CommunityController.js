@@ -69,8 +69,8 @@ export const addEditCommunityBets = async (req, res) => {
     }
 
     if (createCommunityBet) {
-      checkBalance.tokenDollorValue = minusLargeSmallValue(
-        checkBalance.tokenDollorValue,
+      checkBalance.totalCoin = minusLargeSmallValue(
+        checkBalance.totalCoin,
         betAmount
       );
       if (parseFloat(checkBalance.betAmount)) {
