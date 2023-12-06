@@ -1042,9 +1042,6 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         },
         {
-          $sort: { createdAt: -1 },
-        },
-        {
           $lookup: {
             from: 'numberbettings',
             let: { periodId: '$period' },
@@ -1106,6 +1103,9 @@ export const getAllGamePeriodData = async (req, res) => {
             numberBettingsData: 1,
           },
         },
+        {
+          $sort: { period: -1 },
+        },
       ]);
     } else if (gameType === '3colorBetting' || gameType === '2colorBetting') {
       battingAggregationResult = await Period.aggregate([
@@ -1114,9 +1114,6 @@ export const getAllGamePeriodData = async (req, res) => {
             gameId: new mongoose.Types.ObjectId(gameId),
             period: { $nin: isWinTruePeriodsforColourBetting }, // Exclude periods with isWin: true
           },
-        },
-        {
-          $sort: { createdAt: -1 },
         },
         {
           $lookup: {
@@ -1171,6 +1168,9 @@ export const getAllGamePeriodData = async (req, res) => {
             periodId: 1,
             colourbettingsData: 1,
           },
+        },
+        {
+          $sort: { period: -1 },
         },
       ]);
     }
