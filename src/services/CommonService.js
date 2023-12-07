@@ -1,4 +1,4 @@
-import { bcryptjs, StatusCodes, ResponseMessage, jwt, crypto, CurrencyConverter,Decimal } from "../index.js";
+import { bcryptjs, StatusCodes, ResponseMessage, jwt, crypto, CurrencyConverter, Decimal } from "../index.js";
 var key = "a6dfc106fadd4849e8b23759afea1b86c6c4c4b782c2cf08335c61dc4610fae5efe05ee361a4850f56ddb9457a96bbe01d2820d5106851db64cf210f70ec5e98";
 var secretCryptoKey = crypto.createHash("sha256").update(String(key)).digest("base64").slice(0, 32);
 var iv = crypto.randomBytes(16);
@@ -93,43 +93,43 @@ export const decryptObject = (encryptedString) => {
     }
 }
 
-export const minusLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+export const minusLargeSmallValue = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.minus(smallNumber)
 }
 
-export const plusLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+export const plusLargeSmallValue = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.plus(smallNumber)
 }
 
-export const multiplicationLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+export const multiplicationLargeSmallValue = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.times(smallNumber)
 }
 
-export const checkDecimalValueGreaterThanOrEqual = (largeNumberValue,smallNumberNalue) => {
+export const checkDecimalValueGreaterThanOrEqual = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.greaterThanOrEqualTo(smallNumber)
 }
 
-export const checkLargeDecimalValueGreaterThan = (largeNumberValue,smallNumberNalue) => {
+export const checkLargeDecimalValueGreaterThan = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.greaterThan(smallNumber)
 }
 
-export const checkLargeDecimalValueLessThan = (largeNumberValue,smallNumberNalue) => {
+export const checkLargeDecimalValueLessThan = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.lessThan(smallNumber)
 }
 
-export const checkLargeDecimalValueEquals = (largeNumberValue,smallNumberNalue) => {
+export const checkLargeDecimalValueEquals = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.equals(smallNumber)
