@@ -494,7 +494,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const aggregationResult = await NumberBetting.aggregate([
+    const getAllPeriods = await NumberBetting.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
@@ -573,7 +573,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      aggregationResult
+      getAllPeriods
     );
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -1358,7 +1358,26 @@ export const numberBettingWinnerResult = async (req, res) => {
         []
       );
     }
-    // const totalUserInPeriod = await NumberBetting.find({ gameId, period: Number(period), is_deleted: 0 })
+    const checkAlreadyWin = await NumberBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(period),
+      is_deleted: 0,
+    });
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.NUMBER_WINNER + " " + checkAlreadyWin[0].number,
+        [
+          {
+            period: checkAlreadyWin[0].period,
+            number: checkAlreadyWin[0].number,
+            totalBetAmount: checkAlreadyWin.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
+          }
+        ]
+      );
+    }
     const totalUserInPeriod = await NumberBetting.aggregate([
       {
         $match: {
@@ -1423,7 +1442,7 @@ export const numberBettingWinnerResult = async (req, res) => {
                   if (balance) {
                     balance.tokenDollorValue = plusLargeSmallValue(
                       balance.tokenDollorValue,
-                      findUser.betAmount + rewardAmount
+                      Number(findUser.betAmount) + Number(rewardAmount)
                     );
                     await balance.save();
                   }

@@ -15,7 +15,7 @@ import {
 //#region Add edit community betting
 export const addEditCommunityBets = async (req, res) => {
   try {
-    let { communityBetId, gameId, betAmount, period, count } = req.body;
+    let { communityBetId, gameId, betAmount, period } = req.body;
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -36,37 +36,46 @@ export const addEditCommunityBets = async (req, res) => {
         []
       );
     }
-    period = `${period}${count}`;
-    let alreadyExistBet = await CommunityBetting.findOne({
-      userId: req.user,
-      gameId: gameId,
-      period,
-      count,
-    });
-    let createCommunityBet;
+    // let alreadyExistBet = await CommunityBetting.findOne({
+    //   userId: req.user,
+    //   gameId: gameId,
+    //   period,
+    //   count,
+    // });
+    // let createCommunityBet;
     // if (!communityBetId) {
-    if (alreadyExistBet) {
-      createCommunityBet = await dataUpdated(
-        {
-          userId: req.user,
-        },
-        {
-          betAmount: parseInt(betAmount),
-        },
-        CommunityBetting
-      );
-    } else {
-      createCommunityBet = await dataCreate(
-        {
-          userId: req.user,
-          gameId,
-          betAmount,
-          period,
-          count,
-        },
-        CommunityBetting
-      );
-    }
+    // if (alreadyExistBet) {
+    //   createCommunityBet = await dataUpdated(
+    //     {
+    //       userId: req.user,
+    //     },
+    //     {
+    //       betAmount: parseInt(betAmount),
+    //     },
+    //     CommunityBetting
+    //   );
+    // } else {
+    //   createCommunityBet = await dataCreate(
+    //     {
+    //       userId: req.user,
+    //       gameId,
+    //       betAmount,
+    //       period,
+    //       count,
+    //     },
+    //     CommunityBetting
+    //   );
+    // }
+
+    let createCommunityBet = await dataCreate(
+      {
+        userId: req.user,
+        gameId,
+        betAmount,
+        period
+      },
+      CommunityBetting
+    );
 
     if (createCommunityBet) {
       checkBalance.tokenDollorValue = minusLargeSmallValue(
@@ -96,24 +105,6 @@ export const addEditCommunityBets = async (req, res) => {
         []
       );
     }
-    // } else {
-    //     const updateBet = await dataUpdated({ _id: communityBetId, userId: req.user, gameId }, { betAmount, period, count }, CommunityBetting)
-    //     if (updateBet) {
-    //         return sendResponse(
-    //             res,
-    //             StatusCodes.OK,
-    //             ResponseMessage.CMMUNITY_BET_UPDATED,
-    //             updateBet
-    //         );
-    //     } else {
-    //         return sendResponse(
-    //             res,
-    //             StatusCodes.BAD_REQUEST,
-    //             ResponseMessage.FAILED_TO_UPDATE,
-    //             []
-    //         );
-    //     }
-    // }
   } catch (error) {
     return handleErrorResponse(res, error);
   }
@@ -208,15 +199,69 @@ export const getCommunityGamePeriodById = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const getGamePeriodById = await CommunityBetting.find({
-      userId: req.user,
-      gameId,
-      createdAt: { $gte: twentyFourHoursAgo },
-      is_deleted: 0,
-    })
-      .populate("userId", "fullName profile email")
-      .populate("gameId", "gameName gameImage gameMode")
-      .sort({ count: -1 });
+    // const getGamePeriodById = await CommunityBetting.find({
+    //   userId: req.user,
+    //   gameId,
+    //   createdAt: { $gte: twentyFourHoursAgo },
+    //   is_deleted: 0,
+    // })
+    //   .populate("userId", "fullName profile email")
+    //   .populate("gameId", "gameName gameImage gameMode")
+    //   .sort({ count: -1 });
+    const getGamePeriodById = await CommunityBetting.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user),
+          gameId: new mongoose.Types.ObjectId(gameId),
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0
+        }
+      },
+      {
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          price: "$betAmount",
+          period: 1,
+          isWin: 1,
+          periodData: {
+            $filter: {
+              input: "$periodData",
+              as: "pd",
+              cond: {
+                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
+              }
+            }
+          },
+        },
+      },
+      {
+        $unwind: "$periodData"
+      },
+      {
+        $sort: {
+          period: -1,
+        },
+      },
+      {
+        $project: {
+          period: 1,
+          price: 1,
+          isWin: 1,
+          date: "$periodData.date",
+          startTime: "$periodData.startTime",
+          endTime: "$periodData.endTime",
+          createdAt: "$periodData.createdAt",
+        }
+      }
+    ])
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -234,7 +279,7 @@ export const getAllCommunityGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const aggregationResult = await CommunityBetting.aggregate([
+    const getAllPeriods = await CommunityBetting.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
@@ -255,9 +300,12 @@ export const getAllCommunityGamePeriod = async (req, res) => {
         },
       },
       {
-        $sort: {
-          period: -1,
-        },
+        $lookup: {
+          from: "periods",
+          localField: "period",
+          foreignField: "period",
+          as: "periodData",
+        }
       },
       {
         $project: {
@@ -266,6 +314,40 @@ export const getAllCommunityGamePeriod = async (req, res) => {
           price: "$betAmount",
           period: 1,
           winBet: 1,
+          periodData: {
+            $filter: {
+              input: "$periodData",
+              as: "pd",
+              cond: {
+                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
+              }
+            }
+          },
+        },
+      },
+      {
+        $unwind: "$periodData"
+      },
+      {
+        $match: {
+          winBet: { $ne: null }
+        }
+      },
+      {
+        $project: {
+          totalUsers: 1,
+          winBet: 1,
+          period: 1,
+          price: 1,
+          date: "$periodData.date",
+          startTime: "$periodData.startTime",
+          endTime: "$periodData.endTime",
+          createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $sort: {
+          period: -1,
         },
       },
     ]);
@@ -274,7 +356,7 @@ export const getAllCommunityGamePeriod = async (req, res) => {
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      aggregationResult
+      getAllPeriods
     );
   } catch (error) {
     return handleErrorResponse(res, error);

@@ -836,7 +836,7 @@ export const getByIdGamePeriod = async (req, res) => {
         $match: {
           userId: new mongoose.Types.ObjectId(req.user),
           gameId: new mongoose.Types.ObjectId(gameId),
-          // createdAt: { $gte: twentyFourHoursAgo },
+          createdAt: { $gte: twentyFourHoursAgo },
           is_deleted: 0
         }
       },
@@ -981,7 +981,26 @@ export const colourBettingWinnerResult = async (req, res) => {
         []
       );
     }
-    // const totalUserInPeriod = await ColourBetting.find({ gameType, gameId, period: Number(period), is_deleted: 0 })
+    const checkAlreadyWin = await ColourBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(period),
+      is_deleted: 0,
+    });
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.COLOUR_WINNER + " " + checkAlreadyWin[0].colourName,
+        [
+          {
+            period: checkAlreadyWin[0].period,
+            colourName: checkAlreadyWin[0].colourName,
+            totalBetAmount: checkAlreadyWin.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
+          }
+        ]
+      );
+    }
     const totalUserInPeriod = await ColourBetting.aggregate([
       {
         $match: {
@@ -1050,7 +1069,7 @@ export const colourBettingWinnerResult = async (req, res) => {
                   if (balance) {
                     balance.tokenDollorValue = plusLargeSmallValue(
                       balance.tokenDollorValue,
-                      findUser.betAmount + rewardAmount
+                      Number(findUser.betAmount) + Number(rewardAmount)
                     );
                     await balance.save();
                   }
