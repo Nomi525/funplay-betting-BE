@@ -548,11 +548,11 @@ export const getAllNumberGamePeriod = async (req, res) => {
       {
         $unwind: "$periodData"
       },
-      {
-        $match: {
-          winNumber: { $ne: null }
-        }
-      },
+      // {
+      //   $match: {
+      //     winNumber: { $ne: null }
+      //   }
+      // },
       {
         $project: {
           totalUsers: 1,
@@ -1490,6 +1490,7 @@ export const numberBettingWinnerResult = async (req, res) => {
       []
     );
   } catch (error) {
+    console.log('error-NumberBettingController',error);
     return handleErrorResponse(res, error);
   }
 }
