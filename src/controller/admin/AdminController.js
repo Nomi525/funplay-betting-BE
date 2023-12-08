@@ -37,6 +37,7 @@ export const adminLogin = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
+        console.log('error',error);
         return handleErrorResponse(res, error);
     }
 }

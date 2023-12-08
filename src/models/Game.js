@@ -98,46 +98,11 @@ const gameSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
-    winner1: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: "User",
-    },
-    winner2: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: "User",
-    },
-    winner3: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: "User",
-    },
-    winner4: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: "User",
-    },
-    winner1Percent: {
+    winnersPercentage: [{
         type: Number,
         required: false,
         default: 0
-    },
-    winner2Percent: {
-        type: Number,
-        required: false,
-        default: 0
-    },
-    winner3Percent: {
-        type: Number,
-        required: false,
-        default: 0
-    },
-    winner4Percent: {
-        type: Number,
-        required: false,
-        default: 0
-    },
+    }],
     is_deleted: {
         type: Number,
         default: 0

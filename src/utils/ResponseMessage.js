@@ -106,7 +106,7 @@ const ResponseMessage = {
     GAME_DELETED : "Game deleted successfully",
     GAME_ACTIVE : "Game active successfully",
     GAME_DEACTIVE : "Game deactive successfully",
-    GAME_NOT_FOUND : "Game not found successfully",
+    GAME_NOT_FOUND : "Game not found",
     GAME_RULES_CREATED : "Game rules created successfully",
     GAME_RULES_GET : "Game rules get successfully",
     GAME_RULES_GET_ALL : "Game rules all get successfully",
