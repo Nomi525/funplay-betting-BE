@@ -4,6 +4,7 @@ import { userToken } from "./User.spec.js";
 chai.use(chaiHttp);
 const numberBetDeatils = {
     numberBetId: null,
+    period: null,
     number: 5,
     gameId: "65324846c25f9658073a7cc6",
     betAmount: 50,
@@ -38,24 +39,24 @@ describe('Number Betting test case', () => {
     //#endregion
 
     //#region Get All Number Bets
-    // it("Get All Number Bets", (done) => {
-    //     chai.request(appServer)
-    //         .get('/api/user/get-number-bets')
-    //         .set('auth', userToken)
-    //         .end((err, res) => {
-    //             if (res.body.status == 200) {
-    //                 expect(res.body.status).to.be.equal(200);
-    //             } else if (res.body.status == 404) {
-    //                 expect(res.body.status).to.be.equal(404);
-    //             } else if (res.body.status == 400) {
-    //                 expect(res.body.status).to.be.equal(400);
-    //             } else {
-    //                 expect(res.body.status).to.be.equal(500);
-    //             }
-    //             expect(res.body).to.have.all.keys('status', 'message', 'data')
-    //             done();
-    //         })
-    // });
+    it("Get All Number Bets", (done) => {
+        chai.request(appServer)
+            .get('/api/user/get-number-bets')
+            .set('auth', userToken)
+            .end((err, res) => {
+                if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
     //#endregion
 
     //#region Get Single Number Bet
@@ -124,6 +125,91 @@ describe('Number Betting test case', () => {
     //             done();
     //         })
     // });
+    //#endregion
+
+    //#region Get single number game period
+    it("Get single number game period", (done) => {
+        chai.request(appServer)
+            .get(`/api/user/get-single-number-game-period/${numberBetDeatils.gameId}`)
+            .set('auth', userToken)
+            .end((err, res) => {
+                if (res.body.status == 200) {
+                    numberBetDeatils.period = res.body.data.period
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    })
+    //#endregion
+
+    //#region Get all number game period
+    it("Get all number game period", (done) => {
+        chai.request(appServer)
+            .get(`/api/user/get-all-number-game-period/${numberBetDeatils.gameId}`)
+            .set('auth', userToken)
+            .end((err, res) => {
+                if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+    //#region Get number betting winner
+    it("Get number betting winner", (done) => {
+        chai.request(appServer)
+            .get(`/api/user/get-number-betting-winner/${numberBetDeatils.gameId}/${numberBetDeatils.period}`)
+            .set('auth', userToken)
+            .end((err, res) => {
+                if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
+    //#endregion
+
+    //#region Get period for timmer for all game
+    it("Get period for timmer for all game", (done) => {
+        chai.request(appServer)
+            .get(`/api/user/get-period/${numberBetDeatils.gameId}`)
+            .set('auth', userToken)
+            .end((err, res) => {
+                if (res.body.status == 200) {
+                    expect(res.body.status).to.be.equal(200);
+                } else if (res.body.status == 404) {
+                    expect(res.body.status).to.be.equal(404);
+                } else if (res.body.status == 400) {
+                    expect(res.body.status).to.be.equal(400);
+                } else {
+                    expect(res.body.status).to.be.equal(500);
+                }
+                expect(res.body).to.have.all.keys('status', 'message', 'data')
+                done();
+            })
+    });
     //#endregion
 
 })

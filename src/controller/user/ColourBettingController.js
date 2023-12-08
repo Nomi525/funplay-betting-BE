@@ -693,11 +693,11 @@ export const getAllGamePeriod = async (req, res) => {
       {
         $unwind: "$periodData"
       },
-      {
-        $match: {
-          winColour: { $ne: null }
-        }
-      },
+      // {
+      //   $match: {
+      //     winColour: { $ne: null }
+      //   }
+      // },
       {
         $project: {
           totalUsers: 1,
@@ -945,7 +945,6 @@ export const getCommunityWinList = async (req, res) => {
     const threeDaysAgo = new Date();
     threeDaysAgo.setUTCHours(0, 0, 0, 0);
     threeDaysAgo.setDate(currentDate.getDate() - 3);
-    console.log(threeDaysAgo);
     const getGamePeriodById = await CommunityBetting.find({
       is_deleted: 0,
       isWin: true,
@@ -1114,6 +1113,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       []
     );
   } catch (error) {
+    console.log('error-ClourBettingController',error);
     return handleErrorResponse(res, error);
   }
 }

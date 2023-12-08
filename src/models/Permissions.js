@@ -38,6 +38,33 @@ const PermissionSchema = new mongoose.Schema(
                 required: false
             },
         },
+        CMS: {
+           all: {
+              type: Boolean,
+              default: false,
+              required: false
+           },
+           create: {
+              type: Boolean,
+              default: false,
+              required: false
+           },
+           update: {
+              type: Boolean,
+              default: false,
+              required: false
+           },
+           View: {
+              type: Boolean,
+              default: false,
+              required: false
+           },
+           delete: {
+              type: Boolean,
+              default: false,
+              required: false
+           },
+        },
         isActive: {
             type: Boolean,
             default: true,

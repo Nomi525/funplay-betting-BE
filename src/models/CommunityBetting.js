@@ -6,11 +6,11 @@ const communityBettingSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
-    count: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+    // count: {
+    //   type: Number,
+    //   required: false,
+    //   default: 0,
+    // },
     startDate: {
       type: Date,
       required: false,

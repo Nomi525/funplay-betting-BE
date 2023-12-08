@@ -391,3 +391,18 @@ export const getWithdrawalList = async (req, res) => {
 }
 //#endregion
 
+//#region Admin get updated user 
+export const getUpdatedUser = async (req, res) => {
+  try {
+    const findAdmin = await Admin.findOne({ _id: req.admin }).populate('role');
+    if (findAdmin) {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_ROLE, findAdmin);
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_FOUND, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
