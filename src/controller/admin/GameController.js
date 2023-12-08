@@ -42,14 +42,8 @@ export const addEditGame = async (req, res) => {
       gameSecond,
       noOfUsers,
       betAmount,
-      winner1,
-      winner2,
-      winner3,
-      winner4,
-      winner1Percent,
-      winner2Percent,
-      winner3Percent,
-      winner4Percent
+      winnerIds,
+      winnersPercentage
     } = req.body;
     // let originalStartDate = moment(gameTimeFrom);
     // let originalEndDate = moment(gameTimeTo);
@@ -111,14 +105,8 @@ export const addEditGame = async (req, res) => {
             gameSecond,
             noOfUsers,
             betAmount,
-            winner1,
-            winner2,
-            winner3,
-            winner4,
-            winner1Percent,
-            winner2Percent,
-            winner3Percent,
-            winner4Percent
+            winnerIds,
+            winnersPercentage
           },
           Game
         );
@@ -164,14 +152,8 @@ export const addEditGame = async (req, res) => {
           isRepeat,
           noOfUsers,
           betAmount,
-          winner1,
-          winner2,
-          winner3,
-          winner4,
-          winner1Percent,
-          winner2Percent,
-          winner3Percent,
-          winner4Percent
+          winnerIds,
+          winnersPercentage
         },
         Game
       );

@@ -14,6 +14,7 @@ import {
   NumberBetting,
   CommunityBetting,
   NewTransaction,
+  Game,
 } from "../../index.js";
 
 //#region Get All winners user
@@ -53,7 +54,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first:"$gameType"}
+            gameType: { $first: "$gameType" }
           },
         },
         {
@@ -98,7 +99,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first:"$gameType"}
+            gameType: { $first: "$gameType" }
           },
         },
         {
@@ -108,7 +109,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: 1,
             count: 1,
             gameId: 1,
-             gameType: 1,
+            gameType: 1,
           },
         },
       ];
@@ -145,7 +146,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first:"$gameType"}
+            gameType: { $first: "$gameType" }
           },
         },
         {
@@ -182,7 +183,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $addFields: {
             gameType: "communityBetting",
-        },
+          },
         },
         {
           $group: {
@@ -191,7 +192,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first:"$gameType"}
+            gameType: { $first: "$gameType" }
           },
         },
         {
@@ -409,7 +410,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
 export const declareWinnerOfCommunityBetting = async (req, res) => {
   try {
     const { winnerIds, gameId, period } = req.body;
-    if (!winnerIds) {
+    if (!winnerIds.length) {
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -417,33 +418,79 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         []
       )
     }
-    // await Promise.all(winnerIds.map(async (winnerId) => {
-    //   const findCommunityBetting = await getSingleData({ _id: winnerId, gameId, is_deleted: 0 }, CommunityBetting)
-    //   if (findCommunityBetting) {
-    //     let rewardAmount = findCommunityBetting.betAmount * 0.95;
-    //     findCommunityBetting.isWin = true
-    //     findCommunityBetting.rewardAmount = rewardAmount
-    //     await findCommunityBetting.save();
-    //     const balance = await getSingleData(
-    //       { userId: findCommunityBetting.userId },
-    //       NewTransaction
-    //     );
-    //     if (balance) {
-    //       balance.tokenDollorValue = plusLargeSmallValue(
-    //         balance.tokenDollorValue,
-    //         findCommunityBetting.betAmount + rewardAmount
-    //       );
-    //       await balance.save();
-    //     }
-    //   }
-    // }))
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      "Winner added succcessfully",
-      []
-    )
+
+    const getCommunityGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (!getCommunityGame) {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, []);
+    }
+
+    const checkAlreadyWin = await CommunityBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(period),
+      is_deleted: 0,
+    });
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "This period id has already win.",
+        []
+      );
+    }
+    let winFlag = false;
+    if (getCommunityGame.winnersPercentage.length >= winnerIds.length) {
+      const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
+      const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
+      await Promise.all(
+        winnerIds.map(async (winnerId, index) => {
+          const winningAmount = (totalBetAmount * getCommunityGame.winnersPercentage[index]) / 100;
+          const winnerUser = await CommunityBetting.findOne({ gameId, userId: winnerId, period, is_deleted: 0 })
+          if (winnerUser) {
+            let rewardAmount = winningAmount;
+            winnerUser.isWin = true
+            winnerUser.rewardAmount = rewardAmount
+            await winnerUser.save();
+            const balance = await getSingleData(
+              { userId: winnerId },
+              NewTransaction
+            );
+            if (balance) {
+              balance.tokenDollorValue = plusLargeSmallValue(
+                Number(balance.tokenDollorValue),
+                Number(winnerUser.betAmount) + Number(rewardAmount)
+              );
+              await balance.save();
+            }
+            winFlag = true;
+          }
+        })
+      );
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        `Only ${getCommunityGame.winnersPercentage.length} is winner declare`,
+        []
+      );
+    }
+    if (winFlag) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        "Winner added succcessfully",
+        []
+      )
+    } else {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "Winner not added",
+        []
+      )
+    }
   } catch (error) {
+    console.log(error);
     return handleErrorResponse(res, error);
   }
 }
@@ -461,7 +508,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     const findNumberBettingArray = await getAllData(
       { gameId, period: winnerId, number: winNumber, is_deleted: 0, isWin: false },
       NumberBetting
-    ); 
+    );
     const savedInstances = [];
 
     for (const findNumberBetting of findNumberBettingArray) {

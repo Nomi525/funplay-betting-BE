@@ -36,7 +36,7 @@ export const addEditCommunityBets = async (req, res) => {
         []
       );
     }
-    
+
     const checkBalance = await NewTransaction.findOne({
       userId: req.user,
       is_deleted: 0,
@@ -126,7 +126,7 @@ export const getLoginUserCommunityBets = async (req, res) => {
     })
       .populate("userId", "fullName profile email")
       .populate("gameId", "gameName gameImage gameMode")
-      .sort({ updatedAt: -1, createdAt: -1 });
+      .sort({ period: -1 });
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -142,21 +142,32 @@ export const getLoginUserCommunityBets = async (req, res) => {
 //#region Get all live community bets
 export const getAllLiveCommunityBets = async (req, res) => {
   try {
-    const { gameId } = req.params;
+    const { gameId, period } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    let winners = [];
     const getAllLiveBet = await CommunityBetting.find({
       gameId,
+      // period,
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
     })
       .populate("userId", "fullName profile email")
       .populate("gameId", "gameName gameImage gameMode")
-      .sort({ updatedAt: -1, createdAt: -1 });
+      .sort({ period: -1 });
+
+    winners = await CommunityBetting.find({
+      gameId, 
+      period, 
+      isWin: true, 
+      is_deleted: 0
+    }).sort({ rewardAmount: -1 });
+
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.CMMUNITY_BET_GET,
-      getAllLiveBet
+      { getAllLiveBet, winners }
     );
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -177,13 +188,13 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
     endOfYesterday.setHours(23, 59, 59, 999);
     const getLastDayWinners = await CommunityBetting.find({
       gameId,
-      isWin: true,
+      // isWin: true,
       createdAt: { $gte: startOfYesterday, $lte: endOfYesterday },
       is_deleted: 0,
     })
       .populate("userId", "fullName profile email")
       .populate("gameId", "gameName gameImage gameMode")
-      .sort({ updatedAt: -1, createdAt: -1 });
+      .sort({ period: -1 });
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -209,7 +220,7 @@ export const getCommunityGamePeriodById = async (req, res) => {
     })
       .populate("userId", "fullName profile email")
       .populate("gameId", "gameName gameImage gameMode")
-      .sort({ count: -1 });
+      .sort({ period: -1 });
     return sendResponse(
       res,
       StatusCodes.OK,
