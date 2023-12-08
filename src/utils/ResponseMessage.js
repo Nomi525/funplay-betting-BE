@@ -163,6 +163,9 @@ const ResponseMessage = {
     LOSSER : "You are losser",
     NUMBER_WINNER : "Victory Alert! The Winning number is",
     COLOUR_WINNER : "Victory Alert! The Winning Color is",
+    NUMBER_BET_CRETED : "Bet add successfully",
+    COLOUR_BET_CRETED : "Bet add successfully",
+    ALREADY_WIN : "This period ID is already win",
 }
 
 export { ResponseMessage };

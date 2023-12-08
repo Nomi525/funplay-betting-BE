@@ -1033,6 +1033,20 @@ export const colourBettingWinnerResult = async (req, res) => {
             $limit: 1
           }
         ])
+        const checkAlreadyWin = await ColourBetting.find({
+          gameId,
+          isWin: true,
+          period: Number(period),
+          is_deleted: 0,
+        });
+        if (checkAlreadyWin.length) {
+          return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.COLOUR_WINNER + " " + getAllBets[0].colourName,
+            getAllBets
+          );
+        }
         if (getAllBets.length) {
           await Promise.all(
             getAllBets.map(async (item) => {
@@ -1053,10 +1067,8 @@ export const colourBettingWinnerResult = async (req, res) => {
                       //   findUser.betAmount + rewardAmount
                       // );
                       // await balance.save();
-                    console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
                     let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
                     balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
-                    console.log(balance.totalCoin,"winingamount")
                     await balance.save();
                   }
                 } else {
