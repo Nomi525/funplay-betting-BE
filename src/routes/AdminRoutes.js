@@ -89,6 +89,7 @@ import {
   permissionGetById,
   showRating,
   subadminActiveDeactive,
+  getUpdatedUser
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -103,6 +104,7 @@ adminRoutes.post("/change-password", Auth, adminChangePassword);
 adminRoutes.get("/profile", Auth, getAdminProfile);
 adminRoutes.post("/profile-update", Auth, Upload, adminEditProfile);
 adminRoutes.post("/logout", Auth, adminLogout);
+adminRoutes.get("/get-role-admin", Auth, getUpdatedUser);
 
 //#region Role routes
 adminRoutes.post("/role-add-edit", Auth, addEditRole);

@@ -142,7 +142,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
-    if (parseInt(checkBalance.tokenDollorValue) < parseInt(betAmount)) {
+    if (parseInt(checkBalance.totalCoin) < parseInt(betAmount)) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -153,7 +153,7 @@ export const addColourBet = async (req, res) => {
 
     if (
       !checkDecimalValueGreaterThanOrEqual(
-        checkBalance.tokenDollorValue,
+        checkBalance.totalCoin,
         betAmount
       )
     ) {
@@ -212,8 +212,8 @@ export const addColourBet = async (req, res) => {
     );
 
     if (createColourBet) {
-      checkBalance.tokenDollorValue = minusLargeSmallValue(
-        checkBalance.tokenDollorValue,
+      checkBalance.totalCoin = minusLargeSmallValue(
+        checkBalance.totalCoin,
         betAmount
       );
       if (parseFloat(checkBalance.betAmount)) {
@@ -468,8 +468,8 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
                   NewTransaction
                 );
                 if (balance) {
-                  balance.tokenDollorValue = plusLargeSmallValue(
-                    balance.tokenDollorValue,
+                  balance.totalCoin = plusLargeSmallValue(
+                    balance.totalCoin,
                     b.betAmount + rewardAmount
                   );
                   await balance.save();
@@ -693,11 +693,11 @@ export const getAllGamePeriod = async (req, res) => {
       {
         $unwind: "$periodData"
       },
-      {
-        $match: {
-          winColour: { $ne: null }
-        }
-      },
+      // {
+      //   $match: {
+      //     winColour: { $ne: null }
+      //   }
+      // },
       {
         $project: {
           totalUsers: 1,
@@ -836,7 +836,7 @@ export const getByIdGamePeriod = async (req, res) => {
         $match: {
           userId: new mongoose.Types.ObjectId(req.user),
           gameId: new mongoose.Types.ObjectId(gameId),
-          createdAt: { $gte: twentyFourHoursAgo },
+          // createdAt: { $gte: twentyFourHoursAgo },
           is_deleted: 0
         }
       },
@@ -945,7 +945,6 @@ export const getCommunityWinList = async (req, res) => {
     const threeDaysAgo = new Date();
     threeDaysAgo.setUTCHours(0, 0, 0, 0);
     threeDaysAgo.setDate(currentDate.getDate() - 3);
-    console.log(threeDaysAgo);
     const getGamePeriodById = await CommunityBetting.find({
       is_deleted: 0,
       isWin: true,
@@ -981,26 +980,7 @@ export const colourBettingWinnerResult = async (req, res) => {
         []
       );
     }
-    const checkAlreadyWin = await ColourBetting.find({
-      gameId,
-      isWin: true,
-      period: Number(period),
-      is_deleted: 0,
-    });
-    if (checkAlreadyWin.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.COLOUR_WINNER + " " + checkAlreadyWin[0].colourName,
-        [
-          {
-            period: checkAlreadyWin[0].period,
-            colourName: checkAlreadyWin[0].colourName,
-            totalBetAmount: checkAlreadyWin.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
-          }
-        ]
-      );
-    }
+    // const totalUserInPeriod = await ColourBetting.find({ gameType, gameId, period: Number(period), is_deleted: 0 })
     const totalUserInPeriod = await ColourBetting.aggregate([
       {
         $match: {
@@ -1052,6 +1032,20 @@ export const colourBettingWinnerResult = async (req, res) => {
             $limit: 1
           }
         ])
+        const checkAlreadyWin = await ColourBetting.find({
+          gameId,
+          isWin: true,
+          period: Number(period),
+          is_deleted: 0,
+        });
+        if (checkAlreadyWin.length) {
+          return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.COLOUR_WINNER + " " + getAllBets[0].colourName,
+            getAllBets
+          );
+        }
         if (getAllBets.length) {
           await Promise.all(
             getAllBets.map(async (item) => {
@@ -1067,10 +1061,8 @@ export const colourBettingWinnerResult = async (req, res) => {
                     NewTransaction
                   );
                   if (balance) {
-                    balance.tokenDollorValue = plusLargeSmallValue(
-                      balance.tokenDollorValue,
-                      Number(findUser.betAmount) + Number(rewardAmount)
-                    );
+                    let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                    balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
                     await balance.save();
                   }
                 } else {
@@ -1114,6 +1106,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       []
     );
   } catch (error) {
+    console.log('error-ClourBettingController',error);
     return handleErrorResponse(res, error);
   }
 }

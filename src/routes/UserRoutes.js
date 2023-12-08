@@ -185,7 +185,7 @@ userRoutes.get(
   getLoginUserCommunityBets
 );
 userRoutes.get(
-  "/get-all-live-community-bets/:gameId",
+  "/get-all-live-community-bets/:gameId/:period",
   Auth,
   getAllLiveCommunityBets
 );

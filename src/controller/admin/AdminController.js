@@ -37,6 +37,7 @@ export const adminLogin = async (req, res) => {
             return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
         }
     } catch (error) {
+        console.log('error',error);
         return handleErrorResponse(res, error);
     }
 }
@@ -389,5 +390,20 @@ export const getWithdrawalList = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+//#endregion
+
+//#region Admin get updated user 
+export const getUpdatedUser = async (req, res) => {
+  try {
+    const findAdmin = await Admin.findOne({ _id: req.admin }).populate('role');
+    if (findAdmin) {
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_ROLE, findAdmin);
+    } else {
+      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_FOUND, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 //#endregion
 

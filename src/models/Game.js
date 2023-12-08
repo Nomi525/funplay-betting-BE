@@ -88,6 +88,21 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    betAmount: {
+        type: Number,
+        required: false,
+        default: 0
+    },
+    noOfUsers: {
+        type: Number,
+        required: false,
+        default: 0
+    },
+    winnersPercentage: [{
+        type: Number,
+        required: false,
+        default: 0
+    }],
     is_deleted: {
         type: Number,
         default: 0

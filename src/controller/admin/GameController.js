@@ -40,6 +40,10 @@ export const addEditGame = async (req, res) => {
       isRepeat,
       gameHours,
       gameSecond,
+      noOfUsers,
+      betAmount,
+      winnerIds,
+      winnersPercentage
     } = req.body;
     // let originalStartDate = moment(gameTimeFrom);
     // let originalEndDate = moment(gameTimeTo);
@@ -99,6 +103,10 @@ export const addEditGame = async (req, res) => {
             gameMaximumCoin,
             gameHours,
             gameSecond,
+            noOfUsers,
+            betAmount,
+            winnerIds,
+            winnersPercentage
           },
           Game
         );
@@ -142,6 +150,10 @@ export const addEditGame = async (req, res) => {
           gameHours,
           gameSecond,
           isRepeat,
+          noOfUsers,
+          betAmount,
+          winnerIds,
+          winnersPercentage
         },
         Game
       );
@@ -1238,7 +1250,7 @@ export const getAllGamePeriodData = async (req, res) => {
         },
       ]);
     }
-    
+
     return sendResponse(
       res,
       StatusCodes.OK,

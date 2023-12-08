@@ -209,10 +209,8 @@ export const addEditNumberBet = async (req, res) => {
       );
     }
     if (
-      !checkDecimalValueGreaterThanOrEqual(
-        findUserDeposit.tokenDollorValue,
-        betAmount
-      )
+        findUserDeposit.totalCoin <
+        Number(betAmount)
     ) {
       return sendResponse(
         res,
@@ -280,14 +278,14 @@ export const addEditNumberBet = async (req, res) => {
     );
 
     if (createNumberBet) {
-      findUserDeposit.tokenDollorValue = minusLargeSmallValue(
-        findUserDeposit.tokenDollorValue,
-        betAmount
+      findUserDeposit.totalCoin = minusLargeSmallValue(
+        findUserDeposit.totalCoin,
+        Number(betAmount)
       );
       if (parseFloat(findUserDeposit.betAmount)) {
         findUserDeposit.betAmount = plusLargeSmallValue(
           findUserDeposit.betAmount,
-          betAmount
+          Number(betAmount)
         );
       } else {
         findUserDeposit.betAmount = betAmount;
@@ -494,7 +492,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const getAllPeriods = await NumberBetting.aggregate([
+    const aggregationResult = await NumberBetting.aggregate([
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
@@ -550,11 +548,11 @@ export const getAllNumberGamePeriod = async (req, res) => {
       {
         $unwind: "$periodData"
       },
-      {
-        $match: {
-          winNumber: { $ne: null }
-        }
-      },
+      // {
+      //   $match: {
+      //     winNumber: { $ne: null }
+      //   }
+      // },
       {
         $project: {
           totalUsers: 1,
@@ -573,7 +571,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      getAllPeriods
+      aggregationResult
     );
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -710,7 +708,7 @@ export const createGamePeriodFromCronJob = async () => {
         const formattedDate = currentDate2.split("-").join("");
         let endTime2 = moment()
           .utcOffset("+05:30")
-          .add(game.gameHours, "hours")
+          .add(game.gameHours, "minutes")
           .format("HH:mm");
         var endTimestamp = moment(
           `${currentDate2} ${endTime2}:00`,
@@ -1440,10 +1438,14 @@ export const numberBettingWinnerResult = async (req, res) => {
                     NewTransaction
                   );
                   if (balance) {
-                    balance.tokenDollorValue = plusLargeSmallValue(
-                      balance.tokenDollorValue,
-                      Number(findUser.betAmount) + Number(rewardAmount)
-                    );
+                    console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
+                    let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                    balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
+                    // balance.tokenDollorValue = plusLargeSmallValue(
+                    //   +(balance.tokenDollorValue), 
+                    //   +(findUser.betAmount + rewardAmount)
+                    // );
+                    console.log(balance.totalCoin,"winingamount")
                     await balance.save();
                   }
                 } else {
@@ -1488,6 +1490,137 @@ export const numberBettingWinnerResult = async (req, res) => {
       []
     );
   } catch (error) {
+    console.log('error-NumberBettingController',error);
     return handleErrorResponse(res, error);
   }
 }
+// export const numberBettingWinnerResult = async (req, res) => {
+//   try {
+//     const { gameType, type, gameId, period } = req.params;
+//     const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
+//     if (findGameMode) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.OK,
+//         ResponseMessage.WINNER_DECLARE_MANUAL,
+//         []
+//       );
+//     }
+//     // const totalUserInPeriod = await NumberBetting.find({ gameId, period: Number(period), is_deleted: 0 })
+//     const totalUserInPeriod = await NumberBetting.aggregate([
+//       {
+//         $match: {
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           period: Number(period),
+//           is_deleted: 0
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: "$userId",
+//           userTotalBets: { $sum: 1 }
+//         }
+//       }
+//     ])
+//     if (totalUserInPeriod.length) {
+//       if (totalUserInPeriod.length > 1) {
+//         const getAllNumberBets = await NumberBetting.aggregate([
+//           {
+//             $match: { period: Number(period) }
+//           },
+//           {
+//             $group: {
+//               _id: "$number",
+//               period: { $first: "$period" },
+//               totalUser: { $sum: 1 },
+//               userIds: { $push: "$userId" },
+//               totalBetAmount: { $sum: "$betAmount" }
+//             }
+//           },
+//           {
+//             $project: {
+//               _id: 0,
+//               period: 1,
+//               number: "$_id",
+//               totalUser: 1,
+//               userIds: 1,
+//               totalBetAmount: 1,
+//             }
+//           },
+//           {
+//             $sort: { totalBetAmount: 1 }
+//           },
+//           {
+//             $limit: 1
+//           }
+//         ])
+//         if (getAllNumberBets.length) {
+//           await Promise.all(
+//             getAllNumberBets.map(async (item) => {
+//               item.userIds.map(async (userId) => {
+//                 const findUser = await NumberBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
+//                 if (findUser) {
+//                   let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+//                   findUser.isWin = true
+//                   findUser.rewardAmount = rewardAmount
+//                   await findUser.save();
+//                   const balance = await getSingleData(
+//                     { userId },
+//                     NewTransaction
+//                   );
+//                   if (balance) {
+//                     console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
+//                     let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
+//                     balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
+//                     // balance.tokenDollorValue = plusLargeSmallValue(
+//                     //   +(balance.tokenDollorValue), 
+//                     //   +(findUser.betAmount + rewardAmount)
+//                     // );
+//                     console.log(balance.totalCoin,"winingamount")
+//                     await balance.save();
+//                   }
+//                 } else {
+//                   return sendResponse(
+//                     res,
+//                     StatusCodes.BAD_REQUEST,
+//                     "User not found",
+//                     []
+//                   );
+//                 }
+//               })
+//             })
+//           )
+//           // return res.send(getAllNumberBets)
+//           return sendResponse(
+//             res,
+//             StatusCodes.OK,
+//             ResponseMessage.NUMBER_WINNER + " " + getAllNumberBets[0].number,
+//             getAllNumberBets
+//           );
+//         } else {
+//           return sendResponse(
+//             res,
+//             StatusCodes.OK,
+//             ResponseMessage.LOSSER,
+//             []
+//           );
+//         }
+//       } else {
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.LOSSER,
+//           []
+//         );
+//       }
+//     }
+//     return sendResponse(
+//       res,
+//       StatusCodes.BAD_REQUEST,
+//       "User not found",
+//       []
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// }

@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourBetting, minusLargeSmallValue
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourBetting, minusLargeSmallValue, CurrencyCoin
 } from "../../index.js";
 
 
@@ -20,7 +20,12 @@ export const userDashboard = async (req, res) => {
             const transactions = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
             const totalTransaction = transactions.length
             const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
-
+            if(!findUser.currency){
+                findUser.currency = "USD"
+                await findUser.save()
+            }
+            const currency = await CurrencyCoin.findOne({currencyName: findUser.currency});
+            const coinRate = currency?.coin;
             // One months rewards get
             const rewardOneMonthQuery = {
                 createdAt: {
@@ -56,6 +61,8 @@ export const userDashboard = async (req, res) => {
                 // remainingBalance = transactionDeposite.tokenDollorValue
                 // totalDeposit = transactions.filter(tran => tran.type == "withdrawal")
             }
+            let totalCoin = transactionDeposite ? transactionDeposite.totalCoin : 0
+            let convertedCoin = transactionDeposite ? transactionDeposite.totalCoin / coinRate : 0;
             // console.log(totalDepositAmount,totalWithdrawalAmount);
             return sendResponse(
                 res,
@@ -71,6 +78,9 @@ export const userDashboard = async (req, res) => {
                     totalRewardsDistributedToday,
                     totalWithdrawalRequests: totalWithdrawal.length,
                     totalBalance : transactionDeposite ? transactionDeposite.tokenDollorValue : 0,
+                    totalCoin: totalCoin,
+                    currency: findUser ? findUser.currency : "USD",
+                    convertedCoin: convertedCoin,
                     // remainingBalance,
                     // totalDepositeBalance,
                     totalDepositAmount: minusLargeSmallValue(totalDepositAmount, totalWithdrawalAmount)
