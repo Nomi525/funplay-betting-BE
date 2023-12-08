@@ -417,26 +417,26 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         []
       )
     }
-    await Promise.all(winnerIds.map(async (winnerId) => {
-      const findCommunityBetting = await getSingleData({ _id: winnerId, gameId, is_deleted: 0 }, CommunityBetting)
-      if (findCommunityBetting) {
-        let rewardAmount = findCommunityBetting.betAmount * 0.95;
-        findCommunityBetting.isWin = true
-        findCommunityBetting.rewardAmount = rewardAmount
-        await findCommunityBetting.save();
-        const balance = await getSingleData(
-          { userId: findCommunityBetting.userId },
-          NewTransaction
-        );
-        if (balance) {
-          balance.tokenDollorValue = plusLargeSmallValue(
-            balance.tokenDollorValue,
-            findCommunityBetting.betAmount + rewardAmount
-          );
-          await balance.save();
-        }
-      }
-    }))
+    // await Promise.all(winnerIds.map(async (winnerId) => {
+    //   const findCommunityBetting = await getSingleData({ _id: winnerId, gameId, is_deleted: 0 }, CommunityBetting)
+    //   if (findCommunityBetting) {
+    //     let rewardAmount = findCommunityBetting.betAmount * 0.95;
+    //     findCommunityBetting.isWin = true
+    //     findCommunityBetting.rewardAmount = rewardAmount
+    //     await findCommunityBetting.save();
+    //     const balance = await getSingleData(
+    //       { userId: findCommunityBetting.userId },
+    //       NewTransaction
+    //     );
+    //     if (balance) {
+    //       balance.tokenDollorValue = plusLargeSmallValue(
+    //         balance.tokenDollorValue,
+    //         findCommunityBetting.betAmount + rewardAmount
+    //       );
+    //       await balance.save();
+    //     }
+    //   }
+    // }))
     return sendResponse(
       res,
       StatusCodes.OK,
