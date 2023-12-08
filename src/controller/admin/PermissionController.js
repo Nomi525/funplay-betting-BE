@@ -7,7 +7,8 @@ import {
     dataCreate,
     dataUpdated,
     getAllData,
-    Permission
+    Permission,
+    multipleDelete
 } from "../../index.js";
 
 export const addEditPermission = async (req, res) => {
@@ -124,3 +125,27 @@ export const permissionActiveDeActive = async (req, res) => {
     }
 };
 
+//#region Delete multiple permission
+export const multiplePermissionDeletes = async (req, res) => {
+    try {
+        const DeletemultiplePermission = multipleDelete(req.body, Permission)
+        if (DeletemultiplePermission) {
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                ResponseMessage.DELETED_ALL_PERMISSION,
+                DeletemultiplePermission
+            );
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                ResponseMessage.PERMISSION_NOT_DELETED,
+                []
+            );
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+};
+//#endregion

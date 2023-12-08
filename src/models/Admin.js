@@ -57,7 +57,7 @@ const adminSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        deviceName : {
+        deviceName: {
             type: String,
             required: false,
         },
@@ -68,6 +68,16 @@ const adminSchema = new mongoose.Schema(
         longitude: {
             type: Number,
             required: false,
+        },
+        role: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: "Permission",
+        },
+        Permission: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: "Permission",
         },
         isActive: {
             type: Boolean,

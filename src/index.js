@@ -53,6 +53,7 @@ import {
   deleteRating,
   getAdminSetting,
   adminResendOtp,
+  getUpdatedUser,
 } from "./controller/admin/AdminController.js";
 import {
   logout,
@@ -330,6 +331,8 @@ import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
 import Upload from "./middleware/FileUpload.js";
 import { appServer } from "../server.js";
+import { multipleDelete,multipleDeleteUpdate } from "./services/AdminServices.js";
+
 import {
   createError,
   sendResponse,
@@ -355,6 +358,9 @@ import {
 
 dotenv.config();
 export {
+  getUpdatedUser,
+  multipleDelete,
+  multipleDeleteUpdate,
   colourBettingWinnerResult,
   numberBettingWinnerResult,
   getPeriodsDetailsForAllGame,

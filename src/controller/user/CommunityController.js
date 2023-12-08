@@ -1,10 +1,12 @@
 import {
   CommunityBetting,
+  Game,
   NewTransaction,
   ResponseMessage,
   StatusCodes,
   dataCreate,
   dataUpdated,
+  getSingleData,
   handleErrorResponse,
   minusLargeSmallValue,
   mongoose,
@@ -15,8 +17,9 @@ import {
 //#region Add edit community betting
 export const addEditCommunityBets = async (req, res) => {
   try {
-    let { communityBetId, gameId, betAmount, period } = req.body;
-    if (betAmount < 0) {
+    let { gameId, period } = req.body;
+    let getCommunityGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (getCommunityGame.betAmount < 0) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -24,10 +27,21 @@ export const addEditCommunityBets = async (req, res) => {
         []
       );
     }
+    const betCountInPeriod = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
+    if (betCountInPeriod.length >= getCommunityGame.noOfUsers) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "Bet limit expire",
+        []
+      );
+    }
+    
     const checkBalance = await NewTransaction.findOne({
       userId: req.user,
       is_deleted: 0,
     });
+
     if (!checkBalance) {
       return sendResponse(
         res,
@@ -36,42 +50,12 @@ export const addEditCommunityBets = async (req, res) => {
         []
       );
     }
-    // let alreadyExistBet = await CommunityBetting.findOne({
-    //   userId: req.user,
-    //   gameId: gameId,
-    //   period,
-    //   count,
-    // });
-    // let createCommunityBet;
-    // if (!communityBetId) {
-    // if (alreadyExistBet) {
-    //   createCommunityBet = await dataUpdated(
-    //     {
-    //       userId: req.user,
-    //     },
-    //     {
-    //       betAmount: parseInt(betAmount),
-    //     },
-    //     CommunityBetting
-    //   );
-    // } else {
-    //   createCommunityBet = await dataCreate(
-    //     {
-    //       userId: req.user,
-    //       gameId,
-    //       betAmount,
-    //       period,
-    //       count,
-    //     },
-    //     CommunityBetting
-    //   );
-    // }
 
     let createCommunityBet = await dataCreate(
       {
         userId: req.user,
         gameId,
-        betAmount,
+        betAmount: getCommunityGame.betAmount,
         period
       },
       CommunityBetting
@@ -80,15 +64,15 @@ export const addEditCommunityBets = async (req, res) => {
     if (createCommunityBet) {
       checkBalance.tokenDollorValue = minusLargeSmallValue(
         checkBalance.tokenDollorValue,
-        betAmount
+        getCommunityGame.betAmount
       );
       if (parseFloat(checkBalance.betAmount)) {
         checkBalance.betAmount = plusLargeSmallValue(
           checkBalance.betAmount,
-          betAmount
+          getCommunityGame.betAmount
         );
       } else {
-        checkBalance.betAmount = betAmount;
+        checkBalance.betAmount = getCommunityGame.betAmount;
       }
       await checkBalance.save();
       return sendResponse(
