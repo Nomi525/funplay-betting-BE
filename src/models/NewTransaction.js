@@ -77,6 +77,11 @@ const newTransactionSchema = new mongoose.Schema({
         required: false,
         default: 0,
     },
+    totalCoin : {
+        type: Number,
+        required: false,
+        default: 0,
+    },
     is_deleted: {
         type: Number,
         default: 0,
