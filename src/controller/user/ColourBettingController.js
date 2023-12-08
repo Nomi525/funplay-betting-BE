@@ -1062,11 +1062,6 @@ export const colourBettingWinnerResult = async (req, res) => {
                     NewTransaction
                   );
                   if (balance) {
-                    // balance.tokenDollorValue = plusLargeSmallValue(
-                      //   balance.tokenDollorValue,
-                      //   findUser.betAmount + rewardAmount
-                      // );
-                      // await balance.save();
                     let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
                     balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
                     await balance.save();
