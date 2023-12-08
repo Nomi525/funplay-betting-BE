@@ -296,7 +296,7 @@ export const getAllCommunityGamePeriod = async (req, res) => {
               $cond: [{ $eq: ["$isWin", true] }, "$betAmount", null],
             },
           },
-          period: { $first: "$period" },
+          period: { $first: "$period" },      
         },
       },
       {
@@ -357,7 +357,7 @@ export const getAllCommunityGamePeriod = async (req, res) => {
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
       getAllPeriods
-    );
+    ); 
   } catch (error) {
     return handleErrorResponse(res, error);
   }

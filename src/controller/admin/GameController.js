@@ -1033,6 +1033,9 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct('period', { isWin: true });
 
+    // Find periods with isWin: true in the communitybetting collection
+    const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct('period', { isWin: true });
+
     if (gameType === 'numberBetting') {
       battingAggregationResult = await Period.aggregate([
         {
@@ -1167,6 +1170,67 @@ export const getAllGamePeriodData = async (req, res) => {
             period: '$_id',
             periodId: 1,
             colourbettingsData: 1,
+          },
+        },
+        {
+          $sort: { period: -1 },
+        },
+      ]);
+    } else if (gameType === 'communityBetting') {
+      battingAggregationResult = await Period.aggregate([
+        {
+          $match: {
+            gameId: new mongoose.Types.ObjectId(gameId),
+            period: { $nin: isWinTruePeriodsforCommunityBetting }, // Exclude periods with isWin: true
+          },
+        },
+        {
+          $lookup: {
+            from: 'communitybettings',
+            localField: 'period',
+            foreignField: 'period',
+            as: 'communitybettingsData',
+          },
+        },
+        {
+          $unwind: '$communitybettingsData',
+        },
+        {
+          $group: {
+            _id: {
+              period: '$period',
+              // colourName: '$communitybettingsData.colourName',
+              periodId: '$_id',
+            },
+            anyWinTrue: { $max: '$communitybettingsData.isWin' },
+            totalUser: { $addToSet: '$communitybettingsData.userId' },
+            totalBetAmount: { $sum: '$communitybettingsData.betAmount' },
+          },
+        },
+        {
+          $match: {
+            anyWinTrue: { $ne: true },
+          },
+        },
+        {
+          $group: {
+            _id: '$_id.period',
+            periodId: { $first: '$_id.periodId' },
+            communitybettingsData: {
+              $push: {
+                // colourName: '$_id.colourName',
+                totalUser: { $sum: { $size: '$totalUser' } },
+                totalBetAmount: '$totalBetAmount',
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            period: '$_id',
+            periodId: 1,
+            communitybettingsData: 1,
           },
         },
         {
