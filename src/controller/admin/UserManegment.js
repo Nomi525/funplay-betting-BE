@@ -2,7 +2,7 @@ import {
   ResponseMessage, StatusCodes, sendResponse,
   getSingleData, getAllData, handleErrorResponse, User, dataUpdated,
   NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting
+  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -78,9 +78,17 @@ export const getAdminSingleUser = async (req, res) => {
           ? walletAddress?.tokenDollorValue
           : 0;
       }
+      // Add Coin Harsh Sir code
+      const currency = await CurrencyCoin.findOne({ currencyName: findUser.currency });
+      const coinRate = currency?.coin;
+      let totalCoin = walletAddress ? walletAddress.totalCoin : 0
+      let convertedCoin = walletAddress ? walletAddress.totalCoin / coinRate : 0;
       return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_LIST, {
         ...findUser._doc,
         walletAmount,
+        totalCoin: totalCoin,
+        currency: findUser ? findUser.currency : "USD",
+        convertedCoin: convertedCoin,
         useReferralCodeUsers: referralUsers,
       });
     } else {
@@ -92,6 +100,7 @@ export const getAdminSingleUser = async (req, res) => {
       );
     }
   } catch (error) {
+    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -373,7 +382,7 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
       is_deleted: 0,
     })
       .populate("userId")
-      .sort({createdAt : -1})
+      .sort({ createdAt: -1 })
     if (transactionHistory.length) {
       return sendResponse(
         res,

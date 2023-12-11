@@ -18,7 +18,9 @@ import {
   GameReward,
   NumberBetting,
   CommunityBetting,
-  checkDecimalValueGreaterThanOrEqual
+  checkDecimalValueGreaterThanOrEqual,
+  sendMail,
+  ejs
 } from "../../index.js";
 
 //#region Colour betting api
@@ -1064,6 +1066,12 @@ export const colourBettingWinnerResult = async (req, res) => {
                     let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
                     balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
                     await balance.save();
+                    const userData = await getSingleData({ _id: userId }, User)
+                    let gameName = gameType == "3colorBetting" ? "3 Colour Betting" : "2 Colour Betting"
+                    let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+                      gameName: gameName,
+                    });
+                    await sendMail(userData.email, "Colour betting game win", mailInfo)
                   }
                 } else {
                   return sendResponse(
@@ -1106,7 +1114,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       []
     );
   } catch (error) {
-    console.log('error-ClourBettingController',error);
+    console.log('error-ClourBettingController', error);
     return handleErrorResponse(res, error);
   }
 }

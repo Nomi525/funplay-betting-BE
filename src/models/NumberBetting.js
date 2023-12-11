@@ -49,6 +49,12 @@ const numberBettingSchema = new mongoose.Schema(
       required: false,
       default: false,
     },
+    status: {
+      type: String,
+      enum: [null, "Fail", "Pendding", "Successfull"],
+      required: false,
+      default: null,
+    },
     is_deleted: {
       type: Number,
       required: false,
