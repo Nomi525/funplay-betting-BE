@@ -17,7 +17,10 @@ import {
   mongoose,
   Game,
   Period,
-  ColourBetting
+  ColourBetting,
+  sendMail,
+  User,
+  ejs
 } from "../../index.js";
 
 // export const addEditNumberBet = async (req, res) => {
@@ -411,15 +414,6 @@ export const getNumberGamePeriodById = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    // const getGamePeriodById = await NumberBetting.find({
-    //   userId: req.user,
-    //   gameId,
-    //   createdAt: { $gte: twentyFourHoursAgo },
-    //   is_deleted: 0,
-    // })
-    //   .populate("userId", "fullName profile email")
-    //   .populate("gameId", "gameName gameImage gameMode")
-    //   .sort({ period: -1 });
 
     const getGamePeriodById = await NumberBetting.aggregate([
       {
@@ -445,6 +439,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           number: 1,
           period: 1,
           isWin: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -470,10 +465,16 @@ export const getNumberGamePeriodById = async (req, res) => {
           price: 1,
           number: 1,
           isWin: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $match: {
+          status: { $in: ["Fail", "Pendding", "Successfull"] }
         }
       }
     ])
@@ -510,6 +511,27 @@ export const getAllNumberGamePeriod = async (req, res) => {
               $cond: [{ $eq: ["$isWin", true] }, "$number", null],
             },
           },
+          status: {
+            $max: {
+              $cond: {
+                if: { $in: ["$status", ["Successfull"]] },
+                then: "Successfull",
+                else: {
+                  $cond: {
+                    if: { $in: ["$status", ["Pending"]] },
+                    then: "Pending",
+                    else: {
+                      $cond: {
+                        if: { $in: ["$status", ["Fail"]] },
+                        then: "Fail",
+                        else: null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           period: { $first: "$period" },
         },
       },
@@ -534,6 +556,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
           period: 1,
           winNumber: 1,
           createdAt: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -559,10 +582,16 @@ export const getAllNumberGamePeriod = async (req, res) => {
           winNumber: 1,
           period: 1,
           price: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $match: {
+          status: { $ne: null }
         }
       }
     ]);
@@ -1786,6 +1815,11 @@ export const numberBettingWinnerResult = async (req, res) => {
                       // );
                       console.log(balance.totalCoin, "winingamount")
                       await balance.save();
+                      const userData = await getSingleData({ _id: userId }, User)
+                      let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+                        gameName: "Number Betting",
+                      });
+                      await sendMail(userData.email, "Number betting game win", mailInfo)
                     }
                   } else {
                     findUser.status = "Fail";

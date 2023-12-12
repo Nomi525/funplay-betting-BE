@@ -15,6 +15,9 @@ import {
   CommunityBetting,
   NewTransaction,
   Game,
+  ejs,
+  sendMail,
+  User
 } from "../../index.js";
 
 //#region Get All winners user
@@ -506,7 +509,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     }
 
     const findNumberBettingArray = await getAllData(
-      { gameId, period: winnerId, number: winNumber, is_deleted: 0, isWin: false },
+      { gameId, period: winnerId, number: winNumber, status: "Pendding", is_deleted: 0, isWin: false },
       NumberBetting
     );
     const savedInstances = [];
@@ -516,6 +519,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
         let rewardAmount = findNumberBetting.betAmount * 0.95;
         findNumberBetting.isWin = true;
         findNumberBetting.rewardAmount = rewardAmount;
+        findNumberBetting.status = "Successfull";
         await findNumberBetting.save();
 
         const balance = await getSingleData(
@@ -529,15 +533,29 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
             findNumberBetting.betAmount + rewardAmount
           );
           await balance.save();
+          const userData = await getSingleData({ _id: findNumberBetting.userId }, User)
+          let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+            gameName: "Number Betting",
+          });
+          await sendMail(userData.email, "Number betting game win", mailInfo)
         }
-
         savedInstances.push(findNumberBetting);
       } else {
         // Log an error or handle the case where the document is not an instance of NumberBetting
         console.error("Document is not an instance of NumberBetting:", findNumberBetting);
       }
     }
-
+    await NumberBetting.updateMany(
+      {
+        gameId,
+        period: winnerId,
+        number: { $ne: winNumber },
+        status: "Pendding",
+        is_deleted: 0,
+        isWin: false
+      },
+      { status: "Fail" }
+    )
     return sendResponse(
       res,
       StatusCodes.OK,

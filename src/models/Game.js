@@ -23,7 +23,8 @@ const gameSchema = new mongoose.Schema({
     },
     gameWinningAmount: {
         type: Number,
-        required: false
+        required: false,
+        default : 0
     },
     gameHours: {
         type: String,
