@@ -17,7 +17,10 @@ import {
   mongoose,
   Game,
   Period,
-  ColourBetting
+  ColourBetting,
+  sendMail,
+  User,
+  ejs
 } from "../../index.js";
 
 // export const addEditNumberBet = async (req, res) => {
@@ -209,8 +212,8 @@ export const addEditNumberBet = async (req, res) => {
       );
     }
     if (
-        findUserDeposit.totalCoin <
-        Number(betAmount)
+      findUserDeposit.totalCoin <
+      Number(betAmount)
     ) {
       return sendResponse(
         res,
@@ -411,15 +414,6 @@ export const getNumberGamePeriodById = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    // const getGamePeriodById = await NumberBetting.find({
-    //   userId: req.user,
-    //   gameId,
-    //   createdAt: { $gte: twentyFourHoursAgo },
-    //   is_deleted: 0,
-    // })
-    //   .populate("userId", "fullName profile email")
-    //   .populate("gameId", "gameName gameImage gameMode")
-    //   .sort({ period: -1 });
 
     const getGamePeriodById = await NumberBetting.aggregate([
       {
@@ -445,6 +439,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           number: 1,
           period: 1,
           isWin: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -470,10 +465,16 @@ export const getNumberGamePeriodById = async (req, res) => {
           price: 1,
           number: 1,
           isWin: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $match: {
+          status: { $in: ["Fail", "Pendding", "Successfull"] }
         }
       }
     ])
@@ -510,6 +511,27 @@ export const getAllNumberGamePeriod = async (req, res) => {
               $cond: [{ $eq: ["$isWin", true] }, "$number", null],
             },
           },
+          status: {
+            $max: {
+              $cond: {
+                if: { $in: ["$status", ["Successfull"]] },
+                then: "Successfull",
+                else: {
+                  $cond: {
+                    if: { $in: ["$status", ["Pending"]] },
+                    then: "Pending",
+                    else: {
+                      $cond: {
+                        if: { $in: ["$status", ["Fail"]] },
+                        then: "Fail",
+                        else: null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           period: { $first: "$period" },
         },
       },
@@ -534,6 +556,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
           period: 1,
           winNumber: 1,
           createdAt: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -559,10 +582,16 @@ export const getAllNumberGamePeriod = async (req, res) => {
           winNumber: 1,
           period: 1,
           price: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $match: {
+          status: { $ne: null }
         }
       }
     ]);
@@ -708,7 +737,7 @@ export const createGamePeriodFromCronJob = async () => {
         const formattedDate = currentDate2.split("-").join("");
         let endTime2 = moment()
           .utcOffset("+05:30")
-          .add(game.gameHours, "minutes")
+          .add(game.gameHours, "hours")
           .format("HH:mm");
         var endTimestamp = moment(
           `${currentDate2} ${endTime2}:00`,
@@ -832,112 +861,69 @@ export const createGamePeriodFromCronJob = async () => {
           }
         }
       } else if (game.gameName == "3 Color Betting") {
-        const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
-          "HH:mm:ss"
-        );
-        const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
-          "HH:mm:ss"
-        );
-        const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
-        var currentTimestamp = moment(
-          `${currentDate2} ${currentTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
-        var gameStartTimestamp = moment(
-          `${gameStartDate2} ${gameStartTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        var gameEndDate2 = moment(game.gameTimeTo).format("YYYY-MM-DD");
-        var gameEndTimestamp = moment(
-          `${gameEndDate2} ${gameEndTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        let newGameTime = moment(
-          `${gameEndDate2} ${gameEndTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        const formattedDate = currentDate2.split("-").join("");
-        let endTime2 = moment()
-          .utcOffset("+05:30")
-          .add(game.gameSecond[0], "seconds")
-          .format("HH:mm:ss");
-        var endTimestamp = moment(
-          `${currentDate2} ${endTime2}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        let newEndTime = moment(
-          `${currentDate2} ${endTime2}`,
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        if (
-          gameStartTimestamp <= currentTimestamp &&
-          currentTimestamp < gameEndTimestamp
-        ) {
-          let findPeriod2 = await Period.findOne({
-            gameId: game._id,
-            date: currentDate2,
-          }).sort({ createdAt: -1 });
-          if (findPeriod2) {
-            if (game.isRepeat) {
-              const lastIndex = await Period.find({
-                gameId: game._id,
-                is_deleted: 0,
-              })
-                .sort({ createdAt: -1 })
-                .limit(1);
-              if (currentTime >= lastIndex[0].endTime) {
-                const periodCount = await Period.countDocuments({
-                  gameId: game._id,
-                });
-                await Period.updateMany(
-                  { gameId: game._id },
-                  { isTimeUp: true },
-                  { new: true }
-                );
-                const period =
-                  formattedDate + (periodCount + 1).toString().padStart(4, "0");
-                if (newGameTime < newEndTime) {
-                  await Period.create({
-                    gameId: game._id,
-                    period,
-                    startTime: currentTime,
-                    endTime: gameEndTime,
-                    date: currentDate2,
-                  });
-                } else {
-                  await Period.create({
-                    gameId: game._id,
-                    period,
-                    startTime: currentTime,
-                    endTime: endTime2,
-                    date: currentDate2,
-                  });
-                }
-              }
-            } else {
-              const checkSlot = await Period.find({
-                gameId: game._id,
-                is_deleted: 0,
-                date: gameStartDate2,
-                startTime: gameStartTime
-              })
-                .sort({ createdAt: 1 })
-                .limit(1);
-              if (!checkSlot.length) {
-                // generate slow if first slot is not generated
+        game.gameSecond.map(async (second) => {
+          const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
+            "HH:mm:ss"
+          );
+          const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
+            "HH:mm:ss"
+          );
+          const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
+          var currentTimestamp = moment(
+            `${currentDate2} ${currentTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
+          var gameStartTimestamp = moment(
+            `${gameStartDate2} ${gameStartTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          var gameEndDate2 = moment(game.gameTimeTo).format("YYYY-MM-DD");
+          var gameEndTimestamp = moment(
+            `${gameEndDate2} ${gameEndTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          let newGameTime = moment(
+            `${gameEndDate2} ${gameEndTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          );
+          const formattedDate = currentDate2.split("-").join("");
+          let endTime2 = moment()
+            .utcOffset("+05:30")
+            .add(second, "seconds")
+            .format("HH:mm:ss");
+          var endTimestamp = moment(
+            `${currentDate2} ${endTime2}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          let newEndTime = moment(
+            `${currentDate2} ${endTime2}`,
+            "YYYY-MM-DD HH:mm:ss"
+          );
+          if (
+            gameStartTimestamp <= currentTimestamp &&
+            currentTimestamp < gameEndTimestamp
+          ) {
+            let findPeriod2 = await Period.findOne({
+              gameId: game._id,
+              date: currentDate2,
+              periodFor: second
+            }).sort({ createdAt: -1 });
+            if (findPeriod2) {
+              if (game.isRepeat) {
                 const lastIndex = await Period.find({
                   gameId: game._id,
+                  periodFor: second,
                   is_deleted: 0,
                 })
                   .sort({ createdAt: -1 })
                   .limit(1);
                 if (currentTime >= lastIndex[0].endTime) {
                   const periodCount = await Period.countDocuments({
-                    gameId: game._id,
+                    gameId: game._id
                   });
                   await Period.updateMany(
-                    { gameId: game._id },
+                    { gameId: game._id, periodFor: second },
                     { isTimeUp: true },
                     { new: true }
                   );
@@ -950,6 +936,7 @@ export const createGamePeriodFromCronJob = async () => {
                       startTime: currentTime,
                       endTime: gameEndTime,
                       date: currentDate2,
+                      periodFor: second
                     });
                   } else {
                     await Period.create({
@@ -958,139 +945,302 @@ export const createGamePeriodFromCronJob = async () => {
                       startTime: currentTime,
                       endTime: endTime2,
                       date: currentDate2,
+                      periodFor: second
                     });
                   }
                 }
+              } else {
+                const checkSlot = await Period.find({
+                  gameId: game._id,
+                  is_deleted: 0,
+                  date: gameStartDate2,
+                  periodFor: second,
+                  startTime: gameStartTime
+                })
+                  .sort({ createdAt: 1 })
+                  .limit(1);
+                if (!checkSlot.length) {
+                  // generate slow if first slot is not generated
+                  const lastIndex = await Period.find({
+                    gameId: game._id,
+                    periodFor: second,
+                    is_deleted: 0,
+                  })
+                    .sort({ createdAt: -1 })
+                    .limit(1);
+                  if (currentTime >= lastIndex[0].endTime) {
+                    const periodCount = await Period.countDocuments({
+                      gameId: game._id
+                    });
+                    await Period.updateMany(
+                      { gameId: game._id, periodFor: second },
+                      { isTimeUp: true },
+                      { new: true }
+                    );
+                    const period =
+                      formattedDate + (periodCount + 1).toString().padStart(4, "0");
+                    if (newGameTime < newEndTime) {
+                      await Period.create({
+                        gameId: game._id,
+                        period,
+                        startTime: currentTime,
+                        endTime: gameEndTime,
+                        date: currentDate2,
+                        periodFor: second
+                      });
+                    } else {
+                      await Period.create({
+                        gameId: game._id,
+                        period,
+                        startTime: currentTime,
+                        endTime: endTime2,
+                        date: currentDate2,
+                        periodFor: second
+                      });
+                    }
+                  }
+                }
+              }
+            } else {
+              const period = formattedDate + "0001";
+              if (newGameTime < newEndTime) {
+                await Period.create({
+                  gameId: game._id,
+                  period,
+                  startTime: currentTime,
+                  endTime: gameEndTime,
+                  date: currentDate2,
+                  periodFor: second
+                });
+              } else {
+                await Period.create({
+                  gameId: game._id,
+                  period,
+                  startTime: currentTime,
+                  endTime: endTime2,
+                  date: currentDate2,
+                  periodFor: second
+                });
               }
             }
-          } else {
-            const period = formattedDate + "0001";
-            if (newGameTime < newEndTime) {
-              await Period.create({
-                gameId: game._id,
-                period,
-                startTime: currentTime,
-                endTime: gameEndTime,
-                date: currentDate2,
-              });
-            } else {
-              await Period.create({
-                gameId: game._id,
-                period,
-                startTime: currentTime,
-                endTime: endTime2,
-                date: currentDate2,
-              });
-            }
           }
-        }
+        })
+        // const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
+        //   "HH:mm:ss"
+        // );
+        // const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
+        //   "HH:mm:ss"
+        // );
+        // const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
+        // var currentTimestamp = moment(
+        //   `${currentDate2} ${currentTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
+        // var gameStartTimestamp = moment(
+        //   `${gameStartDate2} ${gameStartTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // var gameEndDate2 = moment(game.gameTimeTo).format("YYYY-MM-DD");
+        // var gameEndTimestamp = moment(
+        //   `${gameEndDate2} ${gameEndTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // let newGameTime = moment(
+        //   `${gameEndDate2} ${gameEndTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // );
+        // const formattedDate = currentDate2.split("-").join("");
+        // let endTime2 = moment()
+        //   .utcOffset("+05:30")
+        //   .add(game.gameSecond[0], "seconds")
+        //   .format("HH:mm:ss");
+        // var endTimestamp = moment(
+        //   `${currentDate2} ${endTime2}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // let newEndTime = moment(
+        //   `${currentDate2} ${endTime2}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // );
+        // if (
+        //   gameStartTimestamp <= currentTimestamp &&
+        //   currentTimestamp < gameEndTimestamp
+        // ) {
+        //   let findPeriod2 = await Period.findOne({
+        //     gameId: game._id,
+        //     date: currentDate2,
+        //   }).sort({ createdAt: -1 });
+        //   if (findPeriod2) {
+        //     if (game.isRepeat) {
+        //       const lastIndex = await Period.find({
+        //         gameId: game._id,
+        //         is_deleted: 0,
+        //       })
+        //         .sort({ createdAt: -1 })
+        //         .limit(1);
+        //       if (currentTime >= lastIndex[0].endTime) {
+        //         const periodCount = await Period.countDocuments({
+        //           gameId: game._id,
+        //         });
+        //         await Period.updateMany(
+        //           { gameId: game._id },
+        //           { isTimeUp: true },
+        //           { new: true }
+        //         );
+        //         const period =
+        //           formattedDate + (periodCount + 1).toString().padStart(4, "0");
+        //         if (newGameTime < newEndTime) {
+        //           await Period.create({
+        //             gameId: game._id,
+        //             period,
+        //             startTime: currentTime,
+        //             endTime: gameEndTime,
+        //             date: currentDate2,
+        //           });
+        //         } else {
+        //           await Period.create({
+        //             gameId: game._id,
+        //             period,
+        //             startTime: currentTime,
+        //             endTime: endTime2,
+        //             date: currentDate2,
+        //           });
+        //         }
+        //       }
+        //     } else {
+        //       const checkSlot = await Period.find({
+        //         gameId: game._id,
+        //         is_deleted: 0,
+        //         date: gameStartDate2,
+        //         startTime: gameStartTime
+        //       })
+        //         .sort({ createdAt: 1 })
+        //         .limit(1);
+        //       if (!checkSlot.length) {
+        //         // generate slow if first slot is not generated
+        //         const lastIndex = await Period.find({
+        //           gameId: game._id,
+        //           is_deleted: 0,
+        //         })
+        //           .sort({ createdAt: -1 })
+        //           .limit(1);
+        //         if (currentTime >= lastIndex[0].endTime) {
+        //           const periodCount = await Period.countDocuments({
+        //             gameId: game._id,
+        //           });
+        //           await Period.updateMany(
+        //             { gameId: game._id },
+        //             { isTimeUp: true },
+        //             { new: true }
+        //           );
+        //           const period =
+        //             formattedDate + (periodCount + 1).toString().padStart(4, "0");
+        //           if (newGameTime < newEndTime) {
+        //             await Period.create({
+        //               gameId: game._id,
+        //               period,
+        //               startTime: currentTime,
+        //               endTime: gameEndTime,
+        //               date: currentDate2,
+        //             });
+        //           } else {
+        //             await Period.create({
+        //               gameId: game._id,
+        //               period,
+        //               startTime: currentTime,
+        //               endTime: endTime2,
+        //               date: currentDate2,
+        //             });
+        //           }
+        //         }
+        //       }
+        //     }
+        //   } else {
+        //     const period = formattedDate + "0001";
+        //     if (newGameTime < newEndTime) {
+        //       await Period.create({
+        //         gameId: game._id,
+        //         period,
+        //         startTime: currentTime,
+        //         endTime: gameEndTime,
+        //         date: currentDate2,
+        //       });
+        //     } else {
+        //       await Period.create({
+        //         gameId: game._id,
+        //         period,
+        //         startTime: currentTime,
+        //         endTime: endTime2,
+        //         date: currentDate2,
+        //       });
+        //     }
+        //   }
+        // }
       } else if (game.gameName == "2 Color Betting") {
-        const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
-          "HH:mm:ss"
-        );
-        const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
-          "HH:mm:ss"
-        );
-        const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
-        var currentTimestamp = moment(
-          `${currentDate2} ${currentTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
-        var gameStartTimestamp = moment(
-          `${gameStartDate2} ${gameStartTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        var gameEndDate2 = moment(game.gameTimeTo).format("YYYY-MM-DD");
-        var gameEndTimestamp = moment(
-          `${gameEndDate2} ${gameEndTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        let newGameTime = moment(
-          `${gameEndDate2} ${gameEndTime}`,
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        const formattedDate = currentDate2.split("-").join("");
-        let endTime2 = moment()
-          .utcOffset("+05:30")
-          .add(game.gameSecond[0], "seconds")
-          .format("HH:mm:ss");
-        var endTimestamp = moment(
-          `${currentDate2} ${endTime2}`,
-          "YYYY-MM-DD HH:mm:ss"
-        ).unix();
-        let newEndTime = moment(
-          `${currentDate2} ${endTime2}`,
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        if (
-          gameStartTimestamp <= currentTimestamp &&
-          currentTimestamp < gameEndTimestamp
-        ) {
-          let findPeriod2 = await Period.findOne({
-            gameId: game._id,
-            date: currentDate2,
-          }).sort({ createdAt: -1 });
-          if (findPeriod2) {
-            if (game.isRepeat) {
-              const lastIndex = await Period.find({
-                gameId: game._id,
-                is_deleted: 0,
-              })
-                .sort({ createdAt: -1 })
-                .limit(1);
-              if (currentTime >= lastIndex[0].endTime) {
-                const periodCount = await Period.countDocuments({
-                  gameId: game._id,
-                });
-                await Period.updateMany(
-                  { gameId: game._id },
-                  { isTimeUp: true },
-                  { new: true }
-                );
-                const period =
-                  formattedDate + (periodCount + 1).toString().padStart(4, "0");
-                if (newGameTime < newEndTime) {
-                  await Period.create({
-                    gameId: game._id,
-                    period,
-                    startTime: currentTime,
-                    endTime: gameEndTime,
-                    date: currentDate2,
-                  });
-                } else {
-                  await Period.create({
-                    gameId: game._id,
-                    period,
-                    startTime: currentTime,
-                    endTime: endTime2,
-                    date: currentDate2,
-                  });
-                }
-              }
-            } else {
-              const checkSlot = await Period.find({
-                gameId: game._id,
-                is_deleted: 0,
-                date: gameStartDate2,
-                startTime: gameStartTime
-              })
-                .sort({ createdAt: 1 })
-                .limit(1);
-              if (!checkSlot.length) {
-                // generate slow if first slot is not generated
+        game.gameSecond.map(async (second) => {
+          const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
+            "HH:mm:ss"
+          );
+          const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
+            "HH:mm:ss"
+          );
+          const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
+          var currentTimestamp = moment(
+            `${currentDate2} ${currentTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
+          var gameStartTimestamp = moment(
+            `${gameStartDate2} ${gameStartTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          var gameEndDate2 = moment(game.gameTimeTo).format("YYYY-MM-DD");
+          var gameEndTimestamp = moment(
+            `${gameEndDate2} ${gameEndTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          let newGameTime = moment(
+            `${gameEndDate2} ${gameEndTime}`,
+            "YYYY-MM-DD HH:mm:ss"
+          );
+          const formattedDate = currentDate2.split("-").join("");
+          let endTime2 = moment()
+            .utcOffset("+05:30")
+            .add(second, "seconds")
+            .format("HH:mm:ss");
+          var endTimestamp = moment(
+            `${currentDate2} ${endTime2}`,
+            "YYYY-MM-DD HH:mm:ss"
+          ).unix();
+          let newEndTime = moment(
+            `${currentDate2} ${endTime2}`,
+            "YYYY-MM-DD HH:mm:ss"
+          );
+          if (
+            gameStartTimestamp <= currentTimestamp &&
+            currentTimestamp < gameEndTimestamp
+          ) {
+            let findPeriod2 = await Period.findOne({
+              gameId: game._id,
+              date: currentDate2,
+              periodFor: second
+            }).sort({ createdAt: -1 });
+            if (findPeriod2) {
+              if (game.isRepeat) {
                 const lastIndex = await Period.find({
                   gameId: game._id,
+                  periodFor: second,
                   is_deleted: 0,
                 })
                   .sort({ createdAt: -1 })
                   .limit(1);
                 if (currentTime >= lastIndex[0].endTime) {
                   const periodCount = await Period.countDocuments({
-                    gameId: game._id,
+                    gameId: game._id
                   });
                   await Period.updateMany(
-                    { gameId: game._id },
+                    { gameId: game._id, periodFor: second },
                     { isTimeUp: true },
                     { new: true }
                   );
@@ -1103,6 +1253,7 @@ export const createGamePeriodFromCronJob = async () => {
                       startTime: currentTime,
                       endTime: gameEndTime,
                       date: currentDate2,
+                      periodFor: second
                     });
                   } else {
                     await Period.create({
@@ -1111,32 +1262,238 @@ export const createGamePeriodFromCronJob = async () => {
                       startTime: currentTime,
                       endTime: endTime2,
                       date: currentDate2,
+                      periodFor: second
                     });
                   }
                 }
+              } else {
+                const checkSlot = await Period.find({
+                  gameId: game._id,
+                  is_deleted: 0,
+                  date: gameStartDate2,
+                  periodFor: second,
+                  startTime: gameStartTime
+                })
+                  .sort({ createdAt: 1 })
+                  .limit(1);
+                if (!checkSlot.length) {
+                  // generate slow if first slot is not generated
+                  const lastIndex = await Period.find({
+                    gameId: game._id,
+                    periodFor: second,
+                    is_deleted: 0,
+                  })
+                    .sort({ createdAt: -1 })
+                    .limit(1);
+                  if (currentTime >= lastIndex[0].endTime) {
+                    const periodCount = await Period.countDocuments({
+                      gameId: game._id
+                    });
+                    await Period.updateMany(
+                      { gameId: game._id, periodFor: second },
+                      { isTimeUp: true },
+                      { new: true }
+                    );
+                    const period =
+                      formattedDate + (periodCount + 1).toString().padStart(4, "0");
+                    if (newGameTime < newEndTime) {
+                      await Period.create({
+                        gameId: game._id,
+                        period,
+                        startTime: currentTime,
+                        endTime: gameEndTime,
+                        date: currentDate2,
+                        periodFor: second
+                      });
+                    } else {
+                      await Period.create({
+                        gameId: game._id,
+                        period,
+                        startTime: currentTime,
+                        endTime: endTime2,
+                        date: currentDate2,
+                        periodFor: second
+                      });
+                    }
+                  }
+                }
+              }
+            } else {
+              const period = formattedDate + "0001";
+              if (newGameTime < newEndTime) {
+                await Period.create({
+                  gameId: game._id,
+                  period,
+                  startTime: currentTime,
+                  endTime: gameEndTime,
+                  date: currentDate2,
+                  periodFor: second
+                });
+              } else {
+                await Period.create({
+                  gameId: game._id,
+                  period,
+                  startTime: currentTime,
+                  endTime: endTime2,
+                  date: currentDate2,
+                  periodFor: second
+                });
               }
             }
-          } else {
-            const period = formattedDate + "0001";
-            if (newGameTime < newEndTime) {
-              await Period.create({
-                gameId: game._id,
-                period,
-                startTime: currentTime,
-                endTime: gameEndTime,
-                date: currentDate2,
-              });
-            } else {
-              await Period.create({
-                gameId: game._id,
-                period,
-                startTime: currentTime,
-                endTime: endTime2,
-                date: currentDate2,
-              });
-            }
           }
-        }
+        })
+        // const gameStartTime = moment(game.gameDurationFrom, "h:mm:ss A").format(
+        //   "HH:mm:ss"
+        // );
+        // const gameEndTime = moment(game.gameDurationTo, "h:mm:ss A").format(
+        //   "HH:mm:ss"
+        // );
+        // const currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
+        // var currentTimestamp = moment(
+        //   `${currentDate2} ${currentTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
+        // var gameStartTimestamp = moment(
+        //   `${gameStartDate2} ${gameStartTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // var gameEndDate2 = moment(game.gameTimeTo).format("YYYY-MM-DD");
+        // var gameEndTimestamp = moment(
+        //   `${gameEndDate2} ${gameEndTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // let newGameTime = moment(
+        //   `${gameEndDate2} ${gameEndTime}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // );
+        // const formattedDate = currentDate2.split("-").join("");
+        // let endTime2 = moment()
+        //   .utcOffset("+05:30")
+        //   .add(game.gameSecond[0], "seconds")
+        //   .format("HH:mm:ss");
+        // var endTimestamp = moment(
+        //   `${currentDate2} ${endTime2}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // ).unix();
+        // let newEndTime = moment(
+        //   `${currentDate2} ${endTime2}`,
+        //   "YYYY-MM-DD HH:mm:ss"
+        // );
+        // if (
+        //   gameStartTimestamp <= currentTimestamp &&
+        //   currentTimestamp < gameEndTimestamp
+        // ) {
+        //   let findPeriod2 = await Period.findOne({
+        //     gameId: game._id,
+        //     date: currentDate2,
+        //   }).sort({ createdAt: -1 });
+        //   if (findPeriod2) {
+        //     if (game.isRepeat) {
+        //       const lastIndex = await Period.find({
+        //         gameId: game._id,
+        //         is_deleted: 0,
+        //       })
+        //         .sort({ createdAt: -1 })
+        //         .limit(1);
+        //       if (currentTime >= lastIndex[0].endTime) {
+        //         const periodCount = await Period.countDocuments({
+        //           gameId: game._id,
+        //         });
+        //         await Period.updateMany(
+        //           { gameId: game._id },
+        //           { isTimeUp: true },
+        //           { new: true }
+        //         );
+        //         const period =
+        //           formattedDate + (periodCount + 1).toString().padStart(4, "0");
+        //         if (newGameTime < newEndTime) {
+        //           await Period.create({
+        //             gameId: game._id,
+        //             period,
+        //             startTime: currentTime,
+        //             endTime: gameEndTime,
+        //             date: currentDate2,
+        //           });
+        //         } else {
+        //           await Period.create({
+        //             gameId: game._id,
+        //             period,
+        //             startTime: currentTime,
+        //             endTime: endTime2,
+        //             date: currentDate2,
+        //           });
+        //         }
+        //       }
+        //     } else {
+        //       const checkSlot = await Period.find({
+        //         gameId: game._id,
+        //         is_deleted: 0,
+        //         date: gameStartDate2,
+        //         startTime: gameStartTime
+        //       })
+        //         .sort({ createdAt: 1 })
+        //         .limit(1);
+        //       if (!checkSlot.length) {
+        //         // generate slow if first slot is not generated
+        //         const lastIndex = await Period.find({
+        //           gameId: game._id,
+        //           is_deleted: 0,
+        //         })
+        //           .sort({ createdAt: -1 })
+        //           .limit(1);
+        //         if (currentTime >= lastIndex[0].endTime) {
+        //           const periodCount = await Period.countDocuments({
+        //             gameId: game._id,
+        //           });
+        //           await Period.updateMany(
+        //             { gameId: game._id },
+        //             { isTimeUp: true },
+        //             { new: true }
+        //           );
+        //           const period =
+        //             formattedDate + (periodCount + 1).toString().padStart(4, "0");
+        //           if (newGameTime < newEndTime) {
+        //             await Period.create({
+        //               gameId: game._id,
+        //               period,
+        //               startTime: currentTime,
+        //               endTime: gameEndTime,
+        //               date: currentDate2,
+        //             });
+        //           } else {
+        //             await Period.create({
+        //               gameId: game._id,
+        //               period,
+        //               startTime: currentTime,
+        //               endTime: endTime2,
+        //               date: currentDate2,
+        //             });
+        //           }
+        //         }
+        //       }
+        //     }
+        //   } else {
+        //     const period = formattedDate + "0001";
+        //     if (newGameTime < newEndTime) {
+        //       await Period.create({
+        //         gameId: game._id,
+        //         period,
+        //         startTime: currentTime,
+        //         endTime: gameEndTime,
+        //         date: currentDate2,
+        //       });
+        //     } else {
+        //       await Period.create({
+        //         gameId: game._id,
+        //         period,
+        //         startTime: currentTime,
+        //         endTime: endTime2,
+        //         date: currentDate2,
+        //       });
+        //     }
+        //   }
+        // }
       } else if (game.gameName == "Community Betting") {
         const gameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
           "HH:mm"
@@ -1166,7 +1523,7 @@ export const createGamePeriodFromCronJob = async () => {
         const formattedDate = currentDate2.split("-").join("");
         let endTime2 = moment()
           .utcOffset("+05:30")
-          .add(game.gameHours, "minutes")
+          .add(game.gameHours, "hours")
           .format("HH:mm");
         var endTimestamp = moment(
           `${currentDate2} ${endTime2}:00`,
@@ -1299,12 +1656,22 @@ export const createGamePeriodFromCronJob = async () => {
 export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
+    const { second } = req.query;
     let currentTime = moment().utcOffset("+05:30").format("HH:mm");
-    let getGamePeriod = await Period.find({
+    let query = {
       date: moment().format("YYYY-MM-DD"),
       gameId,
       is_deleted: 0,
-    }).sort({ createdAt: -1 }).limit(1);
+    };
+    if (second) {
+      query.periodFor = second
+    }
+    let getGamePeriod = await Period.find(query).sort({ createdAt: -1 }).limit(1);
+    // let getGamePeriod = await Period.find({
+    //   date: moment().format("YYYY-MM-DD"),
+    //   gameId,
+    //   is_deleted: 0,
+    // }).sort({ createdAt: -1 }).limit(1);
 
     let getAllPeriod = getGamePeriod[0];
     if (
@@ -1312,14 +1679,12 @@ export const getPeriod = async (req, res) => {
       moment().format("YYYY-MM-DD") &&
       getAllPeriod.endTime > currentTime
     ) {
-      console.log(currentTime, 'gfdgdf', moment().format("YYYY-MM-DD HH:mm:ss"));
       const findGame = await Game.findOne({ _id: gameId });
       var currentDate = moment().format("YYYY-MM-DD");
       var currentTimestamp = moment(
         `${currentDate} ${currentTime}:00`,
         "YYYY-MM-DD HH:mm:ss"
       ).unix();
-      console.log("ggdfdfdfdf", currentTimestamp);
       var endTimestamp = moment(
         `${currentDate} ${findGame.gameDurationTo}:00`,
         "YYYY-MM-DD HH:mm:ss"
@@ -1339,7 +1704,6 @@ export const getPeriod = async (req, res) => {
       );
     }
   } catch (error) {
-    // console.log(error,'eee');
     return handleErrorResponse(res, error);
   }
 };
@@ -1349,6 +1713,7 @@ export const numberBettingWinnerResult = async (req, res) => {
     const { gameType, type, gameId, period } = req.params;
     const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
     if (findGameMode) {
+      await NumberBetting.updateMany({ gameId, period }, { status: "Pendding" })
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -1387,6 +1752,7 @@ export const numberBettingWinnerResult = async (req, res) => {
       {
         $group: {
           _id: "$userId",
+          period: { $first: "$period" },
           userTotalBets: { $sum: 1 }
         }
       }
@@ -1419,34 +1785,45 @@ export const numberBettingWinnerResult = async (req, res) => {
           {
             $sort: { totalBetAmount: 1 }
           },
-          {
-            $limit: 1
-          }
+          // {
+          //   $limit: 1
+          // }
         ])
         if (getAllNumberBets.length) {
           await Promise.all(
-            getAllNumberBets.map(async (item) => {
+            getAllNumberBets.map(async (item, index) => {
               item.userIds.map(async (userId) => {
                 const findUser = await NumberBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
                 if (findUser) {
-                  let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-                  findUser.isWin = true
-                  findUser.rewardAmount = rewardAmount
-                  await findUser.save();
-                  const balance = await getSingleData(
-                    { userId },
-                    NewTransaction
-                  );
-                  if (balance) {
-                    console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
-                    let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
-                    balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
-                    // balance.tokenDollorValue = plusLargeSmallValue(
-                    //   +(balance.tokenDollorValue), 
-                    //   +(findUser.betAmount + rewardAmount)
-                    // );
-                    console.log(balance.totalCoin,"winingamount")
-                    await balance.save();
+                  if (index === 0) {
+                    let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                    findUser.isWin = true
+                    findUser.status = "Successfull";
+                    findUser.rewardAmount = rewardAmount
+                    await findUser.save();
+                    const balance = await getSingleData(
+                      { userId },
+                      NewTransaction
+                    );
+                    if (balance) {
+                      console.log(Number(findUser.betAmount), "amount", Number(rewardAmount))
+                      let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                      balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
+                      // balance.tokenDollorValue = plusLargeSmallValue(
+                      //   +(balance.tokenDollorValue), 
+                      //   +(findUser.betAmount + rewardAmount)
+                      // );
+                      console.log(balance.totalCoin, "winingamount")
+                      await balance.save();
+                      const userData = await getSingleData({ _id: userId }, User)
+                      let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+                        gameName: "Number Betting",
+                      });
+                      await sendMail(userData.email, "Number betting game win", mailInfo)
+                    }
+                  } else {
+                    findUser.status = "Fail";
+                    await findUser.save()
                   }
                 } else {
                   return sendResponse(
@@ -1464,7 +1841,7 @@ export const numberBettingWinnerResult = async (req, res) => {
             res,
             StatusCodes.OK,
             ResponseMessage.NUMBER_WINNER + " " + getAllNumberBets[0].number,
-            getAllNumberBets
+            getAllNumberBets[0]
           );
         } else {
           return sendResponse(
@@ -1475,6 +1852,8 @@ export const numberBettingWinnerResult = async (req, res) => {
           );
         }
       } else {
+        // await NumberBetting.updateMany({ gameId, period, userId: totalUserInPeriod[0]._id }, { status: "Fail" })
+        await NumberBetting.updateMany({ gameId, period }, { status: "Fail" })
         return sendResponse(
           res,
           StatusCodes.OK,
@@ -1490,7 +1869,7 @@ export const numberBettingWinnerResult = async (req, res) => {
       []
     );
   } catch (error) {
-    console.log('error-NumberBettingController',error);
+    console.log('error-NumberBettingController', error);
     return handleErrorResponse(res, error);
   }
 }
@@ -1573,7 +1952,7 @@ export const numberBettingWinnerResult = async (req, res) => {
 //                     let winingAmount = Number(findUser.betAmount) + Number(rewardAmount)
 //                     balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
 //                     // balance.tokenDollorValue = plusLargeSmallValue(
-//                     //   +(balance.tokenDollorValue), 
+//                     //   +(balance.tokenDollorValue),
 //                     //   +(findUser.betAmount + rewardAmount)
 //                     // );
 //                     console.log(balance.totalCoin,"winingamount")
