@@ -181,6 +181,8 @@ const ResponseMessage = {
     COLOR_USER_LIST : "Get colour list successfully",
     CMMUNITY_BET_CRETED : "Community bet add successfully",
     CMMUNITY_BET_GET : "Get community bets successfully",
+    CMMUNITY_BET_GET_LAST_DAY : "Get last day bets of community betting",
+    CMMUNITY_BET_GET_LIVE_DATA : "Get live bets of community betting",
     ROLE_EXIST : "Role already exits",
     ROLE_CREATED : "Role created successfully",
     ROLE_UPDATED : "Role updated successfully",
