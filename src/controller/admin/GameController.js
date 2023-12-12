@@ -1188,12 +1188,12 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
-    } else if (gameType === 'communityBetting') {
+    } else if (gameType === "communityBetting") {
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
-            period: { $nin: isWinTruePeriodsforCommunityBetting }, // Exclude periods with isWin: true
+            period: { $nin: isWinTruePeriodsforCommunityBetting },
           },
         },
         {
@@ -1208,15 +1208,23 @@ export const getAllGamePeriodData = async (req, res) => {
           $unwind: '$communitybettingsData',
         },
         {
+          $lookup: {
+          from: 'users',
+          localField: 'communitybettingsData.userId',
+          foreignField: '_id',
+          as: 'usersData',
+        },
+      },
+        {
           $group: {
             _id: {
               period: '$period',
-              // colourName: '$communitybettingsData.colourName',
               periodId: '$_id',
+              userId: '$communitybettingsData.userId',
             },
             anyWinTrue: { $max: '$communitybettingsData.isWin' },
-            totalUser: { $addToSet: '$communitybettingsData.userId' },
             totalBetAmount: { $sum: '$communitybettingsData.betAmount' },
+            usersData: { $first: '$usersData' },
           },
         },
         {
@@ -1226,13 +1234,16 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $group: {
-            _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
-            communitybettingsData: {
+            _id: {
+              period: '$_id.period',
+              periodId: '$_id.periodId',
+            },
+            comunityBettingData: {
               $push: {
-                // colourName: '$_id.colourName',
-                totalUser: { $sum: { $size: '$totalUser' } },
-                totalBetAmount: '$totalBetAmount',
+                userEmail: { $arrayElemAt: ['$usersData.email', 0] },
+                userName: { $arrayElemAt: ['$usersData.fullName', 0] },
+                userId: '$_id.userId',
+                betAmount: '$totalBetAmount',
               },
             },
           },
@@ -1240,17 +1251,17 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $project: {
             _id: 0,
-            period: '$_id',
-            periodId: 1,
-            communitybettingsData: 1,
+            period: '$_id.period',
+            periodId: '$_id.periodId',
+            comunityBettingData: 1,
           },
         },
         {
           $sort: { period: -1 },
         },
       ]);
-    }
-
+    } 
+    
     return sendResponse(
       res,
       StatusCodes.OK,
