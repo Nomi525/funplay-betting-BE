@@ -1037,7 +1037,6 @@ export const getAllGamePeriodData = async (req, res) => {
 
     // Find periods with isWin: true in the communitybetting collection
     const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct('period', { isWin: true });
-
     if (gameType === 'numberBetting') {
       battingAggregationResult = await Period.aggregate([
         {
@@ -1088,9 +1087,9 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $group: {
             _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
+            // periodId: { $first: '$_id.periodId' },
             numberBettingsData: {
-              $push: {
+              $first: {
                 number: '$_id.number',
                 totalUser: { $sum: { $size: '$totalUser' } },
                 totalBetAmount: '$totalBetAmount',
@@ -1101,8 +1100,8 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $project: {
             _id: 0,
-            period: '$_id.period',
-            periodId: '$_id.periodId',
+            period: '$_id',
+            periodId: '$periodId',
             numberBettingsData: 1,
           },
         },
