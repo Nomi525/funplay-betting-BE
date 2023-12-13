@@ -74,11 +74,6 @@ const adminSchema = new mongoose.Schema(
         //     required: false,
         //     ref: "Permission",
         // },
-        // Permission: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     required: false,
-        //     ref: "Permission",
-        // },
         isActive: {
             type: Boolean,
             default: true,

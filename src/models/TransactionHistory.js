@@ -28,11 +28,25 @@ const transactionHistorySchema = new mongoose.Schema({
         required: false,
         default: 0,
     },
-    tetherType :{
+    tetherType: {
         type: String,
         required: false
     },
+    coin: {
+        type: Number,
+        required: false,
+        default: 0
+    },
+    status: {
+        type: String,
+        enum: ['pendding', 'accept', 'reject'],
+        default: 'pendding'
+    },
     type: {
+        type: String,
+        required: false
+    },
+    description: {
         type: String,
         required: false
     },

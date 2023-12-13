@@ -9,13 +9,13 @@ import {
 //#region Add subadmin
 export const addSubadmin = async (req, res) => {
     try {
-        let { firstName, lastName, email, password, role, deviceId, ipAddress } = req.body;
+        let { firstName, lastName, email, password, roleId, deviceId, ipAddress } = req.body;
         const exitsSubadmin = await Admin.findOne({ email: { $regex: "^" + email + "$", $options: "i" }, is_deleted: 0 });
         if (exitsSubadmin) {
             return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.SUBADMIN_ALREADY_EXITS, []);
         }
         const hashPassword = await hashedPassword(password)
-        const createSubadmin = await dataCreate({ firstName, lastName, email, password: hashPassword, role, deviceId, ipAddress }, Admin)
+        const createSubadmin = await dataCreate({ firstName, lastName, email, password: hashPassword, roleId, deviceId, ipAddress }, Admin)
         const subadmin = await createSubadmin.save()
         delete subadmin.password
 

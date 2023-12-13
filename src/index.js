@@ -194,6 +194,7 @@ import {
   getGameWiseUserList,
   getUserWiseGameList,
   getNumberGameTotal,
+  getAllWithdrawalRequest
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -331,7 +332,7 @@ import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
 import Upload from "./middleware/FileUpload.js";
 import { appServer } from "../server.js";
-import { multipleDelete,multipleDeleteUpdate } from "./services/AdminServices.js";
+import { multipleDelete, multipleDeleteUpdate } from "./services/AdminServices.js";
 
 import {
   createError,
@@ -358,6 +359,7 @@ import {
 
 dotenv.config();
 export {
+  getAllWithdrawalRequest,
   getUpdatedUser,
   multipleDelete,
   multipleDeleteUpdate,

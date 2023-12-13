@@ -94,7 +94,7 @@ const gameSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
-    noOfUsers: {
+    noOfWinners: {
         type: Number,
         required: false,
         default: 0

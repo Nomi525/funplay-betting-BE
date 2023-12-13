@@ -412,7 +412,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
 //#region 
 export const declareWinnerOfCommunityBetting = async (req, res) => {
   try {
-    const { winnerIds, gameId, period } = req.body;
+    const { winnerIds, gameId, distributionCoin, period } = req.body;
     if (!winnerIds.length) {
       return sendResponse(
         res,
@@ -442,12 +442,12 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
       );
     }
     let winFlag = false;
-    if (getCommunityGame.winnersPercentage.length >= winnerIds.length) {
-      const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
-      const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
+    if (getCommunityGame.noOfWinners >= winnerIds.length) {
+      // const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
+      // const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
       await Promise.all(
         winnerIds.map(async (winnerId, index) => {
-          const winningAmount = (totalBetAmount * getCommunityGame.winnersPercentage[index]) / 100;
+          const winningAmount = (distributionCoin * getCommunityGame.winnersPercentage[index]) / 100;
           const winnerUser = await CommunityBetting.findOne({ gameId, userId: winnerId, period, is_deleted: 0 })
           if (winnerUser) {
             let rewardAmount = winningAmount;
@@ -461,7 +461,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
             if (balance) {
               balance.tokenDollorValue = plusLargeSmallValue(
                 Number(balance.tokenDollorValue),
-                Number(winnerUser.betAmount) + Number(rewardAmount)
+                Number(rewardAmount)
               );
               await balance.save();
             }
@@ -473,7 +473,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        `Only ${getCommunityGame.winnersPercentage.length} is winner declare`,
+        `Only ${getCommunityGame.noOfWinners} is winner declare`,
         []
       );
     }
