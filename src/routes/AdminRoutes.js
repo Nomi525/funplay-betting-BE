@@ -268,7 +268,7 @@ adminRoutes.get(
   Auth,
   getAllUsersAndWinnersCommunityBetting
 );
-adminRoutes.post("/declare-winner", Auth, declareWinnerOfCommunityBetting);
+adminRoutes.post("/declare-community-betting-winner", Auth, declareWinnerOfCommunityBetting);
 adminRoutes.post("/declare-number-betting-winner", Auth, declareWinnerOfNumberBetting);
 adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBetting);
 

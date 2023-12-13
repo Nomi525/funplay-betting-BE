@@ -192,7 +192,8 @@ export const connectToWallet = async (req, res) => {
       "wallet.walletType": wallet.walletType,
     });
     if (walletUser) {
-      await walletUser.updateOne({ $set: { "wallet.$.isConnected": true } });
+      // await walletUser.updateOne({ $set: { "wallet.$.isConnected": true } });
+      await walletUser.updateOne({ $set: { "wallet.$.isConnected": true, isVerified: true } });
       const payload = {
         user: {
           id: walletUser._id,
