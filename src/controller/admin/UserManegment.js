@@ -253,14 +253,18 @@ export const getUserReferralBySignIn = async (req, res) => {
 
 export const acceptWithdrawalRequest = async (req, res) => {
   try {
-    const { status, withdrawalRequestId } = req.body;
+    const { status, withdrawalRequestId, description } = req.body;
     if (!status || status == "" || status == undefined) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
     }
 
+    // const withdrawalRequest = await getSingleData(
+    //   { _id: withdrawalRequestId, status: "pendding" },
+    //   WithdrawalRequest
+    // );
     const withdrawalRequest = await getSingleData(
-      { _id: withdrawalRequestId, status: "pendding" },
-      WithdrawalRequest
+      { _id: withdrawalRequestId, status: "pendding", type: "withdrawal" },
+      TransactionHistory
     );
     if (!withdrawalRequest) {
       return sendResponse(
@@ -287,7 +291,9 @@ export const acceptWithdrawalRequest = async (req, res) => {
 
     const tokenName = withdrawalRequest.tokenName;
     const tokenAmount = withdrawalRequest.tokenAmount;
-    const tokenDollerValue = withdrawalRequest.tokenValue;
+    const tokenDollerValue = withdrawalRequest.tokenDollorValue;
+    // const tokenDollerValue = withdrawalRequest.tokenValue;
+    const coin = withdrawalRequest.coin;
 
     let requestStatus = "";
     let requestMessage = "";
@@ -326,9 +332,10 @@ export const acceptWithdrawalRequest = async (req, res) => {
         findTransaction.tokenDollorValue,
         tokenDollerValue
       );
+      findTransaction.totalCoin = Number(findTransaction.totalCoin) + Number(coin)
     }
-
     withdrawalRequest.status = requestStatus;
+    withdrawalRequest.description = description ? description : '';
     await withdrawalRequest.save();
 
     findTransaction.blockAmount = await minusLargeSmallValue(
@@ -339,6 +346,7 @@ export const acceptWithdrawalRequest = async (req, res) => {
       findTransaction.blockDollor,
       tokenDollerValue
     );
+    findTransaction.blockCoin = Number(findTransaction.blockCoin) - Number(coin)
     await findTransaction.save();
     return sendResponse(res, StatusCodes.OK, requestMessage, []);
   } catch (error) {
@@ -636,4 +644,23 @@ export const getNumberGameTotal = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
+
+//#region Get All Withdrawal request
+export const getAllWithdrawalRequest = async (req, res) => {
+  try {
+    // const getAllWithdrawalRequest = await WithdrawalRequest.find({ is_deleted: 0 })
+    const getAllWithdrawalRequest = await TransactionHistory.find({ type: "withdrawal", is_deleted: 0 })
+      .populate('userId', 'fullName email currency')
+      .sort({ createdAt: -1 })
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GET_ALL_WITHDRAWAL_REQUEST,
+      getAllWithdrawalRequest
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
 //#endregion

@@ -26,6 +26,11 @@ const withdrawalRequestSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    coin : {
+        type: Number,
+        required: false,
+        default : 0
+    },
     status : {
         type : String,
         enum : ['pendding','accept','reject'],

@@ -40,21 +40,11 @@ export const addEditGame = async (req, res) => {
       isRepeat,
       gameHours,
       gameSecond,
-      noOfUsers,
+      noOfWinners,
       betAmount,
       winnerIds,
       winnersPercentage
     } = req.body;
-    // let originalStartDate = moment(gameTimeFrom);
-    // let originalEndDate = moment(gameTimeTo);
-    // let durationFrom = moment(gameDurationFrom, "hh:mm A");
-    // let durationTo = moment(gameDurationTo, "hh:mm A");
-    // const newStartDate = originalStartDate
-    //   .add(durationFrom.hours(), "hours")
-    //   .add(durationFrom.minutes(), "minutes");
-    // const newEndDate = originalEndDate
-    //   .add(durationTo.hours(), "hours")
-    //   .add(durationTo.minutes(), "minutes");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -103,7 +93,7 @@ export const addEditGame = async (req, res) => {
             gameMaximumCoin,
             gameHours,
             gameSecond,
-            noOfUsers,
+            noOfWinners,
             betAmount,
             winnerIds,
             winnersPercentage
@@ -150,7 +140,7 @@ export const addEditGame = async (req, res) => {
           gameHours,
           gameSecond,
           isRepeat,
-          noOfUsers,
+          noOfWinners,
           betAmount,
           winnerIds,
           winnersPercentage
@@ -1045,6 +1035,9 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct('period', { isWin: true });
 
+    // Find periods with isWin: true in the communitybetting collection
+    const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct('period', { isWin: true });
+
     if (gameType === 'numberBetting') {
       battingAggregationResult = await Period.aggregate([
         {
@@ -1094,10 +1087,8 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $group: {
-            _id: {
-              period: '$_id.period',
-              periodId: '$_id.periodId',
-            },
+            _id: '$_id.period',
+            periodId: { $first: '$_id.periodId' },
             numberBettingsData: {
               $push: {
                 number: '$_id.number',
@@ -1185,8 +1176,78 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
-    }
-
+    } else if (gameType === "communityBetting") {
+      battingAggregationResult = await Period.aggregate([
+        {
+          $match: {
+            gameId: new mongoose.Types.ObjectId(gameId),
+            period: { $nin: isWinTruePeriodsforCommunityBetting },
+          },
+        },
+        {
+          $lookup: {
+            from: 'communitybettings',
+            localField: 'period',
+            foreignField: 'period',
+            as: 'communitybettingsData',
+          },
+        },
+        {
+          $unwind: '$communitybettingsData',
+        },
+        {
+          $lookup: {
+          from: 'users',
+          localField: 'communitybettingsData.userId',
+          foreignField: '_id',
+          as: 'usersData',
+        },
+      },
+        {
+          $group: {
+            _id: {
+              period: '$period',
+              periodId: '$_id',
+              userId: '$communitybettingsData.userId',
+            },
+            anyWinTrue: { $max: '$communitybettingsData.isWin' },
+            totalBetAmount: { $sum: '$communitybettingsData.betAmount' },
+            usersData: { $first: '$usersData' },
+          },
+        },
+        {
+          $match: {
+            anyWinTrue: { $ne: true },
+          },
+        },
+        {
+          $group: {
+            _id: '$_id.period',
+            periodId: { $first: '$_id.periodId' },
+            comunityBettingData: {
+              $push: {
+                userEmail: { $arrayElemAt: ['$usersData.email', 0] },
+                userName: { $arrayElemAt: ['$usersData.fullName', 0] },
+                userId: '$_id.userId',
+                betAmount: '$totalBetAmount',
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            period: '$_id.period',
+            periodId: '$_id.periodId',
+            comunityBettingData: 1,
+          },
+        },
+        {
+          $sort: { period: -1 },
+        },
+      ]);
+    } 
+    
     return sendResponse(
       res,
       StatusCodes.OK,

@@ -1665,14 +1665,9 @@ export const getPeriod = async (req, res) => {
     };
     if (second) {
       query.periodFor = second
+      currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
     }
     let getGamePeriod = await Period.find(query).sort({ createdAt: -1 }).limit(1);
-    // let getGamePeriod = await Period.find({
-    //   date: moment().format("YYYY-MM-DD"),
-    //   gameId,
-    //   is_deleted: 0,
-    // }).sort({ createdAt: -1 }).limit(1);
-
     let getAllPeriod = getGamePeriod[0];
     if (
       getGamePeriod.length && moment(getAllPeriod.date).format("YYYY-MM-DD") ==

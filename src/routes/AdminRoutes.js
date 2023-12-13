@@ -89,7 +89,8 @@ import {
   permissionGetById,
   showRating,
   subadminActiveDeactive,
-  getUpdatedUser
+  getUpdatedUser,
+  getAllWithdrawalRequest
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -147,6 +148,7 @@ adminRoutes.post("/setting-add-edit", Auth, adminSetting);
 
 //#region Withdrawal
 adminRoutes.post("/withdrawal-request", Auth, adminWithdrawalRequest);
+adminRoutes.get("/get-all-withdrawal-request", Auth, getAllWithdrawalRequest);
 adminRoutes.post("/add-edit-coin-setting", Auth, addEditCoinSetting);
 adminRoutes.get("/get-coin-setting/:coinId", Auth, getCoinSetting);
 adminRoutes.get("/get-list-coin-setting", Auth, getListCoinSetting);
