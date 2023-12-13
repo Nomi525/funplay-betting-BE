@@ -442,6 +442,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
       );
     }
     let winFlag = false;
+    let winnerData = [];
     if (getCommunityGame.noOfWinners >= winnerIds.length) {
       // const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
       // const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
@@ -454,6 +455,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
             winnerUser.isWin = true
             winnerUser.rewardAmount = rewardAmount
             await winnerUser.save();
+            winnerData.push(winnerUser)
             const balance = await getSingleData(
               { userId: winnerId },
               NewTransaction
@@ -482,7 +484,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         res,
         StatusCodes.OK,
         "Winner added succcessfully",
-        []
+        winnerData
       )
     } else {
       return sendResponse(
