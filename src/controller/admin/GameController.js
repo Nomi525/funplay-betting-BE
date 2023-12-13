@@ -1196,12 +1196,12 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $lookup: {
-          from: 'users',
-          localField: 'communitybettingsData.userId',
-          foreignField: '_id',
-          as: 'usersData',
+            from: 'users',
+            localField: 'communitybettingsData.userId',
+            foreignField: '_id',
+            as: 'usersData',
+          },
         },
-      },
         {
           $group: {
             _id: {
@@ -1245,8 +1245,8 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
-    } 
-    
+    }
+
     return sendResponse(
       res,
       StatusCodes.OK,
