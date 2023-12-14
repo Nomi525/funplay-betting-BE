@@ -647,6 +647,7 @@ export const getAllGamePeriod = async (req, res) => {
       {
         $group: {
           _id: "$period",
+          gameId : {$first : "$gameId"},
           totalUsers: { $sum: 1 },
           betAmount: { $sum: "$betAmount" },
           winColour: {
@@ -677,6 +678,7 @@ export const getAllGamePeriod = async (req, res) => {
       {
         $project: {
           _id: 0,
+          gameId: 1,
           totalUsers: 1,
           price: "$betAmount",
           period: 1,
@@ -702,6 +704,7 @@ export const getAllGamePeriod = async (req, res) => {
       // },
       {
         $project: {
+          gameId: 1,
           totalUsers: 1,
           winColour: 1,
           period: 1,
