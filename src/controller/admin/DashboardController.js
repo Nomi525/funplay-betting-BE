@@ -17,11 +17,23 @@ export const adminDashboard = async (req, res) => {
         const totalNewLoginUsersIn24Hours = await User.countDocuments({ updatedAt: { $gte: twentyFourHoursAgo } });
 
         const totalTransaction = await getAllDataCount({ is_deleted: 0 }, NewTransaction);
-        const totalNonDepositUser = totalUsers - depositeData.length;
-
+        // const totalNonDepositUser = totalUsers - depositeData.length;
+        const totalZeroDepositUser = totalUsers - depositeData.length;
+        const totalUserIn24Hours = await User.find({ createdAt: { $gte: twentyFourHoursAgo } }).select('_id');
+        // console.log(totalUserIn24Hours);
+        let totalZeroDepositUserIn24Hours = 0
+        if (totalUserIn24Hours.length) {
+            await Promise.all(totalUserIn24Hours.map(async (data) => {
+                const findWallet = await NewTransaction.findOne({ userId: data._id })
+                if(!findWallet){
+                    totalZeroDepositUserIn24Hours++ 
+                }
+            }))
+        }
+        
         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, {
             totalUsers, totalActiveUsers, totalNewLoginUsersIn24Hours, totalDeactivatedUsers,
-            totalDeposit, totalDepositUser: depositeData.length, totalNonDepositUser,
+            totalDeposit, totalDepositUser: depositeData.length, totalZeroDepositUser, totalZeroDepositUserIn24Hours,
             totalTransaction
         });
     } catch (error) {

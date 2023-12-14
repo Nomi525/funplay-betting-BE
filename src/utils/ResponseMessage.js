@@ -221,6 +221,16 @@ const ResponseMessage = {
     CURRENCY_COIN_DELETED : "Currency deleted successfully",
     CURRENCY_COIN_GET : "Get currency successfully",
     CURRENCY_COIN_NOT_FOUND : "Currency not found",
+    BANNER_TITLE_EXITS : "This banner title is already exits",
+    BANNER_CREATED : "Banner created successfully",
+    BANNER_UPDATED : "Banner updated successfully",
+    BANNER_DELETED : "Banner deleted successfully",
+    BANNER_NOT_FOUND : "Banner not found",
+    BANNER_GET : "Get banner successfully",
+    GAME_TIME_GET : "Get game time successfully",
+    GAME_TIME_NOT_FOUND : "Game time not found",
+    CURRENCY_GET : "Get currency successfully",
+    CURRENCY_NOT_FOUND : "Currency not found",
 }
 
 export { ResponseMessage };

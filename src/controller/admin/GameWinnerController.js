@@ -443,7 +443,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
     }
     let winFlag = false;
     let winnerData = [];
-    if (getCommunityGame.noOfWinners >= winnerIds.length) {
+    // if (getCommunityGame.noOfWinners >= winnerIds.length) {
       // const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
       // const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
       await Promise.all(
@@ -471,14 +471,14 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           }
         })
       );
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        `Only ${getCommunityGame.noOfWinners} is winner declare`,
-        []
-      );
-    }
+    // } else {
+    //   return sendResponse(
+    //     res,
+    //     StatusCodes.BAD_REQUEST,
+    //     `Only ${getCommunityGame.noOfWinners} is winner declare`,
+    //     []
+    //   );
+    // }
     if (winFlag) {
       return sendResponse(
         res,

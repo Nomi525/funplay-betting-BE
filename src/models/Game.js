@@ -104,6 +104,11 @@ const gameSchema = new mongoose.Schema({
         required: false,
         default: 0
     }],
+    entryFee: {
+        type: Number,
+        required: false,
+        default : 0
+    },
     is_deleted: {
         type: Number,
         default: 0
