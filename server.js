@@ -1,5 +1,5 @@
 
-import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes, cron, createGamePeriodFromCronJob } from "./src/index.js";
+import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes, cron, createNumberAndCommunityGamePeriodFromCronJob, createColorBettingGamePeriodFromCronJob } from "./src/index.js";
 
 const app = express();
 app.use(cors());
@@ -35,9 +35,16 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-cron.schedule('* * * * * *', () => {
-   createGamePeriodFromCronJob();
+//cron run for every minute
+cron.schedule('* * * * *', () => { 
+  createNumberAndCommunityGamePeriodFromCronJob();
 });
+
+//cron run for every 30 seconds
+cron.schedule('*/30 * * * * * ', () => {
+  createColorBettingGamePeriodFromCronJob();
+});
+
 
 const appServer = app.listen(process.env.PORT, () => {
   dbConnection();
