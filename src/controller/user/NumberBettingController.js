@@ -737,7 +737,7 @@ export const createNumberAndCommunityGamePeriodFromCronJob = async () => {
         const formattedDate = currentDate2.split("-").join("");
         let endTime2 = moment()
           .utcOffset("+05:30")
-          .add(game.gameHours, "hours")
+          .add(game.gameHours, "minutes")
           .format("HH:mm");
         var endTimestamp = moment(
           `${currentDate2} ${endTime2}:00`,
@@ -889,7 +889,7 @@ export const createNumberAndCommunityGamePeriodFromCronJob = async () => {
         const formattedDate = currentDate2.split("-").join("");
         let endTime2 = moment()
           .utcOffset("+05:30")
-          .add(game.gameHours, "hours")
+          .add(game.gameHours, "minutes")
           .format("HH:mm");
         var endTimestamp = moment(
           `${currentDate2} ${endTime2}:00`,
