@@ -35,15 +35,15 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-//cron run for every minute
-// cron.schedule('* * * * *', () => { 
-//   createNumberAndCommunityGamePeriodFromCronJob();
-// });
+// cron run for every minute
+cron.schedule('* * * * *', () => { 
+  createNumberAndCommunityGamePeriodFromCronJob();
+});
 
 //cron run for every 30 seconds
-// cron.schedule('*/30 * * * * * ', () => {
-//   createColorBettingGamePeriodFromCronJob();
-// });
+cron.schedule('*/30 * * * * * ', () => {
+  createColorBettingGamePeriodFromCronJob();
+});
 
 
 const appServer = app.listen(process.env.PORT, () => {
