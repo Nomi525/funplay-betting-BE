@@ -277,8 +277,8 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
     let getAllUsers;
     let getAllWinners;
     let getAllNotWinner;
-    const { gameName } = req.params;
-    if (gameName === "CommunityBetting") {
+    const { gameType } = req.params;
+    if (gameType === "communityBetting") {
       getAllUsers = await CommunityBetting.find({ is_deleted: 0 })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
@@ -303,7 +303,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         0
       );
       totalUsers = getAllUsers.length;
-    } else if (gameName === "2ColorBetting") {
+    } else if (gameType === "2colorBetting") {
       getAllUsers = await ColourBetting.find({
         is_deleted: 0,
         gameType: "2colorBetting",
@@ -333,7 +333,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         0
       );
       totalUsers = getAllUsers.length;
-    } else if (gameName === "3ColorBetting") {
+    } else if (gameType === "3colorBetting") {
       getAllUsers = await ColourBetting.find({
         is_deleted: 0,
         gameType: "3colorBetting",
@@ -363,7 +363,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         0
       );
       totalUsers = getAllUsers.length;
-    } else if (gameName === "NumberBetting") {
+    } else if (gameType === "numberBetting") {
       getAllUsers = await NumberBetting.find({
         is_deleted: 0,
       })
