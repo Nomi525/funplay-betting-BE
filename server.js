@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/images', express.static('./public/uploads'));
+app.use('/api/images', express.static('./public/uploads'));
 
 //SET HEADER
 app.use(function (req, res, next) {
@@ -36,12 +36,12 @@ app.use(function (err, req, res, next) {
 });
 
 // cron run for every minute
-cron.schedule('* * * * *', () => { 
+cron.schedule('* * * * * *', () => { 
   createNumberAndCommunityGamePeriodFromCronJob();
 });
 
 //cron run for every 30 seconds
-cron.schedule('*/30 * * * * * ', () => {
+cron.schedule('* * * * * *', () => {
   createColorBettingGamePeriodFromCronJob();
 });
 
