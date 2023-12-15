@@ -13,8 +13,9 @@ import {
 export const addEditCurrencyCoin = async (req, res) => {
     try {
         const { currencyCoinId, currencyName, coin ,price } = req.body;
+        const sanitizedCurrencyName = currencyName.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         const findCurrencyQuery = {
-            currencyName: { $regex: "^" + currencyName + "$", $options: "i" },
+            currencyName: { $regex: "^" + sanitizedCurrencyName + "$", $options: "i" },
             is_deleted: 0,
         };
         if (currencyCoinId) {

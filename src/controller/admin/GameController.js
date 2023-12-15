@@ -43,7 +43,8 @@ export const addEditGame = async (req, res) => {
       noOfWinners,
       betAmount,
       winnerIds,
-      winnersPercentage
+      winnersPercentage,
+      entryFee
     } = req.body;
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
@@ -96,7 +97,8 @@ export const addEditGame = async (req, res) => {
             noOfWinners,
             betAmount,
             winnerIds,
-            winnersPercentage
+            winnersPercentage,
+            entryFee
           },
           Game
         );
@@ -143,7 +145,8 @@ export const addEditGame = async (req, res) => {
           noOfWinners,
           betAmount,
           winnerIds,
-          winnersPercentage
+          winnersPercentage,
+          entryFee
         },
         Game
       );
@@ -1087,9 +1090,8 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $group: {
             _id: '$_id.period',
-            // periodId: { $first: '$_id.periodId' },
             numberBettingsData: {
-              $first: {
+              $push: {
                 number: '$_id.number',
                 totalUser: { $sum: { $size: '$totalUser' } },
                 totalBetAmount: '$totalBetAmount',
@@ -1153,7 +1155,6 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $group: {
             _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
             colourbettingsData: {
               $push: {
                 colourName: '$_id.colourName',
@@ -1167,7 +1168,6 @@ export const getAllGamePeriodData = async (req, res) => {
           $project: {
             _id: 0,
             period: '$_id',
-            periodId: 1,
             colourbettingsData: 1,
           },
         },
@@ -1236,8 +1236,7 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $project: {
             _id: 0,
-            period: '$_id.period',
-            periodId: '$_id.periodId',
+            period: '$_id',
             comunityBettingData: 1,
           },
         },
