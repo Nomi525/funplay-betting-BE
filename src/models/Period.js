@@ -8,7 +8,8 @@ const periodSchema = new mongoose.Schema({
     period: {
         type: Number,
         required: false,
-        index: true
+        index: true,
+        unique: true
     },
     date: {
         type: Date,
