@@ -17,7 +17,7 @@ import {
   Game,
   ejs,
   sendMail,
-  User
+  User,
 } from "../../index.js";
 
 //#region Get All winners user
@@ -57,7 +57,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first: "$gameType" }
+            gameType: { $first: "$gameType" },
           },
         },
         {
@@ -102,7 +102,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first: "$gameType" }
+            gameType: { $first: "$gameType" },
           },
         },
         {
@@ -149,7 +149,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first: "$gameType" }
+            gameType: { $first: "$gameType" },
           },
         },
         {
@@ -195,7 +195,7 @@ export const getAllWinnersUser = async (req, res) => {
             betAmount: { $sum: "$betAmount" },
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
-            gameType: { $first: "$gameType" }
+            gameType: { $first: "$gameType" },
           },
         },
         {
@@ -296,7 +296,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
-        .sort({ updatedAt: -1 })
+        .sort({ updatedAt: -1 });
 
       totalBetCoins = getAllUsers.reduce(
         (sum, data) => sum + data.betAmount,
@@ -326,7 +326,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
-        .sort({ updatedAt: -1 })
+        .sort({ updatedAt: -1 });
 
       totalBetCoins = getAllUsers.reduce(
         (sum, data) => sum + data.betAmount,
@@ -383,7 +383,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
-        .sort({ updatedAt: -1 })
+        .sort({ updatedAt: -1 });
 
       totalBetCoins = getAllUsers.reduce(
         (sum, data) => sum + data.betAmount,
@@ -400,7 +400,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         totalUsers,
         getAllUsers,
         getAllWinners,
-        getAllNotWinner
+        getAllNotWinner,
       }
     );
   } catch (error) {
@@ -409,22 +409,25 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
 };
 //#endregion
 
-//#region 
+//#region
 export const declareWinnerOfCommunityBetting = async (req, res) => {
   try {
     const { winnerIds, gameId, distributionCoin, period } = req.body;
     if (!winnerIds.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        "winnerIds is required.",
-        []
-      )
+      return sendResponse(res, StatusCodes.OK, "winnerIds is required.", []);
     }
 
-    const getCommunityGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    const getCommunityGame = await getSingleData(
+      { _id: gameId, is_deleted: 0 },
+      Game
+    );
     if (!getCommunityGame) {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.GAME_NOT_FOUND, []);
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.GAME_NOT_FOUND,
+        []
+      );
     }
 
     const checkAlreadyWin = await CommunityBetting.find({
@@ -444,33 +447,41 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
     let winFlag = false;
     let winnerData = [];
     // if (getCommunityGame.noOfWinners >= winnerIds.length) {
-      // const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
-      // const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
-      await Promise.all(
-        winnerIds.map(async (winnerId, index) => {
-          const winningAmount = (distributionCoin * getCommunityGame.winnersPercentage[index]) / 100;
-          const winnerUser = await CommunityBetting.findOne({ gameId, userId: winnerId, period, is_deleted: 0 })
-          if (winnerUser) {
-            let rewardAmount = winningAmount;
-            winnerUser.isWin = true
-            winnerUser.rewardAmount = rewardAmount
-            await winnerUser.save();
-            winnerData.push(winnerUser)
-            const balance = await getSingleData(
-              { userId: winnerId },
-              NewTransaction
-            );
-            if (balance) {
-              balance.tokenDollorValue = plusLargeSmallValue(
-                Number(balance.tokenDollorValue),
-                Number(rewardAmount)
-              );
-              await balance.save();
-            }
-            winFlag = true;
+    // const getAllPeriodBets = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
+    // const totalBetAmount = getAllPeriodBets.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
+    await Promise.all(
+      winnerIds.map(async (winnerId, index) => {
+        const winningAmount =
+          (distributionCoin * getCommunityGame.winnersPercentage[index]) / 100;
+        const winnerUser = await CommunityBetting.findOne({
+          gameId,
+          userId: winnerId,
+          period,
+          is_deleted: 0,
+        });
+        if (winnerUser) {
+          let rewardAmount = winningAmount;
+          winnerUser.isWin = true;
+          winnerUser.rewardAmount = rewardAmount;
+          await winnerUser.save();
+          winnerData.push(winnerUser);
+          const balance = await getSingleData(
+            { userId: winnerId },
+            NewTransaction
+          );
+          if (balance) {
+            // balance.tokenDollorValue = plusLargeSmallValue(
+            //   Number(balance.tokenDollorValue),
+            //   Number(rewardAmount)
+            // );
+            // let winingAmount = Number(rewardAmount);
+            balance.totalCoin = Number(balance.totalCoin) + Number(rewardAmount);
+            await balance.save();
           }
-        })
-      );
+          winFlag = true;
+        }
+      })
+    );
     // } else {
     //   return sendResponse(
     //     res,
@@ -485,20 +496,15 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         StatusCodes.OK,
         "Winner added succcessfully",
         winnerData
-      )
+      );
     } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        "Winner not added",
-        []
-      )
+      return sendResponse(res, StatusCodes.BAD_REQUEST, "Winner not added", []);
     }
   } catch (error) {
     console.log(error);
     return handleErrorResponse(res, error);
   }
-}
+};
 //#endregion
 
 //#region Winner declare of Number Betting
@@ -511,7 +517,14 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     }
 
     const findNumberBettingArray = await getAllData(
-      { gameId, period: winnerId, number: winNumber, status: "pending", is_deleted: 0, isWin: false },
+      {
+        gameId,
+        period: winnerId,
+        number: winNumber,
+        status: "pending",
+        is_deleted: 0,
+        isWin: false,
+      },
       NumberBetting
     );
     const savedInstances = [];
@@ -528,23 +541,38 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
           { userId: findNumberBetting.userId },
           NewTransaction
         );
-
         if (balance) {
-          balance.tokenDollorValue = plusLargeSmallValue(
-            balance.tokenDollorValue,
-            findNumberBetting.betAmount + rewardAmount
-          );
+          // balance.tokenDollorValue = plusLargeSmallValue(
+          //   balance.tokenDollorValue,
+          //   findNumberBetting.betAmount + rewardAmount
+          // );
+
+          // console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
+          let winingAmount = Number(findNumberBetting.betAmount) + Number(rewardAmount);
+          balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
+          // balance.tokenDollorValue = plusLargeSmallValue(
+          //   +(balance.tokenDollorValue),
+          //   +(findUser.betAmount + rewardAmount)
+          // );
+          // console.log(balance.totalCoin, "winingamount");
+          //                     await balance.save();
           await balance.save();
-          const userData = await getSingleData({ _id: findNumberBetting.userId }, User)
+          const userData = await getSingleData(
+            { _id: findNumberBetting.userId },
+            User
+          );
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: "Number Betting",
           });
-          await sendMail(userData.email, "Number betting game win", mailInfo)
+          await sendMail(userData.email, "Number betting game win", mailInfo);
         }
         savedInstances.push(findNumberBetting);
       } else {
         // Log an error or handle the case where the document is not an instance of NumberBetting
-        console.error("Document is not an instance of NumberBetting:", findNumberBetting);
+        console.error(
+          "Document is not an instance of NumberBetting:",
+          findNumberBetting
+        );
       }
     }
     await NumberBetting.updateMany(
@@ -554,10 +582,10 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
         number: { $ne: winNumber },
         status: "pending",
         is_deleted: 0,
-        isWin: false
+        isWin: false,
       },
       { status: "fail" }
-    )
+    );
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -580,7 +608,13 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     }
     const savedInstances = [];
     const findColorBettingArray = await getAllData(
-      { period: winnerId, gameId: gameId, colourName: winColour, is_deleted: 0, isWin: false },
+      {
+        period: winnerId,
+        gameId: gameId,
+        colourName: winColour,
+        is_deleted: 0,
+        isWin: false,
+      },
       ColourBetting
     );
 
@@ -596,17 +630,22 @@ export const declareWinnerOfColorBetting = async (req, res) => {
           NewTransaction
         );
         if (balance) {
-          balance.tokenDollorValue = plusLargeSmallValue(
-            balance.tokenDollorValue,
-            findColorBetting.betAmount + rewardAmount
-          );
+          // balance.tokenDollorValue = plusLargeSmallValue(
+          //   balance.tokenDollorValue,
+          //   findColorBetting.betAmount + rewardAmount
+          // );
+          let winingAmount = Number(findColorBetting.betAmount) + Number(rewardAmount);
+          balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
           await balance.save();
         }
 
         savedInstances.push(findColorBetting);
       } else {
         // Log an error or handle the case where the document is not an instance of ColourBetting
-        console.error("Document is not an instance of ColourBetting:", findColorBetting);
+        console.error(
+          "Document is not an instance of ColourBetting:",
+          findColorBetting
+        );
       }
     }
     return sendResponse(
@@ -619,6 +658,5 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 
 //#endregion
