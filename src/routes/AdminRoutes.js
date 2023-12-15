@@ -90,7 +90,9 @@ import {
   showRating,
   subadminActiveDeactive,
   getUpdatedUser,
-  getAllWithdrawalRequest
+  getAllWithdrawalRequest,
+  deletePermission,
+  getAllSubAdmin
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -115,21 +117,25 @@ adminRoutes.post("/delete-role", Auth, deleteRole);
 
 //#region Permission Routes
 adminRoutes.post("/permission-add-edit", Auth, addEditPermission);
-adminRoutes.get("/get-all-permission", Auth, getAllPermission);
+adminRoutes.get("/get-all-permission", getAllPermission);
 adminRoutes.get(
   "/get-single-permission/:permissionId",
   Auth,
   permissionGetById
 );
 adminRoutes.post("/permission-active-deactive", Auth, permissionActiveDeActive);
+adminRoutes.post("/permission-delete", deletePermission);
 
-//#region Subadmin routes
-adminRoutes.post("/add-subadmin", Auth, addSubadmin);
+// #region Subadmin routes
+adminRoutes.post("/add-subadmin", addSubadmin);
 adminRoutes.get("/get-single-subadmin/:subadminId", Auth, getSingleSubadmin);
-adminRoutes.get("/get-all-subadmin", Auth, getAllSubadmin);
-adminRoutes.post("/delete-subadmin", Auth, deleteSubadmin);
+// adminRoutes.get("/get-all-subadmin", Auth, getAllSubadmin);
+adminRoutes.post("/delete-subadmin", deleteSubadmin);
 adminRoutes.get("/get-login-subadmin", Auth, getLoginSubadmin);
 adminRoutes.post("/active-deactive-subadmin", Auth, subadminActiveDeactive);
+
+adminRoutes.get("/get-sub-admin", getAllSubAdmin);
+
 //#endregion
 
 // ********* CMS Api ************ //

@@ -7,40 +7,72 @@ import {
 //#region admin login
 export const adminLogin = async (req, res) => {
     try {
-        const findAdmin = await getSingleData({ email: req.body.email, is_deleted: 0 }, Admin);
+        const findAdmin = await Admin.findOne({
+            email: req.body.email,
+            is_deleted: 0,
+        }).populate("role");
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
-            if (findAdmin.role == "subadmin") {
-                if(!findAdmin.isActive){
-                    return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DEACTIVATED_USER, []);
+            if (findAdmin.role.Role_type == "Sub Admin") {
+                if (!findAdmin.isActive) {
+                    return sendResponse(
+                        res,
+                        StatusCodes.BAD_REQUEST,
+                        ResponseMessage.DEACTIVATED_USER,
+                        []
+                    );
                 }
-                await dataUpdated({ _id: findAdmin._id }, {
-                    deviceId: req.body.deviceId,
-                    ipAddress: req.body.ipAddress,
-                    deviceName: req.body.deviceName,
-                    latitude: req.body.latitude,
-                    longitude: req.body.longitude,
-                    address: req.body.address,
-                }, Admin);
+                await dataUpdated(
+                    { _id: findAdmin._id },
+                    {
+                        deviceId: req.body.deviceId,
+                        ipAddress: req.body.ipAddress,
+                        deviceName: req.body.deviceName,
+                        latitude: req.body.latitude,
+                        longitude: req.body.longitude,
+                        address: req.body.address,
+                    },
+                    Admin
+                );
             }
-            const comparePassword = await passwordCompare(req.body.password, findAdmin.password);
+            const comparePassword = await passwordCompare(
+                req.body.password,
+                findAdmin.password
+            );
             if (comparePassword) {
-                let token = jwt.sign({ admin: { id: findAdmin._id, role: findAdmin.role } }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' });
-                return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_LOGGED_IN, { ...findAdmin._doc, token });
+                let token = jwt.sign(
+                    { admin: { id: findAdmin._id, role: findAdmin.role } },
+                    process.env.JWT_SECRET_KEY,
+                    { expiresIn: "24h" }
+                );
+                return sendResponse(
+                    res,
+                    StatusCodes.OK,
+                    ResponseMessage.ADMIN_LOGGED_IN,
+                    { ...findAdmin._doc, token }
+                );
+            } else {
+                return sendResponse(
+                    res,
+                    StatusCodes.BAD_REQUEST,
+                    ResponseMessage.PLEASE_USE_VALID_PASSWORD,
+                    []
+                );
             }
-            else {
-                return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PLEASE_USE_VALID_PASSWORD, []);
-            }
-        }
-        else {
-            return sendResponse(res, StatusCodes.NOT_FOUND, ResponseMessage.ADMIN_NOT_EXIST, []);
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.NOT_FOUND,
+                ResponseMessage.ADMIN_NOT_EXIST,
+                []
+            );
         }
     } catch (error) {
-        console.log('error',error);
+        console.log("error", error);
         return handleErrorResponse(res, error);
     }
-}
+};
 //#endregion
 
 //#region admin get profile
@@ -393,17 +425,29 @@ export const getWithdrawalList = async (req, res) => {
 //#endregion
 
 //#region Admin get updated user 
+//#region Admin get updated user
 export const getUpdatedUser = async (req, res) => {
-  try {
-    const findAdmin = await Admin.findOne({ _id: req.admin }).populate('role');
-    if (findAdmin) {
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.ADMIN_ROLE, findAdmin);
-    } else {
-      return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.ADMIN_NOT_FOUND, []);
+    try {
+        const findAdmin = await Admin.findOne({ _id: req.admin }).populate("role");
+        if (findAdmin) {
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                ResponseMessage.ADMIN_ROLE,
+                findAdmin
+            );
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                ResponseMessage.ADMIN_NOT_FOUND,
+                []
+            );
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
     }
-  } catch (error) {
-    return handleErrorResponse(res, error);
-  }
 };
+//#endregion
 //#endregion
 
