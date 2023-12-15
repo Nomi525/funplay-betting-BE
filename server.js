@@ -35,7 +35,7 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-//cron run for every minute
+// cron run for every minute
 cron.schedule('* * * * *', () => { 
   createNumberAndCommunityGamePeriodFromCronJob();
 });
