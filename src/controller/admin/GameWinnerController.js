@@ -648,6 +648,17 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         );
       }
     }
+    await ColourBetting.updateMany(
+      {
+        gameId,
+        period: winnerId,
+        color: { $ne: winColour },
+        status: "pending",
+        is_deleted: 0,
+        isWin: false,
+      },
+      { status: "fail" }
+    );
     return sendResponse(
       res,
       StatusCodes.OK,
