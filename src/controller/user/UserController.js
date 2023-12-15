@@ -215,7 +215,7 @@ export const connectToWallet = async (req, res) => {
         walletType: walletArray[0].walletType,
         isConnected: true,
       },
-      isVerified : true,
+      isVerified: true,
       referralCode: referCode,
       otp,
     });
@@ -268,8 +268,15 @@ export const userSignUpSignInOtp = async (req, res) => {
   try {
     let { fullName, email, currency, referralByCode, registerType, type } = req.body;
     const otp = 4444;
-    email = email ? email.toLowerCase() : null;
-    const existingUser = await getSingleData({ email }, User);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const checkEmailValue = emailRegex.test(email)
+    let existingUser
+    if (checkEmailValue) {
+      email = email ? email.toLowerCase() : null;
+      existingUser = await getSingleData({ email }, User);
+    } else {
+      existingUser = await getSingleData({ mobileNumber: email }, User);
+    }
     if (existingUser?.registerType == "Password" && type !== "signup") {
       return sendResponse(
         res,
@@ -336,13 +343,22 @@ export const userSignUpSignInOtp = async (req, res) => {
           []
         );
       }
-      const updateOtp = await dataUpdated({ email }, { otp, currency }, User);
-      let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(existingUser.email, "Verify Otp", mailInfo);
+      let updateOtp;
+      let message ;
+      if (checkEmailValue) {
+        updateOtp = await dataUpdated({ email }, { otp, currency }, User);
+        let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+        message = ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL
+        await sendMail(existingUser.email, "Verify Otp", mailInfo);
+      } else {
+        updateOtp = await dataUpdated({ mobileNumber: email }, { otp, currency }, User);
+        message = ResponseMessage.ALREADY_REGISTER_VERIFY_MOBILE
+      }
+
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL,
+        message,
         updateOtp
       );
     } else {
@@ -371,7 +387,8 @@ export const userSignUpSignInOtp = async (req, res) => {
       const userData = await dataCreate(
         {
           fullName,
-          email,
+          email: checkEmailValue ? email : '',
+          mobileNumber: !checkEmailValue ? email : '',
           currency,
           otp,
           referralCode: referCode,
@@ -390,12 +407,16 @@ export const userSignUpSignInOtp = async (req, res) => {
       if (userData) {
         await createReward(userData._id, 'Created Reward', 'First time reward from admin side');
       }
-      let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(userData.email, "Verify Otp", mailInfo);
+      let message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_MOBILE;
+      if (checkEmailValue) {
+        let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+        await sendMail(userData.email, "Verify Otp", mailInfo);
+        message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL
+      }
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL,
+        message,
         userData
       );
     }
@@ -780,8 +801,17 @@ export const userCheckEmail = async (req, res) => {
 export const singupFromEmailPassword = async (req, res) => {
   try {
     let { fullName, email, password, currency, referralByCode, registerType, type } = req.body;
-    email = email ? email.toLowerCase() : null;
-    let userFind = await getSingleData({ email }, User);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const checkEmailValue = emailRegex.test(email)
+    if (checkEmailValue) {
+      email = email ? email.toLowerCase() : null;
+    }
+    let userFind
+    if (checkEmailValue) {
+      userFind = await getSingleData({ email }, User);
+    } else {
+      userFind = await getSingleData({ mobileNumber: email }, User);
+    }
     if (type == "login") {
       if (userFind) {
         if (userFind.is_deleted != 0) {
@@ -857,7 +887,12 @@ export const singupFromEmailPassword = async (req, res) => {
         }
         if (userFind) {
           req.body.password = await hashedPassword(password);
-          const updateUser = await dataUpdated({ email: email }, req.body, User)
+          let updateUser
+          if (checkEmailValue) {
+            updateUser = await dataUpdated({ email: email }, req.body, User)
+          } else {
+            updateUser = await dataUpdated({ mobileNumber: email }, req.body, User)
+          }
           const payload = {
             user: {
               id: updateUser._id,
@@ -890,12 +925,13 @@ export const singupFromEmailPassword = async (req, res) => {
         const createUser = await dataCreate(
           {
             fullName,
-            email,
+            email: checkEmailValue ? email : '',
+            mobileNumber: !checkEmailValue ? email : '',
             currency,
             password,
             referralCode: referCode,
             registerType,
-            isVerified : true,
+            isVerified: true,
             referralByCode: referralByCode ? referralByCode : null,
           },
           User
