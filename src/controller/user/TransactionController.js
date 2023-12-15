@@ -166,9 +166,9 @@ export const addNewTransaction = async (req, res) => {
     });
     const promiseData = await Promise.all(mapData)
     if (promiseData[0]?.status == "OK") {
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCTION_UPDATED, promiseData[0]?.data);
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSACTION_UPDATED, promiseData[0]?.data);
     } else if (promiseData[0]?.status == "CREATED") {
-      return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSCTION_CREATED, promiseData[0]?.data);
+      return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TRANSITION_CREATED, promiseData[0]?.data);
     } else {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.DATA_NOT_FOUND, []);
     }

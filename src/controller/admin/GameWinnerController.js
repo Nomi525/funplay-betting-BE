@@ -226,7 +226,7 @@ export const getAllWinnersUser = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.CMMUNITY_BET_GET,
+        ResponseMessage.COMMUNITY_BET_GET,
         netFinalResult
       );
     } else {
@@ -511,7 +511,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     }
 
     const findNumberBettingArray = await getAllData(
-      { gameId, period: winnerId, number: winNumber, status: "Pendding", is_deleted: 0, isWin: false },
+      { gameId, period: winnerId, number: winNumber, status: "pending", is_deleted: 0, isWin: false },
       NumberBetting
     );
     const savedInstances = [];
@@ -521,7 +521,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
         let rewardAmount = findNumberBetting.betAmount * 0.95;
         findNumberBetting.isWin = true;
         findNumberBetting.rewardAmount = rewardAmount;
-        findNumberBetting.status = "Successfull";
+        findNumberBetting.status = "successfully";
         await findNumberBetting.save();
 
         const balance = await getSingleData(
@@ -552,11 +552,11 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
         gameId,
         period: winnerId,
         number: { $ne: winNumber },
-        status: "Pendding",
+        status: "pending",
         is_deleted: 0,
         isWin: false
       },
-      { status: "Fail" }
+      { status: "fail" }
     )
     return sendResponse(
       res,

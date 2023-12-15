@@ -230,7 +230,7 @@ export const addColourBet = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        ResponseMessage.COLOUR_BET_CRETED,
+        ResponseMessage.COLOR_BET_CRATED,
         createColourBet
       );
     } else {
@@ -264,6 +264,7 @@ export const colourBetResult = async (req, res) => {
     let message = "";
     const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
     if (findGameMode) {
+      await ColourBetting .updateMany({ gameId, period }, { status: "pending" })
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -295,7 +296,7 @@ export const colourBetResult = async (req, res) => {
         );
         if (colourBettingResult.length) {
           bettingResult = colourBettingResult;
-          message = ResponseMessage.COLOUR_RESULT;
+          message = ResponseMessage.COLOR_RESULT;
         }
       } else {
         return sendResponse(
@@ -1047,7 +1048,7 @@ export const colourBettingWinnerResult = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.OK,
-            ResponseMessage.COLOUR_WINNER + " " + getAllBets[0].colourName,
+            ResponseMessage.COLOR_WINNER + " " + getAllBets[0].colourName,
             getAllBets
           );
         }
@@ -1090,14 +1091,14 @@ export const colourBettingWinnerResult = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.OK,
-            ResponseMessage.COLOUR_WINNER + " " + getAllBets[0].colourName,
+            ResponseMessage.COLOR_WINNER + " " + getAllBets[0].colourName,
             getAllBets
           );
         } else {
           return sendResponse(
             res,
             StatusCodes.OK,
-            ResponseMessage.LOSSER,
+            ResponseMessage.LOSER,
             []
           );
         }
@@ -1105,7 +1106,7 @@ export const colourBettingWinnerResult = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.OK,
-          ResponseMessage.LOSSER,
+          ResponseMessage.LOSER,
           []
         );
       }

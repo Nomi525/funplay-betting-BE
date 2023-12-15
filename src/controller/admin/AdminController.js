@@ -325,10 +325,10 @@ export const getTransactionList = async (req, res) => {
         const { type } = req.body;
         if (type) {
             const findTranscation = await getAllData({ type }, DummyTransaction)
-            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findTranscation);
+            return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSACTION_DATA_GET, findTranscation);
         }
         const findAllTranscation = await getAllData({}, DummyTransaction)
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSCATION_DATA_GET, findAllTranscation);
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.TRANSACTION_DATA_GET, findAllTranscation);
 
     } catch (error) {
         return handleErrorResponse(res, error);

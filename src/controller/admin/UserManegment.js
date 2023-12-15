@@ -180,7 +180,7 @@ export const getUserReferralBySignIn = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.NOT_FOUND,
-          ResponseMessage.RAFERRAL_NOT_FOUND,
+          ResponseMessage.REFERRAL_NOT_FOUND,
           []
         );
       }

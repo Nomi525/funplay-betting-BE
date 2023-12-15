@@ -18,7 +18,7 @@ export const addEditPrivacyPolicy = async (req, res) => {
                     if (updatePrivacyPolicy) {
                         return sendResponse(res, StatusCodes.OK, ResponseMessage.PRIVACY_POLICY_UPDATED, updatedData);
                     } else {
-                        return sendResponse(res, StatusCodes.OK, ResponseMessage.PRICAY_NOT_FOUND, []);
+                        return sendResponse(res, StatusCodes.OK, ResponseMessage.PRIVACY_NOT_FOUND, []);
                     }
                 }
             } else {

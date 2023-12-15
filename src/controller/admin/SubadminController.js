@@ -230,7 +230,7 @@ import {
         var message;
         if (findSubadmin.isActive) {
           findSubadmin.isActive = false;
-          message = ResponseMessage.SUBADMIN_DEACTIVE;
+          message = ResponseMessage.SUBADMIN_DEACTIVATE;
         } else {
           findSubadmin.isActive = true;
           message = ResponseMessage.SUBADMIN_ACTIVE;

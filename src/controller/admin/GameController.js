@@ -756,7 +756,7 @@ export const gameActiveDeactive = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.OK,
-          ResponseMessage.GAME_DEACTIVE,
+          ResponseMessage.GAME_DEACTIVATE,
           []
         );
       } else {
