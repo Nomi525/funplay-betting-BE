@@ -8,144 +8,187 @@ import {
     dataUpdated,
     getAllData,
     Permission,
-    multipleDelete
-} from "../../index.js";
-
-export const addEditPermission = async (req, res) => {
+    multipleDelete,
+    updateApi
+  } from "../../index.js";
+  
+  export const addEditPermission = async (req, res) => {
     try {
-        const { permissionId, Game, RoleType } = req.body;
-        if (permissionId) {
-            const updatePermission = await dataUpdated({ _id: permissionId }, { RoleType, Game }, Permission);
-            if (updatePermission) {
-                return sendResponse(
-                    res,
-                    StatusCodes.OK,
-                    ResponseMessage.PERMISSION_UPDATED,
-                    updatePermission
-                );
-            } else {
-                return sendResponse(
-                    res,
-                    StatusCodes.BAD_REQUEST,
-                    ResponseMessage.PERMISSION_NOT_UPDATED,
-                    []
-                );
-            }
+      if (req.body.id) {
+        const updatePermission = await updateApi(req.body, Permission);
+        if (updatePermission) {
+          return res.status(200).json({
+            status: StatusCodes.OK,
+            message: ResponseMessage.PERMISSION_UPDATED,
+            data: updatePermission,
+          });
         } else {
-            const savePermission = await dataCreate({ RoleType, Game }, Permission);
-            if (savePermission) {
-                return sendResponse(
-                    res,
-                    StatusCodes.CREATED,
-                    ResponseMessage.PERMISSION_CREATED,
-                    savePermission
-                );
-            } else {
-                return sendResponse(
-                    res,
-                    StatusCodes.BAD_REQUEST,
-                    ResponseMessage.PERMISSION_NOT_CREATED,
-                    []
-                );
-            }
+          return res.status(400).json({
+            status: StatusCodes.BAD_REQUEST,
+            message: ResponseMessage.PERMISSION_NOT_UPDATED,
+          });
         }
+      } else {
+        const savePermission = await dataCreate(req.body, Permission);
+        if (savePermission) {
+          return res.status(201).json({
+            status: StatusCodes.CREATED,
+            message: ResponseMessage.PERMISSION_CREATED,
+            data: savePermission,
+          });
+        } else {
+          return res.status(400).json({
+            status: StatusCodes.OK,
+            message: ResponseMessage.PERMISSION_NOT_CREATED,
+            data: [],
+          });
+        }
+      }
     } catch (error) {
-        return handleErrorResponse(res, error);
+      console.log(error);
+      return res.status(500).json({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: ResponseMessage.INTERNAL_SERVER_ERROR,
+        data: [error.message],
+      });
     }
-};
-
-export const getAllPermission = async (req, res) => {
+  };
+  
+  export const getAllPermission = async (req, res) => {
     try {
-        const getAllPermission = await Permission.find({ is_deleted: 0 }).sort({ createdAt: -1 });
-        if (getAllPermission.length) {
-            return sendResponse(
-                res,
-                StatusCodes.OK,
-                ResponseMessage.PERMISSION_LIST,
-                getAllPermission
-            );
-        } else {
-            return sendResponse(
-                res,
-                StatusCodes.BAD_REQUEST,
-                ResponseMessage.PERMISSION_NOT_FOUND,
-                []
-            );
-        }
+      const getAllPermission = await Permission.find({ isDeleted: false }).sort({
+        createdAt: -1,
+      });
+      if (getAllPermission.length) {
+        return res.status(200).json({
+          status: StatusCodes.OK,
+          message: ResponseMessage.PERMISSION_FETCHED,
+          data: getAllPermission,
+        });
+      } else {
+        return res.status(200).json({
+          status: StatusCodes.BAD_REQUEST,
+          message: ResponseMessage.PERMISSION_LIST_NOT_FOUND,
+          data: [],
+        });
+      }
     } catch (error) {
-        return handleErrorResponse(res, error);
+      return res.status(500).json({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: ResponseMessage.INTERNAL_SERVER_ERROR,
+        data: [error.message],
+      });
     }
-};
-
-export const permissionGetById = async (req, res) => {
+  };
+  
+  export const permissionGetById = async (req, res) => {
     try {
-        const getSinglePermission = await getSingleData({ _id: req.params.permissionId, is_deleted: 0 }, Permission)
-        if (getSinglePermission) {
-            return sendResponse(
-                res,
-                StatusCodes.OK,
-                ResponseMessage.PERMISSION_GET,
-                getSinglePermission
-            );
-        } else {
-            return sendResponse(
-                res,
-                StatusCodes.BAD_REQUEST,
-                ResponseMessage.PERMISSION_NOT_FOUND,
-                []
-            );
-        }
-
+      const getSinglePermission = await getSingleData(
+        { _id: req.params.permissionId, is_deleted: 0 },
+        Permission
+      );
+      if (getSinglePermission) {
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.PERMISSION_GET,
+          getSinglePermission
+        );
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.PERMISSION_NOT_FOUND,
+          []
+        );
+      }
     } catch (error) {
-        return handleErrorResponse(res, error);
+      return handleErrorResponse(res, error);
     }
-};
-
-export const permissionActiveDeActive = async (req, res) => {
+  };
+  
+  export const permissionActiveDeActive = async (req, res) => {
     try {
-        const { permissionId } = req.body;
-        const findPermission = await getSingleData({ _id: permissionId }, Permission)
-        if (findPermission) {
-            var message;
-            if (findPermission.isActive) {
-                findPermission.isActive = false;
-                message = ResponseMessage.PERMISSION_DEACTIVE
-            } else {
-                findPermission.isActive = true;
-                message = ResponseMessage.PERMISSION_ACTIVE
-            }
-            await findPermission.save();
-            return sendResponse(res, StatusCodes.OK, message, []);
+      const { permissionId } = req.body;
+      const findPermission = await getSingleData(
+        { _id: permissionId },
+        Permission
+      );
+      if (findPermission) {
+        var message;
+        if (findPermission.isActive) {
+          findPermission.isActive = false;
+          message = ResponseMessage.PERMISSION_DEACTIVE;
         } else {
-            return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.PERMISSION_NOT_FOUND, []);
+          findPermission.isActive = true;
+          message = ResponseMessage.PERMISSION_ACTIVE;
         }
-
+        await findPermission.save();
+        return sendResponse(res, StatusCodes.OK, message, []);
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.PERMISSION_NOT_FOUND,
+          []
+        );
+      }
     } catch (error) {
-        return handleErrorResponse(res, error);
+      return handleErrorResponse(res, error);
     }
-};
-
-//#region Delete multiple permission
-export const multiplePermissionDeletes = async (req, res) => {
+  };
+  
+  //#region Delete multiple permission
+  export const multiplePermissionDeletes = async (req, res) => {
     try {
-        const DeletemultiplePermission = multipleDelete(req.body, Permission)
-        if (DeletemultiplePermission) {
-            return sendResponse(
-                res,
-                StatusCodes.OK,
-                ResponseMessage.DELETED_ALL_PERMISSION,
-                DeletemultiplePermission
-            );
-        } else {
-            return sendResponse(
-                res,
-                StatusCodes.BAD_REQUEST,
-                ResponseMessage.PERMISSION_NOT_DELETED,
-                []
-            );
-        }
+      const DeletemultiplePermission = multipleDelete(req.body, Permission);
+      if (DeletemultiplePermission) {
+        return sendResponse(
+          res,
+          StatusCodes.OK,
+          ResponseMessage.DELETED_ALL_PERMISSION,
+          DeletemultiplePermission
+        );
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.PERMISSION_NOT_DELETED,
+          []
+        );
+      }
     } catch (error) {
-        return handleErrorResponse(res, error);
+      return handleErrorResponse(res, error);
     }
-};
-//#endregion
+  };
+  //#endregion
+  
+  export const deletePermission = async (req, res) => {
+    try {
+      const permissionDelete = await Permission.findOneAndUpdate(
+        { _id: req.body.id },
+        { $set: { isDeleted: true } },
+        { new: true }
+      );
+      if (permissionDelete) {
+        return res.status(200).json({
+          status: StatusCodes.OK,
+          message: ResponseMessage.PARTNER_DELETED,
+          data: [],
+        });
+      } else {
+        return res.status(400).json({
+          status: StatusCodes.BAD_REQUEST,
+          message: ResponseMessage.PARTNER_NOT_DELETED,
+          data: [],
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: ResponseMessage.INTERNAL_SERVER_ERROR,
+        data: [error.message],
+      });
+    }
+  };
+  

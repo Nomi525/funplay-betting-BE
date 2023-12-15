@@ -31,6 +31,7 @@ import {
   getAllDataCount,
   deleteById,
   createReward,
+  updateApi
 } from "./services/QueryService.js";
 import { validatorRequest } from "./utils/Validator.js";
 import { validatorMiddlware } from "./middleware/Validation.js";
@@ -222,6 +223,7 @@ import {
   getAllPermission,
   permissionGetById,
   permissionActiveDeActive,
+  deletePermission
 } from "./controller/admin/PermissionController.js";
 
 import {
@@ -231,6 +233,7 @@ import {
   subadminActiveDeactive,
   getSingleSubadmin,
   getAllSubadmin,
+  getAllSubAdmin
 } from "./controller/admin/SubadminController.js";
 
 // Number Betting
@@ -360,6 +363,9 @@ import {
 
 dotenv.config();
 export {
+  updateApi,
+  getAllSubAdmin,
+  deletePermission,
   getAllWithdrawalRequest,
   getUpdatedUser,
   multipleDelete,

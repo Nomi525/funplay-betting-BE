@@ -43,3 +43,22 @@ export const createReward = async (userId, title, description) => {
     const rewardCreate = await dataCreate({ userId, title, points: adminSetting.rewardsPoints, description }, Reward);
     return rewardCreate;
 }
+
+export const updateApi = async (body, table) => {
+    try {
+      if (body.id) {
+        let updateData = await table.findByIdAndUpdate(
+          { _id: body.id },
+          {
+            $set: body,
+          },
+          {
+            new: true,
+          }
+        );
+        return updateData;
+      }
+    } catch (error) {
+      console.log(error, "error");
+    }
+  };
