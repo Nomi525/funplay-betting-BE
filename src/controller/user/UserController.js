@@ -1572,7 +1572,7 @@ export const changePassword = async (req, res) => {
         return sendResponse(
           res,
           StatusCodes.BAD_REQUEST,
-          ResponseMessage.OLD_PASSWORD_WORNG,
+          ResponseMessage.OLD_PASSWORD_WRONG,
           []
         );
       }

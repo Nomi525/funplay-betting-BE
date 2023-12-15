@@ -297,7 +297,7 @@ export const addEditNumberBet = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        ResponseMessage.NUMBER_BET_CRETED,
+        ResponseMessage.NUMBER_BET_CRATED,
         createNumberBet
       );
     } else {
@@ -474,7 +474,7 @@ export const getNumberGamePeriodById = async (req, res) => {
       },
       {
         $match: {
-          status: { $in: ["Fail", "Pendding", "Successfull"] }
+          status: { $in: ["fail", "pending", "successfully"] }
         }
       }
     ])
@@ -514,16 +514,16 @@ export const getAllNumberGamePeriod = async (req, res) => {
           status: {
             $max: {
               $cond: {
-                if: { $in: ["$status", ["Successfull"]] },
-                then: "Successfull",
+                if: { $in: ["$status", ["successfully"]] },
+                then: "successfully",
                 else: {
                   $cond: {
                     if: { $in: ["$status", ["Pending"]] },
                     then: "Pending",
                     else: {
                       $cond: {
-                        if: { $in: ["$status", ["Fail"]] },
-                        then: "Fail",
+                        if: { $in: ["$status", ["fail"]] },
+                        then: "fail",
                         else: null,
                       },
                     },
@@ -1724,7 +1724,7 @@ export const numberBettingWinnerResult = async (req, res) => {
     const { gameType, type, gameId, period } = req.params;
     const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
     if (findGameMode) {
-      await NumberBetting.updateMany({ gameId, period }, { status: "Pendding" })
+      await NumberBetting.updateMany({ gameId, period }, { status: "pending" })
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -1809,7 +1809,7 @@ export const numberBettingWinnerResult = async (req, res) => {
                   if (index === 0) {
                     let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
                     findUser.isWin = true
-                    findUser.status = "Successfull";
+                    findUser.status = "successfully";
                     findUser.rewardAmount = rewardAmount
                     await findUser.save();
                     const balance = await getSingleData(
@@ -1824,7 +1824,6 @@ export const numberBettingWinnerResult = async (req, res) => {
                       //   +(balance.tokenDollorValue), 
                       //   +(findUser.betAmount + rewardAmount)
                       // );
-                      console.log(balance.totalCoin, "winingamount")
                       await balance.save();
                       const userData = await getSingleData({ _id: userId }, User)
                       let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
@@ -1833,7 +1832,7 @@ export const numberBettingWinnerResult = async (req, res) => {
                       await sendMail(userData.email, "Number betting game win", mailInfo)
                     }
                   } else {
-                    findUser.status = "Fail";
+                    findUser.status = "fail";
                     await findUser.save()
                   }
                 } else {
@@ -1858,17 +1857,17 @@ export const numberBettingWinnerResult = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.OK,
-            ResponseMessage.LOSSER,
+            ResponseMessage.LOSER,
             []
           );
         }
       } else {
-        // await NumberBetting.updateMany({ gameId, period, userId: totalUserInPeriod[0]._id }, { status: "Fail" })
-        await NumberBetting.updateMany({ gameId, period }, { status: "Fail" })
+        // await NumberBetting.updateMany({ gameId, period, userId: totalUserInPeriod[0]._id }, { status: "fail" })
+        await NumberBetting.updateMany({ gameId, period }, { status: "fail" })
         return sendResponse(
           res,
           StatusCodes.OK,
-          ResponseMessage.LOSSER,
+          ResponseMessage.LOSER,
           []
         );
       }

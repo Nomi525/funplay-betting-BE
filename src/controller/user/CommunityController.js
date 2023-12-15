@@ -106,7 +106,7 @@ export const addEditCommunityBets = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.CREATED,
-        ResponseMessage.CMMUNITY_BET_CRETED,
+        ResponseMessage.COMMUNITY_BET_CRATED,
         createCommunityBet
       );
     } else {
@@ -140,7 +140,7 @@ export const getLoginUserCommunityBets = async (req, res) => {
     return sendResponse(
       res,
       StatusCodes.OK,
-      ResponseMessage.CMMUNITY_BET_GET,
+      ResponseMessage.COMMUNITY_BET_GET,
       getLoginUserBet
     );
   } catch (error) {
@@ -176,7 +176,7 @@ export const getAllLiveCommunityBets = async (req, res) => {
     return sendResponse(
       res,
       StatusCodes.OK,
-      ResponseMessage.CMMUNITY_BET_GET_LIVE_DATA,
+      ResponseMessage.COMMUNITY_BET_GET_LIVE_DATA,
       { getAllLiveBet, winners }
     );
   } catch (error) {
@@ -214,7 +214,7 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
     return sendResponse(
       res,
       StatusCodes.OK,
-      ResponseMessage.CMMUNITY_BET_GET_LAST_DAY,
+      ResponseMessage.COMMUNITY_BET_GET_LAST_DAY,
       getLastDayWinners
     );
   } catch (error) {
