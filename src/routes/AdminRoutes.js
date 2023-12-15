@@ -264,7 +264,7 @@ adminRoutes.post("/get-number-total", Auth, getNumberGameTotal);
 // All winners
 adminRoutes.post("/get-all-and-update-winners-user", Auth, getAllWinnersUser);
 adminRoutes.get(
-  "/get-all-users-and-winners-community-betting/:gameName",
+  "/get-all-users-and-winners-community-betting/:gameType",
   Auth,
   getAllUsersAndWinnersCommunityBetting
 );
