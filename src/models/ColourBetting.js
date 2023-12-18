@@ -56,6 +56,12 @@ const colourBettingSchema = new mongoose.Schema(
       required: false,
       default: false,
     },
+    status: {
+      type: String,
+      enum: [null, "fail", "pending", "successfully"],
+      required: false,
+      default: null,
+    },
     is_deleted: {
       type: Number,
       required: false,

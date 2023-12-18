@@ -244,8 +244,7 @@ import {
   deleteNumberBet,
   getAllNumberGamePeriod,
   getNumberGamePeriodById,
-  createNumberAndCommunityGamePeriodFromCronJob,
-  createColorBettingGamePeriodFromCronJob,
+  createAllGamePeriodFromCronJob,
   getPeriod,
   numberBettingWinnerResult
 } from "./controller/user/NumberBettingController.js";
@@ -379,8 +378,7 @@ export {
   getPeriod,
   Period,
   cron,
-  createNumberAndCommunityGamePeriodFromCronJob,
-  createColorBettingGamePeriodFromCronJob,
+  createAllGamePeriodFromCronJob,
   getCommunityGamePeriodById,
   getAllCommunityGamePeriod,
   getAllNumberGamePeriod,
