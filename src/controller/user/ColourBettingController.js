@@ -1009,7 +1009,8 @@ export const colourBettingWinnerResult = async (req, res) => {
       }
     ])
     if (totalUserInPeriod.length) {
-      if (totalUserInPeriod.length >= 1 && totalUserInPeriod.userTotalBets > 1) {
+      const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
+      if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
         const getAllBets = await ColourBetting.aggregate([
           {
             $match: {
