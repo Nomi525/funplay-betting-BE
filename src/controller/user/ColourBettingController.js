@@ -684,6 +684,7 @@ export const getAllGamePeriod = async (req, res) => {
           price: "$betAmount",
           period: 1,
           winColour: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -710,6 +711,7 @@ export const getAllGamePeriod = async (req, res) => {
           winColour: 1,
           period: 1,
           price: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
@@ -861,6 +863,7 @@ export const getByIdGamePeriod = async (req, res) => {
           colourName: 1,
           period: 1,
           isWin: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -886,6 +889,7 @@ export const getByIdGamePeriod = async (req, res) => {
           price: 1,
           colourName: 1,
           isWin: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
@@ -1004,7 +1008,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       }
     ])
     if (totalUserInPeriod.length) {
-      if (totalUserInPeriod.length > 1) {
+      if (totalUserInPeriod.length >= 1 && totalUserInPeriod.userTotalBets > 1) {
         const getAllBets = await ColourBetting.aggregate([
           {
             $match: {
