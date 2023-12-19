@@ -1065,7 +1065,8 @@ export const colourBettingWinnerResult = async (req, res) => {
                 const findUser = await ColourBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
                 if (findUser) {
                   let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-                  findUser.isWin = true
+                  findUser.isWin = true,
+                  findUser.status = "successfully";
                   findUser.rewardAmount = rewardAmount
                   await findUser.save();
                   const balance = await getSingleData(
