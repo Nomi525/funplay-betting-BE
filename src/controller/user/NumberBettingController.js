@@ -276,6 +276,7 @@ export const addEditNumberBet = async (req, res) => {
         lossAmount,
         isWin,
         period,
+        status: "pending",
       },
       NumberBetting
     );

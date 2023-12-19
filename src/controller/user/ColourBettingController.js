@@ -208,7 +208,8 @@ export const addColourBet = async (req, res) => {
         betAmount: parseInt(betAmount),
         gameType,
         period,
-        selectedTime
+        selectedTime,
+        status: "pending",
       },
       ColourBetting
     );
