@@ -18,6 +18,7 @@ import {
   ejs,
   sendMail,
   User,
+  PenaltyBetting
 } from "../../index.js";
 
 //#region Get All winners user
@@ -601,7 +602,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, userId, winColour, period } = req.body;
+    const { gameId, winnerId, userId, winBetSide, period } = req.body;
 
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
@@ -669,5 +670,54 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
 
+//#region Winner declare of Penalty Betting
+export const declareWinnerOfPenaltyBetting = async (req, res) => {
+  try {
+    const { gameId, winnerId, userId, winBetSide, period } = req.body;
+    if (!winnerId) {
+      return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
+    }
+    const savedInstances = [];
+    const findPenaltyBettingArray = await getAllData(
+      { period: winnerId, gameId: gameId, betSide: winBetSide, is_deleted: 0, isWin: false },
+      PenaltyBetting
+    );
+    for (const findPenaltyBetting of findPenaltyBettingArray) {
+      if (findPenaltyBetting instanceof PenaltyBetting) {
+        let rewardAmount = findPenaltyBetting.betAmount * 0.95;
+        findPenaltyBetting.isWin = true;
+        findPenaltyBetting.status = "successfully";
+        findPenaltyBetting.rewardAmount = rewardAmount;
+        await findPenaltyBetting.save();
+
+        const balance = await getSingleData(
+          { userId: findPenaltyBetting.userId },
+          NewTransaction
+        );
+        if (balance) {
+          // balance.tokenDollorValue = plusLargeSmallValue(
+          //   balance.tokenDollorValue,
+          //   findPenaltyBetting.betAmount + rewardAmount
+          // );
+          balance.totalCoin = Number(balance.totalCoin) + Number(findPenaltyBetting.betAmount) + Number(rewardAmount)
+          await balance.save();
+        }
+        savedInstances.push(findPenaltyBetting);
+      }
+
+    }
+    await PenaltyBetting.updateMany({ gameId, betSide: { $ne: winBetSide }, period: winnerId, isWin: false, status: 'pending' }, { status: "fail" });
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "Winners added successfully",
+      findPenaltyBettingArray
+    );
+  } catch (error) {
+    // console.log(error);
+    return handleErrorResponse(res, error);
+  }
+};
 //#endregion
