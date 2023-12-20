@@ -1953,11 +1953,6 @@ export const createAllGamePeriodFromCronJob = async () => {
           }
         }
       } else if (game.gameName == "3 Color Betting") {
-        const formattedDate = currentDate2.split("-").join("");
-        let period = formattedDate + "0000";
-        const periodCount = await Period.countDocuments({
-          gameId: game._id,
-        });
         game.gameSecond.map(async (second, index) => {
           const gameStartTime = moment(
             game.gameDurationFrom,
@@ -1985,7 +1980,7 @@ export const createAllGamePeriodFromCronJob = async () => {
             `${gameEndDate2} ${gameEndTime}`,
             "YYYY-MM-DD HH:mm:ss"
           );
-          // const formattedDate = currentDate2.split("-").join("");
+          const formattedDate = currentDate2.split("-").join("");
           let endTime2 = moment()
             .utcOffset("+05:30")
             .add(second, "seconds")
@@ -2002,10 +1997,10 @@ export const createAllGamePeriodFromCronJob = async () => {
             gameStartTimestamp <= currentTimestamp &&
             currentTimestamp < gameEndTimestamp
           ) {
-            // let period = formattedDate + "0000";
-            // const periodCount = await Period.countDocuments({
-            //   gameId: game._id,
-            // });
+            let period = formattedDate + "0000";
+            const periodCount = await Period.countDocuments({
+              gameId: game._id,
+            });
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2108,11 +2103,6 @@ export const createAllGamePeriodFromCronJob = async () => {
           }
         });
       } else if (game.gameName == "2 Color Betting") {
-        const formattedDate = currentDate2.split("-").join("");
-        let period = formattedDate + "0000";
-        const periodCount = await Period.countDocuments({
-          gameId: game._id,
-        });
         game.gameSecond.map(async (second, index) => {
           const gameStartTime = moment(
             game.gameDurationFrom,
@@ -2140,7 +2130,7 @@ export const createAllGamePeriodFromCronJob = async () => {
             `${gameEndDate2} ${gameEndTime}`,
             "YYYY-MM-DD HH:mm:ss"
           );
-
+          const formattedDate = currentDate2.split("-").join("");
           let endTime2 = moment()
             .utcOffset("+05:30")
             .add(second, "seconds")
@@ -2157,9 +2147,10 @@ export const createAllGamePeriodFromCronJob = async () => {
             gameStartTimestamp <= currentTimestamp &&
             currentTimestamp < gameEndTimestamp
           ) {
-
-
-
+            let period = formattedDate + "0000";
+            const periodCount = await Period.countDocuments({
+              gameId: game._id,
+            });
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
