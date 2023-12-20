@@ -208,7 +208,8 @@ export const addColourBet = async (req, res) => {
         betAmount: parseInt(betAmount),
         gameType,
         period,
-        selectedTime
+        selectedTime,
+        status: "pending",
       },
       ColourBetting
     );
@@ -684,6 +685,7 @@ export const getAllGamePeriod = async (req, res) => {
           price: "$betAmount",
           period: 1,
           winColour: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -710,6 +712,7 @@ export const getAllGamePeriod = async (req, res) => {
           winColour: 1,
           period: 1,
           price: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
@@ -861,6 +864,7 @@ export const getByIdGamePeriod = async (req, res) => {
           colourName: 1,
           period: 1,
           isWin: 1,
+          status: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -886,6 +890,7 @@ export const getByIdGamePeriod = async (req, res) => {
           price: 1,
           colourName: 1,
           isWin: 1,
+          status: 1,
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
@@ -1004,7 +1009,8 @@ export const colourBettingWinnerResult = async (req, res) => {
       }
     ])
     if (totalUserInPeriod.length) {
-      if (totalUserInPeriod.length > 1) {
+      const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
+      if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
         const getAllBets = await ColourBetting.aggregate([
           {
             $match: {
@@ -1059,7 +1065,8 @@ export const colourBettingWinnerResult = async (req, res) => {
                 const findUser = await ColourBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 })
                 if (findUser) {
                   let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-                  findUser.isWin = true
+                  findUser.isWin = true,
+                  findUser.status = "successfully";
                   findUser.rewardAmount = rewardAmount
                   await findUser.save();
                   const balance = await getSingleData(

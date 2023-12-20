@@ -276,6 +276,7 @@ export const addEditNumberBet = async (req, res) => {
         lossAmount,
         isWin,
         period,
+        status: "pending",
       },
       NumberBetting
     );
@@ -518,8 +519,8 @@ export const getAllNumberGamePeriod = async (req, res) => {
                 then: "successfully",
                 else: {
                   $cond: {
-                    if: { $in: ["$status", ["Pending"]] },
-                    then: "Pending",
+                    if: { $in: ["$status", ["pending"]] },
+                    then: "pending",
                     else: {
                       $cond: {
                         if: { $in: ["$status", ["fail"]] },
@@ -2362,7 +2363,8 @@ export const numberBettingWinnerResult = async (req, res) => {
       }
     ])
     if (totalUserInPeriod.length) {
-      if (totalUserInPeriod.length > 1) {
+      const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
+      if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
         const getAllNumberBets = await NumberBetting.aggregate([
           {
             $match: { period: Number(period) }
@@ -2393,6 +2395,7 @@ export const numberBettingWinnerResult = async (req, res) => {
           //   $limit: 1
           // }
         ])
+        console.log({getAllNumberBets});
         if (getAllNumberBets.length) {
           await Promise.all(
             getAllNumberBets.map(async (item, index) => {
