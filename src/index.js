@@ -292,7 +292,16 @@ import {
   declareWinnerOfCommunityBetting,
   declareWinnerOfNumberBetting,
   declareWinnerOfColorBetting,
+  declareWinnerOfPenaltyBetting
 } from "./controller/admin/GameWinnerController.js";
+
+// Penalty Controller
+import {
+  addPenaltyBet,
+  getAllGamePeriodOfPenaltyBetting,
+  getByIdGamePeriodOfPenaltyBetting,
+  penaltyBettingWinnerResult
+} from "./controller/user/PenaltyBettingController.js";
 
 // *********** Routes **************** //
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -329,6 +338,7 @@ import { ColourBetting } from "./models/ColourBetting.js";
 import { GameReward } from "./models/GameReward.js";
 import { CommunityBetting } from "./models/CommunityBetting.js";
 import { Period } from "./models/Period.js";
+import { PenaltyBetting } from "./models/PenaltyBetting.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -359,9 +369,15 @@ import {
   multiplicationLargeSmallValue,
   checkLargeDecimalValueEquals,
 } from "./services/CommonService.js";
-
 dotenv.config();
+
 export {
+  declareWinnerOfPenaltyBetting,
+  penaltyBettingWinnerResult,
+  getAllGamePeriodOfPenaltyBetting,
+  getByIdGamePeriodOfPenaltyBetting,
+  addPenaltyBet,
+  PenaltyBetting,
   updateApi,
   getAllSubAdmin,
   deletePermission,

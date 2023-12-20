@@ -233,6 +233,12 @@ const ResponseMessage = {
     GAME_TIME_NOT_FOUND : "Game time not found",
     CURRENCY_GET : "Get currency successfully",
     CURRENCY_NOT_FOUND : "Currency not found",
+    PENALTY_BET_CRETED : "Bet add successfully",
+    PENALTY_BET_GET : "Get penalty bet successfully.",
+    PENALTY_BET_NOT_FOUND : "Penalty bet not found.",
+    PENALTY_BET_ID : "Penalty bet id is required",
+    PENALTY_BET_DELETED : "Penalty deleted successfully.",
+    PENALTY_WINNER : "Victory Alert! The Winning Color is",
 }
 
 export { ResponseMessage };

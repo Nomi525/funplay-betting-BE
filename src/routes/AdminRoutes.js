@@ -92,7 +92,8 @@ import {
   getUpdatedUser,
   getAllWithdrawalRequest,
   deletePermission,
-  getAllSubAdmin
+  getAllSubAdmin,
+  declareWinnerOfPenaltyBetting
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -277,6 +278,7 @@ adminRoutes.get(
 adminRoutes.post("/declare-community-betting-winner", Auth, declareWinnerOfCommunityBetting);
 adminRoutes.post("/declare-number-betting-winner", Auth, declareWinnerOfNumberBetting);
 adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBetting);
+adminRoutes.post("/declare-penalty-betting-winner", Auth, declareWinnerOfPenaltyBetting);
 
 adminRoutes.get("/get-all-game-periods/:gameType/:gameId", Auth, getAllGamePeriodData);
 export { adminRoutes };

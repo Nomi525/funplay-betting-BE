@@ -120,8 +120,8 @@ export const addEditGame = async (req, res) => {
         }
       }
     } else {
-      const combinedGameTimeFrom = moment(`${gameTimeFrom} ${gameDurationFrom}`, "YYYY-MM-DD hh:mm:ss A").format();
-      const combinedGameTimeTo = moment(`${gameTimeTo} ${gameDurationTo}`, "YYYY-MM-DD hh:mm:ss A").format();
+      // const combinedGameTimeFrom = moment(`${gameTimeFrom} ${gameDurationFrom}`, "YYYY-MM-DD hh:mm:ss A").format();
+      // const combinedGameTimeTo = moment(`${gameTimeTo} ${gameDurationTo}`, "YYYY-MM-DD hh:mm:ss A").format();
       const updateGame = await dataUpdated(
         { _id: gameId },
         {
@@ -133,10 +133,10 @@ export const addEditGame = async (req, res) => {
           gameDurationTo,
           gameRound,
           gameWinningAmount,
-          // gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
-          gameTimeFrom: combinedGameTimeFrom,
-          // gameTimeTo: moment(gameTimeTo).format("YYYY-MM-DD"),
-          gameTimeTo: combinedGameTimeTo,
+          gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
+          // gameTimeFrom: combinedGameTimeFrom,
+          gameTimeTo: moment(gameTimeTo).format("YYYY-MM-DD"),
+          // gameTimeTo: combinedGameTimeTo,
           gameMode,
           description,
           gameWeek,
