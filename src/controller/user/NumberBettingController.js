@@ -2587,13 +2587,13 @@ export const numberBettingWinnerResult = async (req, res) => {
           if (getAllNumberBets.length == 1) {
             const randomWinNumber = getRandomNumberExcluding(tieNumbers.map(item => item.number), 1, 100);
             await NumberBetting.create({
-              userId: null, period, number: randomWinNumber, is_deleted: 0, isWin: true, status: 'successfully'
+              userId: null, period, gameId, number: randomWinNumber, is_deleted: 0, isWin: true, status: 'successfully'
             })
-            await NumberBetting.updateMany({ period, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
+            await NumberBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
             return sendResponse(
               res,
               StatusCodes.OK,
-              `Winner number is ${randomWinNumber}`,
+              `Victory Alert! The Winning Number is ${randomWinNumber}`,
               []
             );
           } else {
@@ -2605,7 +2605,7 @@ export const numberBettingWinnerResult = async (req, res) => {
                     const findUser = await NumberBetting.findOne({ userId, period: item.period, number: item.number, is_deleted: 0 });
                     if (findUser) {
                       let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-                      await NumberBetting.updateOne({ userId, period: item.period, isWin: false, status: 'pending', number: item.number, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
+                      await NumberBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', number: item.number, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
                       const balance = await getSingleData({ userId }, NewTransaction);
                       if (balance) {
                         let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
@@ -2629,7 +2629,7 @@ export const numberBettingWinnerResult = async (req, res) => {
                 } else {
                   // Handling the losers
                   item.userIds.map(async (userId) => {
-                    await NumberBetting.updateOne({ userId, period: item.period, isWin: false, status: 'pending', number: item.number, is_deleted: 0 }, { status: 'fail' });
+                    await NumberBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', number: item.number, is_deleted: 0 }, { status: 'fail' });
                   });
                 }
               })
