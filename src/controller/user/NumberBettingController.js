@@ -2569,26 +2569,26 @@ export const numberBettingWinnerResult = async (req, res) => {
           },
         ]);
 
-        const checkUser = await NumberBetting.aggregate([
-          {
-            $match: { period: Number(period) }
-          },
-          {
-            $group: {
-              _id: "$userId",
-              totalUser: { $sum: 1 }
-            }
-          },
-          {
-            $project: {
-              totalUser: 1
-            }
-          }
-        ])
+        // const checkUser = await NumberBetting.aggregate([
+        //   {
+        //     $match: { period: Number(period) }
+        //   },
+        //   {
+        //     $group: {
+        //       _id: "$userId",
+        //       totalUser: { $sum: 1 }
+        //     }
+        //   },
+        //   {
+        //     $project: {
+        //       totalUser: 1
+        //     }
+        //   }
+        // ])
 
         if (getAllNumberBets.length) {
           const tieNumbers = getAllNumberBets.filter(item => item.totalBetAmount === getAllNumberBets[0].totalBetAmount);
-          if (getAllNumberBets.length == 1 || checkUser.length == 1) {
+          if (getAllNumberBets.length == 1) {
             const randomWinNumber = getRandomNumberExcluding(tieNumbers.map(item => item.number), 1, 100);
             await NumberBetting.create({
               userId: null, period, number: randomWinNumber, is_deleted: 0, isWin: true, status: 'successfully'
