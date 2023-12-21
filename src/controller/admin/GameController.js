@@ -1349,7 +1349,6 @@ export const getAllGamePeriodData = async (req, res) => {
         },
       ]);
     }
-    return res.send(battingAggregationResult);
     return sendResponse(
       res,
       StatusCodes.OK,
