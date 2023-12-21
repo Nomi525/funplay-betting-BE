@@ -602,8 +602,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, userId, winBetSide, period } = req.body;
-
+    const { gameId, winnerId, winColour,userId, winBetSide, period } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
