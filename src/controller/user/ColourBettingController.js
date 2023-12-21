@@ -722,8 +722,8 @@ export const getAllGamePeriod = async (req, res) => {
         }
       },
       {
-        $match : {
-          periodFor : second
+        $match: {
+          periodFor: second
         }
       }
     ]);
@@ -907,8 +907,8 @@ export const getByIdGamePeriod = async (req, res) => {
         }
       },
       {
-        $match : {
-          periodFor : second
+        $match: {
+          periodFor: second
         }
       }
     ])
@@ -1255,7 +1255,7 @@ export const colourBettingWinnerResult = async (req, res) => {
           if (getAllColourBets.length == 1) {
             const randomWinColour = getRandomElementExcluding(tieColours.map(item => item.colourName), gameType);
             await ColourBetting.create({
-              userId: null, period, gameId, colourName: randomWinColour, is_deleted: 0, isWin: true, status: 'successfully'
+              userId: null, period, gameId, gameType, colourName: randomWinColour, is_deleted: 0, isWin: true, status: 'successfully'
             });
             await ColourBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
             return sendResponse(
