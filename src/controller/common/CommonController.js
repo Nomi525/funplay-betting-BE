@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Currency } from "../../models/Currency.js";
-import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period } from "./../../index.js";
+import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -157,7 +157,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
             },
             {
                 $sort: {
-                    gameId: 1,
+                    // gameId: 1,
                     period: -1,
                 },
             }
@@ -170,6 +170,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     if (item.gameName == "Number Betting") {
                         const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinNumber = findNumbers.find((data) => data.isWin)
+                        let uniqueNumberUserIds = getUniqueUserIds(findNumbers)
                         let winner = '';
                         if(findWinNumber){
                             winner = findWinNumber.number
@@ -177,13 +178,14 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                         gamePeriod.push({
                             period: item.period,
                             gameName: item.gameName,
-                            totalUsers: findNumbers.length,
+                            totalUsers: uniqueNumberUserIds.length,
                             totalBetAmount: findNumbers.reduce((sum, data) => sum + data.betAmount, 0),
                             winner
                         })
                     } else if (item.gameName == "3 Color Betting" || item.gameName == "2 Color Betting") {
                         let gameType = item.gameName == "3 Color Betting" ? "3colorBetting" : "2colorBetting";
                         const findColours = await ColourBetting.find({ gameType, gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        let uniqueColorUserIds = getUniqueUserIds(findColours)
                         const findWinColour = findColours.find((data) => data.isWin)
                         let winner = '';
                         if(findWinColour){
@@ -192,8 +194,24 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                         gamePeriod.push({
                             period: item.period,
                             gameName: item.gameName,
-                            totalUsers: findColours.length,
+                            totalUsers: uniqueColorUserIds.length,
                             totalBetAmount: findColours.reduce((sum, data) => sum + data.betAmount, 0),
+                            winner
+                        })
+                    } else if (item.gameName == "Community Betting") {
+                        const findCommunity = await CommunityBetting.find({gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount )
+                        let winner = [];
+                        let uniqueCommunityUserIds = getUniqueUserIds(findCommunity)
+                        if(findWinCommunity.length){
+                            // winner = findWinCommunity.betAmount
+                            winner = findWinCommunity
+                        }
+                        gamePeriod.push({
+                            period: item.period,
+                            gameName: item.gameName,
+                            totalUsers: uniqueCommunityUserIds.length,
+                            totalBetAmount: findCommunity.reduce((sum, data) => sum + data.betAmount, 0),
                             winner
                         })
                     }
@@ -389,3 +407,8 @@ export const getAllGameRecodesGameWise = async (req, res) => {
     }
 }
 //#endregion
+
+function getUniqueUserIds(data){
+    let uniqueUserIds = new Set(data.map(entry => String(entry.userId)));
+    return [...uniqueUserIds]
+}
