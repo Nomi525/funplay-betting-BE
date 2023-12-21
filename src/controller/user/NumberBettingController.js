@@ -1665,7 +1665,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
 
 export const createAllGamePeriodFromCronJob = async () => {
   try {
-    var currentDate2 = moment().format("YYYY-MM-DD");
+    var currentDate2 = moment().utcOffset("+05:30").format("YYYY-MM-DD");
     // var currentDate3 = moment();
     const findGame2 = await Game.find({
       gameTimeFrom: { $lte: currentDate2 },
