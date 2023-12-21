@@ -631,6 +631,7 @@ export const getSingleGameWiseWinner = async (req, res) => {
 export const getAllGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
+    const { second } = req.query;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const currentDateOnServer = new Date();
     const last24HoursDateOnServer = new Date(currentDateOnServer - 24 * 60 * 60 * 1000);
@@ -716,7 +717,13 @@ export const getAllGamePeriod = async (req, res) => {
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
+          periodFor: "$periodData.periodFor",
           createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $match : {
+          periodFor : second
         }
       }
     ]);
@@ -835,6 +842,7 @@ export const getAllGamePeriod = async (req, res) => {
 export const getByIdGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
+    const { second } = req.query;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     // const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
     //   .populate('userId', 'fullName profile email')
@@ -894,7 +902,13 @@ export const getByIdGamePeriod = async (req, res) => {
           date: "$periodData.date",
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
+          periodFor: "$periodData.periodFor",
           createdAt: "$periodData.createdAt",
+        }
+      },
+      {
+        $match : {
+          periodFor : second
         }
       }
     ])
@@ -1137,8 +1151,12 @@ function getRandomElement(arr) {
 }
 
 // Function to get a random element from an array excluding specified elements
-function getRandomElementExcluding(excludeElements) {
+function getRandomElementExcluding(excludeElements, gameType) {
   let randomElement;
+  let allColors = ["red", "green", "orange"];
+  if (gameType == "2colorBetting") {
+    allColors = ["red", "green"]
+  }
   do {
     randomElement = getRandomElement(allColors);
   } while (excludeElements.includes(randomElement));
@@ -1148,10 +1166,6 @@ function getRandomElementExcluding(excludeElements) {
 export const colourBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, gameId, period } = req.params;
-    let allColors = ["red", "green", "orange"];
-    if (gameType == "2colorBetting") {
-      allColors = ["red", "green"]
-    }
     const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
 
     if (findGameMode) {
@@ -1239,7 +1253,7 @@ export const colourBettingWinnerResult = async (req, res) => {
         if (getAllColourBets.length) {
           const tieColours = getAllColourBets.filter(item => item.totalBetAmount === getAllColourBets[0].totalBetAmount);
           if (getAllColourBets.length == 1) {
-            const randomWinColour = getRandomElementExcluding(tieColours.map(item => item.colourName));
+            const randomWinColour = getRandomElementExcluding(tieColours.map(item => item.colourName), gameType);
             await ColourBetting.create({
               userId: null, period, gameId, colourName: randomWinColour, is_deleted: 0, isWin: true, status: 'successfully'
             });
