@@ -1184,7 +1184,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       isWin: true,
       period: Number(period),
       is_deleted: 0,
-    });
+    }).lean();
 
     if (checkAlreadyWin.length) {
       return sendResponse(
