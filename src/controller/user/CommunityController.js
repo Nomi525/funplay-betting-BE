@@ -90,18 +90,6 @@ export const addEditCommunityBets = async (req, res) => {
       } else {
         checkBalance.betAmount = betAmount;
       }
-      // checkBalance.tokenDollorValue = minusLargeSmallValue(
-      //   checkBalance.tokenDollorValue,
-      //   getCommunityGame.betAmount
-      // );
-      // if (parseFloat(checkBalance.betAmount)) {
-      //   checkBalance.betAmount = plusLargeSmallValue(
-      //     checkBalance.betAmount,
-      //     getCommunityGame.betAmount
-      //   );
-      // } else {
-      //   checkBalance.betAmount = getCommunityGame.betAmount;
-      // }
       await checkBalance.save();
       return sendResponse(
         res,

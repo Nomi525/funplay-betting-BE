@@ -460,10 +460,12 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           userId: winnerId,
           period,
           is_deleted: 0,
+          status : "pending"
         });
         if (winnerUser) {
           let rewardAmount = winningAmount;
           winnerUser.isWin = true;
+          winnerUser.status = "successfully";
           winnerUser.rewardAmount = rewardAmount;
           await winnerUser.save();
           winnerData.push(winnerUser);
@@ -484,6 +486,13 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         }
       })
     );
+    await CommunityBetting.updateMany({
+      gameId,
+      isWin: false,
+      period: Number(period),
+      is_deleted: 0,
+      status : "pending"
+    }, { status: "fail" })
     // } else {
     //   return sendResponse(
     //     res,
