@@ -292,7 +292,8 @@ import {
   declareWinnerOfCommunityBetting,
   declareWinnerOfNumberBetting,
   declareWinnerOfColorBetting,
-  declareWinnerOfPenaltyBetting
+  declareWinnerOfPenaltyBetting,
+  declareWinnerOfCardBetting
 } from "./controller/admin/GameWinnerController.js";
 
 // Penalty Controller
@@ -302,6 +303,15 @@ import {
   getByIdGamePeriodOfPenaltyBetting,
   penaltyBettingWinnerResult
 } from "./controller/user/PenaltyBettingController.js";
+
+// Crad Controller
+
+import { 
+  addCardBet,
+  getByIdGamePeriodOfCardBetting,
+  getAllGamePeriodOfCardBetting,
+  cardBettingWinnerResult,
+} from "./controller/user/CardBettingController.js";
 
 // *********** Routes **************** //
 import { adminRoutes } from "./routes/AdminRoutes.js";
@@ -339,6 +349,7 @@ import { GameReward } from "./models/GameReward.js";
 import { CommunityBetting } from "./models/CommunityBetting.js";
 import { Period } from "./models/Period.js";
 import { PenaltyBetting } from "./models/PenaltyBetting.js";
+import { CardBetting } from "./models/CardBetting.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
@@ -372,6 +383,12 @@ import {
 dotenv.config();
 
 export {
+  addCardBet,
+  getByIdGamePeriodOfCardBetting,
+  getAllGamePeriodOfCardBetting,
+  cardBettingWinnerResult,
+  CardBetting,
+  declareWinnerOfCardBetting,
   declareWinnerOfPenaltyBetting,
   penaltyBettingWinnerResult,
   getAllGamePeriodOfPenaltyBetting,

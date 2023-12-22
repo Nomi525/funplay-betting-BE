@@ -1,4 +1,6 @@
 const ResponseMessage = {
+    INVALID_TYPE : "Invalid type",
+    REGISTERED_TYPE_NOT_MATCH_FOR_OTP : "Register type not match for otp",
     REGISTERED : "Registered successfully",
     LOGIN : "Login successfully",
     DATABASE_CONNECTED: "Database connected",
@@ -174,6 +176,7 @@ const ResponseMessage = {
     LOSER : "You are loser",
     NUMBER_WINNER : "Victory Alert! The Winning number is",
     COLOR_WINNER : "Victory Alert! The Winning Color is",
+    PENALTY_WINNER : "Victory Alert! The Winning Color is",
     NUMBER_BET_CRATED : "Bet add successfully",
     COLOR_BET_CRATED : "Bet add successfully",
     ALREADY_WIN : "This period ID is already win",
@@ -238,7 +241,13 @@ const ResponseMessage = {
     PENALTY_BET_NOT_FOUND : "Penalty bet not found.",
     PENALTY_BET_ID : "Penalty bet id is required",
     PENALTY_BET_DELETED : "Penalty deleted successfully.",
-    PENALTY_WINNER : "Victory Alert! The Winning Color is",
+    PENALTY_WINNER : "Victory Alert! The Winning Side is",
+    CARD_BET_CRETED : "Bet add successfully",
+    CARD_BET_GET : "Get card bet successfully.",
+    CARD_BET_NOT_FOUND : "card bet not found.",
+    CARD_BET_ID : "Card bet id is required",
+    CARD_BET_DELETED : "card deleted successfully.",
+    CARD_WINNER : "Victory Alert! The Winning Card is",
 }
 
 export { ResponseMessage };

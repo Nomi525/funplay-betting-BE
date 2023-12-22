@@ -18,13 +18,12 @@ import {
     checkDecimalValueGreaterThanOrEqual,
     sendMail,
     ejs,
-    PenaltyBetting
+    CardBetting,
 } from "../../index.js";
-
 //#region Add penalty Betting
-export const addPenaltyBet = async (req, res) => {
+export const addCardBet = async (req, res) => {
     try {
-        let { gameId, betSide, betAmount, period } = req.body;
+        let { gameId, card, betAmount, period } = req.body;
         if (betAmount < 0) {
             return sendResponse(
                 res,
@@ -68,18 +67,18 @@ export const addPenaltyBet = async (req, res) => {
             );
         }
 
-        let createPenaltyBet = await dataCreate(
+        let createCardBet = await dataCreate(
             {
                 userId: req.user,
                 gameId: gameId,
-                betSide: betSide,
+                card: card,
                 betAmount: parseInt(betAmount),
                 period
             },
-            PenaltyBetting
+            CardBetting
         );
 
-        if (createPenaltyBet) {
+        if (createCardBet) {
             checkBalance.totalCoin = minusLargeSmallValue(
                 checkBalance.totalCoin,
                 betAmount
@@ -96,8 +95,8 @@ export const addPenaltyBet = async (req, res) => {
             return sendResponse(
                 res,
                 StatusCodes.CREATED,
-                ResponseMessage.PENALTY_BET_CRETED,
-                createPenaltyBet
+                ResponseMessage.CARD_BET_CRETED,
+                createCardBet
             );
         } else {
             return sendResponse(
@@ -114,11 +113,11 @@ export const addPenaltyBet = async (req, res) => {
 //#endregion
 
 //#region Get By Id Penalty Betting Period
-export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
+export const getByIdGamePeriodOfCardBetting = async (req, res) => {
     try {
         const { gameId } = req.params;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const getGamePeriodById = await PenaltyBetting.aggregate([
+        const getGamePeriodById = await CardBetting.aggregate([
             {
                 $match: {
                     userId: new mongoose.Types.ObjectId(req.user),
@@ -139,7 +138,7 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                 $project: {
                     _id: 0,
                     price: "$betAmount",
-                    betSide: 1,
+                    card: 1,
                     period: 1,
                     isWin: 1,
                     status: 1,
@@ -166,7 +165,7 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                 $project: {
                     period: 1,
                     price: 1,
-                    betSide: 1,
+                    card: 1,
                     isWin: 1,
                     status: 1,
                     date: "$periodData.date",
@@ -194,11 +193,11 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
 //#endregion
 
 //#region Get All Penalty Betting Period
-export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
+export const getAllGamePeriodOfCardBetting = async (req, res) => {
     try {
         const { gameId } = req.params;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const getPenaltyBettingPeriods = await PenaltyBetting.aggregate([
+        const getCardBettingPeriods = await CardBetting.aggregate([
             {
                 $match: {
                     gameId: new mongoose.Types.ObjectId(gameId),
@@ -212,11 +211,11 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
                     gameId: { $first: "$gameId" },
                     totalUsers: { $sum: 1 },
                     betAmount: { $sum: "$betAmount" },
-                    winBetSide: {
+                    wincard: {
                         $max: {
                             $cond: [
                                 { $eq: ['$isWin', true] },
-                                "$betSide",
+                                "$card",
                                 null
                             ]
                         }
@@ -265,7 +264,7 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
                     totalUsers: 1,
                     price: "$betAmount",
                     period: 1,
-                    winBetSide: 1,
+                    wincard: 1,
                     status: 1,
                     periodData: {
                         $filter: {
@@ -285,7 +284,7 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
                 $project: {
                     gameId: 1,
                     totalUsers: 1,
-                    winBetSide: 1,
+                    wincard: 1,
                     period: 1,
                     price: 1,
                     status: 1,
@@ -305,7 +304,7 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
             res,
             StatusCodes.OK,
             ResponseMessage.GAME_PERIOD_GET,
-            getPenaltyBettingPeriods
+            getCardBettingPeriods
         );
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -321,20 +320,20 @@ function getRandomElement(arr) {
 // Function to get a random element from an array excluding specified elements
 function getRandomElementExcluding(excludeElements) {
     let randomElement;
-    let allColors = ["left", "right"];
+    let allCards = ["left", "right"];
     do {
-        randomElement = getRandomElement(allColors);
+        randomElement = getRandomElement(allCards);
     } while (excludeElements.includes(randomElement));
     return randomElement;
 }
 
 //#region Penalty Game Winner api
-export const penaltyBettingWinnerResult = async (req, res) => {
+export const cardBettingWinnerResult = async (req, res) => {
     try {
         const { gameId, period } = req.params;
         const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
         if (findGameMode) {
-            await PenaltyBetting.updateMany({ gameId, period }, { status: "pending" })
+            await CardBetting.updateMany({ gameId, period }, { status: "pending" })
             return sendResponse(
                 res,
                 StatusCodes.OK,
@@ -342,7 +341,7 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                 []
             );
         }
-        const checkAlreadyWin = await PenaltyBetting.find({
+        const checkAlreadyWin = await CardBetting.find({
             gameId,
             isWin: true,
             period: Number(period),
@@ -352,17 +351,17 @@ export const penaltyBettingWinnerResult = async (req, res) => {
             return sendResponse(
                 res,
                 StatusCodes.OK,
-                ResponseMessage.PENALTY_WINNER + " " + checkAlreadyWin[0].betSide,
+                ResponseMessage.PENALTY_WINNER + " " + checkAlreadyWin[0].card,
                 [
                     {
                         period: checkAlreadyWin[0].period,
-                        betSide: checkAlreadyWin[0].betSide,
+                        card: checkAlreadyWin[0].card,
                         totalBetAmount: checkAlreadyWin.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
                     }
                 ]
             );
         }
-        const totalUserInPeriod = await PenaltyBetting.aggregate([
+        const totalUserInPeriod = await CardBetting.aggregate([
             {
                 $match: {
                     gameId: new mongoose.Types.ObjectId(gameId),
@@ -381,13 +380,13 @@ export const penaltyBettingWinnerResult = async (req, res) => {
         if (totalUserInPeriod.length) {
             const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
             if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
-                const getAllSideBets = await PenaltyBetting.aggregate([
+                const getAllSideBets = await CardBetting.aggregate([
                     {
                         $match: { period: Number(period) }
                     },
                     {
                         $group: {
-                            _id: "$betSide",
+                            _id: "$card",
                             period: { $first: "$period" },
                             totalUser: { $sum: 1 },
                             userIds: { $push: "$userId" },
@@ -398,7 +397,7 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                         $project: {
                             _id: 0,
                             period: 1,
-                            betSide: "$_id",
+                            card: "$_id",
                             totalUser: 1,
                             userIds: 1,
                             totalBetAmount: 1,
@@ -412,11 +411,11 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                 if (getAllSideBets.length) {
                     const tieSides = getAllSideBets.filter(item => item.totalBetAmount === getAllSideBets[0].totalBetAmount);
                     if (getAllSideBets.length == 1) {
-                        const randomWinSide = getRandomElementExcluding(tieSides.map(item => item.betSide));
-                        await PenaltyBetting.create({
-                            userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+                        const randomWinSide = getRandomElementExcluding(tieSides.map(item => item.card));
+                        await CardBetting.create({
+                            userId: null, period, gameId, card: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
                         });
-                        await PenaltyBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
+                        await CardBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
                         return sendResponse(
                             res,
                             StatusCodes.OK,
@@ -429,10 +428,10 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                                 if (index === 0) {
                                     // Handling the winner
                                     item.userIds.map(async (userId) => {
-                                        const findUser = await PenaltyBetting.findOne({ userId, gameId, period: item.period, betSide: item.betSide, is_deleted: 0 });
+                                        const findUser = await CardBetting.findOne({ userId, gameId, period: item.period, card: item.card, is_deleted: 0 });
                                         if (findUser) {
                                             let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-                                            await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 },
+                                            await CardBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', card: item.card, is_deleted: 0 },
                                                 { isWin: true, status: 'successfully', rewardAmount }
                                             );
                                             const balance = await getSingleData({ userId }, NewTransaction);
@@ -459,7 +458,7 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                                 } else {
                                     // Handling the losers
                                     item.userIds.map(async (userId) => {
-                                        await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 }, { status: 'fail' });
+                                        await CardBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', card: item.card, is_deleted: 0 }, { status: 'fail' });
                                     });
                                 }
                             })
@@ -468,11 +467,11 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                     return sendResponse(
                         res,
                         StatusCodes.OK,
-                        ResponseMessage.PENALTY_WINNER + " " + getAllSideBets[0].betSide,
+                        ResponseMessage.PENALTY_WINNER + " " + getAllSideBets[0].card,
                         getAllSideBets[0]
                     );
                 } else {
-                    await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
+                    await CardBetting.updateMany({ gameId, period }, { status: "fail" })
                     return sendResponse(
                         res,
                         StatusCodes.OK,
@@ -481,7 +480,7 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                     );
                 }
             } else {
-                await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
+                await CardBetting.updateMany({ gameId, period }, { status: "fail" })
                 return sendResponse(
                     res,
                     StatusCodes.OK,
