@@ -1328,13 +1328,35 @@ export const colourBettingWinnerResult = async (req, res) => {
           []
         );
       }
+    } else {
+      let allColors = ["red", "green", "orange"];
+      if (gameType == "2colorBetting") {
+        allColors = ["red", "green"]
+      }
+      let randomIndex = Math.floor(Math.random() * allColors.length);
+      let randomWinColor = allColors[randomIndex];
+      await ColourBetting.create({
+        userId: null, period, gameId, colourName: randomWinColor, is_deleted: 0, isWin: true, status: 'successfully'
+      })
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.COLOR_WINNER + " " + randomWinColor,
+        [
+          {
+            period,
+            number: randomWinColor,
+            totalBetAmount: 0
+          }
+        ]
+      );
     }
-    return sendResponse(
-      res,
-      StatusCodes.BAD_REQUEST,
-      "User not found",
-      []
-    );
+    // return sendResponse(
+    //   res,
+    //   StatusCodes.BAD_REQUEST,
+    //   "User not found",
+    //   []
+    // );
   } catch (error) {
     console.log('error-ColourBettingController', error);
     return handleErrorResponse(res, error);

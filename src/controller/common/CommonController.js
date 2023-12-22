@@ -164,12 +164,11 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                 },
             }
         ]);
-        let sNo = 0;
-        const gamePeriod = [];
+        let gamePeriod = [];
         if (getAllPeriod.length) {
             await Promise.all(
                 getAllPeriod.map(async (item,i) => {
-                    // let sNo = i+1;
+                    let sNo = i+1;
                     if (item.gameName == "Number Betting") {
                         const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinNumber = findNumbers.find((data) => data.isWin)
@@ -221,10 +220,10 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             winner
                         })
                     }
-                    sNo++
                 })
             )
         }
+        gamePeriod = await Promise.all(gamePeriod.sort(((a,b) => a.sNo - b.sNo)))
         return sendResponse(
             res,
             StatusCodes.OK,

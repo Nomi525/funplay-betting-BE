@@ -623,6 +623,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       if (findColorBetting instanceof ColourBetting) {
         let rewardAmount = findColorBetting.betAmount * 0.95;
         findColorBetting.isWin = true;
+        findColorBetting.status = "successfully";
         findColorBetting.rewardAmount = rewardAmount;
         await findColorBetting.save();
 
