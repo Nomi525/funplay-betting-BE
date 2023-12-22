@@ -1666,6 +1666,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
 export const createAllGamePeriodFromCronJob = async () => {
   try {
     var currentDate2 = moment().utcOffset("+05:30").format("YYYY-MM-DD");
+    console.log('currentDate2 1669',currentDate2);
     // var currentDate3 = moment();
     const findGame2 = await Game.find({
       gameTimeFrom: { $lte: currentDate2 },
@@ -1685,6 +1686,7 @@ export const createAllGamePeriodFromCronJob = async () => {
           `${currentDate2} ${currentTime}:00`,
           "YYYY-MM-DD HH:mm:ss"
         ).unix();
+        console.log('Number currentTime 1689',currentTime);
         var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
         var gameStartTimestamp = moment(
           `${gameStartDate2} ${gameStartTime}:00`,
@@ -1748,7 +1750,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                     date: currentDate2
                   }
                 },
-                { upsert: true, hint: { period: 1 } }
+                { upsert: true }
               ).lean();
             } else {
               await Period.updateOne({
@@ -1765,7 +1767,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                     date: currentDate2
                   }
                 },
-                { upsert: true, hint: { period: 1 } }
+                { upsert: true }
               ).lean();
             }
           } else {
@@ -1788,7 +1790,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                         date: currentDate2,
                       }
                     },
-                    { upsert: true, hint: { period: 1 } }
+                    { upsert: true }
                   ).lean();
                 } else {
                   await Period.updateOne({
@@ -1806,7 +1808,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                         date: currentDate2,
                       }
                     },
-                    { upsert: true, hint: { period: 1 } }
+                    { upsert: true }
                   ).lean();
                 }
               }
@@ -1825,6 +1827,7 @@ export const createAllGamePeriodFromCronJob = async () => {
           `${currentDate2} ${currentTime}:00`,
           "YYYY-MM-DD HH:mm:ss"
         ).unix();
+        console.log('Color currentTime 1830',currentTime);
         var gameStartDate2 = moment(game.gameTimeFrom).format("YYYY-MM-DD");
         var gameStartTimestamp = moment(
           `${gameStartDate2} ${gameStartTime}:00`,
@@ -1887,7 +1890,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                     date: currentDate2,
                   }
                 },
-                { upsert: true, hint: { period: 1 } }
+                { upsert: true }
               ).lean();
             } else {
               await Period.updateOne({
@@ -1904,7 +1907,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                     date: currentDate2,
                   }
                 },
-                { upsert: true, hint: { period: 1 } }
+                { upsert: true }
               ).lean();
             }
           } else {
@@ -1927,7 +1930,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                         date: currentDate2,
                       }
                     },
-                    { upsert: true, hint: { period: 1 } }
+                    { upsert: true }
                   ).lean();
                 } else {
                   await Period.updateOne({
@@ -1945,7 +1948,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                         date: currentDate2,
                       }
                     },
-                    { upsert: true, hint: { period: 1 } }
+                    { upsert: true }
                   ).lean();
                 }
               }
@@ -2094,7 +2097,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                           periodFor: second,
                         }
                       },
-                      { upsert: true, hint: { period: 1 } }
+                      { upsert: true }
                     ).lean();
                   }
                 }
@@ -2180,7 +2183,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                       periodFor: second,
                     }
                   },
-                  { upsert: true, hint: { period: 1 } }
+                  { upsert: true }
                 ).lean();
               } else {
                 await Period.updateOne({
@@ -2199,7 +2202,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                       periodFor: second,
                     }
                   },
-                  { upsert: true, hint: { period: 1 } }
+                  { upsert: true }
                 ).lean();
               }
             } else {
@@ -2224,7 +2227,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                           periodFor: second,
                         }
                       },
-                      { upsert: true, hint: { period: 1 } }
+                      { upsert: true }
                     ).lean();
                   } else {
                     await Period.updateOne({
@@ -2244,7 +2247,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                           periodFor: second,
                         }
                       },
-                      { upsert: true, hint: { period: 1 } }
+                      { upsert: true }
                     ).lean();
                   }
                 }
@@ -2330,7 +2333,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                       periodFor: second,
                     }
                   },
-                  { upsert: true, hint: { period: 1 } }
+                  { upsert: true }
                 ).lean();
               } else {
                 await Period.updateOne({
@@ -2349,7 +2352,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                       periodFor: second,
                     }
                   },
-                  { upsert: true, hint: { period: 1 } }
+                  { upsert: true }
                 ).lean();
               }
             } else {
@@ -2374,7 +2377,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                           periodFor: second,
                         }
                       },
-                      { upsert: true, hint: { period: 1 } }
+                      { upsert: true }
                     ).lean();
                   } else {
                     await Period.updateOne({
@@ -2394,7 +2397,7 @@ export const createAllGamePeriodFromCronJob = async () => {
                           periodFor: second,
                         }
                       },
-                      { upsert: true, hint: { period: 1 } }
+                      { upsert: true }
                     ).lean();
                   }
                 }
