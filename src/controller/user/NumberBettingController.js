@@ -1663,6 +1663,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
 // };
 
 
+// cronJob for all games  
 export const createAllGamePeriodFromCronJob = async () => {
   try {
     var currentDate2 = moment().utcOffset("+05:30").format("YYYY-MM-DD");
