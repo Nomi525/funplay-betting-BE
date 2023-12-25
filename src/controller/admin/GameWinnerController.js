@@ -18,7 +18,8 @@ import {
   ejs,
   sendMail,
   User,
-  PenaltyBetting
+  PenaltyBetting,
+  CardBetting
 } from "../../index.js";
 
 //#region Get All winners user
@@ -459,10 +460,12 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           userId: winnerId,
           period,
           is_deleted: 0,
+          status : "pending"
         });
         if (winnerUser) {
           let rewardAmount = winningAmount;
           winnerUser.isWin = true;
+          winnerUser.status = "successfully";
           winnerUser.rewardAmount = rewardAmount;
           await winnerUser.save();
           winnerData.push(winnerUser);
@@ -483,6 +486,13 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         }
       })
     );
+    await CommunityBetting.updateMany({
+      gameId,
+      isWin: false,
+      period: Number(period),
+      is_deleted: 0,
+      status : "pending"
+    }, { status: "fail" })
     // } else {
     //   return sendResponse(
     //     res,
@@ -602,7 +612,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winColour,userId, winBetSide, period } = req.body;
+    const { gameId, winnerId, winColour, userId, winBetSide, period } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
@@ -622,6 +632,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       if (findColorBetting instanceof ColourBetting) {
         let rewardAmount = findColorBetting.betAmount * 0.95;
         findColorBetting.isWin = true;
+        findColorBetting.status = "successfully";
         findColorBetting.rewardAmount = rewardAmount;
         await findColorBetting.save();
 
@@ -716,6 +727,83 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
     );
   } catch (error) {
     // console.log(error);
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Winner declare of Number Betting
+export const declareWinnerOfCardBetting = async (req, res) => {
+  try {
+    const { gameId, winnerId, userId, winCard, period } = req.body;
+    if (!winnerId) {
+      return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
+    }
+
+    const findCardBettingArray = await getAllData(
+      {
+        gameId,
+        period: winnerId,
+        card: winCard,
+        status: "pending",
+        is_deleted: 0,
+        isWin: false,
+      },
+      CardBetting
+    );
+    const savedInstances = [];
+
+    for (const findCardBetting of findCardBettingArray) {
+      if (findCardBetting instanceof CardBetting) {
+        let rewardAmount = findCardBetting.betAmount * 0.95;
+        findCardBetting.isWin = true;
+        findCardBetting.rewardAmount = rewardAmount;
+        findCardBetting.status = "successfully";
+        await findCardBetting.save();
+
+        const balance = await getSingleData(
+          { userId: findCardBetting.userId },
+          NewTransaction
+        );
+        if (balance) {
+          let winingAmount = Number(findCardBetting.betAmount) + Number(rewardAmount);
+          balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
+          await balance.save();
+          const userData = await getSingleData(
+            { _id: findCardBetting.userId },
+            User
+          );
+          let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+            gameName: "Card Betting",
+          });
+          await sendMail(userData.email, "Card betting game win", mailInfo);
+        }
+        savedInstances.push(findCardBetting);
+      } else {
+        console.error(
+          "Document is not an instance of Card Betting:",
+          findCardBetting
+        );
+      }
+    }
+    await CardBetting.updateMany(
+      {
+        gameId,
+        period: winnerId,
+        card: { $ne: winCard },
+        status: "pending",
+        is_deleted: 0,
+        isWin: false,
+      },
+      { status: "fail" }
+    );
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "Winners added successfully",
+      savedInstances
+    );
+  } catch (error) {
     return handleErrorResponse(res, error);
   }
 };

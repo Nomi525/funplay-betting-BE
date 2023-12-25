@@ -137,6 +137,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     _id: 0,
                     gameId: "$gameId",
                     period: "$period",
+                    createdAt: "$createdAt",
                 },
             },
             {
@@ -153,20 +154,21 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     gameName: "$game.gameName",
                     gameId: "$gameId",
                     period: "$period",
+                    createdAt: "$createdAt",
                 }
             },
             {
                 $sort: {
                     // gameId: 1,
-                    period: -1,
+                    createdAt: -1,
                 },
             }
         ]);
-
-        const gamePeriod = [];
+        let gamePeriod = [];
         if (getAllPeriod.length) {
             await Promise.all(
-                getAllPeriod.map(async (item) => {
+                getAllPeriod.map(async (item,i) => {
+                    let sNo = i+1;
                     if (item.gameName == "Number Betting") {
                         const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinNumber = findNumbers.find((data) => data.isWin)
@@ -176,6 +178,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             winner = findWinNumber.number
                         }
                         gamePeriod.push({
+                            sNo : sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueNumberUserIds.length,
@@ -192,6 +195,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             winner = findWinColour.colourName
                         }
                         gamePeriod.push({
+                            sNo : sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueColorUserIds.length,
@@ -208,6 +212,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             winner = findWinCommunity
                         }
                         gamePeriod.push({
+                            sNo : sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueCommunityUserIds.length,
@@ -218,6 +223,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                 })
             )
         }
+        gamePeriod = await Promise.all(gamePeriod.sort(((a,b) => a.sNo - b.sNo)))
         return sendResponse(
             res,
             StatusCodes.OK,

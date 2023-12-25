@@ -71,7 +71,11 @@ import {
   addPenaltyBet,
   getAllGamePeriodOfPenaltyBetting,
   getByIdGamePeriodOfPenaltyBetting,
-  penaltyBettingWinnerResult
+  penaltyBettingWinnerResult,
+  addCardBet,
+  getByIdGamePeriodOfCardBetting,
+  getAllGamePeriodOfCardBetting,
+  cardBettingWinnerResult,
 } from "./../index.js";
 const userRoutes = express.Router();
 
@@ -221,6 +225,14 @@ userRoutes.get('/get-all-penalty-betting-period/:gameId', Auth, getAllGamePeriod
 userRoutes.get('/get-penalty-betting-winner/:gameId/:period', Auth, penaltyBettingWinnerResult)
 
 //#endregion Penalty Betting Routes
+
+//#region card Betting All Routes
+userRoutes.post('/create-card-bet', Auth, addCardBet)
+userRoutes.get('/get-by-id-card-betting-period/:gameId', Auth, getByIdGamePeriodOfCardBetting)
+userRoutes.get('/get-all-card-betting-period/:gameId', Auth, getAllGamePeriodOfCardBetting)
+userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinnerResult)
+
+//#endregion card Betting Routes
 
 
 export { userRoutes };
