@@ -155,7 +155,7 @@ const ResponseMessage = {
     GET_ALL_WITHDRAWAL_REQUEST : "Get all withdrawal request successfully",
     REFERRAL_NOT_FOUND : "Referral not found",
     USER_ACTIVATED : "User activated successfully",
-    USER_DEACTIVATED : "User deactivated successfully",
+    USER_DEACTIVATED : "Account deactivated successfully",
     FAILED_TO_CREATE: "Failed to created",
     FAILED_TO_UPDATE: "Failed to updated",
     FAILED_TO_DELETE: "Failed to delete",

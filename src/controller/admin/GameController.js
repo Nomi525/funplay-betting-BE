@@ -1280,75 +1280,123 @@ export const getAllGamePeriodData = async (req, res) => {
         }
       ]);
     } else if (gameType === "communityBetting") {
-      battingAggregationResult = await Period.aggregate([
-        {
-          $match: {
-            gameId: new mongoose.Types.ObjectId(gameId),
-            period: { $nin: isWinTruePeriodsforCommunityBetting },
-          },
-        },
-        {
-          $lookup: {
-            from: 'communitybettings',
-            localField: 'period',
-            foreignField: 'period',
-            as: 'communitybettingsData',
-          },
-        },
-        {
-          $unwind: '$communitybettingsData',
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'communitybettingsData.userId',
-            foreignField: '_id',
-            as: 'usersData',
-          },
-        },
-        {
-          $group: {
-            _id: {
-              period: '$period',
-              periodId: '$_id',
-              userId: '$communitybettingsData.userId',
+        battingAggregationResult = await Period.aggregate([
+          {
+            $match: {
+              gameId: new mongoose.Types.ObjectId(gameId),
+              period: { $nin: isWinTruePeriodsforCommunityBetting },
             },
-            anyWinTrue: { $max: '$communitybettingsData.isWin' },
-            totalBetAmount: { $sum: '$communitybettingsData.betAmount' },
-            usersData: { $first: '$usersData' },
           },
-        },
-        {
-          $match: {
-            anyWinTrue: { $ne: true },
+          {
+            $lookup: {
+              from: 'communitybettings',
+              localField: 'period',
+              foreignField: 'period',
+              as: 'communitybettingsData',
+            },
           },
-        },
-        {
-          $group: {
-            _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
-            comunityBettingData: {
-              $push: {
-                userEmail: { $arrayElemAt: ['$usersData.email', 0] },
-                userName: { $arrayElemAt: ['$usersData.fullName', 0] },
-                userId: '$_id.userId',
-                betAmount: '$totalBetAmount',
+          {
+            $unwind: '$communitybettingsData',
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'communitybettingsData.userId',
+              foreignField: '_id',
+              as: 'usersData',
+            },
+          },
+          {
+            $group: {
+              _id: {
+                period: '$period',
+                periodId: '$_id',
+                userId: '$communitybettingsData.userId',
+              },
+              anyWinTrue: { $max: '$communitybettingsData.isWin' },
+              totalBetAmount: { $sum: '$communitybettingsData.betAmount' },
+              usersData: { $first: '$usersData' },
+            },
+          },
+          {
+            $match: {
+              anyWinTrue: { $ne: true },
+            },
+          },
+          {
+            $group: {
+              _id: '$_id.period',
+              periodId: { $first: '$_id.periodId' },
+              comunityBettingData: {
+                $push: {
+                  userEmail: { $arrayElemAt: ['$usersData.email', 0] },
+                  userName: { $arrayElemAt: ['$usersData.fullName', 0] },
+                  userId: '$_id.userId',
+                  betAmount: '$totalBetAmount',
+                },
               },
             },
           },
-        },
-        {
-          $project: {
-            _id: 0,
-            period: '$_id',
-            comunityBettingData: 1,
+          {
+            $project: {
+              _id: 0,
+              period: '$_id',
+              comunityBettingData: 1,
+            },
           },
-        },
-        {
-          $sort: { period: -1 },
-        },
-      ]);
-    }
+          {
+            $sort: { period: -1 },
+          },
+          {
+            $facet: {
+              totalPeriodUser: [
+                {
+                  $match: {
+                    gameId: new mongoose.Types.ObjectId(gameId),
+                    period: { $nin: isWinTruePeriodsforCommunityBetting },
+                  },
+                },
+                {
+                  $lookup: {
+                    from: 'communitybettings',
+                    localField: 'period',
+                    foreignField: 'period',
+                    as: 'communitybettingsData',
+                  },
+                },
+                {
+                  $unwind: '$communitybettingsData',
+                },
+                {
+                  $group: {
+                    _id: '$communitybettingsData.userId',
+                    totalUsers: { $sum: 1 },
+                  }
+                },
+                {
+                  $group: {
+                    _id: null,
+                    totalUserArrayLength: { $sum: 1 },
+                  },
+                },
+              ]
+            }
+          },
+          {
+            $unwind: '$totalPeriodUser',
+          },
+          {
+            $replaceRoot: {
+              newRoot: {
+                $mergeObjects: [
+                  '$totalPeriodUser',
+                  { totalUser: { $arrayElemAt: ['$totalPeriodUser.totalUserArrayLength', 0] } },
+                ],
+              },
+            },
+          }
+        ]);
+      }
     return sendResponse(
       res,
       StatusCodes.OK,
