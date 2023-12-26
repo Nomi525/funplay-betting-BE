@@ -86,7 +86,7 @@ export const addEditGame = async (req, res) => {
             gameRound,
             gameWinningAmount,
             gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
-            gameTimeTo: moment(gameTimeTo).format("YYYY-MM-DD"),
+            gameTimeTo: moment(gameTimeTo).utc(),
             gameMode,
             description,
             gameWeek,
