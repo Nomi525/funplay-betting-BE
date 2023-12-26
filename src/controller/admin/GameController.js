@@ -135,7 +135,7 @@ export const addEditGame = async (req, res) => {
           gameWinningAmount,
           gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
           // gameTimeFrom: combinedGameTimeFrom,
-          gameTimeTo: moment(gameTimeTo).format("YYYY-MM-DD"),
+          gameTimeTo: moment(gameTimeTo).utc(),
           // gameTimeTo: combinedGameTimeTo,
           gameMode,
           description,
