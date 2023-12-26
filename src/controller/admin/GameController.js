@@ -46,6 +46,8 @@ export const addEditGame = async (req, res) => {
       winnersPercentage,
       entryFee
     } = req.body;
+    console.log(gameTimeTo, "gameTimeTo", moment(gameTimeTo).utc());
+    console.log(new Date(gameTimeTo),  "new Date(gameTimeTo)");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,

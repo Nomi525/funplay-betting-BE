@@ -2055,7 +2055,9 @@ export const createAllGamePeriodFromCronJob = async () => {
                 ).lean();
               }
             } else {
+              console.log(game.isRepeat, "game.isRepeat");
               if (game.isRepeat) {
+                console.log(currentTime, "currentTime", lastIndex.endTime,"lastIndex.endTime");
                 if (currentTime >= lastIndex.endTime) {
                   await Period.updateOne({ _id: lastIndex._id }, { $set: { isTimeUp: true } });
                   if (newGameTime < newEndTime) {
