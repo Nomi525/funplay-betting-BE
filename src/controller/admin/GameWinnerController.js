@@ -21,6 +21,7 @@ import {
   PenaltyBetting,
   CardBetting
 } from "../../index.js";
+import mongoose from "mongoose";
 
 //#region Get All winners user
 export const getAllWinnersUser = async (req, res) => {
@@ -460,7 +461,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           userId: winnerId,
           period,
           is_deleted: 0,
-          status : "pending"
+          status: "pending"
         });
         if (winnerUser) {
           let rewardAmount = winningAmount;
@@ -491,7 +492,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
       isWin: false,
       period: Number(period),
       is_deleted: 0,
-      status : "pending"
+      status: "pending"
     }, { status: "fail" })
     // } else {
     //   return sendResponse(
@@ -521,7 +522,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
 //#region Winner declare of Number Betting
 export const declareWinnerOfNumberBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, userId, winNumber, period } = req.body;
+    const { gameId, winnerId, winNumber } = req.body;
 
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
@@ -538,8 +539,36 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
       },
       NumberBetting
     );
+    // const checkUserCount = await NumberBetting.aggregate([
+    //   {
+    //     $match: {
+    //       period: Number(winnerId),
+    //       gameId: new mongoose.Types.ObjectId(gameId),
+    //       is_deleted: 0,
+    //       isWin: false,
+    //     }
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$userId",
+    //     }
+    //   }
+    // ])
     const savedInstances = [];
-
+    let winFlage = false;
+    // if (checkUserCount == 1) {
+    //   const winAdminNumber = await NumberBetting.create({
+    //     gameId,
+    //     userId: null,
+    //     period: winnerId,
+    //     number: winNumber,
+    //     rewardAmount: 0,
+    //     status: "successfully",
+    //     is_deleted: 0,
+    //     isWin: true,
+    //   });
+    //   savedInstances.push(winAdminNumber);
+    // } else {
     for (const findNumberBetting of findNumberBettingArray) {
       if (findNumberBetting instanceof NumberBetting) {
         let rewardAmount = findNumberBetting.betAmount * 0.95;
@@ -578,14 +607,26 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
           await sendMail(userData.email, "Number betting game win", mailInfo);
         }
         savedInstances.push(findNumberBetting);
-      } else {
-        // Log an error or handle the case where the document is not an instance of NumberBetting
-        console.error(
-          "Document is not an instance of NumberBetting:",
-          findNumberBetting
-        );
+        winFlage = true;
       }
     }
+    // }
+
+    // Win number from given by admin
+    if (!winFlage) {
+      const winAdminNumber = await NumberBetting.create({
+        gameId,
+        userId: null,
+        period: winnerId,
+        number: winNumber,
+        rewardAmount: 0,
+        status: "successfully",
+        is_deleted: 0,
+        isWin: true,
+      });
+      savedInstances.push(winAdminNumber);
+    }
+
     await NumberBetting.updateMany(
       {
         gameId,
@@ -597,6 +638,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
       },
       { status: "fail" }
     );
+
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -612,11 +654,48 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winColour, userId, winBetSide, period } = req.body;
+    const { gameId, winnerId, winColour } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
+    // const checkUserCount = await ColourBetting.aggregate([
+    //   {
+    //     $match: {
+    //       period: Number(winnerId),
+    //       gameId: new mongoose.Types.ObjectId(gameId),
+    //       is_deleted: 0,
+    //       isWin: false,
+    //     }
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$userId",
+    //       gameType: { $first: "$gameType" }
+    //     }
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //       userId: "$_id",
+    //       gameType: 1,
+    //     }
+    //   }
+    // ])
     const savedInstances = [];
+    // if (checkUserCount.length == 1 ) {
+    //   const winAdminColor = await ColourBetting.create({
+    //     gameId,
+    //     userId: null,
+    //     period: winnerId,
+    //     colourName: winColour,
+    //     gameType: checkUserCount[0].gameType,
+    //     rewardAmount: 0,
+    //     status: "successfully",
+    //     is_deleted: 0,
+    //     isWin: true,
+    //   });
+    //   savedInstances.push(winAdminColor);
+    // } else {
     const findColorBettingArray = await getAllData(
       {
         period: winnerId,
@@ -627,7 +706,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       },
       ColourBetting
     );
-
+    let winFlage = false;
     for (const findColorBetting of findColorBettingArray) {
       if (findColorBetting instanceof ColourBetting) {
         let rewardAmount = findColorBetting.betAmount * 0.95;
@@ -651,13 +730,23 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         }
 
         savedInstances.push(findColorBetting);
-      } else {
-        // Log an error or handle the case where the document is not an instance of ColourBetting
-        console.error(
-          "Document is not an instance of ColourBetting:",
-          findColorBetting
-        );
+        winFlage = true
       }
+    }
+    // }
+    // Win color from given by admin
+    if (!winFlage) {
+      const winAdminColor = await ColourBetting.create({
+        gameId,
+        userId: null,
+        period: winnerId,
+        colourName: winColour,
+        rewardAmount: 0,
+        status: "successfully",
+        is_deleted: 0,
+        isWin: true,
+      });
+      savedInstances.push(winAdminColor);
     }
     await ColourBetting.updateMany(
       {
@@ -674,7 +763,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       res,
       StatusCodes.OK,
       "Winners added successfully",
-      findColorBettingArray
+      savedInstances
     );
   } catch (error) {
     return handleErrorResponse(res, error);
@@ -685,11 +774,12 @@ export const declareWinnerOfColorBetting = async (req, res) => {
 //#region Winner declare of Penalty Betting
 export const declareWinnerOfPenaltyBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, userId, winBetSide, period } = req.body;
+    const { gameId, winnerId, winBetSide } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
     const savedInstances = [];
+    let winFlage = false;
     const findPenaltyBettingArray = await getAllData(
       { period: winnerId, gameId: gameId, betSide: winBetSide, is_deleted: 0, isWin: false },
       PenaltyBetting
@@ -715,15 +805,31 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
           await balance.save();
         }
         savedInstances.push(findPenaltyBetting);
+        winFlage = true
       }
-
     }
+
+    // Win side from given by admin
+    if (!winFlage) {
+      const winAdminSide = await PenaltyBetting.create({
+        gameId,
+        userId: null,
+        period: winnerId,
+        betSide: winBetSide,
+        rewardAmount: 0,
+        status: "successfully",
+        is_deleted: 0,
+        isWin: true,
+      });
+      savedInstances.push(winAdminSide);
+    }
+
     await PenaltyBetting.updateMany({ gameId, betSide: { $ne: winBetSide }, period: winnerId, isWin: false, status: 'pending' }, { status: "fail" });
     return sendResponse(
       res,
       StatusCodes.OK,
       "Winners added successfully",
-      findPenaltyBettingArray
+      savedInstances
     );
   } catch (error) {
     // console.log(error);
@@ -735,7 +841,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
 //#region Winner declare of Number Betting
 export const declareWinnerOfCardBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, userId, winCard, period } = req.body;
+    const { gameId, winnerId, winCard } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }

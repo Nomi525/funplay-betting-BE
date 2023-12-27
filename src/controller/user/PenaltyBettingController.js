@@ -74,7 +74,8 @@ export const addPenaltyBet = async (req, res) => {
                 gameId: gameId,
                 betSide: betSide,
                 betAmount: parseInt(betAmount),
-                period
+                period,
+                status: "pending"
             },
             PenaltyBetting
         );
@@ -117,6 +118,7 @@ export const addPenaltyBet = async (req, res) => {
 export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
     try {
         const { gameId } = req.params;
+        const { second } = req.query;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const getGamePeriodById = await PenaltyBetting.aggregate([
             {
@@ -172,14 +174,20 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                     date: "$periodData.date",
                     startTime: "$periodData.startTime",
                     endTime: "$periodData.endTime",
+                    periodFor: "$periodData.periodFor",
                     createdAt: "$periodData.createdAt",
                 }
             },
             {
                 $match: {
-                    status: { $in: ["fail", "pending", "successfully"] }
+                    periodFor: second
                 }
             }
+            // {
+            //     $match: {
+            //         status: { $in: ["fail", "pending", "successfully"] }
+            //     }
+            // }
         ])
         return sendResponse(
             res,
@@ -197,6 +205,7 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
 export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
     try {
         const { gameId } = req.params;
+        const { second } = req.query;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const getPenaltyBettingPeriods = await PenaltyBetting.aggregate([
             {
@@ -292,9 +301,15 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
                     date: "$periodData.date",
                     startTime: "$periodData.startTime",
                     endTime: "$periodData.endTime",
+                    periodFor: "$periodData.periodFor",
                     createdAt: "$periodData.createdAt",
                 }
             },
+            {
+                $match: {
+                    periodFor: second
+                }
+            }
             // {
             //     $match: {
             //         status: { $ne: null }
@@ -321,9 +336,9 @@ function getRandomElement(arr) {
 // Function to get a random element from an array excluding specified elements
 function getRandomElementExcluding(excludeElements) {
     let randomElement;
-    let allColors = ["left", "right"];
+    let allSides = ["left", "right"];
     do {
-        randomElement = getRandomElement(allColors);
+        randomElement = getRandomElement(allSides);
     } while (excludeElements.includes(randomElement));
     return randomElement;
 }
@@ -489,13 +504,32 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                     []
                 );
             }
+        } else {
+            let allSides = ["left", "right"];
+            let randomIndex = Math.floor(Math.random() * allSides.length);
+            let randomWinSide = allSides[randomIndex];
+            await PenaltyBetting.create({
+                userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+            })
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                ResponseMessage.PENALTY_WINNER + " " + randomWinSide,
+                [
+                    {
+                        period,
+                        betSide: randomWinSide,
+                        totalBetAmount: 0
+                    }
+                ]
+            );
         }
-        return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            "User not found",
-            []
-        );
+        // return sendResponse(
+        //     res,
+        //     StatusCodes.BAD_REQUEST,
+        //     "User not found",
+        //     []
+        // );
     } catch (error) {
         return handleErrorResponse(res, error);
     }

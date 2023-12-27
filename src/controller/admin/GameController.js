@@ -6,6 +6,7 @@ import {
   GameRules,
   GameTime,
   NumberBetting,
+  PenaltyBetting,
   Period,
   ResponseMessage,
   StatusCodes,
@@ -1044,6 +1045,9 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct('period', { isWin: true });
 
+    // Find periods with isWin: true in the colourbettings collection
+    const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct('period', { isWin: true });
+
     // Find periods with isWin: true in the communitybetting collection
     const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct('period', { isWin: true });
     if (gameType === 'numberBetting') {
@@ -1351,6 +1355,115 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $sort: { period: -1 },
         },
+      ]);
+    } else if (gameType === 'penaltyBetting') {
+      battingAggregationResult = await Period.aggregate([
+        {
+          $facet: {
+            totalSide: [
+              {
+                $match: {
+                  gameId: new mongoose.Types.ObjectId(gameId),
+                  period: { $nin: isWinTruePeriodsforpenaltyBetting }, // Exclude periods with isWin: true
+                },
+              },
+              {
+                $lookup: {
+                  from: 'penaltybettings',
+                  localField: 'period',
+                  foreignField: 'period',
+                  as: 'penaltybettingsData',
+                },
+              },
+              {
+                $unwind: '$penaltybettingsData',
+              },
+              {
+                $group: {
+                  _id: {
+                    period: '$period',
+                    betSide: '$penaltybettingsData.betSide',
+                    periodId: '$_id',
+                  },
+                  anyWinTrue: { $max: '$penaltybettingsData.isWin' },
+                  totalUser: { $addToSet: '$penaltybettingsData.userId' },
+                  totalBetAmount: { $sum: '$penaltybettingsData.betAmount' },
+                },
+              },
+              {
+                $match: {
+                  anyWinTrue: { $ne: true },
+                },
+              },
+              {
+                $group: {
+                  _id: '$_id.period',
+                  penaltybettingsData: {
+                    $push: {
+                      betSide: '$_id.betSide',
+                      totalUser: { $sum: { $size: '$totalUser' } },
+                      totalBetAmount: '$totalBetAmount',
+                    },
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  period: '$_id',
+                  penaltybettingsData: 1,
+                },
+              },
+              {
+                $sort: { period: -1 },
+              }
+            ],
+            totalPeriodUser: [
+              {
+                $match: {
+                  gameId: new mongoose.Types.ObjectId(gameId),
+                  period: { $nin: isWinTruePeriodsforColourBetting },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'penaltybettings',
+                  localField: 'period',
+                  foreignField: 'period',
+                  as: 'penaltybettingsData',
+                },
+              },
+              {
+                $unwind: '$penaltybettingsData',
+              },
+              {
+                $group: {
+                  _id: '$penaltybettingsData.userId',
+                  totalUsers: { $sum: 1 }
+                }
+              },
+              {
+                $group: {
+                  _id: null,
+                  totalUserArrayLength: { $sum: 1 },
+                },
+              },
+            ]
+          }
+        },
+        {
+          $unwind: '$totalSide',
+        },
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                '$totalSide',
+                { totalUser: { $arrayElemAt: ['$totalPeriodUser.totalUserArrayLength', 0] } },
+              ],
+            },
+          },
+        }
       ]);
     }
     return sendResponse(
