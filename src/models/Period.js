@@ -15,23 +15,23 @@ const periodSchema = new mongoose.Schema({
         required: false
     },
     startTime: {
-        type: String,
+        type: Number,
         required: false
     },
     endTime: {
-        type: String,
+        type: Number,
         required: false
     },
-    isTimeUp: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    isSlotGrater: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
+    // isTimeUp: {
+    //     type: Boolean,
+    //     required: false,
+    //     default: false
+    // },
+    // isSlotGrater: {
+    //     type: Boolean,
+    //     required: false,
+    //     default: false
+    // },
     periodFor: {
         type: String,
         enum: ["30", "60", "120"],
