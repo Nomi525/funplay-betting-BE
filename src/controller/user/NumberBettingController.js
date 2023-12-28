@@ -1692,11 +1692,13 @@ const updateAndCreatePeriod = async (
 };
 function allDateStamps(game, time, type) {
   //main game start time gamedurationfrom
-  const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
+  const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").utcOffset("+05:30").format(
     "HH:mm"
   );
   //main game end time gamedurationto
-  const mainGameEndTime = moment(game.gameDurationTo, "h:mm A").format("HH:mm");
+  const mainGameEndTime = moment(game.gameDurationTo, "h:mm A").utcOffset("+05:30").format("HH:mm");
+  console.log(mainGameStartTime, "mainGameStartTime");
+  console.log(mainGameEndTime, "mainGameEndTime");
   //main game start date gameTimeFrom
   const mainGameStartDate = moment(game.gameTimeFrom).format("YYYY-MM-DD");
   //main game end date gameTimeTo
@@ -1705,14 +1707,14 @@ function allDateStamps(game, time, type) {
   let gameStartTimeStamp = moment(
     `${mainGameStartDate} ${mainGameStartTime}:00`,
     "YYYY-MM-DD HH:mm:ss"
-  ).unix();
+  ).utcOffset("+05:30").unix();
   //game end time stamp create from main game end date and time
   let gameEndTimeStamp = moment(
     `${mainGameEndDate} ${mainGameEndTime}:00`,
     "YYYY-MM-DD HH:mm:ss"
-  ).unix();
+  ).utcOffset("+05:30").unix();
   //current time stamp
-  const currentTimeAndDateStamp = moment().utcOffset("+05:30").add(8, "seconds").unix();
+  const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
   let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
@@ -1747,6 +1749,8 @@ export async function createAllGamePeriodFromCronJob() {
         //date for period
         const formattedDate = currentDate.split("-").join("");
         // this codition compare between current time stamp and game start time stamp and game end time stamp
+        console.log(gameStartTimeStamp <= currentTimeAndDateStamp,"condition check",gameEndTimeStamp > currentTimeAndDateStamp)
+        console.log(gameStartTimeStamp,"1",currentTimeAndDateStamp,"2",gameEndTimeStamp)
         if (
           gameStartTimeStamp <= currentTimeAndDateStamp &&
           gameEndTimeStamp > currentTimeAndDateStamp
