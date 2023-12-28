@@ -1691,7 +1691,7 @@ const updateAndCreatePeriod = async (
   ).lean();
 };
 function allDateStamps(game, time, type) {
-  let serverTime = "+8:00"
+  let serverTime = "+5:30"
   //main game start time gamedurationfrom
   const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
     "HH:mm"
@@ -1716,7 +1716,7 @@ function allDateStamps(game, time, type) {
   console.log(gameEndTimeStamp,"1717")
 
   //current time stamp
-  const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
+  const currentTimeAndDateStamp = moment().utcOffset(serverTime).unix();
   console.log(currentTimeAndDateStamp,"1721")
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
