@@ -1672,11 +1672,10 @@ const updateAndCreatePeriod = async (
   endTime,
   periodFor
 ) => {
-
-let objForCheck = { gameId, date, period };
-if(periodFor){
-  objForCheck.periodFor = periodFor
-}
+  let objForCheck = { gameId, date, period };
+  if (periodFor) {
+    objForCheck.periodFor = periodFor;
+  }
   await Period.updateOne(
     objForCheck,
     {
@@ -2169,7 +2168,7 @@ export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
-    let currentTime = moment().utcOffset("+05:30").format("HH:mm");
+    const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
     let query = {
       date: moment().format("YYYY-MM-DD"),
       gameId,
@@ -2177,7 +2176,6 @@ export const getPeriod = async (req, res) => {
     };
     if (second) {
       query.periodFor = second;
-      currentTime = moment().utcOffset("+05:30").format("HH:mm:ss");
     }
     let getGamePeriod = await Period.find(query)
       .sort({ createdAt: -1 })
@@ -2187,18 +2185,8 @@ export const getPeriod = async (req, res) => {
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
         moment().format("YYYY-MM-DD") &&
-      getAllPeriod.endTime > currentTime
+      getAllPeriod.endTime > currentTimeAndDateStamp
     ) {
-      const findGame = await Game.findOne({ _id: gameId });
-      var currentDate = moment().format("YYYY-MM-DD");
-      var currentTimestamp = moment(
-        `${currentDate} ${currentTime}:00`,
-        "YYYY-MM-DD HH:mm:ss"
-      ).unix();
-      var endTimestamp = moment(
-        `${currentDate} ${findGame.gameDurationTo}:00`,
-        "YYYY-MM-DD HH:mm:ss"
-      ).unix();
       return sendResponse(
         res,
         StatusCodes.OK,
