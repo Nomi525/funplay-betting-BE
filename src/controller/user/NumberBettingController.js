@@ -1712,10 +1712,11 @@ function allDateStamps(game, time, type) {
     "YYYY-MM-DD HH:mm:ss"
   ).unix();
   //current time stamp
-  const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
+  const currentTimeAndDateStamp = moment().utcOffset("+05:30").add(8, "seconds").unix();
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
-  let gameHoursNextTimeStamp = moment(newTimeStamp).add(time, type).unix();
+  let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
+  let gameHoursNextTimeStamp = moment(newEightSecondsTimeStamp).add(time, type).unix();
   return {
     gameStartTimeStamp,
     gameEndTimeStamp,
@@ -1774,7 +1775,7 @@ export async function createAllGamePeriodFromCronJob() {
                 game._id,
                 currentDate,
                 period,
-                currentTimeAndDateStamp,
+                gameStartTimeStamp,
                 gameEndTimeStamp
               );
             } else {
@@ -1783,15 +1784,14 @@ export async function createAllGamePeriodFromCronJob() {
                 game._id,
                 currentDate,
                 period,
-                currentTimeAndDateStamp,
+                gameStartTimeStamp,
                 gameHoursNextTimeStamp
               );
             }
           } else {
             console.log(
-              currentTimeAndDateStamp > lastIndex.endTime,
-              "check",
               currentTimeAndDateStamp,
+              "check",
               lastIndex.endTime
             );
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
@@ -1817,7 +1817,8 @@ export async function createAllGamePeriodFromCronJob() {
             }
           }
         }
-      } else if (game.gameName == "Community Betting") {
+      } 
+      else if (game.gameName == "Community Betting") {
         const {
           gameStartTimeStamp,
           gameEndTimeStamp,
@@ -1856,7 +1857,7 @@ export async function createAllGamePeriodFromCronJob() {
                 game._id,
                 currentDate,
                 period,
-                currentTimeAndDateStamp,
+                gameStartTimeStamp,
                 gameEndTimeStamp
               );
             } else {
@@ -1865,7 +1866,7 @@ export async function createAllGamePeriodFromCronJob() {
                 game._id,
                 currentDate,
                 period,
-                currentTimeAndDateStamp,
+                gameStartTimeStamp,
                 gameHoursNextTimeStamp
               );
             }
@@ -1940,7 +1941,7 @@ export async function createAllGamePeriodFromCronJob() {
                   game._id,
                   currentDate,
                   period,
-                  currentTimeAndDateStamp,
+                  gameStartTimeStamp,
                   gameEndTimeStamp,
                   second
                 );
@@ -1950,7 +1951,7 @@ export async function createAllGamePeriodFromCronJob() {
                   game._id,
                   currentDate,
                   period,
-                  currentTimeAndDateStamp,
+                  gameStartTimeStamp,
                   gameHoursNextTimeStamp,
                   second
                 );
@@ -2026,7 +2027,7 @@ export async function createAllGamePeriodFromCronJob() {
                   game._id,
                   currentDate,
                   period,
-                  currentTimeAndDateStamp,
+                  gameStartTimeStamp,
                   gameEndTimeStamp,
                   second
                 );
@@ -2036,7 +2037,7 @@ export async function createAllGamePeriodFromCronJob() {
                   game._id,
                   currentDate,
                   period,
-                  currentTimeAndDateStamp,
+                  gameStartTimeStamp,
                   gameHoursNextTimeStamp,
                   second
                 );
@@ -2112,7 +2113,7 @@ export async function createAllGamePeriodFromCronJob() {
                   game._id,
                   currentDate,
                   period,
-                  currentTimeAndDateStamp,
+                  gameStartTimeStamp,
                   gameEndTimeStamp,
                   second
                 );
@@ -2122,7 +2123,7 @@ export async function createAllGamePeriodFromCronJob() {
                   game._id,
                   currentDate,
                   period,
-                  currentTimeAndDateStamp,
+                  gameStartTimeStamp,
                   gameHoursNextTimeStamp,
                   second
                 );
