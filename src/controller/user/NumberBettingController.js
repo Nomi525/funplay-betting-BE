@@ -1712,6 +1712,7 @@ function allDateStamps(game, time, type) {
     `${mainGameStartDate} ${mainGameStartTime}:00`,
     "YYYY-MM-DDTHH:mm:ss"
   )
+  console.log(mainGameStartDate," ",mainGameStartTime);
   console.log(gameStartTimeStamp,"1711")
   //game end time stamp create from main game end date and time
   let gameEndTimeStamp = moment(
