@@ -1707,8 +1707,7 @@ function allDateStamps(game, time, type) {
     `${mainGameStartDate} ${mainGameStartTime}:00`,
     "YYYY-MM-DDTHH:mm:ss"
   ).utcOffset(serverTime).unix()
-  console.log(mainGameStartDate," ",mainGameStartTime);
-  console.log(new Date(gameStartTimeStamp),"1711")
+  console.log(gameStartTimeStamp,"1711")
   //game end time stamp create from main game end date and time
   let gameEndTimeStamp = moment(
     `${mainGameEndDate} ${mainGameEndTime}:00`,
@@ -1718,10 +1717,8 @@ function allDateStamps(game, time, type) {
 
   //current time stamp
   const currentTimeAndDateStamp = moment().utcOffset(serverTime).unix();
-  console.log(currentTimeAndDateStamp,"1721")
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
-  console.log(newTimeStamp,"1723")
   let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
   let gameHoursNextTimeStamp = moment(newEightSecondsTimeStamp).add(time, type).unix();
   return {
