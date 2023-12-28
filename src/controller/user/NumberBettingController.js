@@ -1,4 +1,4 @@
-import moment from "moment/moment.js";
+import moment from 'moment-timezone'
 import {
   ResponseMessage,
   StatusCodes,
