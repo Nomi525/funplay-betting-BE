@@ -1691,7 +1691,7 @@ const updateAndCreatePeriod = async (
   ).lean();
 };
 function allDateStamps(game, time, type) {
-  let serverTime = "+2:30"
+  let serverTime = "+8:00"
   //main game start time gamedurationfrom
   const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
     "HH:mm"
