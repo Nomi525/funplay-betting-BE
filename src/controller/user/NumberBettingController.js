@@ -1728,6 +1728,7 @@ function allDateStamps(game, time, type) {
 export async function createAllGamePeriodFromCronJob() {
   try {
     var currentDate = moment().utcOffset("+05:30").format("YYYY-MM-DD");
+    console.log(currentDate, "currentDate");
     // var currentDate3 = moment();
     const findGame2 = await Game.find({
       gameTimeFrom: { $lte: currentDate },
