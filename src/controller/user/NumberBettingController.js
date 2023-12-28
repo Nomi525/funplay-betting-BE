@@ -1713,7 +1713,7 @@ function allDateStamps(game, time, type) {
     `${mainGameEndDate} ${mainGameEndTime}:00`,
     "YYYY-MM-DDTHH:mm:ss"
   ).utcOffset(serverTime).unix()
-  console.log(moment().tz("Asia/Kolkata"),"1717")
+  console.log(moment.tz("Asia/Kolkata"),"1717")
 
   //current time stamp
   const currentTimeAndDateStamp = moment().utcOffset(serverTime).unix();
