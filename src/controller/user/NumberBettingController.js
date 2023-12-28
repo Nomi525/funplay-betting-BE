@@ -1694,10 +1694,10 @@ function allDateStamps(game, time, type) {
   let serverTime = "+5:30"
   //main game start time gamedurationfrom
   const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
-    "HH:mm"
+    "hh:mm"
   );
   //main game end time gamedurationto
-  const mainGameEndTime = moment(game.gameDurationTo, "h:mm A").format("HH:mm");
+  const mainGameEndTime = moment(game.gameDurationTo, "h:mm A").format("hh:mm");
   //main game start date gameTimeFrom
   const mainGameStartDate = moment(game.gameTimeFrom).format("YYYY-MM-DD");
   //main game end date gameTimeTo
