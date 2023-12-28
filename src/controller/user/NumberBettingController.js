@@ -1751,6 +1751,7 @@ export async function createAllGamePeriodFromCronJob() {
           gameStartTimeStamp <= currentTimeAndDateStamp &&
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
+          console.log("1st condition")
           let period = formattedDate + "0000";
           const periodCount = await Period.countDocuments({
             gameId: game._id,
@@ -1818,6 +1819,8 @@ export async function createAllGamePeriodFromCronJob() {
             }
           }
         }
+        console.log("out condition")
+
       } 
       else if (game.gameName == "Community Betting") {
         const {
