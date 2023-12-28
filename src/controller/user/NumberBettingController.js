@@ -1692,11 +1692,6 @@ const updateAndCreatePeriod = async (
 };
 function allDateStamps(game, time, type) {
   let serverTime = "+5:30"
-  const nDate = new Date().toLocaleString('en-US', {
-    timeZone: 'Asia/Calcutta'
-  });
-  
-  console.log(nDate);
   //main game start time gamedurationfrom
   const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
     "HH:mm"
@@ -1711,14 +1706,14 @@ function allDateStamps(game, time, type) {
   let gameStartTimeStamp = moment(
     `${mainGameStartDate} ${mainGameStartTime}:00`,
     "YYYY-MM-DDTHH:mm:ss"
-  )
+  ).utcOffset(serverTime).unix()
   console.log(mainGameStartDate," ",mainGameStartTime);
   console.log(new Date(gameStartTimeStamp),"1711")
   //game end time stamp create from main game end date and time
   let gameEndTimeStamp = moment(
     `${mainGameEndDate} ${mainGameEndTime}:00`,
     "YYYY-MM-DDTHH:mm:ss"
-  )
+  ).utcOffset(serverTime).unix()
   console.log(gameEndTimeStamp,"1717")
 
   //current time stamp
