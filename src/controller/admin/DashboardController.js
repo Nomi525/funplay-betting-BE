@@ -1,6 +1,6 @@
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, getAllDataCount, NewTransaction, WalletLogin, plusLargeSmallValue
+    getSingleData, getAllData, Rating, handleErrorResponse, User, getAllDataCount, NewTransaction, WalletLogin, plusLargeSmallValue, TransactionHistory
 } from "../../index.js";
 
 export const adminDashboard = async (req, res) => {
@@ -16,7 +16,8 @@ export const adminDashboard = async (req, res) => {
         const twentyFourHoursAgo = new Date(currentTime - 24 * 60 * 60 * 1000); // 24 hours ago
         const totalNewLoginUsersIn24Hours = await User.countDocuments({ updatedAt: { $gte: twentyFourHoursAgo } });
 
-        const totalTransaction = await getAllDataCount({ is_deleted: 0 }, NewTransaction);
+        // const totalTransaction = await getAllDataCount({ is_deleted: 0 }, NewTransaction);
+        const totalTransaction = await TransactionHistory.find({ is_deleted: 0 })
         // const totalNonDepositUser = totalUsers - depositeData.length;
         const totalZeroDepositUser = totalUsers - depositeData.length;
         const totalUserIn24Hours = await User.find({ createdAt: { $gte: twentyFourHoursAgo } }).select('_id');
@@ -25,16 +26,16 @@ export const adminDashboard = async (req, res) => {
         if (totalUserIn24Hours.length) {
             await Promise.all(totalUserIn24Hours.map(async (data) => {
                 const findWallet = await NewTransaction.findOne({ userId: data._id })
-                if(!findWallet){
-                    totalZeroDepositUserIn24Hours++ 
+                if (!findWallet) {
+                    totalZeroDepositUserIn24Hours++
                 }
             }))
         }
-        
+
         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, {
             totalUsers, totalActiveUsers, totalNewLoginUsersIn24Hours, totalDeactivatedUsers,
             totalDeposit, totalDepositUser: depositeData.length, totalZeroDepositUser, totalZeroDepositUserIn24Hours,
-            totalTransaction
+            totalTransaction : totalTransaction.length
         });
     } catch (error) {
         // console.log(error);
