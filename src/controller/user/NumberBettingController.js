@@ -1691,6 +1691,7 @@ const updateAndCreatePeriod = async (
   ).lean();
 };
 function allDateStamps(game, time, type) {
+  let serverTime = "+2:30"
   //main game start time gamedurationfrom
   const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
     "HH:mm"
@@ -1705,13 +1706,13 @@ function allDateStamps(game, time, type) {
   let gameStartTimeStamp = moment(
     `${mainGameStartDate} ${mainGameStartTime}:00`,
     "YYYY-MM-DD HH:mm:ss"
-  );
+  ).utcOffset(serverTime).unix();
   console.log(gameStartTimeStamp,"1711")
   //game end time stamp create from main game end date and time
   let gameEndTimeStamp = moment(
     `${mainGameEndDate} ${mainGameEndTime}:00`,
     "YYYY-MM-DD HH:mm:ss"
-  )
+  ).utcOffset(serverTime).unix();
   console.log(gameEndTimeStamp,"1717")
 
   //current time stamp
