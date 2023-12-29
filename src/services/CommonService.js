@@ -1,4 +1,17 @@
-import { bcryptjs, StatusCodes, ResponseMessage, jwt, crypto, CurrencyConverter,Decimal } from "../index.js";
+import {
+    bcryptjs,
+    StatusCodes,
+    ResponseMessage,
+    jwt,
+    crypto,
+    CurrencyConverter,
+    Decimal,
+    NumberBetting,
+    ColourBetting,
+    CommunityBetting,
+    PenaltyBetting,
+    CardBetting,
+} from "../index.js";
 var key = "a6dfc106fadd4849e8b23759afea1b86c6c4c4b782c2cf08335c61dc4610fae5efe05ee361a4850f56ddb9457a96bbe01d2820d5106851db64cf210f70ec5e98";
 var secretCryptoKey = crypto.createHash("sha256").update(String(key)).digest("base64").slice(0, 32);
 var iv = crypto.randomBytes(16);
@@ -93,44 +106,86 @@ export const decryptObject = (encryptedString) => {
     }
 }
 
-export const minusLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+export const minusLargeSmallValue = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.minus(smallNumber)
 }
 
-export const plusLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+export const plusLargeSmallValue = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.plus(smallNumber)
 }
 
-export const multiplicationLargeSmallValue = (largeNumberValue,smallNumberNalue) => {
+export const multiplicationLargeSmallValue = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.times(smallNumber)
 }
 
-export const checkDecimalValueGreaterThanOrEqual = (largeNumberValue,smallNumberNalue) => {
+export const checkDecimalValueGreaterThanOrEqual = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.greaterThanOrEqualTo(smallNumber)
 }
 
-export const checkLargeDecimalValueGreaterThan = (largeNumberValue,smallNumberNalue) => {
+export const checkLargeDecimalValueGreaterThan = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.greaterThan(smallNumber)
 }
 
-export const checkLargeDecimalValueLessThan = (largeNumberValue,smallNumberNalue) => {
+export const checkLargeDecimalValueLessThan = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.lessThan(smallNumber)
 }
 
-export const checkLargeDecimalValueEquals = (largeNumberValue,smallNumberNalue) => {
+export const checkLargeDecimalValueEquals = (largeNumberValue, smallNumberNalue) => {
     const largeNumber = new Decimal(largeNumberValue);
     const smallNumber = new Decimal(smallNumberNalue)
     return largeNumber.equals(smallNumber)
+}
+
+export const calculateTotalReward = async (bettingModel, query) => {
+    const bettingData = await bettingModel.find({ ...query, is_deleted: 0 });
+    return bettingData.reduce((total, data) => total + Number(data.rewardAmount), 0);
+}
+
+export const calculateAllGameReward = async (rewardQuery) => {
+    const totalNumberReward = await calculateTotalReward(NumberBetting, rewardQuery);
+    const totalColourReward = await calculateTotalReward(ColourBetting, rewardQuery);
+    const totalCommunityReward = await calculateTotalReward(CommunityBetting, rewardQuery);
+    const totalPenaltyReward = await calculateTotalReward(PenaltyBetting, rewardQuery);
+    const totalCardReward = await calculateTotalReward(CardBetting, rewardQuery);
+    const totalReward = totalNumberReward + totalColourReward + totalCommunityReward + totalPenaltyReward + totalCardReward;
+    return totalReward
+}
+
+export const getAllBids = async (bidQuery) => {
+    const numberBetting = await NumberBetting.find(bidQuery)
+    const colourBetting = await ColourBetting.find(bidQuery)
+    const communityBetting = await CommunityBetting.find(bidQuery)
+    const penaltyBetting = await PenaltyBetting.find(bidQuery)
+    const cardBetting = await CardBetting.find(bidQuery)
+    const totalBid = numberBetting.length + colourBetting.length + communityBetting.length + penaltyBetting.length + cardBetting.length
+    return totalBid
+}
+
+// Function to get a random element from an array
+export const getRandomElement = (arr) => {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export const winCardNumberFun = (card) => {
+    const allLowCards = ['A', '2', '3', '4', '5', '6'];
+    const allHighCards = ['8', '9', '10', 'J', 'Q', 'K'];
+    let randomCard = '';
+    if (card == 'high') {
+        randomCard = getRandomElement(allHighCards);
+    } else {
+        randomCard = getRandomElement(allLowCards);
+    }
+    return randomCard
 }

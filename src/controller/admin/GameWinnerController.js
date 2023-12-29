@@ -19,7 +19,9 @@ import {
   sendMail,
   User,
   PenaltyBetting,
-  CardBetting
+  CardBetting,
+  getRandomElement,
+  winCardNumberFun,
 } from "../../index.js";
 import mongoose from "mongoose";
 
@@ -527,6 +529,31 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame.gameMode == "Auto") {
+      await NumberBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_AUTO,
+        []
+      );
+    }
+    const checkAlreadyWin = await NumberBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(winnerId),
+      is_deleted: 0,
+    }).lean();
+
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.ALREADY_WIN,
+        []
+      );
+    }
 
     const findNumberBettingArray = await getAllData(
       {
@@ -571,7 +598,8 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     // } else {
     for (const findNumberBetting of findNumberBettingArray) {
       if (findNumberBetting instanceof NumberBetting) {
-        let rewardAmount = findNumberBetting.betAmount * 0.95;
+        // let rewardAmount = findNumberBetting.betAmount * 0.95;
+        let rewardAmount = findNumberBetting.betAmount + findNumberBetting.betAmount * findGame.winningCoin;
         findNumberBetting.isWin = true;
         findNumberBetting.rewardAmount = rewardAmount;
         findNumberBetting.status = "successfully";
@@ -658,44 +686,32 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
-    // const checkUserCount = await ColourBetting.aggregate([
-    //   {
-    //     $match: {
-    //       period: Number(winnerId),
-    //       gameId: new mongoose.Types.ObjectId(gameId),
-    //       is_deleted: 0,
-    //       isWin: false,
-    //     }
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$userId",
-    //       gameType: { $first: "$gameType" }
-    //     }
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 0,
-    //       userId: "$_id",
-    //       gameType: 1,
-    //     }
-    //   }
-    // ])
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame.gameMode == "Auto") {
+      await ColourBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_AUTO,
+        []
+      );
+    }
+    const checkAlreadyWin = await ColourBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(winnerId),
+      is_deleted: 0,
+    }).lean();
+
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.ALREADY_WIN,
+        []
+      );
+    }
     const savedInstances = [];
-    // if (checkUserCount.length == 1 ) {
-    //   const winAdminColor = await ColourBetting.create({
-    //     gameId,
-    //     userId: null,
-    //     period: winnerId,
-    //     colourName: winColour,
-    //     gameType: checkUserCount[0].gameType,
-    //     rewardAmount: 0,
-    //     status: "successfully",
-    //     is_deleted: 0,
-    //     isWin: true,
-    //   });
-    //   savedInstances.push(winAdminColor);
-    // } else {
     const findColorBettingArray = await getAllData(
       {
         period: winnerId,
@@ -709,7 +725,8 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     let winFlage = false;
     for (const findColorBetting of findColorBettingArray) {
       if (findColorBetting instanceof ColourBetting) {
-        let rewardAmount = findColorBetting.betAmount * 0.95;
+        // let rewardAmount = findColorBetting.betAmount * 0.95;
+        let rewardAmount = findColorBetting.betAmount + findColorBetting.betAmount * findGame.winningCoin;
         findColorBetting.isWin = true;
         findColorBetting.status = "successfully";
         findColorBetting.rewardAmount = rewardAmount;
@@ -727,13 +744,18 @@ export const declareWinnerOfColorBetting = async (req, res) => {
           let winingAmount = Number(findColorBetting.betAmount) + Number(rewardAmount);
           balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
           await balance.save();
+          let gameName = findColorBetting.gameType == "2colorBetting" ? "2 Color Betting" : "3 Color Betting"
+          let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+            gameName: gameName,
+          });
+          await sendMail(userData.email, `${gameName} game win`, mailInfo);
         }
 
         savedInstances.push(findColorBetting);
         winFlage = true
       }
     }
-    // }
+
     // Win color from given by admin
     if (!winFlage) {
       const winAdminColor = await ColourBetting.create({
@@ -778,6 +800,31 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame.gameMode == "Auto") {
+      await PenaltyBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_AUTO,
+        []
+      );
+    }
+    const checkAlreadyWin = await PenaltyBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(winnerId),
+      is_deleted: 0,
+    }).lean();
+
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.ALREADY_WIN,
+        []
+      );
+    }
     const savedInstances = [];
     let winFlage = false;
     const findPenaltyBettingArray = await getAllData(
@@ -786,7 +833,8 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
     );
     for (const findPenaltyBetting of findPenaltyBettingArray) {
       if (findPenaltyBetting instanceof PenaltyBetting) {
-        let rewardAmount = findPenaltyBetting.betAmount * 0.95;
+        // let rewardAmount = findPenaltyBetting.betAmount * 0.95;
+        let rewardAmount = findPenaltyBetting.betAmount + findPenaltyBetting.betAmount * findGame.winningCoin;
         findPenaltyBetting.isWin = true;
         findPenaltyBetting.status = "successfully";
         findPenaltyBetting.rewardAmount = rewardAmount;
@@ -803,6 +851,10 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
           // );
           balance.totalCoin = Number(balance.totalCoin) + Number(findPenaltyBetting.betAmount) + Number(rewardAmount)
           await balance.save();
+          let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+            gameName: "Penalty Betting",
+          });
+          await sendMail(userData.email, "Penalty betting game win", mailInfo);
         }
         savedInstances.push(findPenaltyBetting);
         winFlage = true
@@ -845,7 +897,31 @@ export const declareWinnerOfCardBetting = async (req, res) => {
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    if (findGame.gameMode == "Auto") {
+      await CardBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.WINNER_DECLARE_AUTO,
+        []
+      );
+    }
+    const checkAlreadyWin = await CardBetting.find({
+      gameId,
+      isWin: true,
+      period: Number(winnerId),
+      is_deleted: 0,
+    }).lean();
 
+    if (checkAlreadyWin.length) {
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.ALREADY_WIN,
+        []
+      );
+    }
     const findCardBettingArray = await getAllData(
       {
         gameId,
@@ -858,13 +934,18 @@ export const declareWinnerOfCardBetting = async (req, res) => {
       CardBetting
     );
     const savedInstances = [];
-
+    let count = 1;
+    let winFlage = false;
+    let winCardNumber;
     for (const findCardBetting of findCardBettingArray) {
       if (findCardBetting instanceof CardBetting) {
-        let rewardAmount = findCardBetting.betAmount * 0.95;
+        if (count == 1) winCardNumber = winCardNumberFun(winCard)
+        // let rewardAmount = findCardBetting.betAmount * 0.95;
+        let rewardAmount = findCardBetting.betAmount + findCardBetting.betAmount * findGame.winningCoin;
         findCardBetting.isWin = true;
         findCardBetting.rewardAmount = rewardAmount;
         findCardBetting.status = "successfully";
+        findCardBetting.winCardNumber = winCardNumber;
         await findCardBetting.save();
 
         const balance = await getSingleData(
@@ -885,12 +966,14 @@ export const declareWinnerOfCardBetting = async (req, res) => {
           await sendMail(userData.email, "Card betting game win", mailInfo);
         }
         savedInstances.push(findCardBetting);
+        winFlage = true
       } else {
         console.error(
           "Document is not an instance of Card Betting:",
           findCardBetting
         );
       }
+      count++
     }
     await CardBetting.updateMany(
       {
@@ -903,6 +986,22 @@ export const declareWinnerOfCardBetting = async (req, res) => {
       },
       { status: "fail" }
     );
+    // Win side from given by admin
+    if (!winFlage) {
+      winCardNumber = winCardNumberFun(winCard)
+      const winCardByAdmin = await CardBetting.create({
+        gameId,
+        userId: null,
+        period: winnerId,
+        card: winCard,
+        winCardNumber,
+        rewardAmount: 0,
+        status: "successfully",
+        is_deleted: 0,
+        isWin: true,
+      });
+      savedInstances.push(winCardByAdmin);
+    }
     return sendResponse(
       res,
       StatusCodes.OK,

@@ -1166,9 +1166,9 @@ function getRandomElementExcluding(excludeElements, gameType) {
 export const colourBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, gameId, period } = req.params;
-    const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
 
-    if (findGameMode) {
+    if (findGame.gameMode == "Manual") {
       await ColourBetting.updateMany({ gameId, period }, { status: "pending" });
 
       return sendResponse(
@@ -1272,7 +1272,8 @@ export const colourBettingWinnerResult = async (req, res) => {
                   item.userIds.map(async (userId) => {
                     const findUser = await ColourBetting.findOne({ userId, gameId, period: item.period, colourName: item.colourName, is_deleted: 0 });
                     if (findUser) {
-                      let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                      // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                      let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
                       await ColourBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
                       const balance = await getSingleData({ userId }, NewTransaction);
                       if (balance) {

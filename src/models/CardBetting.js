@@ -16,6 +16,10 @@ const cardBettingSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    winCardNumber: {
+      type: String,
+      required: false,
+    },
     betAmount: {
       type: Number,
       required: false,

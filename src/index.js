@@ -379,10 +379,20 @@ import {
   checkLargeDecimalValueLessThan,
   multiplicationLargeSmallValue,
   checkLargeDecimalValueEquals,
+  calculateTotalReward,
+  calculateAllGameReward,
+  getAllBids,
+  getRandomElement,
+  winCardNumberFun
 } from "./services/CommonService.js";
 dotenv.config();
 
 export {
+  getRandomElement,
+  winCardNumberFun,
+  getAllBids,
+  calculateAllGameReward,
+  calculateTotalReward,
   addCardBet,
   getByIdGamePeriodOfCardBetting,
   getAllGamePeriodOfCardBetting,

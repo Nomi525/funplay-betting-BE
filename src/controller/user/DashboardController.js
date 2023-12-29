@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 import {
     ResponseMessage, StatusCodes, sendResponse, dataCreate, dataUpdated,
-    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser, getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue, ColourBetting, minusLargeSmallValue, CurrencyCoin, NumberBetting, CommunityBetting
+    getSingleData, getAllData, Rating, handleErrorResponse, User, WalletLogin, ReferralUser,
+    getAllDataCount, NewTransaction, TransactionHistory, Reward, plusLargeSmallValue,
+    ColourBetting, minusLargeSmallValue, CurrencyCoin, NumberBetting,
+    CommunityBetting, PenaltyBetting, CardBetting, calculateTotalReward, calculateAllGameReward,
+    getAllBids
 } from "../../index.js";
 
 
@@ -16,19 +20,27 @@ export const userDashboard = async (req, res) => {
             const numberBettingForUser = await NumberBetting.find({ userId: findUser._id, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
             const colourBettingForUser = await ColourBetting.find({ userId: findUser._id, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
             const communityBettingForUser = await CommunityBetting.find({ userId: findUser._id, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
-            const totalUserswhoPlacedBidsin24Hrs = numberBettingForUser.length + colourBettingForUser.length + communityBettingForUser.length;
+            const penaltyBettingForUser = await PenaltyBetting.find({ userId: findUser._id, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+            const cardBettingForUser = await CardBetting.find({ userId: findUser._id, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+            const totalUserswhoPlacedBidsin24Hrs = numberBettingForUser.length + colourBettingForUser.length + communityBettingForUser.length + penaltyBettingForUser.length + cardBettingForUser.length;
+            // const totalUserswhoPlacedBidsin24Hrs = await getAllBids({ userId: findUser._id, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
 
             // For All Get bit of 24 hours
             const numberBetting = await NumberBetting.find({ createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
             const colourBetting = await ColourBetting.find({ createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
             const communityBetting = await CommunityBetting.find({ createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
-            const totalBidin24Hrs = numberBetting.length + colourBetting.length + communityBetting.length
+            const penaltyBetting = await PenaltyBetting.find({ createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+            const cardBetting = await CardBetting.find({ createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
+            const totalBidin24Hrs = numberBetting.length + colourBetting.length + communityBetting.length + penaltyBetting.length + cardBetting.length
+            // const totalBidin24Hrs = await getAllBids({ createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
 
             // For Total winning amount in 24 hours
             let numberBettingWinningAmount = numberBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
             let colourBettingWinningAmount = colourBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
             let communityBettingWinningAmount = communityBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
-            const totalWinningAmountin24Hrs = numberBettingWinningAmount + colourBettingWinningAmount + communityBettingWinningAmount
+            let penaltyBettingWinningAmount = penaltyBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
+            let cardBettingWinningAmount = cardBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
+            const totalWinningAmountin24Hrs = numberBettingWinningAmount + colourBettingWinningAmount + communityBettingWinningAmount + penaltyBettingWinningAmount + cardBettingWinningAmount
 
             // For Total referral code count
             const totalReferralCount = await ReferralUser.countDocuments({ userId: findUser._id })
@@ -56,6 +68,16 @@ export const userDashboard = async (req, res) => {
                 }
             };
 
+            // One Week Reward
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(today.getDate() - 7);
+            const rewardOneWeekQuery = {
+                createdAt: {
+                    $gte: oneWeekAgo,
+                    $lte: today,
+                }
+            };
+
             // Today Rewas count get
             today.setHours(0, 0, 0, 0);
             const endOfDay = new Date(today);
@@ -67,11 +89,13 @@ export const userDashboard = async (req, res) => {
                 }
             };
 
-            // All Reward Data Code
+            // All Reward Data Code 24 hours
             const totalNumberBettingReward = numberBetting.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
             const totalColourBettingReward = colourBetting.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
             const totalCommunityBettingReward = communityBetting.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
-            const totalReward = totalNumberBettingReward + totalColourBettingReward + totalCommunityBettingReward
+            const totalPenaltyBettingReward = penaltyBetting.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
+            const totalCardBettingReward = cardBetting.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
+            const totalReward = totalNumberBettingReward + totalColourBettingReward + totalCommunityBettingReward + totalPenaltyBettingReward + totalCardBettingReward
 
             // One month Reward Code
             const totalRewardsDistributedToday = await Reward.countDocuments({ userId: findUser._id, is_deleted: 0, ...rewardTodayQuery });
@@ -79,30 +103,30 @@ export const userDashboard = async (req, res) => {
             const totalDeposit = transactions.filter(tran => tran.type == "deposit")
 
             // One Day Reward
-            const totalOneDayNumberReward = await calculateTotalReward(NumberBetting, rewardTodayQuery);
-            const totalOneDayColourReward = await calculateTotalReward(ColourBetting, rewardTodayQuery);
-            const totalOneDayCommunityReward = await calculateTotalReward(CommunityBetting, rewardTodayQuery);
-            const totalOneDayReward = totalOneDayNumberReward + totalOneDayColourReward + totalOneDayCommunityReward;
+            // const totalOneDayNumberReward = await calculateTotalReward(NumberBetting, rewardTodayQuery);
+            // const totalOneDayColourReward = await calculateTotalReward(ColourBetting, rewardTodayQuery);
+            // const totalOneDayCommunityReward = await calculateTotalReward(CommunityBetting, rewardTodayQuery);
+            // const totalOneDayPenaltyReward = await calculateTotalReward(PenaltyBetting, rewardTodayQuery);
+            // const totalOneDayCardReward = await calculateTotalReward(CardBetting, rewardTodayQuery);
+            // const totalOneDayReward = totalOneDayNumberReward + totalOneDayColourReward + totalOneDayCommunityReward + totalOneDayPenaltyReward + totalOneDayCardReward;
+            const totalOneDayReward = await calculateAllGameReward(rewardTodayQuery);
 
             // One Month Reward
-            const totalOneMonthNumberReward = await calculateTotalReward(NumberBetting, rewardOneMonthQuery);
-            const totalOneMonthColourReward = await calculateTotalReward(ColourBetting, rewardOneMonthQuery);
-            const totalOneMonthCommunityReward = await calculateTotalReward(CommunityBetting, rewardOneMonthQuery);
-            const totalOneMonthReward = totalOneMonthNumberReward + totalOneMonthColourReward + totalOneMonthCommunityReward;
+            // const totalOneMonthNumberReward = await calculateTotalReward(NumberBetting, rewardOneMonthQuery);
+            // const totalOneMonthColourReward = await calculateTotalReward(ColourBetting, rewardOneMonthQuery);
+            // const totalOneMonthCommunityReward = await calculateTotalReward(CommunityBetting, rewardOneMonthQuery);
+            // const totalOneMonthPenaltyReward = await calculateTotalReward(PenaltyBetting, rewardOneMonthQuery);
+            // const totalOneMonthCardReward = await calculateTotalReward(CardBetting, rewardOneMonthQuery);
+            // const totalOneMonthReward = totalOneMonthNumberReward + totalOneMonthColourReward + totalOneMonthCommunityReward + totalOneMonthPenaltyReward + totalOneMonthCardReward;
+            const totalOneMonthReward = await calculateAllGameReward(rewardOneMonthQuery)
 
-            // One Week Reward
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(today.getDate() - 7);
-            const rewardOneWeekQuery = {
-                createdAt: {
-                    $gte: oneWeekAgo,
-                    $lte: today,
-                }
-            };
-            const totalOneWeekNumberReward = await calculateTotalReward(NumberBetting, rewardOneWeekQuery);
-            const totalOneWeekColourReward = await calculateTotalReward(ColourBetting, rewardOneWeekQuery);
-            const totalOneWeekCommunityReward = await calculateTotalReward(CommunityBetting, rewardOneWeekQuery);
-            const totalOneWeekReward = totalOneWeekNumberReward + totalOneWeekColourReward + totalOneWeekCommunityReward;
+            // const totalOneWeekNumberReward = await calculateTotalReward(NumberBetting, rewardOneWeekQuery);
+            // const totalOneWeekColourReward = await calculateTotalReward(ColourBetting, rewardOneWeekQuery);
+            // const totalOneWeekCommunityReward = await calculateTotalReward(CommunityBetting, rewardOneWeekQuery);
+            // const totalOneWeekPenaltyReward = await calculateTotalReward(PenaltyBetting, rewardOneWeekQuery);
+            // const totalOneWeekCardReward = await calculateTotalReward(CardBetting, rewardOneWeekQuery);
+            // const totalOneWeekReward = totalOneWeekNumberReward + totalOneWeekColourReward + totalOneWeekCommunityReward + totalOneWeekPenaltyReward + totalOneWeekCardReward;
+            const totalOneWeekReward = await calculateAllGameReward(rewardOneWeekQuery)
 
             const totalRewardsDistributedOneMonth = await Reward.countDocuments({ userId: findUser._id, is_deleted: 0, ...rewardOneMonthQuery });
 
@@ -203,7 +227,7 @@ async function getActiveWinnerPlayers(timeRange) {
     return userDataResult;
 }
 
-async function calculateTotalReward(bettingModel, query) {
-    const bettingData = await bettingModel.find({ ...query, is_deleted: 0 });
-    return bettingData.reduce((total, data) => total + Number(data.rewardAmount), 0);
-}
+// async function calculateTotalReward(bettingModel, query) {
+//     const bettingData = await bettingModel.find({ ...query, is_deleted: 0 });
+//     return bettingData.reduce((total, data) => total + Number(data.rewardAmount), 0);
+// }

@@ -347,8 +347,8 @@ function getRandomElementExcluding(excludeElements) {
 export const penaltyBettingWinnerResult = async (req, res) => {
     try {
         const { gameId, period } = req.params;
-        const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
-        if (findGameMode) {
+        const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+        if (findGame.gameMode == "Manual") {
             await PenaltyBetting.updateMany({ gameId, period }, { status: "pending" })
             return sendResponse(
                 res,
@@ -446,7 +446,8 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                                     item.userIds.map(async (userId) => {
                                         const findUser = await PenaltyBetting.findOne({ userId, gameId, period: item.period, betSide: item.betSide, is_deleted: 0 });
                                         if (findUser) {
-                                            let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                                            // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                                            let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
                                             await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 },
                                                 { isWin: true, status: 'successfully', rewardAmount }
                                             );
