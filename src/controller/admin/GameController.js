@@ -46,7 +46,8 @@ export const addEditGame = async (req, res) => {
       betAmount,
       winnerIds,
       winnersPercentage,
-      entryFee
+      entryFee,
+      winningCoin
     } = req.body;
     console.log(gameTimeTo, "gameTimeTo", moment(gameTimeTo).utc());
     console.log(new Date(gameTimeTo), "new Date(gameTimeTo)");
@@ -102,7 +103,8 @@ export const addEditGame = async (req, res) => {
             betAmount,
             winnerIds,
             winnersPercentage,
-            entryFee
+            entryFee,
+            winningCoin
           },
           Game
         );
@@ -154,7 +156,8 @@ export const addEditGame = async (req, res) => {
           betAmount,
           winnerIds,
           winnersPercentage,
-          entryFee
+          entryFee,
+          winningCoin
         },
         Game
       );

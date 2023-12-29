@@ -19,6 +19,8 @@ import {
     sendMail,
     ejs,
     CardBetting,
+    getRandomElement,
+    winCardNumberFun
 } from "../../index.js";
 //#region Add penalty Betting
 export const addCardBet = async (req, res) => {
@@ -73,7 +75,8 @@ export const addCardBet = async (req, res) => {
                 gameId: gameId,
                 card: card,
                 betAmount: parseInt(betAmount),
-                period
+                period,
+                status: "pending"
             },
             CardBetting
         );
@@ -116,6 +119,7 @@ export const addCardBet = async (req, res) => {
 export const getByIdGamePeriodOfCardBetting = async (req, res) => {
     try {
         const { gameId } = req.params;
+        const { second } = req.query;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const getGamePeriodById = await CardBetting.aggregate([
             {
@@ -139,6 +143,7 @@ export const getByIdGamePeriodOfCardBetting = async (req, res) => {
                     _id: 0,
                     price: "$betAmount",
                     card: 1,
+                    winCardNumber: 1,
                     period: 1,
                     isWin: 1,
                     status: 1,
@@ -166,19 +171,26 @@ export const getByIdGamePeriodOfCardBetting = async (req, res) => {
                     period: 1,
                     price: 1,
                     card: 1,
+                    winCardNumber: 1,
                     isWin: 1,
                     status: 1,
                     date: "$periodData.date",
                     startTime: "$periodData.startTime",
                     endTime: "$periodData.endTime",
+                    periodFor: "$periodData.periodFor",
                     createdAt: "$periodData.createdAt",
                 }
             },
             {
                 $match: {
-                    status: { $in: ["fail", "pending", "successfully"] }
+                    periodFor: second
                 }
             }
+            // {
+            //     $match: {
+            //         status: { $in: ["fail", "pending", "successfully"] }
+            //     }
+            // }
         ])
         return sendResponse(
             res,
@@ -196,6 +208,7 @@ export const getByIdGamePeriodOfCardBetting = async (req, res) => {
 export const getAllGamePeriodOfCardBetting = async (req, res) => {
     try {
         const { gameId } = req.params;
+        const { second } = req.query;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const getCardBettingPeriods = await CardBetting.aggregate([
             {
@@ -211,7 +224,7 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
                     gameId: { $first: "$gameId" },
                     totalUsers: { $sum: 1 },
                     betAmount: { $sum: "$betAmount" },
-                    wincard: {
+                    card: {
                         $max: {
                             $cond: [
                                 { $eq: ['$isWin', true] },
@@ -220,6 +233,7 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
                             ]
                         }
                     },
+                    winCardNumber: { $first: "$winCardNumber" },
                     status: {
                         $max: {
                             $cond: {
@@ -264,7 +278,8 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
                     totalUsers: 1,
                     price: "$betAmount",
                     period: 1,
-                    wincard: 1,
+                    card: 1,
+                    winCardNumber: 1,
                     status: 1,
                     periodData: {
                         $filter: {
@@ -284,16 +299,23 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
                 $project: {
                     gameId: 1,
                     totalUsers: 1,
-                    wincard: 1,
+                    card: 1,
+                    winCardNumber: 1,
                     period: 1,
                     price: 1,
                     status: 1,
                     date: "$periodData.date",
                     startTime: "$periodData.startTime",
                     endTime: "$periodData.endTime",
+                    periodFor: "$periodData.periodFor",
                     createdAt: "$periodData.createdAt",
                 }
             },
+            {
+                $match: {
+                    periodFor: second
+                }
+            }
             // {
             //     $match: {
             //         status: { $ne: null }
@@ -312,27 +334,40 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
 };
 //#endregion
 
-// Function to get a random element from an array
-function getRandomElement(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+// // Function to get a random element from an array
+// function getRandomElement(arr) {
+//     return arr[Math.floor(Math.random() * arr.length)];
+// }
 
-// Function to get a random element from an array excluding specified elements
+// // Function to get a random element from an array excluding specified elements
+
 function getRandomElementExcluding(excludeElements) {
     let randomElement;
-    let allCards = ["left", "right"];
+    let allCards = ["low", "high"];
     do {
         randomElement = getRandomElement(allCards);
     } while (excludeElements.includes(randomElement));
     return randomElement;
 }
 
+// function winCardNumberFun(card) {
+//     const allLowCards = ['A', '2', '3', '4', '5', '6'];
+//     const allHighCards = ['8', '9', '10', 'J', 'Q', 'K'];
+//     let randomCard = '';
+//     if (card == 'high') {
+//         randomCard = getRandomElement(allHighCards);
+//     } else {
+//         randomCard = getRandomElement(allLowCards);
+//     }
+//     return randomCard
+// }
+
 //#region Penalty Game Winner api
 export const cardBettingWinnerResult = async (req, res) => {
     try {
         const { gameId, period } = req.params;
-        const findGameMode = await getSingleData({ _id: gameId, gameMode: "Manual", is_deleted: 0 }, Game);
-        if (findGameMode) {
+        const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+        if (findGame.gameMode == "Manual") {
             await CardBetting.updateMany({ gameId, period }, { status: "pending" })
             return sendResponse(
                 res,
@@ -351,7 +386,7 @@ export const cardBettingWinnerResult = async (req, res) => {
             return sendResponse(
                 res,
                 StatusCodes.OK,
-                ResponseMessage.PENALTY_WINNER + " " + checkAlreadyWin[0].card,
+                ResponseMessage.CARD_WINNER + " " + checkAlreadyWin[0].card + ' ' + checkAlreadyWin[0].winCardNumber,
                 [
                     {
                         period: checkAlreadyWin[0].period,
@@ -380,7 +415,7 @@ export const cardBettingWinnerResult = async (req, res) => {
         if (totalUserInPeriod.length) {
             const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
             if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
-                const getAllSideBets = await CardBetting.aggregate([
+                const getAllCardBets = await CardBetting.aggregate([
                     {
                         $match: { period: Number(period) }
                     },
@@ -407,32 +442,35 @@ export const cardBettingWinnerResult = async (req, res) => {
                         $sort: { totalBetAmount: 1 }
                     },
                 ]);
-
-                if (getAllSideBets.length) {
-                    const tieSides = getAllSideBets.filter(item => item.totalBetAmount === getAllSideBets[0].totalBetAmount);
-                    if (getAllSideBets.length == 1) {
-                        const randomWinSide = getRandomElementExcluding(tieSides.map(item => item.card));
+                let winCardNumber;
+                if (getAllCardBets.length) {
+                    const tieCards = getAllCardBets.filter(item => item.totalBetAmount === getAllCardBets[0].totalBetAmount);
+                    if (getAllCardBets.length == 1) {
+                        const randomWinCard = getRandomElementExcluding(tieCards.map(item => item.card));
+                        winCardNumber = winCardNumberFun(randomWinCard);
                         await CardBetting.create({
-                            userId: null, period, gameId, card: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+                            userId: null, period, gameId, card: randomWinCard, is_deleted: 0, isWin: true, winCardNumber, status: 'successfully'
                         });
                         await CardBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
                         return sendResponse(
                             res,
                             StatusCodes.OK,
-                            `${ResponseMessage.PENALTY_WINNER} ${randomWinSide}`,
+                            `${ResponseMessage.CARD_WINNER} ${randomWinCard} ${winCardNumber}`,
                             []
                         );
                     } else {
                         await Promise.all(
-                            getAllSideBets.map(async (item, index) => {
+                            getAllCardBets.map(async (item, index) => {
                                 if (index === 0) {
                                     // Handling the winner
-                                    item.userIds.map(async (userId) => {
+                                    item.userIds.map(async (userId, i) => {
+                                        if (i == 0) winCardNumber = winCardNumberFun(item.card)
                                         const findUser = await CardBetting.findOne({ userId, gameId, period: item.period, card: item.card, is_deleted: 0 });
                                         if (findUser) {
-                                            let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                                            // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                                            let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
                                             await CardBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', card: item.card, is_deleted: 0 },
-                                                { isWin: true, status: 'successfully', rewardAmount }
+                                                { isWin: true, winCardNumber, status: 'successfully', rewardAmount }
                                             );
                                             const balance = await getSingleData({ userId }, NewTransaction);
                                             if (balance) {
@@ -440,11 +478,11 @@ export const cardBettingWinnerResult = async (req, res) => {
                                                 balance.totalCoin = Number(balance.totalCoin) + Number(winningAmount);
                                                 await balance.save();
                                                 const userData = await getSingleData({ _id: userId }, User);
-                                                let gameName = 'Penalty Betting'
+                                                let gameName = 'Card Betting'
                                                 let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
                                                     gameName: gameName
                                                 });
-                                                await sendMail(userData.email, "Penalty betting game win", mailInfo)
+                                                await sendMail(userData.email, "Card betting game win", mailInfo)
                                             }
                                         } else {
                                             return sendResponse(
@@ -467,8 +505,8 @@ export const cardBettingWinnerResult = async (req, res) => {
                     return sendResponse(
                         res,
                         StatusCodes.OK,
-                        ResponseMessage.PENALTY_WINNER + " " + getAllSideBets[0].card,
-                        getAllSideBets[0]
+                        ResponseMessage.CARD_WINNER + " " + getAllCardBets[0].card + ' ' + winCardNumber,
+                        getAllCardBets[0]
                     );
                 } else {
                     await CardBetting.updateMany({ gameId, period }, { status: "fail" })
@@ -488,13 +526,33 @@ export const cardBettingWinnerResult = async (req, res) => {
                     []
                 );
             }
+        } else {
+            let allCards = ["low", "high"];
+            let randomIndex = Math.floor(Math.random() * allCards.length);
+            let randomWinCard = allCards[randomIndex];
+            const winCardNumber = winCardNumberFun(randomWinCard)
+            await CardBetting.create({
+                userId: null, period, gameId, card: randomWinCard, is_deleted: 0, isWin: true, winCardNumber, status: 'successfully'
+            })
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                ResponseMessage.CARD_WINNER + " " + randomWinCard + ' ' + winCardNumber,
+                [
+                    {
+                        period,
+                        card: randomWinCard,
+                        totalBetAmount: 0
+                    }
+                ]
+            );
         }
-        return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            "User not found",
-            []
-        );
+        // return sendResponse(
+        //     res,
+        //     StatusCodes.BAD_REQUEST,
+        //     "User not found",
+        //     []
+        // );
     } catch (error) {
         return handleErrorResponse(res, error);
     }

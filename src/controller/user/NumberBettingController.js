@@ -2377,14 +2377,13 @@ export const getPeriod = async (req, res) => {
 export const numberBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;
-    const findGameMode = await getSingleData(
-      { _id: gameId, gameMode: "Manual", is_deleted: 0 },
+    const findGame = await getSingleData(
+      { _id: gameId, is_deleted: 0 },
       Game
     );
 
-    if (findGameMode) {
+    if (findGame.gameMode == "Manual") {
       await NumberBetting.updateMany({ gameId, period }, { status: "pending" });
-
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -2533,10 +2532,11 @@ export const numberBettingWinnerResult = async (req, res) => {
                       is_deleted: 0,
                     });
                     if (findUser) {
-                      let rewardAmount = multiplicationLargeSmallValue(
-                        findUser.betAmount,
-                        0.95
-                      );
+                      // let rewardAmount = multiplicationLargeSmallValue(
+                      //   findUser.betAmount,
+                      //   0.95
+                      // );
+                      let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
                       await NumberBetting.updateOne(
                         {
                           userId,
