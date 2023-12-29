@@ -1,4 +1,4 @@
-import moment from 'moment-timezone'
+import moment from "moment";
 import {
   ResponseMessage,
   StatusCodes,
@@ -1691,32 +1691,14 @@ const updateAndCreatePeriod = async (
   ).lean();
 };
 function allDateStamps(game, time, type) {
-  let serverTime = "+5:30"
-  //main game start time gamedurationfrom
-  const mainGameStartTime = moment(game.gameDurationFrom, "h:mm A").format(
-    "HH:mm"
-  );
-  //main game end time gamedurationto
-  const mainGameEndTime = moment(game.gameDurationTo, "h:mm A").format("HH:mm");
-  //main game start date gameTimeFrom
-  const mainGameStartDate = moment(game.gameTimeFrom).format("YYYY-MM-DD");
-  //main game end date gameTimeTo
-  const mainGameEndDate = moment(game.gameTimeTo).format("YYYY-MM-DD");
-  //game start time stamp create from main game start date and time
-  let gameStartTimeStamp = moment(
-    `${mainGameStartDate} ${mainGameStartTime}:00`,
-    "YYYY-MM-DDTHH:mm:ss"
-  ).tz("UTC").unix()
-  console.log(gameStartTimeStamp,"1711")
+  let serverTime = "+5:30";
+  let gameStartTimeStamp = moment(game.gameTimeFrom)
+    .utcOffset(serverTime)
+    .unix();
   //game end time stamp create from main game end date and time
-  let gameEndTimeStamp = moment(
-    `${mainGameEndDate} ${mainGameEndTime}:00`,
-    "YYYY-MM-DDTHH:mm:ss"
-  ).tz("UTC").unix()
-  console.log(gameEndTimeStamp,"1717")
-
+  let gameEndTimeStamp = moment(game.gameTimeTo).utcOffset(serverTime).unix();
   //current time stamp
-  const currentTimeAndDateStamp = moment().utcOffset(serverTime).unix();
+  let currentTimeAndDateStamp = moment().unix();
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
   let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
@@ -1731,11 +1713,12 @@ function allDateStamps(game, time, type) {
 // cronJob for all games
 export async function createAllGamePeriodFromCronJob() {
   try {
-    var currentDate = moment().utcOffset("+05:30").format("YYYY-MM-DD");
-    console.log(currentDate, "currentDate");
+    var currentDate = moment().format("YYYY-MM-DDT00:00:00");
+    var currentDate2 = moment().format("YYYY-MM-DDT23:59:59");
+    const dateForPeriod = moment().format("YYYY-MM-DD");
     // var currentDate3 = moment();
     const findGame2 = await Game.find({
-      gameTimeFrom: { $lte: currentDate },
+      gameTimeFrom: { $lte: currentDate2 },
       gameTimeTo: { $gte: currentDate },
       is_deleted: 0,
     });
@@ -1749,14 +1732,13 @@ export async function createAllGamePeriodFromCronJob() {
           gameHoursNextTimeStamp,
         } = allDateStamps(game, game.gameHours, "minutes");
         //date for period
-        const formattedDate = currentDate.split("-").join("");
+        const formattedDate = dateForPeriod.split("-").join("");
         // this codition compare between current time stamp and game start time stamp and game end time stamp
-        console.log(gameStartTimeStamp <= currentTimeAndDateStamp,"condition check",gameEndTimeStamp > currentTimeAndDateStamp)
         if (
           gameStartTimeStamp <= currentTimeAndDateStamp &&
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
-          console.log("1st condition")
+          console.log("1st condition");
           let period = formattedDate + "0000";
           const periodCount = await Period.countDocuments({
             gameId: game._id,
@@ -1780,7 +1762,7 @@ export async function createAllGamePeriodFromCronJob() {
               console.log("1");
               await updateAndCreatePeriod(
                 game._id,
-                currentDate,
+                dateForPeriod,
                 period,
                 gameStartTimeStamp,
                 gameEndTimeStamp
@@ -1789,24 +1771,20 @@ export async function createAllGamePeriodFromCronJob() {
               console.log("2");
               await updateAndCreatePeriod(
                 game._id,
-                currentDate,
+                dateForPeriod,
                 period,
                 gameStartTimeStamp,
                 gameHoursNextTimeStamp
               );
             }
           } else {
-            console.log(
-              currentTimeAndDateStamp,
-              "check",
-              lastIndex.endTime
-            );
+            console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 console.log("3");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   currentTimeAndDateStamp,
                   gameEndTimeStamp
@@ -1815,7 +1793,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("4");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   currentTimeAndDateStamp,
                   gameHoursNextTimeStamp
@@ -1824,10 +1802,7 @@ export async function createAllGamePeriodFromCronJob() {
             }
           }
         }
-        console.log("out condition")
-
-      } 
-      else if (game.gameName == "Community Betting") {
+      } else if (game.gameName == "Community Betting") {
         const {
           gameStartTimeStamp,
           gameEndTimeStamp,
@@ -1835,7 +1810,7 @@ export async function createAllGamePeriodFromCronJob() {
           gameHoursNextTimeStamp,
         } = allDateStamps(game, game.gameHours, "minutes");
         //date for period
-        const formattedDate = currentDate.split("-").join("");
+        const formattedDate = dateForPeriod.split("-").join("");
         // this codition compare between current time stamp and game start time stamp and game end time stamp
         if (
           gameStartTimeStamp <= currentTimeAndDateStamp &&
@@ -1864,7 +1839,7 @@ export async function createAllGamePeriodFromCronJob() {
               console.log("1");
               await updateAndCreatePeriod(
                 game._id,
-                currentDate,
+                dateForPeriod,
                 period,
                 gameStartTimeStamp,
                 gameEndTimeStamp
@@ -1873,7 +1848,7 @@ export async function createAllGamePeriodFromCronJob() {
               console.log("2");
               await updateAndCreatePeriod(
                 game._id,
-                currentDate,
+                dateForPeriod,
                 period,
                 gameStartTimeStamp,
                 gameHoursNextTimeStamp
@@ -1891,7 +1866,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("3");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   currentTimeAndDateStamp,
                   gameEndTimeStamp
@@ -1900,7 +1875,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("4");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   currentTimeAndDateStamp,
                   gameHoursNextTimeStamp
@@ -1918,7 +1893,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameHoursNextTimeStamp,
           } = allDateStamps(game, second, "seconds");
           //date for period
-          const formattedDate = currentDate.split("-").join("");
+          const formattedDate = dateForPeriod.split("-").join("");
           // this codition compare between current time stamp and game start time stamp and game end time stamp
           if (
             gameStartTimeStamp <= currentTimeAndDateStamp &&
@@ -1948,7 +1923,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("1 3 Color Betting");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   gameStartTimeStamp,
                   gameEndTimeStamp,
@@ -1958,7 +1933,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("2 3 Color Betting");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   gameStartTimeStamp,
                   gameHoursNextTimeStamp,
@@ -1974,7 +1949,7 @@ export async function createAllGamePeriodFromCronJob() {
                   console.log("3 3 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
-                    currentDate,
+                    dateForPeriod,
                     period,
                     currentTimeAndDateStamp,
                     gameEndTimeStamp,
@@ -1984,7 +1959,7 @@ export async function createAllGamePeriodFromCronJob() {
                   console.log("4 3 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
-                    currentDate,
+                    dateForPeriod,
                     period,
                     currentTimeAndDateStamp,
                     gameHoursNextTimeStamp,
@@ -2004,7 +1979,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameHoursNextTimeStamp,
           } = allDateStamps(game, second, "seconds");
           //date for period
-          const formattedDate = currentDate.split("-").join("");
+          const formattedDate = dateForPeriod.split("-").join("");
           // this codition compare between current time stamp and game start time stamp and game end time stamp
           if (
             gameStartTimeStamp <= currentTimeAndDateStamp &&
@@ -2034,7 +2009,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("1 2 Color Betting");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   gameStartTimeStamp,
                   gameEndTimeStamp,
@@ -2044,7 +2019,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("2 2 Color Betting");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   gameStartTimeStamp,
                   gameHoursNextTimeStamp,
@@ -2060,7 +2035,7 @@ export async function createAllGamePeriodFromCronJob() {
                   console.log("3 2 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
-                    currentDate,
+                    dateForPeriod,
                     period,
                     currentTimeAndDateStamp,
                     gameEndTimeStamp,
@@ -2070,7 +2045,7 @@ export async function createAllGamePeriodFromCronJob() {
                   console.log("4 2 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
-                    currentDate,
+                    dateForPeriod,
                     period,
                     currentTimeAndDateStamp,
                     gameHoursNextTimeStamp,
@@ -2090,7 +2065,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameHoursNextTimeStamp,
           } = allDateStamps(game, second, "seconds");
           //date for period
-          const formattedDate = currentDate.split("-").join("");
+          const formattedDate = dateForPeriod.split("-").join("");
           // this codition compare between current time stamp and game start time stamp and game end time stamp
           if (
             gameStartTimeStamp <= currentTimeAndDateStamp &&
@@ -2120,7 +2095,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("1 Penalty Betting");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   gameStartTimeStamp,
                   gameEndTimeStamp,
@@ -2130,7 +2105,7 @@ export async function createAllGamePeriodFromCronJob() {
                 console.log("2 Penalty Betting");
                 await updateAndCreatePeriod(
                   game._id,
-                  currentDate,
+                  dateForPeriod,
                   period,
                   gameStartTimeStamp,
                   gameHoursNextTimeStamp,
@@ -2146,7 +2121,7 @@ export async function createAllGamePeriodFromCronJob() {
                   console.log("3 Penalty Betting");
                   await updateAndCreatePeriod(
                     game._id,
-                    currentDate,
+                    dateForPeriod,
                     period,
                     currentTimeAndDateStamp,
                     gameEndTimeStamp,
@@ -2156,7 +2131,7 @@ export async function createAllGamePeriodFromCronJob() {
                   console.log("4 Penalty Betting");
                   await updateAndCreatePeriod(
                     game._id,
-                    currentDate,
+                    dateForPeriod,
                     period,
                     currentTimeAndDateStamp,
                     gameHoursNextTimeStamp,

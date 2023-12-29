@@ -47,8 +47,10 @@ export const addEditGame = async (req, res) => {
       winnersPercentage,
       entryFee
     } = req.body;
-    console.log(gameTimeTo, "gameTimeTo", moment(gameTimeTo).utc());
-    console.log(new Date(gameTimeTo),  "new Date(gameTimeTo)");
+    let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
+    let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
+    newGameStartDate = moment(`${newGameStartDate} ${gameDurationFrom}`).utcOffset("-05:30").format("YYYY-MM-DDTHH:mm:ss");
+    newGameEndDate = moment(`${newGameEndDate} ${gameDurationTo}`).utcOffset("-05:30").format("YYYY-MM-DDTHH:mm:ss");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -88,8 +90,8 @@ export const addEditGame = async (req, res) => {
             gameDurationTo,
             gameRound,
             gameWinningAmount,
-            gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
-            gameTimeTo: moment(gameTimeTo).utc(),
+            gameTimeFrom: newGameStartDate,
+            gameTimeTo: newGameEndDate,
             gameMode,
             description,
             gameWeek,
@@ -136,9 +138,9 @@ export const addEditGame = async (req, res) => {
           gameDurationTo,
           gameRound,
           gameWinningAmount,
-          gameTimeFrom: moment(gameTimeFrom).format("YYYY-MM-DD"),
+          gameTimeFrom: newGameStartDate,
           // gameTimeFrom: combinedGameTimeFrom,
-          gameTimeTo: moment(gameTimeTo).utc(),
+          gameTimeTo: newGameEndDate,
           // gameTimeTo: combinedGameTimeTo,
           gameMode,
           description,
