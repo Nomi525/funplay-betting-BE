@@ -2359,6 +2359,38 @@ export const getPeriod = async (req, res) => {
 //   }
 // }
 
+
+
+export const createAllGameWinnerFromCronJob = async (req, res) => {
+  try {
+    // const { gameType, type, gameId, period } = req.params;
+
+    // console.log("check");
+    // const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
+    var currentDate = moment().format("YYYY-MM-DDT00:00:00");
+    console.log(currentDate, "currentDate");
+
+    let currentTimeAndDateStampPlus10Second = moment().unix() + 10; 
+    
+    let findGames = await Period.find({
+      date: currentDate,
+      endTime: currentTimeAndDateStampPlus10Second,
+      is_deleted: 0,
+    });
+
+
+    // console.log(findGames.length, "findGames");
+    // for (const game of findGames) {
+    // }
+
+
+   return 1;
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+
 export const numberBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;

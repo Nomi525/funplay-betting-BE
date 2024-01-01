@@ -245,6 +245,7 @@ import {
   getAllNumberGamePeriod,
   getNumberGamePeriodById,
   createAllGamePeriodFromCronJob,
+  createAllGameWinnerFromCronJob,
   getPeriod,
   numberBettingWinnerResult
 } from "./controller/user/NumberBettingController.js";
@@ -422,6 +423,7 @@ export {
   Period,
   cron,
   createAllGamePeriodFromCronJob,
+  createAllGameWinnerFromCronJob,
   getCommunityGamePeriodById,
   getAllCommunityGamePeriod,
   getAllNumberGamePeriod,
