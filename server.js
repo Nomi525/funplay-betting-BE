@@ -1,5 +1,5 @@
 
-import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes, cron, createAllGamePeriodFromCronJob } from "./src/index.js";
+import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes, cron, createAllGamePeriodFromCronJob,createAllGameWinnerFromCronJob} from "./src/index.js";
 
 const app = express();
 app.use(cors());
@@ -39,6 +39,11 @@ app.use(function (err, req, res, next) {
 cron.schedule('* * * * * *', () => { 
   createAllGamePeriodFromCronJob();
 });
+
+// cron run for every seconds
+// cron.schedule('* * * * * *', () => { 
+//   createAllGameWinnerFromCronJob();
+// });
 
 
 
