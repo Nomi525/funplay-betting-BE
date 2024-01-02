@@ -2146,7 +2146,6 @@ export async function createAllGamePeriodFromCronJob() {
           }
         });
       } else if (game.gameName == "Card Betting") {
-        console.log('Card Betting');
         game.gameSecond.map(async (second, index) => {
           const {
             gameStartTimeStamp,
