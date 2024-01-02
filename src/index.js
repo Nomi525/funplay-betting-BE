@@ -121,6 +121,7 @@ import {
   getSingleGame,
   getSingleGameRules,
   gameRuleDelete,
+  getAllGamePeriodSelectedTimeList
 } from "./controller/admin/GameController.js";
 // import {
 //   addEditPrivacyPolicy,
@@ -394,6 +395,7 @@ import {
 dotenv.config();
 
 export {
+  getAllGamePeriodSelectedTimeList,
   declareCardWinner,
   declarePenaltyWinner,
   declareColorWinner,

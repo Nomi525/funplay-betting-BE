@@ -461,11 +461,11 @@ export const declareNumberWinner = async (game, period) => {
 //#endregion
 
 //#region For Declare number winner
-export const declareColorWinner = async (game, period, gameType) => {
+export const declareColorWinner = async (game, period, selectedTime, gameType) => {
     const { _id, gameMode, winningCoin } = game
     const gameId = _id
     if (gameMode == "Manual") {
-        await ColourBetting.updateMany({ gameId, period }, { status: "pending" });
+        await ColourBetting.updateMany({ gameId, period, selectedTime }, { status: "pending" });
         return {
             message: ResponseMessage.WINNER_DECLARE_MANUAL
         }
@@ -474,6 +474,7 @@ export const declareColorWinner = async (game, period, gameType) => {
             gameId,
             isWin: true,
             period: Number(period),
+            selectedTime,
             is_deleted: 0,
         }).lean();
         if (checkAlreadyWin.length) {
@@ -487,6 +488,7 @@ export const declareColorWinner = async (game, period, gameType) => {
                         gameId: new mongoose.Types.ObjectId(gameId),
                         gameType,
                         period: Number(period),
+                        selectedTime,
                         is_deleted: 0
                     }
                 },
@@ -503,7 +505,7 @@ export const declareColorWinner = async (game, period, gameType) => {
                 if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
                     const getAllColourBets = await ColourBetting.aggregate([
                         {
-                            $match: { period: Number(period), gameType }
+                            $match: { period: Number(period), selectedTime, gameType }
                         },
                         {
                             $group: {
@@ -534,9 +536,9 @@ export const declareColorWinner = async (game, period, gameType) => {
                         if (getAllColourBets.length == 1) {
                             const randomWinColour = getRandomColorExcluding(tieColours.map(item => item.colourName), gameType);
                             await ColourBetting.create({
-                                userId: null, period, gameId, gameType, colourName: randomWinColour, is_deleted: 0, isWin: true, status: 'successfully'
+                                userId: null, period, selectedTime, gameId, gameType, colourName: randomWinColour, is_deleted: 0, isWin: true, status: 'successfully'
                             });
-                            await ColourBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
+                            await ColourBetting.updateMany({ period, selectedTime, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
                             return {
                                 message: `Victory Alert! The Winning Color is ${randomWinColour}`,
                             }
@@ -546,10 +548,10 @@ export const declareColorWinner = async (game, period, gameType) => {
                                     if (index === 0) {
                                         // Handling the winner
                                         item.userIds.map(async (userId) => {
-                                            const findUser = await ColourBetting.findOne({ userId, gameId, period: item.period, colourName: item.colourName, is_deleted: 0 });
+                                            const findUser = await ColourBetting.findOne({ userId, gameId, period: item.period, selectedTime, colourName: item.colourName, is_deleted: 0 });
                                             if (findUser) {
                                                 let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
-                                                await ColourBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
+                                                await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
                                                 const balance = await getSingleData({ userId }, NewTransaction);
                                                 if (balance) {
                                                     let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
@@ -561,7 +563,7 @@ export const declareColorWinner = async (game, period, gameType) => {
                                     } else {
                                         // Handling the losers
                                         item.userIds.map(async (userId) => {
-                                            await ColourBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { status: 'fail' });
+                                            await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { status: 'fail' });
                                         });
                                     }
                                 })
@@ -571,13 +573,13 @@ export const declareColorWinner = async (game, period, gameType) => {
                             message: ResponseMessage.COLOR_WINNER + " " + getAllColourBets[0].colourName
                         }
                     } else {
-                        await ColourBetting.updateMany({ gameId, period }, { status: "fail" })
+                        await ColourBetting.updateMany({ gameId, selectedTime, period }, { status: "fail" })
                         return {
                             message: ResponseMessage.LOSER
                         }
                     }
                 } else {
-                    await ColourBetting.updateMany({ gameId, period }, { status: "fail" })
+                    await ColourBetting.updateMany({ gameId, selectedTime, period }, { status: "fail" })
                     return {
                         message: ResponseMessage.LOSER
                     }
@@ -590,7 +592,7 @@ export const declareColorWinner = async (game, period, gameType) => {
                 let randomIndex = Math.floor(Math.random() * allColors.length);
                 let randomWinColor = allColors[randomIndex];
                 await ColourBetting.create({
-                    userId: null, period, gameId, colourName: randomWinColor, is_deleted: 0, isWin: true, status: 'successfully'
+                    userId: null, period, selectedTime, gameId, colourName: randomWinColor, is_deleted: 0, isWin: true, status: 'successfully'
                 })
                 return {
                     message: ResponseMessage.COLOR_WINNER + " " + randomWinColor

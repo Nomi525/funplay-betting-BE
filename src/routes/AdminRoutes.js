@@ -94,7 +94,8 @@ import {
   deletePermission,
   getAllSubAdmin,
   declareWinnerOfPenaltyBetting,
-  declareWinnerOfCardBetting
+  declareWinnerOfCardBetting,
+  getAllGamePeriodSelectedTimeList
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -283,5 +284,6 @@ adminRoutes.post("/declare-penalty-betting-winner", Auth, declareWinnerOfPenalty
 adminRoutes.post("/declare-card-betting-winner", Auth, declareWinnerOfCardBetting);
 
 adminRoutes.get("/get-all-game-periods/:gameType/:gameId", Auth, getAllGamePeriodData);
+adminRoutes.get("/get-all-game-period-selected-time/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 export { adminRoutes };
 
