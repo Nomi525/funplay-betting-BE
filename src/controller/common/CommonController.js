@@ -167,18 +167,18 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
         let gamePeriod = [];
         if (getAllPeriod.length) {
             await Promise.all(
-                getAllPeriod.map(async (item,i) => {
-                    let sNo = i+1;
+                getAllPeriod.map(async (item, i) => {
+                    let sNo = i + 1;
                     if (item.gameName == "Number Betting") {
                         const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinNumber = findNumbers.find((data) => data.isWin)
                         let uniqueNumberUserIds = getUniqueUserIds(findNumbers)
                         let winner = '';
-                        if(findWinNumber){
+                        if (findWinNumber) {
                             winner = findWinNumber.number
                         }
                         gamePeriod.push({
-                            sNo : sNo,
+                            sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueNumberUserIds.length,
@@ -191,11 +191,11 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                         let uniqueColorUserIds = getUniqueUserIds(findColours)
                         const findWinColour = findColours.find((data) => data.isWin)
                         let winner = '';
-                        if(findWinColour){
+                        if (findWinColour) {
                             winner = findWinColour.colourName
                         }
                         gamePeriod.push({
-                            sNo : sNo,
+                            sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueColorUserIds.length,
@@ -203,16 +203,16 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             winner
                         })
                     } else if (item.gameName == "Community Betting") {
-                        const findCommunity = await CommunityBetting.find({gameId: item.gameId, period: item.period, is_deleted: 0 })
-                        const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount )
+                        const findCommunity = await CommunityBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount)
                         let winner = [];
                         let uniqueCommunityUserIds = getUniqueUserIds(findCommunity)
-                        if(findWinCommunity.length){
+                        if (findWinCommunity.length) {
                             // winner = findWinCommunity.betAmount
                             winner = findWinCommunity
                         }
                         gamePeriod.push({
-                            sNo : sNo,
+                            sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueCommunityUserIds.length,
@@ -223,7 +223,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                 })
             )
         }
-        gamePeriod = await Promise.all(gamePeriod.sort(((a,b) => a.sNo - b.sNo)))
+        gamePeriod = await Promise.all(gamePeriod.sort(((a, b) => a.sNo - b.sNo)))
         return sendResponse(
             res,
             StatusCodes.OK,
@@ -414,7 +414,8 @@ export const getAllGameRecodesGameWise = async (req, res) => {
 }
 //#endregion
 
-function getUniqueUserIds(data){
+// From get unique ids get in array of object
+function getUniqueUserIds(data) {
     let uniqueUserIds = new Set(data.map(entry => String(entry.userId)));
     return [...uniqueUserIds]
 }

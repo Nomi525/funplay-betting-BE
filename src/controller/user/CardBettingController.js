@@ -20,6 +20,7 @@ import {
     ejs,
     CardBetting,
     getRandomElement,
+    getRandomNumberExcluding,
     winCardNumberFun
 } from "../../index.js";
 //#region Add penalty Betting

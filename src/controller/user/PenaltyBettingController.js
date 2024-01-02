@@ -18,7 +18,8 @@ import {
     checkDecimalValueGreaterThanOrEqual,
     sendMail,
     ejs,
-    PenaltyBetting
+    PenaltyBetting,
+    getRandomNumberExcluding
 } from "../../index.js";
 
 //#region Add penalty Betting
@@ -334,14 +335,14 @@ function getRandomElement(arr) {
 }
 
 // Function to get a random element from an array excluding specified elements
-function getRandomElementExcluding(excludeElements) {
-    let randomElement;
-    let allSides = ["left", "right"];
-    do {
-        randomElement = getRandomElement(allSides);
-    } while (excludeElements.includes(randomElement));
-    return randomElement;
-}
+// function getRandomElementExcluding(excludeElements) {
+//     let randomElement;
+//     let allSides = ["left", "right"];
+//     do {
+//         randomElement = getRandomElement(allSides);
+//     } while (excludeElements.includes(randomElement));
+//     return randomElement;
+// }
 
 //#region Penalty Game Winner api
 export const penaltyBettingWinnerResult = async (req, res) => {

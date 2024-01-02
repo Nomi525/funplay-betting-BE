@@ -21,6 +21,9 @@ import {
   sendMail,
   User,
   ejs,
+  getRandomNumberExcluding,
+  declareNumberWinner,
+  declareColorWinner
 } from "../../index.js";
 
 // export const addEditNumberBet = async (req, res) => {
@@ -2167,7 +2170,7 @@ export const getPeriod = async (req, res) => {
     if (
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
-        moment().format("YYYY-MM-DD") &&
+      moment().format("YYYY-MM-DD") &&
       getAllPeriod.endTime > currentTimeAndDateStamp
     ) {
       return sendResponse(
@@ -2359,26 +2362,22 @@ export const getPeriod = async (req, res) => {
 
 export const createAllGameWinnerFromCronJob = async (req, res) => {
   try {
-    // const { gameType, type, gameId, period } = req.params;
-
-    // console.log("check");
-    // const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
-    var currentDate = moment().format("YYYY-MM-DDT00:00:00");
-    console.log(currentDate, "currentDate");
-
+    var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
     let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
-
-    let findGames = await Period.find({
+    let findPeriods = await Period.find({
       date: currentDate,
-      endTime: currentTimeAndDateStampPlus10Second,
+      endTime: Number(currentTimeAndDateStampPlus10Second),
       is_deleted: 0,
     });
-
-    // console.log(findGames.length, "findGames");
-    // for (const game of findGames) {
-    // }
-
-    return 1;
+    findPeriods.map(async (findPeriod) => {
+      const findGame = await Game.findOne({ _id: findPeriod.gameId, is_deleted: 0 }).lean()
+      if (findGame.gameName == "Number Betting") {
+        await declareNumberWinner(findGame, findPeriod.period)
+      } else if (findGame.gameName == "2 Color Betting" || findGame.gameName == "3 Color Betting") {
+        const gameType = findGame.gameName == "2 Color Betting" ? "2colorBetting" : "3colorBetting"
+        await declareColorWinner(findGame, findPeriod.period, gameType);
+      }
+    })
   } catch (error) {
     return handleErrorResponse(res, error);
   }
@@ -2654,21 +2653,7 @@ export const numberBettingWinnerResult = async (req, res) => {
         ]
       );
     }
-    // return sendResponse(
-    //   res,
-    //   StatusCodes.BAD_REQUEST,
-    //   "User not found",
-    //   []
-    // );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
-
-function getRandomNumberExcluding(excludeNumbers, min, max) {
-  let randomNum;
-  do {
-    randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-  } while (excludeNumbers.includes(randomNum));
-  return randomNum;
-}

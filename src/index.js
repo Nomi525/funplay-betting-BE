@@ -384,11 +384,17 @@ import {
   calculateAllGameReward,
   getAllBids,
   getRandomElement,
-  winCardNumberFun
+  winCardNumberFun,
+  getRandomNumberExcluding,
+  declareNumberWinner,
+  declareColorWinner
 } from "./services/CommonService.js";
 dotenv.config();
 
 export {
+  declareNumberWinner,
+  declareColorWinner,
+  getRandomNumberExcluding,
   getRandomElement,
   winCardNumberFun,
   getAllBids,

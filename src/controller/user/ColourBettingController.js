@@ -20,7 +20,8 @@ import {
   CommunityBetting,
   checkDecimalValueGreaterThanOrEqual,
   sendMail,
-  ejs
+  ejs,
+  getRandomElement
 } from "../../index.js";
 
 //#region Colour betting api
@@ -1146,9 +1147,9 @@ export const getCommunityWinList = async (req, res) => {
 //#endregion
 
 // Function to get a random element from an array
-function getRandomElement(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+// function getRandomElement(arr) {
+//   return arr[Math.floor(Math.random() * arr.length)];
+// }
 
 // Function to get a random element from an array excluding specified elements
 function getRandomElementExcluding(excludeElements, gameType) {
