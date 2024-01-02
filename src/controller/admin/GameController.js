@@ -1019,7 +1019,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
 //#region Get list of game periods by gameId and gameType
 export const getAllGamePeriodData = async (req, res) => {
   try {
-    const { gameId, gameType } = req.params;
+    const { gameId, gameType, periodFor  } = req.params;
     let battingAggregationResult;
 
     // Find periods with isWin: true in the numberbettings collection
@@ -1186,6 +1186,7 @@ export const getAllGamePeriodData = async (req, res) => {
                 $match: {
                   gameId: new mongoose.Types.ObjectId(gameId),
                   period: { $nin: isWinTruePeriodsforColourBetting }, // Exclude periods with isWin: true
+                  periodFor: periodFor
                 },
               },
               {
@@ -1261,6 +1262,11 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $unwind: "$colourbettingsData",
+              },
+              {
+                $match: {
+                  'colourbettingsData.selectedTime': periodFor,
+                },
               },
               {
                 $group: {
