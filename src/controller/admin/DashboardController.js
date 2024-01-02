@@ -3,6 +3,7 @@ import {
     getSingleData, getAllData, Rating, handleErrorResponse, User, getAllDataCount, NewTransaction, WalletLogin, plusLargeSmallValue, TransactionHistory
 } from "../../index.js";
 
+//#region admin dashboard
 export const adminDashboard = async (req, res) => {
     try {
         const totalUsers = await getAllDataCount({ is_deleted: 0, isVerified: true }, User);
@@ -42,3 +43,4 @@ export const adminDashboard = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+// #endregion

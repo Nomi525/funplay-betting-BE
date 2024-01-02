@@ -30,7 +30,6 @@ export const getAllWinnersUser = async (req, res) => {
   try {
     const { userId, gameId, period, gameType } = req.body;
     // const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
     let updateWinner;
     if (!userId) {
       let numberBettingPipeline = [
@@ -414,14 +413,13 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
 };
 //#endregion
 
-//#region
+//#region Declare winner of community betting
 export const declareWinnerOfCommunityBetting = async (req, res) => {
   try {
     const { winnerIds, gameId, distributionCoin, period } = req.body;
     if (!winnerIds.length) {
       return sendResponse(res, StatusCodes.OK, "winnerIds is required.", []);
     }
-
     const getCommunityGame = await getSingleData(
       { _id: gameId, is_deleted: 0 },
       Game
@@ -434,7 +432,6 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
         []
       );
     }
-
     const checkAlreadyWin = await CommunityBetting.find({
       gameId,
       isWin: true,
@@ -445,7 +442,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
-        "This period id has already win.",
+        ResponseMessage.PERIOD_ALREADY_EXITS,
         []
       );
     }
@@ -463,7 +460,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           userId: winnerId,
           period,
           is_deleted: 0,
-          status: "pending"
+          status: "pending",
         });
         if (winnerUser) {
           let rewardAmount = winningAmount;
@@ -482,20 +479,24 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
             //   Number(rewardAmount)
             // );
             // let winingAmount = Number(rewardAmount);
-            balance.totalCoin = Number(balance.totalCoin) + Number(rewardAmount);
+            balance.totalCoin =
+              Number(balance.totalCoin) + Number(rewardAmount);
             await balance.save();
           }
           winFlag = true;
         }
       })
     );
-    await CommunityBetting.updateMany({
-      gameId,
-      isWin: false,
-      period: Number(period),
-      is_deleted: 0,
-      status: "pending"
-    }, { status: "fail" })
+    await CommunityBetting.updateMany(
+      {
+        gameId,
+        isWin: false,
+        period: Number(period),
+        is_deleted: 0,
+        status: "pending",
+      },
+      { status: "fail" }
+    );
     // } else {
     //   return sendResponse(
     //     res,
@@ -531,7 +532,10 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
-      await NumberBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      await NumberBetting.updateMany(
+        { gameId, period: winnerId },
+        { status: "pending" }
+      );
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -547,12 +551,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     }).lean();
 
     if (checkAlreadyWin.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.ALREADY_WIN,
-        []
-      );
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_WIN, []);
     }
 
     const findNumberBettingArray = await getAllData(
@@ -599,7 +598,9 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     for (const findNumberBetting of findNumberBettingArray) {
       if (findNumberBetting instanceof NumberBetting) {
         // let rewardAmount = findNumberBetting.betAmount * 0.95;
-        let rewardAmount = findNumberBetting.betAmount + findNumberBetting.betAmount * findGame.winningCoin;
+        let rewardAmount =
+          findNumberBetting.betAmount +
+          findNumberBetting.betAmount * findGame.winningCoin;
         findNumberBetting.isWin = true;
         findNumberBetting.rewardAmount = rewardAmount;
         findNumberBetting.status = "successfully";
@@ -616,7 +617,8 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
           // );
 
           // console.log(Number(findUser.betAmount),"amount", Number(rewardAmount))
-          let winingAmount = Number(findNumberBetting.betAmount) + Number(rewardAmount);
+          let winingAmount =
+            Number(findNumberBetting.betAmount) + Number(rewardAmount);
           balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
           // balance.tokenDollorValue = plusLargeSmallValue(
           //   +(balance.tokenDollorValue),
@@ -688,7 +690,10 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
-      await ColourBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      await ColourBetting.updateMany(
+        { gameId, period: winnerId },
+        { status: "pending" }
+      );
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -704,12 +709,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     }).lean();
 
     if (checkAlreadyWin.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.ALREADY_WIN,
-        []
-      );
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_WIN, []);
     }
     const savedInstances = [];
     const findColorBettingArray = await getAllData(
@@ -726,7 +726,9 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     for (const findColorBetting of findColorBettingArray) {
       if (findColorBetting instanceof ColourBetting) {
         // let rewardAmount = findColorBetting.betAmount * 0.95;
-        let rewardAmount = findColorBetting.betAmount + findColorBetting.betAmount * findGame.winningCoin;
+        let rewardAmount =
+          findColorBetting.betAmount +
+          findColorBetting.betAmount * findGame.winningCoin;
         findColorBetting.isWin = true;
         findColorBetting.status = "successfully";
         findColorBetting.rewardAmount = rewardAmount;
@@ -741,10 +743,14 @@ export const declareWinnerOfColorBetting = async (req, res) => {
           //   balance.tokenDollorValue,
           //   findColorBetting.betAmount + rewardAmount
           // );
-          let winingAmount = Number(findColorBetting.betAmount) + Number(rewardAmount);
+          let winingAmount =
+            Number(findColorBetting.betAmount) + Number(rewardAmount);
           balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
           await balance.save();
-          let gameName = findColorBetting.gameType == "2colorBetting" ? "2 Color Betting" : "3 Color Betting"
+          let gameName =
+            findColorBetting.gameType == "2colorBetting"
+              ? "2 Color Betting"
+              : "3 Color Betting";
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: gameName,
           });
@@ -752,7 +758,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         }
 
         savedInstances.push(findColorBetting);
-        winFlage = true
+        winFlage = true;
       }
     }
 
@@ -802,7 +808,10 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
-      await PenaltyBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      await PenaltyBetting.updateMany(
+        { gameId, period: winnerId },
+        { status: "pending" }
+      );
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -818,23 +827,26 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
     }).lean();
 
     if (checkAlreadyWin.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.ALREADY_WIN,
-        []
-      );
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_WIN, []);
     }
     const savedInstances = [];
     let winFlage = false;
     const findPenaltyBettingArray = await getAllData(
-      { period: winnerId, gameId: gameId, betSide: winBetSide, is_deleted: 0, isWin: false },
+      {
+        period: winnerId,
+        gameId: gameId,
+        betSide: winBetSide,
+        is_deleted: 0,
+        isWin: false,
+      },
       PenaltyBetting
     );
     for (const findPenaltyBetting of findPenaltyBettingArray) {
       if (findPenaltyBetting instanceof PenaltyBetting) {
         // let rewardAmount = findPenaltyBetting.betAmount * 0.95;
-        let rewardAmount = findPenaltyBetting.betAmount + findPenaltyBetting.betAmount * findGame.winningCoin;
+        let rewardAmount =
+          findPenaltyBetting.betAmount +
+          findPenaltyBetting.betAmount * findGame.winningCoin;
         findPenaltyBetting.isWin = true;
         findPenaltyBetting.status = "successfully";
         findPenaltyBetting.rewardAmount = rewardAmount;
@@ -849,7 +861,10 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
           //   balance.tokenDollorValue,
           //   findPenaltyBetting.betAmount + rewardAmount
           // );
-          balance.totalCoin = Number(balance.totalCoin) + Number(findPenaltyBetting.betAmount) + Number(rewardAmount)
+          balance.totalCoin =
+            Number(balance.totalCoin) +
+            Number(findPenaltyBetting.betAmount) +
+            Number(rewardAmount);
           await balance.save();
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: "Penalty Betting",
@@ -857,7 +872,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
           await sendMail(userData.email, "Penalty betting game win", mailInfo);
         }
         savedInstances.push(findPenaltyBetting);
-        winFlage = true
+        winFlage = true;
       }
     }
 
@@ -876,7 +891,16 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       savedInstances.push(winAdminSide);
     }
 
-    await PenaltyBetting.updateMany({ gameId, betSide: { $ne: winBetSide }, period: winnerId, isWin: false, status: 'pending' }, { status: "fail" });
+    await PenaltyBetting.updateMany(
+      {
+        gameId,
+        betSide: { $ne: winBetSide },
+        period: winnerId,
+        isWin: false,
+        status: "pending",
+      },
+      { status: "fail" }
+    );
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -899,7 +923,10 @@ export const declareWinnerOfCardBetting = async (req, res) => {
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
-      await CardBetting.updateMany({ gameId, period: winnerId }, { status: "pending" })
+      await CardBetting.updateMany(
+        { gameId, period: winnerId },
+        { status: "pending" }
+      );
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -915,12 +942,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
     }).lean();
 
     if (checkAlreadyWin.length) {
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.ALREADY_WIN,
-        []
-      );
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_WIN, []);
     }
     const findCardBettingArray = await getAllData(
       {
@@ -939,9 +961,11 @@ export const declareWinnerOfCardBetting = async (req, res) => {
     let winCardNumber;
     for (const findCardBetting of findCardBettingArray) {
       if (findCardBetting instanceof CardBetting) {
-        if (count == 1) winCardNumber = winCardNumberFun(winCard)
+        if (count == 1) winCardNumber = winCardNumberFun(winCard);
         // let rewardAmount = findCardBetting.betAmount * 0.95;
-        let rewardAmount = findCardBetting.betAmount + findCardBetting.betAmount * findGame.winningCoin;
+        let rewardAmount =
+          findCardBetting.betAmount +
+          findCardBetting.betAmount * findGame.winningCoin;
         findCardBetting.isWin = true;
         findCardBetting.rewardAmount = rewardAmount;
         findCardBetting.status = "successfully";
@@ -953,7 +977,8 @@ export const declareWinnerOfCardBetting = async (req, res) => {
           NewTransaction
         );
         if (balance) {
-          let winingAmount = Number(findCardBetting.betAmount) + Number(rewardAmount);
+          let winingAmount =
+            Number(findCardBetting.betAmount) + Number(rewardAmount);
           balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount);
           await balance.save();
           const userData = await getSingleData(
@@ -966,14 +991,14 @@ export const declareWinnerOfCardBetting = async (req, res) => {
           await sendMail(userData.email, "Card betting game win", mailInfo);
         }
         savedInstances.push(findCardBetting);
-        winFlage = true
+        winFlage = true;
       } else {
         console.error(
           "Document is not an instance of Card Betting:",
           findCardBetting
         );
       }
-      count++
+      count++;
     }
     await CardBetting.updateMany(
       {
@@ -988,7 +1013,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
     );
     // Win side from given by admin
     if (!winFlage) {
-      winCardNumber = winCardNumberFun(winCard)
+      winCardNumber = winCardNumberFun(winCard);
       const winCardByAdmin = await CardBetting.create({
         gameId,
         userId: null,

@@ -20,7 +20,7 @@ import {
   ColourBetting,
   sendMail,
   User,
-  ejs
+  ejs,
 } from "../../index.js";
 
 // export const addEditNumberBet = async (req, res) => {
@@ -175,7 +175,6 @@ import {
 //   }
 // };
 
-
 export const addEditNumberBet = async (req, res) => {
   try {
     let {
@@ -211,10 +210,7 @@ export const addEditNumberBet = async (req, res) => {
         []
       );
     }
-    if (
-      findUserDeposit.totalCoin <
-      Number(betAmount)
-    ) {
+    if (findUserDeposit.totalCoin < Number(betAmount)) {
       return sendResponse(
         res,
         StatusCodes.BAD_REQUEST,
@@ -222,7 +218,7 @@ export const addEditNumberBet = async (req, res) => {
         []
       );
     }
-    const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins)
+    const totalBetAmount = parseInt(betAmount) * parseInt(rewardsCoins);
 
     // const totalBetAmount = multiplicationLargeSmallValue(
     //   betAmount,
@@ -422,8 +418,8 @@ export const getNumberGamePeriodById = async (req, res) => {
           userId: new mongoose.Types.ObjectId(req.user),
           gameId: new mongoose.Types.ObjectId(gameId),
           createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0
-        }
+          is_deleted: 0,
+        },
       },
       {
         $lookup: {
@@ -431,7 +427,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           localField: "period",
           foreignField: "period",
           as: "periodData",
-        }
+        },
       },
       {
         $project: {
@@ -446,14 +442,14 @@ export const getNumberGamePeriodById = async (req, res) => {
               input: "$periodData",
               as: "pd",
               cond: {
-                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
-              }
-            }
+                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
+              },
+            },
           },
         },
       },
       {
-        $unwind: "$periodData"
+        $unwind: "$periodData",
       },
       {
         $sort: {
@@ -471,14 +467,14 @@ export const getNumberGamePeriodById = async (req, res) => {
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
-        }
+        },
       },
       {
         $match: {
-          status: { $in: ["fail", "pending", "successfully"] }
-        }
-      }
-    ])
+          status: { $in: ["fail", "pending", "successfully"] },
+        },
+      },
+    ]);
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -547,7 +543,7 @@ export const getAllNumberGamePeriod = async (req, res) => {
           localField: "period",
           foreignField: "period",
           as: "periodData",
-        }
+        },
       },
       {
         $project: {
@@ -563,14 +559,14 @@ export const getAllNumberGamePeriod = async (req, res) => {
               input: "$periodData",
               as: "pd",
               cond: {
-                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)]
-              }
-            }
+                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
+              },
+            },
           },
         },
       },
       {
-        $unwind: "$periodData"
+        $unwind: "$periodData",
       },
       // {
       //   $match: {
@@ -588,13 +584,13 @@ export const getAllNumberGamePeriod = async (req, res) => {
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
-        }
+        },
       },
       {
         $match: {
-          status: { $ne: null }
-        }
-      }
+          status: { $ne: null },
+        },
+      },
     ]);
 
     return sendResponse(
@@ -1672,7 +1668,7 @@ const updateAndCreatePeriod = async (
   endTime,
   periodFor
 ) => {
-  let objForCheck = { gameId, date, period };
+  let objForCheck = { gameId, date, period, periodFor };
   if (periodFor) {
     objForCheck.periodFor = periodFor;
   }
@@ -1690,6 +1686,7 @@ const updateAndCreatePeriod = async (
     { upsert: true }
   ).lean();
 };
+
 function allDateStamps(game, time, type) {
   let serverTime = "+5:30";
   let gameStartTimeStamp = moment(game.gameTimeFrom)
@@ -1702,7 +1699,9 @@ function allDateStamps(game, time, type) {
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
   let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
-  let gameHoursNextTimeStamp = moment(newEightSecondsTimeStamp).add(time, type).unix();
+  let gameHoursNextTimeStamp = moment(newEightSecondsTimeStamp)
+    .add(time, type)
+    .unix();
   return {
     gameStartTimeStamp,
     gameEndTimeStamp,
@@ -1738,12 +1737,11 @@ export async function createAllGamePeriodFromCronJob() {
           gameStartTimeStamp <= currentTimeAndDateStamp &&
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
-          console.log("1st condition");
+          // console.log("1st condition");
           let period = formattedDate + "0000";
           const periodCount = await Period.countDocuments({
             gameId: game._id,
           });
-
           const lastIndex = await Period.findOne({
             gameId: game._id,
             is_deleted: 0,
@@ -1759,7 +1757,7 @@ export async function createAllGamePeriodFromCronJob() {
           }
           if (!lastIndex) {
             if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-              console.log("1");
+              // console.log("1");
               await updateAndCreatePeriod(
                 game._id,
                 dateForPeriod,
@@ -1768,7 +1766,7 @@ export async function createAllGamePeriodFromCronJob() {
                 gameEndTimeStamp
               );
             } else {
-              console.log("2");
+              // console.log("2");
               await updateAndCreatePeriod(
                 game._id,
                 dateForPeriod,
@@ -1778,10 +1776,10 @@ export async function createAllGamePeriodFromCronJob() {
               );
             }
           } else {
-            console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
+            // console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                console.log("3");
+                // console.log("3");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -1790,7 +1788,7 @@ export async function createAllGamePeriodFromCronJob() {
                   gameEndTimeStamp
                 );
               } else {
-                console.log("4");
+                // console.log("4");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -1902,6 +1900,7 @@ export async function createAllGamePeriodFromCronJob() {
             let period = formattedDate + "0000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
+              periodFor: second,
             });
             const lastIndex = await Period.findOne({
               gameId: game._id,
@@ -1913,10 +1912,9 @@ export async function createAllGamePeriodFromCronJob() {
 
             if (periodCount) {
               period =
-                formattedDate +
-                (periodCount + index + 1).toString().padStart(4, "0");
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
             } else {
-              period = formattedDate + (index + 1).toString().padStart(4, "0");
+              period = formattedDate + (1).toString().padStart(4, "0");
             }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
@@ -1956,7 +1954,7 @@ export async function createAllGamePeriodFromCronJob() {
                     second
                   );
                 } else {
-                  console.log("4 3 Color Betting");
+                  // console.log("4 3 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -1988,6 +1986,7 @@ export async function createAllGamePeriodFromCronJob() {
             let period = formattedDate + "0000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
+              periodFor: second,
             });
             const lastIndex = await Period.findOne({
               gameId: game._id,
@@ -1997,16 +1996,15 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
-              period =
-                formattedDate +
-                (periodCount + index + 1).toString().padStart(4, "0");
-            } else {
-              period = formattedDate + (index + 1).toString().padStart(4, "0");
-            }
+             if (periodCount) {
+               period =
+                 formattedDate + (periodCount + 1).toString().padStart(4, "0");
+             } else {
+               period = formattedDate + (1).toString().padStart(4, "0");
+             }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                console.log("1 2 Color Betting");
+                // console.log("1 2 Color Betting");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -2016,7 +2014,7 @@ export async function createAllGamePeriodFromCronJob() {
                   second
                 );
               } else {
-                console.log("2 2 Color Betting");
+                // console.log("2 2 Color Betting");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -2032,7 +2030,7 @@ export async function createAllGamePeriodFromCronJob() {
                 currentTimeAndDateStamp >= lastIndex.endTime
               ) {
                 if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                  console.log("3 2 Color Betting");
+                  // console.log("3 2 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -2042,7 +2040,7 @@ export async function createAllGamePeriodFromCronJob() {
                     second
                   );
                 } else {
-                  console.log("4 2 Color Betting");
+                  // console.log("4 2 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -2074,6 +2072,7 @@ export async function createAllGamePeriodFromCronJob() {
             let period = formattedDate + "0000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
+              periodFor: second,
             });
             const lastIndex = await Period.findOne({
               gameId: game._id,
@@ -2083,16 +2082,15 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
-              period =
-                formattedDate +
-                (periodCount + index + 1).toString().padStart(4, "0");
-            } else {
-              period = formattedDate + (index + 1).toString().padStart(4, "0");
-            }
+           if (periodCount) {
+             period =
+               formattedDate + (periodCount + 1).toString().padStart(4, "0");
+           } else {
+             period = formattedDate + (1).toString().padStart(4, "0");
+           }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                console.log("1 Penalty Betting");
+                // console.log("1 Penalty Betting");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -2102,7 +2100,7 @@ export async function createAllGamePeriodFromCronJob() {
                   second
                 );
               } else {
-                console.log("2 Penalty Betting");
+                // console.log("2 Penalty Betting");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -2118,7 +2116,7 @@ export async function createAllGamePeriodFromCronJob() {
                 currentTimeAndDateStamp >= lastIndex.endTime
               ) {
                 if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                  console.log("3 Penalty Betting");
+                  // console.log("3 Penalty Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -2128,7 +2126,7 @@ export async function createAllGamePeriodFromCronJob() {
                     second
                   );
                 } else {
-                  console.log("4 Penalty Betting");
+                  // console.log("4 Penalty Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -2359,8 +2357,6 @@ export const getPeriod = async (req, res) => {
 //   }
 // }
 
-
-
 export const createAllGameWinnerFromCronJob = async (req, res) => {
   try {
     // const { gameType, type, gameId, period } = req.params;
@@ -2370,34 +2366,28 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00");
     console.log(currentDate, "currentDate");
 
-    let currentTimeAndDateStampPlus10Second = moment().unix() + 10; 
-    
+    let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
+
     let findGames = await Period.find({
       date: currentDate,
       endTime: currentTimeAndDateStampPlus10Second,
       is_deleted: 0,
     });
 
-
     // console.log(findGames.length, "findGames");
     // for (const game of findGames) {
     // }
 
-
-   return 1;
+    return 1;
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
 
-
 export const numberBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, type, gameId, period } = req.params;
-    const findGame = await getSingleData(
-      { _id: gameId, is_deleted: 0 },
-      Game
-    );
+    const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
 
     if (findGame.gameMode == "Manual") {
       await NumberBetting.updateMany({ gameId, period }, { status: "pending" });
@@ -2553,7 +2543,9 @@ export const numberBettingWinnerResult = async (req, res) => {
                       //   findUser.betAmount,
                       //   0.95
                       // );
-                      let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
+                      let rewardAmount =
+                        findUser.betAmount +
+                        findUser.betAmount * findGame.winningCoin;
                       await NumberBetting.updateOne(
                         {
                           userId,
