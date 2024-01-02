@@ -19,6 +19,7 @@ import {
     sendMail,
     ejs,
     PenaltyBetting,
+    getRandomElement,
     getRandomNumberExcluding
 } from "../../index.js";
 
@@ -330,19 +331,19 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
 //#endregion
 
 // Function to get a random element from an array
-function getRandomElement(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+// function getRandomElement(arr) {
+//     return arr[Math.floor(Math.random() * arr.length)];
+// }
 
 // Function to get a random element from an array excluding specified elements
-// function getRandomElementExcluding(excludeElements) {
-//     let randomElement;
-//     let allSides = ["left", "right"];
-//     do {
-//         randomElement = getRandomElement(allSides);
-//     } while (excludeElements.includes(randomElement));
-//     return randomElement;
-// }
+function getRandomElementExcluding(excludeElements) {
+    let randomElement;
+    let allSides = ["left", "right"];
+    do {
+        randomElement = getRandomElement(allSides);
+    } while (excludeElements.includes(randomElement));
+    return randomElement;
+}
 
 //#region Penalty Game Winner api
 export const penaltyBettingWinnerResult = async (req, res) => {

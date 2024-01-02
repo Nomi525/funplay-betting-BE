@@ -72,10 +72,10 @@ const gameSchema = new mongoose.Schema({
         required: false,
         default: true
     },
-    gameTime: [{
-        type: String,
-        required: false
-    }],
+    // gameTime: [{
+    //     type: String,
+    //     required: false
+    // }],
     gameSecond: [{
         type: String,
         required: false

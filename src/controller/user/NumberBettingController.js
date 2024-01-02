@@ -23,7 +23,9 @@ import {
   ejs,
   getRandomNumberExcluding,
   declareNumberWinner,
-  declareColorWinner
+  declareColorWinner,
+  declareCardWinner,
+  declarePenaltyWinner,
 } from "../../index.js";
 
 // export const addEditNumberBet = async (req, res) => {
@@ -1999,12 +2001,12 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-             if (periodCount) {
-               period =
-                 formattedDate + (periodCount + 1).toString().padStart(4, "0");
-             } else {
-               period = formattedDate + (1).toString().padStart(4, "0");
-             }
+            if (periodCount) {
+              period =
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            } else {
+              period = formattedDate + (1).toString().padStart(4, "0");
+            }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 // console.log("1 2 Color Betting");
@@ -2085,12 +2087,98 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-           if (periodCount) {
-             period =
-               formattedDate + (periodCount + 1).toString().padStart(4, "0");
-           } else {
-             period = formattedDate + (1).toString().padStart(4, "0");
-           }
+            if (periodCount) {
+              period =
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            } else {
+              period = formattedDate + (1).toString().padStart(4, "0");
+            }
+            if (!lastIndex) {
+              if (gameEndTimeStamp < gameHoursNextTimeStamp) {
+                // console.log("1 Penalty Betting");
+                await updateAndCreatePeriod(
+                  game._id,
+                  dateForPeriod,
+                  period,
+                  gameStartTimeStamp,
+                  gameEndTimeStamp,
+                  second
+                );
+              } else {
+                // console.log("2 Penalty Betting");
+                await updateAndCreatePeriod(
+                  game._id,
+                  dateForPeriod,
+                  period,
+                  gameStartTimeStamp,
+                  gameHoursNextTimeStamp,
+                  second
+                );
+              }
+            } else {
+              if (
+                game.isRepeat &&
+                currentTimeAndDateStamp >= lastIndex.endTime
+              ) {
+                if (gameEndTimeStamp < gameHoursNextTimeStamp) {
+                  // console.log("3 Penalty Betting");
+                  await updateAndCreatePeriod(
+                    game._id,
+                    dateForPeriod,
+                    period,
+                    currentTimeAndDateStamp,
+                    gameEndTimeStamp,
+                    second
+                  );
+                } else {
+                  // console.log("4 Penalty Betting");
+                  await updateAndCreatePeriod(
+                    game._id,
+                    dateForPeriod,
+                    period,
+                    currentTimeAndDateStamp,
+                    gameHoursNextTimeStamp,
+                    second
+                  );
+                }
+              }
+            }
+          }
+        });
+      } else if (game.gameName == "Card Betting") {
+        game.gameSecond.map(async (second, index) => {
+          const {
+            gameStartTimeStamp,
+            gameEndTimeStamp,
+            currentTimeAndDateStamp,
+            gameHoursNextTimeStamp,
+          } = allDateStamps(game, second, "seconds");
+          //date for period
+          const formattedDate = dateForPeriod.split("-").join("");
+          // this codition compare between current time stamp and game start time stamp and game end time stamp
+          if (
+            gameStartTimeStamp <= currentTimeAndDateStamp &&
+            gameEndTimeStamp > currentTimeAndDateStamp
+          ) {
+            let period = formattedDate + "0000";
+            const periodCount = await Period.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            const lastIndex = await Period.findOne({
+              gameId: game._id,
+              periodFor: second,
+              is_deleted: 0,
+            })
+              .sort({ createdAt: -1 })
+              .lean();
+
+            if (periodCount) {
+              period =
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            } else {
+              period = formattedDate + (1).toString().padStart(4, "0");
+            }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 // console.log("1 Penalty Betting");
@@ -2364,6 +2452,7 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
   try {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
     let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
+    // console.log('current10Second', currentTimeAndDateStampPlus10Second);
     let findPeriods = await Period.find({
       date: currentDate,
       endTime: Number(currentTimeAndDateStampPlus10Second),
@@ -2376,6 +2465,10 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
       } else if (findGame.gameName == "2 Color Betting" || findGame.gameName == "3 Color Betting") {
         const gameType = findGame.gameName == "2 Color Betting" ? "2colorBetting" : "3colorBetting"
         await declareColorWinner(findGame, findPeriod.period, gameType);
+      } else if (findGame.gameName == "Penalty Betting") {
+        await declarePenaltyWinner(findGame, findPeriod.period);
+      } else if (findGame.gameName == "Card Betting") {
+        await declareCardWinner(findGame, findPeriod.period);
       }
     })
   } catch (error) {

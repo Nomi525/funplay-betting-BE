@@ -34,7 +34,7 @@ const periodSchema = new mongoose.Schema({
     // },
     periodFor: {
         type: String,
-        enum: ["30", "60", "120"],
+        enum: ["30", "60", "80", "120", "180"],
         required: false
     },
     is_deleted: {

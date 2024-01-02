@@ -181,6 +181,7 @@ export const getRandomElement = (arr) => {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+//#region For numbet betting
 export const getRandomNumberExcluding = (excludeNumbers, min, max) => {
     let randomNum;
     do {
@@ -189,7 +190,7 @@ export const getRandomNumberExcluding = (excludeNumbers, min, max) => {
     return randomNum;
 }
 
-// Function to get a random element from an array excluding specified elements
+//#region For color betting
 export const getRandomColorExcluding = (excludeElements, gameType) => {
     let randomElement;
     let allColors = ["red", "green", "orange"];
@@ -202,6 +203,27 @@ export const getRandomColorExcluding = (excludeElements, gameType) => {
     return randomElement;
 }
 
+//#region For penalty betting
+export const getRandomSideExcluding = (excludeElements) => {
+    let randomElement;
+    let allSides = ["left", "right"];
+    do {
+        randomElement = getRandomElement(allSides);
+    } while (excludeElements.includes(randomElement));
+    return randomElement;
+}
+
+//#region For card betting
+export const getRandomCardExcluding = (excludeElements) => {
+    let randomElement;
+    let allCards = ["low", "high"];
+    do {
+        randomElement = getRandomElement(allCards);
+    } while (excludeElements.includes(randomElement));
+    return randomElement;
+}
+
+//#region For card betting
 export const winCardNumberFun = (card) => {
     const allLowCards = ['A', '2', '3', '4', '5', '6'];
     const allHighCards = ['8', '9', '10', 'J', 'Q', 'K'];
@@ -572,6 +594,287 @@ export const declareColorWinner = async (game, period, gameType) => {
                 })
                 return {
                     message: ResponseMessage.COLOR_WINNER + " " + randomWinColor
+                }
+            }
+        }
+    }
+}
+//#endregion
+
+//#region For Declare penalty winner
+export const declarePenaltyWinner = async (game, period) => {
+    const { _id, gameMode, winningCoin } = game
+    const gameId = _id
+    if (gameMode == "Manual") {
+        await PenaltyBetting.updateMany({ gameId, period }, { status: "pending" })
+        return {
+            message: ResponseMessage.WINNER_DECLARE_MANUAL
+        }
+    } else {
+        const checkAlreadyWin = await PenaltyBetting.find({
+            gameId,
+            isWin: true,
+            period: Number(period),
+            is_deleted: 0,
+        }).lean();
+        if (checkAlreadyWin.length) {
+            return {
+                message: ResponseMessage.PENALTY_WINNER + " " + checkAlreadyWin[0].betSide
+            }
+        } else {
+            const totalUserInPeriod = await PenaltyBetting.aggregate([
+                {
+                    $match: {
+                        gameId: new mongoose.Types.ObjectId(gameId),
+                        period: Number(period),
+                        is_deleted: 0
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$userId",
+                        period: { $first: "$period" },
+                        userTotalBets: { $sum: 1 }
+                    }
+                }
+            ])
+            if (totalUserInPeriod.length) {
+                const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
+                if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
+                    const getAllSideBets = await PenaltyBetting.aggregate([
+                        {
+                            $match: { period: Number(period) }
+                        },
+                        {
+                            $group: {
+                                _id: "$betSide",
+                                period: { $first: "$period" },
+                                totalUser: { $sum: 1 },
+                                userIds: { $push: "$userId" },
+                                totalBetAmount: { $sum: "$betAmount" }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 0,
+                                period: 1,
+                                betSide: "$_id",
+                                totalUser: 1,
+                                userIds: 1,
+                                totalBetAmount: 1,
+                            }
+                        },
+                        {
+                            $sort: { totalBetAmount: 1 }
+                        },
+                    ]);
+
+                    if (getAllSideBets.length) {
+                        const tieSides = getAllSideBets.filter(item => item.totalBetAmount === getAllSideBets[0].totalBetAmount);
+                        if (getAllSideBets.length == 1) {
+                            const randomWinSide = getRandomSideExcluding(tieSides.map(item => item.betSide));
+                            await PenaltyBetting.create({
+                                userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+                            });
+                            await PenaltyBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
+                            return {
+                                message: `${ResponseMessage.PENALTY_WINNER} ${randomWinSide}`
+                            }
+                        } else {
+                            await Promise.all(
+                                getAllSideBets.map(async (item, index) => {
+                                    if (index === 0) {
+                                        // Handling the winner
+                                        item.userIds.map(async (userId) => {
+                                            const findUser = await PenaltyBetting.findOne({ userId, gameId, period: item.period, betSide: item.betSide, is_deleted: 0 });
+                                            if (findUser) {
+                                                let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
+                                                await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 },
+                                                    { isWin: true, status: 'successfully', rewardAmount }
+                                                );
+                                                const balance = await getSingleData({ userId }, NewTransaction);
+                                                if (balance) {
+                                                    let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                                                    balance.totalCoin = Number(balance.totalCoin) + Number(winningAmount);
+                                                    await balance.save();
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        // Handling the losers
+                                        item.userIds.map(async (userId) => {
+                                            await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 }, { status: 'fail' });
+                                        });
+                                    }
+                                })
+                            );
+                        }
+                        return {
+                            message: ResponseMessage.PENALTY_WINNER + " " + getAllSideBets[0].betSide
+                        }
+                    } else {
+                        await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
+                        return {
+                            message: ResponseMessage.LOSER
+                        }
+                    }
+                } else {
+                    await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
+                    return {
+                        message: ResponseMessage.LOSER
+                    }
+                }
+            } else {
+                let allSides = ["left", "right"];
+                let randomIndex = Math.floor(Math.random() * allSides.length);
+                let randomWinSide = allSides[randomIndex];
+                await PenaltyBetting.create({
+                    userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+                })
+                return {
+                    message: ResponseMessage.PENALTY_WINNER + " " + randomWinSide
+                }
+            }
+        }
+    }
+}
+//#endregion
+
+//#region For Declare card winner
+export const declareCardWinner = async (game, period) => {
+    const { _id, gameMode, winningCoin } = game
+    const gameId = _id
+    if (gameMode == "Manual") {
+        await CardBetting.updateMany({ gameId, period }, { status: "pending" })
+        return {
+            message: ResponseMessage.WINNER_DECLARE_MANUAL
+        }
+    } else {
+        const checkAlreadyWin = await CardBetting.find({
+            gameId,
+            isWin: true,
+            period: Number(period),
+            is_deleted: 0,
+        }).lean();
+        if (checkAlreadyWin.length) {
+            return {
+                message: ResponseMessage.CARD_WINNER + " " + checkAlreadyWin[0].card + ' ' + checkAlreadyWin[0].winCardNumber
+            }
+        } else {
+            const totalUserInPeriod = await CardBetting.aggregate([
+                {
+                    $match: {
+                        gameId: new mongoose.Types.ObjectId(gameId),
+                        period: Number(period),
+                        is_deleted: 0
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$userId",
+                        period: { $first: "$period" },
+                        userTotalBets: { $sum: 1 }
+                    }
+                }
+            ])
+            if (totalUserInPeriod.length) {
+                const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
+                if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
+                    const getAllCardBets = await CardBetting.aggregate([
+                        {
+                            $match: { period: Number(period) }
+                        },
+                        {
+                            $group: {
+                                _id: "$card",
+                                period: { $first: "$period" },
+                                totalUser: { $sum: 1 },
+                                userIds: { $push: "$userId" },
+                                totalBetAmount: { $sum: "$betAmount" }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 0,
+                                period: 1,
+                                card: "$_id",
+                                totalUser: 1,
+                                userIds: 1,
+                                totalBetAmount: 1,
+                            }
+                        },
+                        {
+                            $sort: { totalBetAmount: 1 }
+                        },
+                    ]);
+                    let winCardNumber;
+                    if (getAllCardBets.length) {
+                        const tieCards = getAllCardBets.filter(item => item.totalBetAmount === getAllCardBets[0].totalBetAmount);
+                        if (getAllCardBets.length == 1) {
+                            const randomWinCard = getRandomCardExcluding(tieCards.map(item => item.card));
+                            winCardNumber = winCardNumberFun(randomWinCard);
+                            await CardBetting.create({
+                                userId: null, period, gameId, card: randomWinCard, is_deleted: 0, isWin: true, winCardNumber, status: 'successfully'
+                            });
+                            await CardBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
+                            return {
+                                message: `${ResponseMessage.CARD_WINNER} ${randomWinCard} ${winCardNumber}`
+                            }
+                        } else {
+                            await Promise.all(
+                                getAllCardBets.map(async (item, index) => {
+                                    if (index === 0) {
+                                        // Handling the winner
+                                        item.userIds.map(async (userId, i) => {
+                                            if (i == 0) winCardNumber = winCardNumberFun(item.card)
+                                            const findUser = await CardBetting.findOne({ userId, gameId, period: item.period, card: item.card, is_deleted: 0 });
+                                            if (findUser) {
+                                                let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
+                                                await CardBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', card: item.card, is_deleted: 0 },
+                                                    { isWin: true, winCardNumber, status: 'successfully', rewardAmount }
+                                                );
+                                                const balance = await getSingleData({ userId }, NewTransaction);
+                                                if (balance) {
+                                                    let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
+                                                    balance.totalCoin = Number(balance.totalCoin) + Number(winningAmount);
+                                                    await balance.save()
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        // Handling the losers
+                                        item.userIds.map(async (userId) => {
+                                            await CardBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', card: item.card, is_deleted: 0 }, { status: 'fail' });
+                                        });
+                                    }
+                                })
+                            );
+                        }
+                        return {
+                            message: ResponseMessage.CARD_WINNER + " " + getAllCardBets[0].card + ' ' + winCardNumber
+                        }
+                    } else {
+                        await CardBetting.updateMany({ gameId, period }, { status: "fail" })
+                        return {
+                            message: ResponseMessage.LOSER
+                        }
+                    }
+                } else {
+                    await CardBetting.updateMany({ gameId, period }, { status: "fail" })
+                    return {
+                        message: ResponseMessage.LOSER
+                    }
+                }
+            } else {
+                let allCards = ["low", "high"];
+                let randomIndex = Math.floor(Math.random() * allCards.length);
+                let randomWinCard = allCards[randomIndex];
+                const winCardNumber = winCardNumberFun(randomWinCard)
+                await CardBetting.create({
+                    userId: null, period, gameId, card: randomWinCard, is_deleted: 0, isWin: true, winCardNumber, status: 'successfully'
+                })
+                return {
+                    message: ResponseMessage.CARD_WINNER + " " + randomWinCard + ' ' + winCardNumber
                 }
             }
         }

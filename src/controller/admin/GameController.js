@@ -49,6 +49,7 @@ export const addEditGame = async (req, res) => {
       entryFee,
       winningCoin,
     } = req.body;
+    gameSecond = gameSecond ? gameSecond : []
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
     newGameStartDate = moment(`${newGameStartDate} ${gameDurationFrom}`)
@@ -154,7 +155,6 @@ export const addEditGame = async (req, res) => {
           gameWeek,
           gameMinimumCoin,
           gameMaximumCoin,
-          gameTime,
           gameHours,
           gameSecond,
           isRepeat,
@@ -167,6 +167,7 @@ export const addEditGame = async (req, res) => {
         },
         Game
       );
+      console.log(gameSecond,'gameSecond');
       if (updateGame) {
         return sendResponse(
           res,
