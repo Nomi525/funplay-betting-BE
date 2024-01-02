@@ -167,7 +167,7 @@ export const addEditGame = async (req, res) => {
         },
         Game
       );
-      console.log(gameSecond,'gameSecond');
+      console.log(gameSecond, 'gameSecond');
       if (updateGame) {
         return sendResponse(
           res,
@@ -983,6 +983,34 @@ export const getCommunityGameList = async (req, res) => {
       );
     }
   } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+//#endregion
+
+//#region Get all game times
+export const getAllGamePeriodSelectedTimeList = async (req, res) => {
+  try {
+    const { gameId } = req.params
+    const gameSelectedTimeList = await ColourBetting.aggregate([
+      {
+        $match: { gameId : new mongoose.Types.ObjectId(gameId), is_deleted: 0 }
+      },
+      {
+        $group: {
+          _id: "$selectedTime",
+        }
+      }
+    ]);
+    console.log(gameSelectedTimeList);
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_GET,
+      gameSelectedTimeList
+    );
+  } catch (error) {
+
     return handleErrorResponse(res, error);
   }
 };

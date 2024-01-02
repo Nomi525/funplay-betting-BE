@@ -2464,7 +2464,7 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
         await declareNumberWinner(findGame, findPeriod.period)
       } else if (findGame.gameName == "2 Color Betting" || findGame.gameName == "3 Color Betting") {
         const gameType = findGame.gameName == "2 Color Betting" ? "2colorBetting" : "3colorBetting"
-        await declareColorWinner(findGame, findPeriod.period, gameType);
+        await declareColorWinner(findGame, findPeriod.period, findPeriod.periodFor, gameType);
       } else if (findGame.gameName == "Penalty Betting") {
         await declarePenaltyWinner(findGame, findPeriod.period);
       } else if (findGame.gameName == "Card Betting") {
