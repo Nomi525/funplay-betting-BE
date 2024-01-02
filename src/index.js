@@ -387,13 +387,17 @@ import {
   winCardNumberFun,
   getRandomNumberExcluding,
   declareNumberWinner,
-  declareColorWinner
+  declareColorWinner,
+  declarePenaltyWinner,
+  declareCardWinner,
 } from "./services/CommonService.js";
 dotenv.config();
 
 export {
-  declareNumberWinner,
+  declareCardWinner,
+  declarePenaltyWinner,
   declareColorWinner,
+  declareNumberWinner,
   getRandomNumberExcluding,
   getRandomElement,
   winCardNumberFun,
