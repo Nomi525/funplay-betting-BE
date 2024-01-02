@@ -994,7 +994,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
     const { gameId } = req.params
     const gameSelectedTimeList = await ColourBetting.aggregate([
       {
-        $match: { gameId : new mongoose.Types.ObjectId(gameId), is_deleted: 0 }
+        $match: { gameId : new mongoose.Types.ObjectId(gameId), isWin: false, is_deleted: 0 }
       },
       {
         $group: {
