@@ -999,6 +999,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
       {
         $group: {
           _id: "$selectedTime",
+          // period: "id.$period",
         }
       }
     ]);
