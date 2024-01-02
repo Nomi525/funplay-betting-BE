@@ -16,7 +16,7 @@ import {
   getSingleData,
   handleErrorResponse,
   mongoose,
-  sendResponse
+  sendResponse,
 } from "../../index.js";
 
 //#region Game add and edit
@@ -47,12 +47,16 @@ export const addEditGame = async (req, res) => {
       winnerIds,
       winnersPercentage,
       entryFee,
-      winningCoin
+      winningCoin,
     } = req.body;
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
-    newGameStartDate = moment(`${newGameStartDate} ${gameDurationFrom}`).utcOffset("-05:30").format("YYYY-MM-DDTHH:mm:ss");
-    newGameEndDate = moment(`${newGameEndDate} ${gameDurationTo}`).utcOffset("-05:30").format("YYYY-MM-DDTHH:mm:ss");
+    newGameStartDate = moment(`${newGameStartDate} ${gameDurationFrom}`)
+      .utcOffset("-05:30")
+      .format("YYYY-MM-DDTHH:mm:ss");
+    newGameEndDate = moment(`${newGameEndDate} ${gameDurationTo}`)
+      .utcOffset("-05:30")
+      .format("YYYY-MM-DDTHH:mm:ss");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
       is_deleted: 0,
@@ -106,7 +110,7 @@ export const addEditGame = async (req, res) => {
             winnerIds,
             winnersPercentage,
             entryFee,
-            winningCoin
+            winningCoin,
           },
           Game
         );
@@ -159,7 +163,7 @@ export const addEditGame = async (req, res) => {
           winnerIds,
           winnersPercentage,
           entryFee,
-          winningCoin
+          winningCoin,
         },
         Game
       );
@@ -183,69 +187,6 @@ export const addEditGame = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
-// export const gameDelete = async (req, res) => {
-//   try {
-//     const { gameId } = req.body;
-//     await dataUpdated({ _id: gameId }, { is_deleted: 1 }, Game);
-//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_DELETED, []);
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// };
-
-//#region Game delete
-// export const gameActiveDeactive = async (req, res) => {
-//   try {
-//     const { gameId } = req.body;
-//     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
-//     if (findGame) {
-//       if (findGame.isActive == false) {
-//         const checkGameCount = await Game.countDocuments({
-//           $or: [{ isActive: true, is_deleted: 0 }],
-//         });
-//         if (checkGameCount >= 6) {
-//           return sendResponse(
-//             res,
-//             StatusCodes.BAD_REQUEST,
-//             ResponseMessage.GAME_ACTIVE_LIMIT,
-//             []
-//           );
-//         }
-//       }
-//       if (findGame.isActive) {
-//         findGame.isActive = false;
-//         await findGame.save();
-//         return sendResponse(
-//           res,
-//           StatusCodes.OK,
-//           ResponseMessage.GAME_DEACTIVE,
-//           []
-//         );
-//       } else {
-//         findGame.isActive = true;
-//         await findGame.save();
-//         return sendResponse(
-//           res,
-//           StatusCodes.OK,
-//           ResponseMessage.GAME_ACTIVE,
-//           []
-//         );
-//       }
-//     } else {
-//       return sendResponse(
-//         res,
-//         StatusCodes.BAD_REQUEST,
-//         ResponseMessage.GAME_NOT_FOUND,
-//         []
-//       );
-//     }
-//   } catch (error) {
-//     return handleErrorResponse(res, error);
-//   }
-// };
-//#endregion
-
 //#region game repeat active and deactive
 export const gameIsRepeat = async (req, res) => {
   try {
@@ -757,7 +698,7 @@ export const gameDelete = async (req, res) => {
 };
 //#endregion
 
-//#region Game delete
+//#region Game active deactive
 export const gameActiveDeactive = async (req, res) => {
   try {
     const { gameId } = req.body;
@@ -796,7 +737,7 @@ export const gameActiveDeactive = async (req, res) => {
 };
 //#endregion
 
-// Games Rules CRUD
+// region add edit game rule
 export const addEditGameRule = async (req, res) => {
   try {
     const { gameId, gameRules } = req.body;
@@ -841,7 +782,9 @@ export const addEditGameRule = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
 
+//#region get game rule
 export const getGameRules = async (req, res) => {
   try {
     const getGameRules = await GameRules.find({ is_deleted: 0 }).populate(
@@ -867,7 +810,9 @@ export const getGameRules = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
 
+//#region get single game rule
 export const getSingleGameRules = async (req, res) => {
   try {
     const { gameId } = req.body;
@@ -894,7 +839,9 @@ export const getSingleGameRules = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
 
+//#region Game rule delete
 export const gameRuleDelete = async (req, res) => {
   try {
     const { gameId } = req.body;
@@ -909,6 +856,7 @@ export const gameRuleDelete = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+//#endregion
 
 //#region Game wise time
 export const addEditGameWiseTime = async (req, res) => {
@@ -1046,21 +994,36 @@ export const getAllGamePeriodData = async (req, res) => {
     let battingAggregationResult;
 
     // Find periods with isWin: true in the numberbettings collection
-    const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct('period', { isWin: true });
+    const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
     // Find periods with isWin: true in the colourbettings collection
-    const isWinTruePeriodsforColourBetting = await ColourBetting.distinct('period', { isWin: true });
+    const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
     // Find periods with isWin: true in the penaltyBetting collection
-    const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct('period', { isWin: true });
+    const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
     // Find periods with isWin: true in the communitybetting collection
-    const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct('period', { isWin: true });
+    const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
     // Find periods with isWin: true in the cardbetting collection
-    const isWinTruePeriodsforCardBetting = await CardBetting.distinct('period', { isWin: true });
+    const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
-    if (gameType === 'numberBetting') {
+    if (gameType === "numberBetting") {
       battingAggregationResult = await Period.aggregate([
         {
           $facet: {
@@ -1073,36 +1036,36 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'numberbettings',
-                  let: { periodId: '$period' },
+                  from: "numberbettings",
+                  let: { periodId: "$period" },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
                           $and: [
-                            { $eq: ['$period', '$$periodId'] },
-                            { $ne: ['$isWin', true] },
+                            { $eq: ["$period", "$$periodId"] },
+                            { $ne: ["$isWin", true] },
                           ],
                         },
                       },
                     },
                   ],
-                  as: 'numberBettingsData',
+                  as: "numberBettingsData",
                 },
               },
               {
-                $unwind: '$numberBettingsData',
+                $unwind: "$numberBettingsData",
               },
               {
                 $group: {
                   _id: {
-                    period: '$period',
-                    number: '$numberBettingsData.number',
-                    periodId: '$_id',
+                    period: "$period",
+                    number: "$numberBettingsData.number",
+                    periodId: "$_id",
                   },
-                  anyWinTrue: { $max: '$numberBettingsData.isWin' },
-                  totalUser: { $addToSet: '$numberBettingsData.userId' },
-                  totalBetAmount: { $sum: '$numberBettingsData.betAmount' },
+                  anyWinTrue: { $max: "$numberBettingsData.isWin" },
+                  totalUser: { $addToSet: "$numberBettingsData.userId" },
+                  totalBetAmount: { $sum: "$numberBettingsData.betAmount" },
                 },
               },
               {
@@ -1112,12 +1075,12 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $group: {
-                  _id: '$_id.period',
+                  _id: "$_id.period",
                   numberBettingsData: {
                     $push: {
-                      number: '$_id.number',
-                      totalUser: { $sum: { $size: '$totalUser' } },
-                      totalBetAmount: '$totalBetAmount',
+                      number: "$_id.number",
+                      totalUser: { $sum: { $size: "$totalUser" } },
+                      totalBetAmount: "$totalBetAmount",
                     },
                   },
                 },
@@ -1125,14 +1088,14 @@ export const getAllGamePeriodData = async (req, res) => {
               {
                 $project: {
                   _id: 0,
-                  period: '$_id',
-                  periodId: '$periodId',
+                  period: "$_id",
+                  periodId: "$periodId",
                   numberBettingsData: 1,
                 },
               },
               {
                 $sort: { period: -1 },
-              }
+              },
             ],
             totalPeriodUser: [
               {
@@ -1143,20 +1106,20 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'numberbettings',
-                  localField: 'period',
-                  foreignField: 'period',
-                  as: 'numberbettingsData',
+                  from: "numberbettings",
+                  localField: "period",
+                  foreignField: "period",
+                  as: "numberbettingsData",
                 },
               },
               {
-                $unwind: '$numberbettingsData',
+                $unwind: "$numberbettingsData",
               },
               {
                 $group: {
-                  _id: '$numberbettingsData.userId',
-                  totalUsers: { $sum: 1 }
-                }
+                  _id: "$numberbettingsData.userId",
+                  totalUsers: { $sum: 1 },
+                },
               },
               {
                 $group: {
@@ -1164,24 +1127,28 @@ export const getAllGamePeriodData = async (req, res) => {
                   totalUserArrayLength: { $sum: 1 },
                 },
               },
-            ]
+            ],
           },
         },
         {
-          $unwind: '$totalNumber',
+          $unwind: "$totalNumber",
         },
         {
           $replaceRoot: {
             newRoot: {
               $mergeObjects: [
-                '$totalNumber',
-                { totalUser: { $arrayElemAt: ['$totalPeriodUser.totalUserArrayLength', 0] } },
+                "$totalNumber",
+                {
+                  totalUser: {
+                    $arrayElemAt: ["$totalPeriodUser.totalUserArrayLength", 0],
+                  },
+                },
               ],
             },
           },
-        }
+        },
       ]);
-    } else if (gameType === '3colorBetting' || gameType === '2colorBetting') {
+    } else if (gameType === "3colorBetting" || gameType === "2colorBetting") {
       battingAggregationResult = await Period.aggregate([
         {
           $facet: {
@@ -1194,30 +1161,30 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'colourbettings',
-                  localField: 'period',
-                  foreignField: 'period',
-                  as: 'colourbettingsData',
+                  from: "colourbettings",
+                  localField: "period",
+                  foreignField: "period",
+                  as: "colourbettingsData",
                 },
               },
               {
-                $unwind: '$colourbettingsData',
+                $unwind: "$colourbettingsData",
               },
               {
                 $match: {
-                  'colourbettingsData.gameType': gameType,
+                  "colourbettingsData.gameType": gameType,
                 },
               },
               {
                 $group: {
                   _id: {
-                    period: '$period',
-                    colourName: '$colourbettingsData.colourName',
-                    periodId: '$_id',
+                    period: "$period",
+                    colourName: "$colourbettingsData.colourName",
+                    periodId: "$_id",
                   },
-                  anyWinTrue: { $max: '$colourbettingsData.isWin' },
-                  totalUser: { $addToSet: '$colourbettingsData.userId' },
-                  totalBetAmount: { $sum: '$colourbettingsData.betAmount' },
+                  anyWinTrue: { $max: "$colourbettingsData.isWin" },
+                  totalUser: { $addToSet: "$colourbettingsData.userId" },
+                  totalBetAmount: { $sum: "$colourbettingsData.betAmount" },
                 },
               },
               {
@@ -1227,12 +1194,12 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $group: {
-                  _id: '$_id.period',
+                  _id: "$_id.period",
                   colourbettingsData: {
                     $push: {
-                      colourName: '$_id.colourName',
-                      totalUser: { $sum: { $size: '$totalUser' } },
-                      totalBetAmount: '$totalBetAmount',
+                      colourName: "$_id.colourName",
+                      totalUser: { $sum: { $size: "$totalUser" } },
+                      totalBetAmount: "$totalBetAmount",
                     },
                   },
                 },
@@ -1240,13 +1207,13 @@ export const getAllGamePeriodData = async (req, res) => {
               {
                 $project: {
                   _id: 0,
-                  period: '$_id',
+                  period: "$_id",
                   colourbettingsData: 1,
                 },
               },
               {
                 $sort: { period: -1 },
-              }
+              },
             ],
             totalPeriodUser: [
               {
@@ -1257,20 +1224,20 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'colourbettings',
-                  localField: 'period',
-                  foreignField: 'period',
-                  as: 'colourbettingsData',
+                  from: "colourbettings",
+                  localField: "period",
+                  foreignField: "period",
+                  as: "colourbettingsData",
                 },
               },
               {
-                $unwind: '$colourbettingsData',
+                $unwind: "$colourbettingsData",
               },
               {
                 $group: {
-                  _id: '$colourbettingsData.userId',
-                  totalUsers: { $sum: 1 }
-                }
+                  _id: "$colourbettingsData.userId",
+                  totalUsers: { $sum: 1 },
+                },
               },
               {
                 $group: {
@@ -1278,22 +1245,26 @@ export const getAllGamePeriodData = async (req, res) => {
                   totalUserArrayLength: { $sum: 1 },
                 },
               },
-            ]
-          }
+            ],
+          },
         },
         {
-          $unwind: '$totalColor',
+          $unwind: "$totalColor",
         },
         {
           $replaceRoot: {
             newRoot: {
               $mergeObjects: [
-                '$totalColor',
-                { totalUser: { $arrayElemAt: ['$totalPeriodUser.totalUserArrayLength', 0] } },
+                "$totalColor",
+                {
+                  totalUser: {
+                    $arrayElemAt: ["$totalPeriodUser.totalUserArrayLength", 0],
+                  },
+                },
               ],
             },
           },
-        }
+        },
       ]);
     } else if (gameType === "communityBetting") {
       battingAggregationResult = await Period.aggregate([
@@ -1305,33 +1276,33 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $lookup: {
-            from: 'communitybettings',
-            localField: 'period',
-            foreignField: 'period',
-            as: 'communitybettingsData',
+            from: "communitybettings",
+            localField: "period",
+            foreignField: "period",
+            as: "communitybettingsData",
           },
         },
         {
-          $unwind: '$communitybettingsData',
+          $unwind: "$communitybettingsData",
         },
         {
           $lookup: {
-            from: 'users',
-            localField: 'communitybettingsData.userId',
-            foreignField: '_id',
-            as: 'usersData',
+            from: "users",
+            localField: "communitybettingsData.userId",
+            foreignField: "_id",
+            as: "usersData",
           },
         },
         {
           $group: {
             _id: {
-              period: '$period',
-              periodId: '$_id',
-              userId: '$communitybettingsData.userId',
+              period: "$period",
+              periodId: "$_id",
+              userId: "$communitybettingsData.userId",
             },
-            anyWinTrue: { $max: '$communitybettingsData.isWin' },
-            totalBetAmount: { $sum: '$communitybettingsData.betAmount' },
-            usersData: { $first: '$usersData' },
+            anyWinTrue: { $max: "$communitybettingsData.isWin" },
+            totalBetAmount: { $sum: "$communitybettingsData.betAmount" },
+            usersData: { $first: "$usersData" },
           },
         },
         {
@@ -1341,32 +1312,32 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $group: {
-            _id: '$_id.period',
-            periodId: { $first: '$_id.periodId' },
+            _id: "$_id.period",
+            periodId: { $first: "$_id.periodId" },
             comunityBettingData: {
               $push: {
-                userEmail: { $arrayElemAt: ['$usersData.email', 0] },
-                userName: { $arrayElemAt: ['$usersData.fullName', 0] },
-                userId: '$_id.userId',
-                betAmount: '$totalBetAmount',
+                userEmail: { $arrayElemAt: ["$usersData.email", 0] },
+                userName: { $arrayElemAt: ["$usersData.fullName", 0] },
+                userId: "$_id.userId",
+                betAmount: "$totalBetAmount",
               },
             },
-            totalUniqueUsers: { $addToSet: '$_id.userId' }, // Count total unique users
+            totalUniqueUsers: { $addToSet: "$_id.userId" }, // Count total unique users
           },
         },
         {
           $project: {
             _id: 0,
-            period: '$_id',
+            period: "$_id",
             comunityBettingData: 1,
-            totalUniqueUsers: { $size: '$totalUniqueUsers' }, // Include total unique user count
+            totalUniqueUsers: { $size: "$totalUniqueUsers" }, // Include total unique user count
           },
         },
         {
           $sort: { period: -1 },
         },
       ]);
-    } else if (gameType === 'penaltyBetting') {
+    } else if (gameType === "penaltyBetting") {
       battingAggregationResult = await Period.aggregate([
         {
           $facet: {
@@ -1379,25 +1350,25 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'penaltybettings',
-                  localField: 'period',
-                  foreignField: 'period',
-                  as: 'penaltybettingsData',
+                  from: "penaltybettings",
+                  localField: "period",
+                  foreignField: "period",
+                  as: "penaltybettingsData",
                 },
               },
               {
-                $unwind: '$penaltybettingsData',
+                $unwind: "$penaltybettingsData",
               },
               {
                 $group: {
                   _id: {
-                    period: '$period',
-                    betSide: '$penaltybettingsData.betSide',
-                    periodId: '$_id',
+                    period: "$period",
+                    betSide: "$penaltybettingsData.betSide",
+                    periodId: "$_id",
                   },
-                  anyWinTrue: { $max: '$penaltybettingsData.isWin' },
-                  totalUser: { $addToSet: '$penaltybettingsData.userId' },
-                  totalBetAmount: { $sum: '$penaltybettingsData.betAmount' },
+                  anyWinTrue: { $max: "$penaltybettingsData.isWin" },
+                  totalUser: { $addToSet: "$penaltybettingsData.userId" },
+                  totalBetAmount: { $sum: "$penaltybettingsData.betAmount" },
                 },
               },
               {
@@ -1407,12 +1378,12 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $group: {
-                  _id: '$_id.period',
+                  _id: "$_id.period",
                   penaltybettingsData: {
                     $push: {
-                      betSide: '$_id.betSide',
-                      totalUser: { $sum: { $size: '$totalUser' } },
-                      totalBetAmount: '$totalBetAmount',
+                      betSide: "$_id.betSide",
+                      totalUser: { $sum: { $size: "$totalUser" } },
+                      totalBetAmount: "$totalBetAmount",
                     },
                   },
                 },
@@ -1420,13 +1391,13 @@ export const getAllGamePeriodData = async (req, res) => {
               {
                 $project: {
                   _id: 0,
-                  period: '$_id',
+                  period: "$_id",
                   penaltybettingsData: 1,
                 },
               },
               {
                 $sort: { period: -1 },
-              }
+              },
             ],
             totalPeriodUser: [
               {
@@ -1437,20 +1408,20 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'penaltybettings',
-                  localField: 'period',
-                  foreignField: 'period',
-                  as: 'penaltybettingsData',
+                  from: "penaltybettings",
+                  localField: "period",
+                  foreignField: "period",
+                  as: "penaltybettingsData",
                 },
               },
               {
-                $unwind: '$penaltybettingsData',
+                $unwind: "$penaltybettingsData",
               },
               {
                 $group: {
-                  _id: '$penaltybettingsData.userId',
-                  totalUsers: { $sum: 1 }
-                }
+                  _id: "$penaltybettingsData.userId",
+                  totalUsers: { $sum: 1 },
+                },
               },
               {
                 $group: {
@@ -1458,24 +1429,28 @@ export const getAllGamePeriodData = async (req, res) => {
                   totalUserArrayLength: { $sum: 1 },
                 },
               },
-            ]
-          }
+            ],
+          },
         },
         {
-          $unwind: '$totalSide',
+          $unwind: "$totalSide",
         },
         {
           $replaceRoot: {
             newRoot: {
               $mergeObjects: [
-                '$totalSide',
-                { totalUser: { $arrayElemAt: ['$totalPeriodUser.totalUserArrayLength', 0] } },
+                "$totalSide",
+                {
+                  totalUser: {
+                    $arrayElemAt: ["$totalPeriodUser.totalUserArrayLength", 0],
+                  },
+                },
               ],
             },
           },
-        }
+        },
       ]);
-    } else if (gameType === 'cardBetting') {
+    } else if (gameType === "cardBetting") {
       battingAggregationResult = await Period.aggregate([
         {
           $facet: {
@@ -1488,36 +1463,36 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'cardbettings',
-                  let: { periodId: '$period' },
+                  from: "cardbettings",
+                  let: { periodId: "$period" },
                   pipeline: [
                     {
                       $match: {
                         $expr: {
                           $and: [
-                            { $eq: ['$period', '$$periodId'] },
-                            { $ne: ['$isWin', true] },
+                            { $eq: ["$period", "$$periodId"] },
+                            { $ne: ["$isWin", true] },
                           ],
                         },
                       },
                     },
                   ],
-                  as: 'cardBettingsData',
+                  as: "cardBettingsData",
                 },
               },
               {
-                $unwind: '$cardBettingsData',
+                $unwind: "$cardBettingsData",
               },
               {
                 $group: {
                   _id: {
-                    period: '$period',
-                    number: '$cardBettingsData.number',
-                    periodId: '$_id',
+                    period: "$period",
+                    number: "$cardBettingsData.number",
+                    periodId: "$_id",
                   },
-                  anyWinTrue: { $max: '$cardBettingsData.isWin' },
-                  totalUser: { $addToSet: '$cardBettingsData.userId' },
-                  totalBetAmount: { $sum: '$cardBettingsData.betAmount' },
+                  anyWinTrue: { $max: "$cardBettingsData.isWin" },
+                  totalUser: { $addToSet: "$cardBettingsData.userId" },
+                  totalBetAmount: { $sum: "$cardBettingsData.betAmount" },
                 },
               },
               {
@@ -1527,12 +1502,12 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $group: {
-                  _id: '$_id.period',
+                  _id: "$_id.period",
                   cardBettingsData: {
                     $push: {
-                      number: '$_id.number',
-                      totalUser: { $sum: { $size: '$totalUser' } },
-                      totalBetAmount: '$totalBetAmount',
+                      number: "$_id.number",
+                      totalUser: { $sum: { $size: "$totalUser" } },
+                      totalBetAmount: "$totalBetAmount",
                     },
                   },
                 },
@@ -1540,14 +1515,14 @@ export const getAllGamePeriodData = async (req, res) => {
               {
                 $project: {
                   _id: 0,
-                  period: '$_id',
-                  periodId: '$periodId',
+                  period: "$_id",
+                  periodId: "$periodId",
                   cardBettingsData: 1,
                 },
               },
               {
                 $sort: { period: -1 },
-              }
+              },
             ],
             totalPeriodUser: [
               {
@@ -1558,20 +1533,20 @@ export const getAllGamePeriodData = async (req, res) => {
               },
               {
                 $lookup: {
-                  from: 'cardbettings',
-                  localField: 'period',
-                  foreignField: 'period',
-                  as: 'cardbettingsData',
+                  from: "cardbettings",
+                  localField: "period",
+                  foreignField: "period",
+                  as: "cardbettingsData",
                 },
               },
               {
-                $unwind: '$cardbettingsData',
+                $unwind: "$cardbettingsData",
               },
               {
                 $group: {
-                  _id: '$cardbettingsData.userId',
-                  totalUsers: { $sum: 1 }
-                }
+                  _id: "$cardbettingsData.userId",
+                  totalUsers: { $sum: 1 },
+                },
               },
               {
                 $group: {
@@ -1579,22 +1554,26 @@ export const getAllGamePeriodData = async (req, res) => {
                   totalUserArrayLength: { $sum: 1 },
                 },
               },
-            ]
+            ],
           },
         },
         {
-          $unwind: '$totalCard',
+          $unwind: "$totalCard",
         },
         {
           $replaceRoot: {
             newRoot: {
               $mergeObjects: [
-                '$totalCard',
-                { totalUser: { $arrayElemAt: ['$totalPeriodUser.totalUserArrayLength', 0] } },
+                "$totalCard",
+                {
+                  totalUser: {
+                    $arrayElemAt: ["$totalPeriodUser.totalUserArrayLength", 0],
+                  },
+                },
               ],
             },
           },
-        }
+        },
       ]);
     }
     return sendResponse(
@@ -1608,5 +1587,3 @@ export const getAllGamePeriodData = async (req, res) => {
   }
 };
 //#endregion
-
-

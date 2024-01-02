@@ -1,5 +1,6 @@
 import { createError, sendResponse, CMS, Admin, StatusCodes, ResponseMessage,handleErrorResponse } from "../../index.js";
 
+//#region addEditPrivacyPolicy
 export const addEditPrivacyPolicy = async (req, res) => {
     try {
         let checkAdmin = await Admin.findById({ _id: req.admin });
@@ -42,7 +43,7 @@ export const addEditPrivacyPolicy = async (req, res) => {
     }
 };
 //#endregion
-//#region addEditContactus
+//#region addEditAboutUs
 export const addEditAboutUs = async (req, res) => {
     try {
         let checkAdmin = await Admin.findById({ _id: req.admin });
@@ -84,7 +85,6 @@ export const addEditAboutUs = async (req, res) => {
 //#endregion
 
 //#region termsAndConditions
-
 export const addEditTermsAndCondition = async (req, res) => {
     try {
         let checkAdmin = await Admin.findById({ _id: req.admin });
@@ -124,7 +124,6 @@ export const addEditTermsAndCondition = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 };
-
 //#endregion
 
 //#region getCMS
