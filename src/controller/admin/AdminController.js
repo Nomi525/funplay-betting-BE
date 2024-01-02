@@ -424,7 +424,6 @@ export const getWithdrawalList = async (req, res) => {
 }
 //#endregion
 
-//#region Admin get updated user 
 //#region Admin get updated user
 export const getUpdatedUser = async (req, res) => {
     try {
@@ -449,5 +448,5 @@ export const getUpdatedUser = async (req, res) => {
     }
 };
 //#endregion
-//#endregion
+
 

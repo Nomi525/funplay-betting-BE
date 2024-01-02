@@ -45,8 +45,6 @@ cron.schedule('* * * * * *', () => {
 //   createAllGameWinnerFromCronJob();
 // });
 
-
-
 const appServer = app.listen(process.env.PORT, () => {
   dbConnection();
   console.log(`server running on port: ${process.env.PORT}`);
