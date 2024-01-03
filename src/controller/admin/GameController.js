@@ -1047,7 +1047,7 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
       "period",
-      { isWin: true, selectedTime: periodFor }
+      { isWin: true, selectedTime: periodFor, gameId, gameType }
     );
 
     // Find periods with isWin: true in the penaltyBetting collection
