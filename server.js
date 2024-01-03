@@ -1,11 +1,21 @@
-
-import { express, cors, dbConnection, adminRoutes, userRoutes, commonRoutes, cron, createAllGamePeriodFromCronJob,createAllGameWinnerFromCronJob} from "./src/index.js";
+import {
+  express,
+  cors,
+  dbConnection,
+  adminRoutes,
+  userRoutes,
+  commonRoutes,
+  cron,
+  createAllGamePeriodFromCronJob,
+  createAllGameWinnerFromCronJob,
+} from "./src/index.js";
+import { Server, app } from "./Socket.config";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/images', express.static('./public/uploads'));
+app.use("/api/images", express.static("./public/uploads"));
 
 //SET HEADER
 app.use(function (req, res, next) {
@@ -36,12 +46,12 @@ app.use(function (err, req, res, next) {
 });
 
 // cron run for every seconds
-cron.schedule('* * * * * *', () => { 
+cron.schedule("* * * * * *", () => {
   createAllGamePeriodFromCronJob();
 });
 
 // cron run for every seconds
-// cron.schedule('* * * * * *', () => { 
+// cron.schedule('* * * * * *', () => {
 //   createAllGameWinnerFromCronJob();
 // });
 
@@ -50,4 +60,4 @@ const appServer = app.listen(process.env.PORT, () => {
   console.log(`server running on port: ${process.env.PORT}`);
 });
 
-export { appServer }
+export { appServer };
