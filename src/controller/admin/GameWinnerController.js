@@ -684,7 +684,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winColour,periodFor } = req.body;
+    const { gameId, winnerId, winColour, periodFor } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
@@ -753,6 +753,11 @@ export const declareWinnerOfColorBetting = async (req, res) => {
             findColorBetting.gameType == "2colorBetting"
               ? "2 Color Betting"
               : "3 Color Betting";
+          const userData = await getSingleData(
+            { _id: findColorBetting.userId },
+            User
+          );
+          // console.log(userData.email,'userData.email');
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: gameName,
           });
@@ -767,9 +772,9 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     // Win color from given by admin
     if (!winFlage) {
       let gameType =
-      findGame.gameName == "2 Color Betting"
-              ? "2colorBetting"
-              : "3colorBetting";
+        findGame.gameName == "2 Color Betting"
+          ? "2colorBetting"
+          : "3colorBetting";
       const winAdminColor = await ColourBetting.create({
         gameId,
         userId: null,
@@ -875,6 +880,10 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
             Number(findPenaltyBetting.betAmount) +
             Number(rewardAmount);
           await balance.save();
+          const userData = await getSingleData(
+            { _id: findPenaltyBetting.userId },
+            User
+          );
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: "Penalty Betting",
           });
