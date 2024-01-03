@@ -551,7 +551,8 @@ export const declareColorWinner = async (game, period, selectedTime, gameType) =
                                             const findUser = await ColourBetting.findOne({ userId, gameId, period: item.period, selectedTime, colourName: item.colourName, is_deleted: 0 });
                                             if (findUser) {
                                                 let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
-                                                await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
+                                                const data = await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
+                                                // console.log('ColourBetting', data);
                                                 const balance = await getSingleData({ userId }, NewTransaction);
                                                 if (balance) {
                                                     let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
@@ -559,6 +560,7 @@ export const declareColorWinner = async (game, period, selectedTime, gameType) =
                                                     await balance.save();
                                                 }
                                             }
+                                            // console.log('findUser', findUser);
                                         });
                                     } else {
                                         // Handling the losers
