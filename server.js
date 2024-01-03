@@ -40,7 +40,7 @@ cron.schedule('* * * * * *', () => {
   createAllGamePeriodFromCronJob();
 });
 
-// cron run for every seconds
+// // cron run for every seconds
 cron.schedule('* * * * * *', () => { 
   createAllGameWinnerFromCronJob();
 });
