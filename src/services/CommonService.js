@@ -534,6 +534,7 @@ export const declareColorWinner = async (game, period, selectedTime, gameType) =
                     if (getAllColourBets.length) {
                         const tieColours = getAllColourBets.filter(item => item.totalBetAmount === getAllColourBets[0].totalBetAmount);
                         if (getAllColourBets.length == 1) {
+                            console.log(`ramdom win 537 line period is ${period}`);
                             const randomWinColour = getRandomColorExcluding(tieColours.map(item => item.colourName), gameType);
                             await ColourBetting.create({
                                 userId: null, period, selectedTime, gameId, gameType, colourName: randomWinColour, is_deleted: 0, isWin: true, status: 'successfully'
@@ -546,13 +547,13 @@ export const declareColorWinner = async (game, period, selectedTime, gameType) =
                             await Promise.all(
                                 getAllColourBets.map(async (item, index) => {
                                     if (index === 0) {
+                                        console.log(`auto win 550 line period is ${item.period}`);
                                         // Handling the winner
                                         item.userIds.map(async (userId) => {
                                             const findUser = await ColourBetting.findOne({ userId, gameId, period: item.period, selectedTime, colourName: item.colourName, is_deleted: 0 });
                                             if (findUser) {
                                                 let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
-                                                const data = await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
-                                                // console.log('ColourBetting', data);
+                                                await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { isWin: true, status: 'successfully', rewardAmount });
                                                 const balance = await getSingleData({ userId }, NewTransaction);
                                                 if (balance) {
                                                     let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
@@ -560,11 +561,13 @@ export const declareColorWinner = async (game, period, selectedTime, gameType) =
                                                     await balance.save();
                                                 }
                                             }
-                                            // console.log('findUser', findUser);
+                                            // console.log('findUser 563', findUser);
                                         });
                                     } else {
                                         // Handling the losers
                                         item.userIds.map(async (userId) => {
+                                            console.log(`auto fail 569 line period is ${item.period}`);
+                                            // console.log('568 loss');
                                             await ColourBetting.updateOne({ userId, gameId, period: item.period, selectedTime, isWin: false, status: 'pending', colourName: item.colourName, is_deleted: 0 }, { status: 'fail' });
                                         });
                                     }
@@ -575,18 +578,21 @@ export const declareColorWinner = async (game, period, selectedTime, gameType) =
                             message: ResponseMessage.COLOR_WINNER + " " + getAllColourBets[0].colourName
                         }
                     } else {
+                        // console.log('579 fail');
                         await ColourBetting.updateMany({ gameId, selectedTime, period }, { status: "fail" })
                         return {
                             message: ResponseMessage.LOSER
                         }
                     }
                 } else {
+                    // console.log('586 fail');
                     await ColourBetting.updateMany({ gameId, selectedTime, period }, { status: "fail" })
                     return {
                         message: ResponseMessage.LOSER
                     }
                 }
             } else {
+                console.log(`auto win 595 line not play in period ${item.period}`);
                 let allColors = ["red", "green", "orange"];
                 if (gameType == "2colorBetting") {
                     allColors = ["red", "green"]
