@@ -640,6 +640,7 @@ export const getAllGamePeriod = async (req, res) => {
       {
         $match: {
           gameId: new mongoose.Types.ObjectId(gameId),
+          selectedTime: second,
           // createdAt: { $gte: twentyFourHoursAgo },
           createdAt: {
             $gte: last24HoursDateOnServer,
@@ -845,16 +846,13 @@ export const getByIdGamePeriod = async (req, res) => {
     const { gameId } = req.params;
     const { second } = req.query;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    // const getGamePeriodById = await ColourBetting.find({ userId: req.user, gameId, createdAt: { $gte: twentyFourHoursAgo }, is_deleted: 0 })
-    //   .populate('userId', 'fullName profile email')
-    //   .populate('gameId', 'gameName gameImage gameMode')
-    //   .sort({ period: -1 })
     const getGamePeriodById = await ColourBetting.aggregate([
       {
         $match: {
           userId: new mongoose.Types.ObjectId(req.user),
           gameId: new mongoose.Types.ObjectId(gameId),
-          // createdAt: { $gte: twentyFourHoursAgo },
+          selectedTime: second,
+          createdAt: { $gte: twentyFourHoursAgo },
           is_deleted: 0
         }
       },

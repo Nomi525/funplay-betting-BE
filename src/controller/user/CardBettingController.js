@@ -127,6 +127,7 @@ export const getByIdGamePeriodOfCardBetting = async (req, res) => {
                 $match: {
                     userId: new mongoose.Types.ObjectId(req.user),
                     gameId: new mongoose.Types.ObjectId(gameId),
+                    selectedTime: second,
                     createdAt: { $gte: twentyFourHoursAgo },
                     is_deleted: 0
                 }
@@ -215,6 +216,7 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
             {
                 $match: {
                     gameId: new mongoose.Types.ObjectId(gameId),
+                    selectedTime: second,
                     createdAt: { $gte: twentyFourHoursAgo },
                     is_deleted: 0,
                 },

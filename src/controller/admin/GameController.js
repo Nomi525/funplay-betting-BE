@@ -1047,13 +1047,13 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
       "period",
-      { isWin: true }
+      { isWin: true, selectedTime: periodFor }
     );
 
     // Find periods with isWin: true in the penaltyBetting collection
     const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
       "period",
-      { isWin: true }
+      { isWin: true, selectedTime: periodFor }
     );
 
     // Find periods with isWin: true in the communitybetting collection
@@ -1065,7 +1065,7 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the cardbetting collection
     const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
       "period",
-      { isWin: true }
+      { isWin: true, selectedTime: periodFor }
     );
 
     if (gameType === "numberBetting") {
@@ -1259,6 +1259,7 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
+      // console.log(battingAggregationResult);
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getUserColor = await ColourBetting.aggregate([
           {
@@ -1266,7 +1267,7 @@ export const getAllGamePeriodData = async (req, res) => {
               gameId: new mongoose.Types.ObjectId(gameId),
               period: Number(result.period),
               selectedTime: periodFor,
-              gameType 
+              gameType
             }
           },
           {
@@ -1288,6 +1289,7 @@ export const getAllGamePeriodData = async (req, res) => {
           colourbettingsData: result.colourbettingsData
         }
       }))
+      // console.log('data',battingAggregationResult);
       // battingAggregationResult = await Period.aggregate([
       //   {
       //     $facet: {
