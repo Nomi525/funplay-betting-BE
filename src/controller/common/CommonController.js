@@ -205,19 +205,19 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     } else if (item.gameName == "Community Betting") {
                         const findCommunity = await CommunityBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount)
-                        let winner = [];
+                        // let winner = [];
                         let uniqueCommunityUserIds = getUniqueUserIds(findCommunity)
-                        if (findWinCommunity.length) {
-                            // winner = findWinCommunity.betAmount
-                            winner = findWinCommunity
-                        }
+                        // if (findWinCommunity.length) {
+                        //     // winner = findWinCommunity.betAmount
+                        //     winner = findWinCommunity
+                        // }
                         gamePeriod.push({
                             sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueCommunityUserIds.length,
                             totalBetAmount: findCommunity.reduce((sum, data) => sum + data.betAmount, 0),
-                            winner
+                            winner : findWinCommunity.length
                         })
                     }
                 })
