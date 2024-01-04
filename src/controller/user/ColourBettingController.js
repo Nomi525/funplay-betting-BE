@@ -1182,6 +1182,7 @@ function getRandomElementExcluding(excludeElements, gameType) {
 export const colourBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, gameId, period } = req.params;
+    const { second: periodFor } = req.query
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
 
     if (findGame.gameMode == "Manual") {

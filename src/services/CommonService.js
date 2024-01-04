@@ -534,7 +534,7 @@ export const declareColorWinner = async (
   const gameId = _id;
   if (gameMode == "Manual") {
     await ColourBetting.updateMany(
-      { gameId, period, selectedTime },
+      { gameId,gameType, period, selectedTime },
       { status: "pending" }
     );
     return {
@@ -544,6 +544,7 @@ export const declareColorWinner = async (
     const checkAlreadyWin = await ColourBetting.find({
       gameId,
       isWin: true,
+      gameType,
       period: Number(period),
       selectedTime,
       is_deleted: 0,
@@ -634,6 +635,7 @@ export const declareColorWinner = async (
                   period,
                   selectedTime,
                   gameId,
+                  gameType,
                   isWin: false,
                   status: "pending",
                   is_deleted: 0,
@@ -664,6 +666,7 @@ export const declareColorWinner = async (
                         userId,
                         gameId,
                         period: item.period,
+                        gameType,
                         selectedTime,
                         colourName: item.colourName,
                         is_deleted: 0,
@@ -679,6 +682,7 @@ export const declareColorWinner = async (
                             gameId,
                             period: item.period,
                             selectedTime,
+                            gameType,
                             isWin: false,
                             status: "pending",
                             colourName: item.colourName,
@@ -714,6 +718,7 @@ export const declareColorWinner = async (
                           gameId,
                           period: item.period,
                           selectedTime,
+                          gameType,
                           isWin: false,
                           status: "pending",
                           colourName: item.colourName,
@@ -735,7 +740,7 @@ export const declareColorWinner = async (
           } else {
             // console.log('579 fail');
             await ColourBetting.updateMany(
-              { gameId, selectedTime, period },
+              { gameId, selectedTime, period,gameType },
               { status: "fail" }
             );
             return {
@@ -745,7 +750,7 @@ export const declareColorWinner = async (
         } else {
           // console.log('586 fail');
           await ColourBetting.updateMany(
-            { gameId, selectedTime, period },
+            { gameId, selectedTime, period,gameType },
             { status: "fail" }
           );
           return {
@@ -765,6 +770,7 @@ export const declareColorWinner = async (
           period,
           selectedTime,
           gameId,
+          gameType,
           colourName: randomWinColor,
           is_deleted: 0,
           isWin: true,
