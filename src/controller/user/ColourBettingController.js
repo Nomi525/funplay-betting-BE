@@ -1186,7 +1186,8 @@ export const colourBettingWinnerResult = async (req, res) => {
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
 
     if (findGame.gameMode == "Manual") {
-      await ColourBetting.updateMany({ gameId, period, gameType, selectedTime: periodFor }, { status: "pending" });
+      await ColourBetting.updateMany({ gameId, period }, { status: "pending" });
+
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -1198,23 +1199,18 @@ export const colourBettingWinnerResult = async (req, res) => {
     const checkAlreadyWin = await ColourBetting.find({
       gameId,
       isWin: true,
-      selectedTime: periodFor,
-      gameType,
       period: Number(period),
       is_deleted: 0,
     }).lean();
-    // console.log(checkAlreadyWin, "maulik202301");
 
     if (checkAlreadyWin.length) {
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.COLOR_WINNER +
-        checkAlreadyWin[0].colourName,
+        ResponseMessage.COLOR_WINNER + " " + checkAlreadyWin[0].colourName,
         [
           {
             period: checkAlreadyWin[0].period,
-            periodFor: checkAlreadyWin[0].selectedTime,
             colourName: checkAlreadyWin[0].colourName,
             totalBetAmount: checkAlreadyWin.reduce(
               (total, data) => Number(total) + Number(data.betAmount),
@@ -1223,238 +1219,229 @@ export const colourBettingWinnerResult = async (req, res) => {
           },
         ]
       );
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        "Result not found",
-        []
-      );
     }
 
-    // const totalUserInPeriod = await ColourBetting.aggregate([
-    //   {
-    //     $match: {
-    //       gameId: new mongoose.Types.ObjectId(gameId),
-    //       gameType,
-    //       period: Number(period),
-    //       is_deleted: 0,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$userId",
-    //       period: { $first: "$period" },
-    //       userTotalBets: { $sum: 1 },
-    //     },
-    //   },
-    // ]);
+    const totalUserInPeriod = await ColourBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          gameType,
+          period: Number(period),
+          is_deleted: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$userId",
+          period: { $first: "$period" },
+          userTotalBets: { $sum: 1 },
+        },
+      },
+    ]);
 
-    // if (totalUserInPeriod.length) {
-    //   const hasUserTotalBets = totalUserInPeriod.some(
-    //     (user) => user.userTotalBets >= 1
-    //   );
-    //   if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
-    //     const getAllColourBets = await ColourBetting.aggregate([
-    //       {
-    //         $match: { period: Number(period), gameType },
-    //       },
-    //       {
-    //         $group: {
-    //           _id: "$colourName",
-    //           period: { $first: "$period" },
-    //           totalUser: { $sum: 1 },
-    //           userIds: { $push: "$userId" },
-    //           totalBetAmount: { $sum: "$betAmount" },
-    //         },
-    //       },
-    //       {
-    //         $project: {
-    //           _id: 0,
-    //           period: 1,
-    //           colourName: "$_id",
-    //           totalUser: 1,
-    //           userIds: 1,
-    //           totalBetAmount: 1,
-    //         },
-    //       },
-    //       {
-    //         $sort: { totalBetAmount: 1 },
-    //       },
-    //     ]);
+    if (totalUserInPeriod.length) {
+      const hasUserTotalBets = totalUserInPeriod.some(
+        (user) => user.userTotalBets >= 1
+      );
+      if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
+        const getAllColourBets = await ColourBetting.aggregate([
+          {
+            $match: { period: Number(period), gameType },
+          },
+          {
+            $group: {
+              _id: "$colourName",
+              period: { $first: "$period" },
+              totalUser: { $sum: 1 },
+              userIds: { $push: "$userId" },
+              totalBetAmount: { $sum: "$betAmount" },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              period: 1,
+              colourName: "$_id",
+              totalUser: 1,
+              userIds: 1,
+              totalBetAmount: 1,
+            },
+          },
+          {
+            $sort: { totalBetAmount: 1 },
+          },
+        ]);
 
-    //     if (getAllColourBets.length) {
-    //       const tieColours = getAllColourBets.filter(
-    //         (item) => item.totalBetAmount === getAllColourBets[0].totalBetAmount
-    //       );
-    //       if (getAllColourBets.length == 1) {
-    //         const randomWinColour = getRandomElementExcluding(
-    //           tieColours.map((item) => item.colourName),
-    //           gameType
-    //         );
-    //         await ColourBetting.create({
-    //           userId: null,
-    //           period,
-    //           gameId,
-    //           gameType,
-    //           colourName: randomWinColour,
-    //           is_deleted: 0,
-    //           isWin: true,
-    //           status: "successfully",
-    //         });
-    //         await ColourBetting.updateMany(
-    //           {
-    //             period,
-    //             gameId,
-    //             isWin: false,
-    //             status: "pending",
-    //             is_deleted: 0,
-    //           },
-    //           { status: "fail" }
-    //         );
-    //         return sendResponse(
-    //           res,
-    //           StatusCodes.OK,
-    //           `Victory Alert! The Winning Color is 1263 ${randomWinColour}`,
-    //           []
-    //         );
-    //       } else {
-    //         await Promise.all(
-    //           getAllColourBets.map(async (item, index) => {
-    //             if (index === 0) {
-    //               // Handling the winner
-    //               item.userIds.map(async (userId) => {
-    //                 const findUser = await ColourBetting.findOne({
-    //                   userId,
-    //                   gameId,
-    //                   period: item.period,
-    //                   colourName: item.colourName,
-    //                   is_deleted: 0,
-    //                 });
-    //                 if (findUser) {
-    //                   // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-    //                   let rewardAmount =
-    //                     findUser.betAmount +
-    //                     findUser.betAmount * findGame.winningCoin;
-    //                   await ColourBetting.updateOne(
-    //                     {
-    //                       userId,
-    //                       gameId,
-    //                       period: item.period,
-    //                       isWin: false,
-    //                       status: "pending",
-    //                       colourName: item.colourName,
-    //                       is_deleted: 0,
-    //                     },
-    //                     { isWin: true, status: "successfully", rewardAmount }
-    //                   );
-    //                   const balance = await getSingleData(
-    //                     { userId },
-    //                     NewTransaction
-    //                   );
-    //                   if (balance) {
-    //                     let winningAmount =
-    //                       Number(findUser.betAmount) + Number(rewardAmount);
-    //                     balance.totalCoin =
-    //                       Number(balance.totalCoin) + Number(winningAmount);
-    //                     await balance.save();
-    //                     const userData = await getSingleData(
-    //                       { _id: userId },
-    //                       User
-    //                     );
-    //                     let gameName =
-    //                       gameType == "3colorBetting"
-    //                         ? "3 Colour Betting"
-    //                         : "2 Colour Betting";
-    //                     let mailInfo = await ejs.renderFile(
-    //                       "src/views/GameWinner.ejs",
-    //                       {
-    //                         gameName: gameName,
-    //                       }
-    //                     );
-    //                     await sendMail(
-    //                       userData.email,
-    //                       "Colour betting game win",
-    //                       mailInfo
-    //                     );
-    //                   }
-    //                 } else {
-    //                   return sendResponse(
-    //                     res,
-    //                     StatusCodes.BAD_REQUEST,
-    //                     "User not found",
-    //                     []
-    //                   );
-    //                 }
-    //               });
-    //             } else {
-    //               // Handling the losers
-    //               item.userIds.map(async (userId) => {
-    //                 await ColourBetting.updateOne(
-    //                   {
-    //                     userId,
-    //                     gameId,
-    //                     period: item.period,
-    //                     isWin: false,
-    //                     status: "pending",
-    //                     colourName: item.colourName,
-    //                     is_deleted: 0,
-    //                   },
-    //                   { status: "fail" }
-    //                 );
-    //               });
-    //             }
-    //           })
-    //         );
-    //       }
-    //       return sendResponse(
-    //         res,
-    //         StatusCodes.OK,
-    //         ResponseMessage.COLOR_WINNER +
-    //         "testcolor5 " +
-    //         getAllColourBets[0].colourName,
-    //         getAllColourBets[0]
-    //       );
-    //     } else {
-    //       await ColourBetting.updateMany(
-    //         { gameId, period },
-    //         { status: "fail" }
-    //       );
-    //       return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
-    //     }
-    //   } else {
-    //     await ColourBetting.updateMany({ gameId, period }, { status: "fail" });
-    //     return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
-    //   }
-    // } else {
-    //   let allColors = ["red", "green", "orange"];
-    //   if (gameType == "2colorBetting") {
-    //     allColors = ["red", "green"];
-    //   }
-    //   let randomIndex = Math.floor(Math.random() * allColors.length);
-    //   let randomWinColor = allColors[randomIndex];
-    //   await ColourBetting.create({
-    //     userId: null,
-    //     period,
-    //     gameId,
-    //     colourName: randomWinColor,
-    //     is_deleted: 0,
-    //     isWin: true,
-    //     status: "successfully",
-    //   });
-    //   return sendResponse(
-    //     res,
-    //     StatusCodes.OK,
-    //     ResponseMessage.COLOR_WINNER + "testcolor6 " + randomWinColor,
-    //     [
-    //       {
-    //         period,
-    //         number: randomWinColor,
-    //         totalBetAmount: 0,
-    //       },
-    //     ]
-    //   );
-    // }
+        if (getAllColourBets.length) {
+          const tieColours = getAllColourBets.filter(
+            (item) => item.totalBetAmount === getAllColourBets[0].totalBetAmount
+          );
+          if (getAllColourBets.length == 1) {
+            const randomWinColour = getRandomElementExcluding(
+              tieColours.map((item) => item.colourName),
+              gameType
+            );
+            await ColourBetting.create({
+              userId: null,
+              period,
+              gameId,
+              gameType,
+              colourName: randomWinColour,
+              is_deleted: 0,
+              isWin: true,
+              status: "successfully",
+            });
+            await ColourBetting.updateMany(
+              {
+                period,
+                gameId,
+                isWin: false,
+                status: "pending",
+                is_deleted: 0,
+              },
+              { status: "fail" }
+            );
+            return sendResponse(
+              res,
+              StatusCodes.OK,
+              `Victory Alert! The Winning Color is ${randomWinColour}`,
+              []
+            );
+          } else {
+            await Promise.all(
+              getAllColourBets.map(async (item, index) => {
+                if (index === 0) {
+                  // Handling the winner
+                  item.userIds.map(async (userId) => {
+                    const findUser = await ColourBetting.findOne({
+                      userId,
+                      gameId,
+                      period: item.period,
+                      colourName: item.colourName,
+                      is_deleted: 0,
+                    });
+                    if (findUser) {
+                      // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+                      let rewardAmount =
+                        findUser.betAmount +
+                        findUser.betAmount * findGame.winningCoin;
+                      await ColourBetting.updateOne(
+                        {
+                          userId,
+                          gameId,
+                          period: item.period,
+                          isWin: false,
+                          status: "pending",
+                          colourName: item.colourName,
+                          is_deleted: 0,
+                        },
+                        { isWin: true, status: "successfully", rewardAmount }
+                      );
+                      const balance = await getSingleData(
+                        { userId },
+                        NewTransaction
+                      );
+                      if (balance) {
+                        let winningAmount =
+                          Number(findUser.betAmount) + Number(rewardAmount);
+                        balance.totalCoin =
+                          Number(balance.totalCoin) + Number(winningAmount);
+                        await balance.save();
+                        const userData = await getSingleData(
+                          { _id: userId },
+                          User
+                        );
+                        let gameName =
+                          gameType == "3colorBetting"
+                            ? "3 Colour Betting"
+                            : "2 Colour Betting";
+                        let mailInfo = await ejs.renderFile(
+                          "src/views/GameWinner.ejs",
+                          {
+                            gameName: gameName,
+                          }
+                        );
+                        await sendMail(
+                          userData.email,
+                          "Colour betting game win",
+                          mailInfo
+                        );
+                      }
+                    } else {
+                      return sendResponse(
+                        res,
+                        StatusCodes.BAD_REQUEST,
+                        "User not found",
+                        []
+                      );
+                    }
+                  });
+                } else {
+                  // Handling the losers
+                  item.userIds.map(async (userId) => {
+                    await ColourBetting.updateOne(
+                      {
+                        userId,
+                        gameId,
+                        period: item.period,
+                        isWin: false,
+                        status: "pending",
+                        colourName: item.colourName,
+                        is_deleted: 0,
+                      },
+                      { status: "fail" }
+                    );
+                  });
+                }
+              })
+            );
+          }
+          return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.COLOR_WINNER + " " + getAllColourBets[0].colourName,
+            getAllColourBets[0]
+          );
+        } else {
+          await ColourBetting.updateMany(
+            { gameId, period },
+            { status: "fail" }
+          );
+          return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
+        }
+      } else {
+        await ColourBetting.updateMany({ gameId, period }, { status: "fail" });
+        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
+      }
+    } else {
+      let allColors = ["red", "green", "orange"];
+      if (gameType == "2colorBetting") {
+        allColors = ["red", "green"];
+      }
+      let randomIndex = Math.floor(Math.random() * allColors.length);
+      let randomWinColor = allColors[randomIndex];
+      await ColourBetting.create({
+        userId: null,
+        period,
+        gameId,
+        colourName: randomWinColor,
+        is_deleted: 0,
+        isWin: true,
+        status: "successfully",
+      });
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.COLOR_WINNER + " " + randomWinColor,
+        [
+          {
+            period,
+            number: randomWinColor,
+            totalBetAmount: 0,
+          },
+        ]
+      );
+    }
     // return sendResponse(
     //   res,
     //   StatusCodes.BAD_REQUEST,
