@@ -43,6 +43,10 @@ const cardBettingSchema = new mongoose.Schema(
       required: false,
       default: 0,
     },
+    selectedTime: {
+        type: String,
+        required: false,
+    },
     isWin: {
       type: Boolean,
       required: false,

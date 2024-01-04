@@ -26,7 +26,7 @@ import {
 //#region Add penalty Betting
 export const addCardBet = async (req, res) => {
     try {
-        let { gameId, card, betAmount, period } = req.body;
+        let { gameId, card, betAmount, period ,selectedTime} = req.body;
         if (betAmount < 0) {
             return sendResponse(
                 res,
@@ -77,7 +77,8 @@ export const addCardBet = async (req, res) => {
                 card: card,
                 betAmount: parseInt(betAmount),
                 period,
-                status: "pending"
+                status: "pending",
+                selectedTime
             },
             CardBetting
         );

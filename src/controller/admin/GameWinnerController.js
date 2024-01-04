@@ -816,14 +816,14 @@ export const declareWinnerOfColorBetting = async (req, res) => {
 //#region Winner declare of Penalty Betting
 export const declareWinnerOfPenaltyBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winBetSide } = req.body;
+    const { gameId, winnerId, winBetSide, periodFor } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
       await PenaltyBetting.updateMany(
-        { gameId, period: winnerId },
+        { gameId, period: winnerId, selectedTime: periodFor },
         { status: "pending" }
       );
       return sendResponse(
@@ -837,6 +837,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       gameId,
       isWin: true,
       period: Number(winnerId),
+      selectedTime: periodFor,
       is_deleted: 0,
     }).lean();
 
@@ -850,6 +851,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
         period: winnerId,
         gameId: gameId,
         betSide: winBetSide,
+        selectedTime: periodFor,
         is_deleted: 0,
         isWin: false,
       },
@@ -901,6 +903,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
         userId: null,
         period: winnerId,
         betSide: winBetSide,
+        selectedTime: periodFor,
         rewardAmount: 0,
         status: "successfully",
         is_deleted: 0,
@@ -913,6 +916,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       {
         gameId,
         betSide: { $ne: winBetSide },
+        selectedTime: periodFor,
         period: winnerId,
         isWin: false,
         status: "pending",
@@ -935,14 +939,14 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
 //#region Winner declare of Number Betting
 export const declareWinnerOfCardBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winCard } = req.body;
+    const { gameId, winnerId, winCard, periodFor } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
       await CardBetting.updateMany(
-        { gameId, period: winnerId },
+        { gameId, period: winnerId, selectedTime: periodFor },
         { status: "pending" }
       );
       return sendResponse(
@@ -956,6 +960,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
       gameId,
       isWin: true,
       period: Number(winnerId),
+      selectedTime: periodFor,
       is_deleted: 0,
     }).lean();
 
@@ -968,6 +973,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         period: winnerId,
         card: winCard,
         status: "pending",
+        selectedTime: periodFor,
         is_deleted: 0,
         isWin: false,
       },
@@ -1010,11 +1016,6 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         }
         savedInstances.push(findCardBetting);
         winFlage = true;
-      } else {
-        console.error(
-          "Document is not an instance of Card Betting:",
-          findCardBetting
-        );
       }
       count++;
     }
@@ -1023,6 +1024,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         gameId,
         period: winnerId,
         card: { $ne: winCard },
+        selectedTime: periodFor,
         status: "pending",
         is_deleted: 0,
         isWin: false,
@@ -1038,6 +1040,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         period: winnerId,
         card: winCard,
         winCardNumber,
+        selectedTime: periodFor,
         rewardAmount: 0,
         status: "successfully",
         is_deleted: 0,
