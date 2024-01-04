@@ -1198,19 +1198,15 @@ export const colourBettingWinnerResult = async (req, res) => {
     const checkAlreadyWin = await ColourBetting.find({
       gameId,
       isWin: true,
-      selectedTime:"60",
       period: Number(period),
       is_deleted: 0,
     }).lean();
-    console.log(checkAlreadyWin, "maulik202301");
 
     if (checkAlreadyWin.length) {
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.COLOR_WINNER +
-          "testcolor4 " +
-          checkAlreadyWin[0].colourName,
+        ResponseMessage.COLOR_WINNER + " " + checkAlreadyWin[0].colourName,
         [
           {
             period: checkAlreadyWin[0].period,
@@ -1402,9 +1398,7 @@ export const colourBettingWinnerResult = async (req, res) => {
           return sendResponse(
             res,
             StatusCodes.OK,
-            ResponseMessage.COLOR_WINNER +
-              "testcolor5 " +
-              getAllColourBets[0].colourName,
+            ResponseMessage.COLOR_WINNER + " " + getAllColourBets[0].colourName,
             getAllColourBets[0]
           );
         } else {
@@ -1437,7 +1431,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.COLOR_WINNER + "testcolor6 " + randomWinColor,
+        ResponseMessage.COLOR_WINNER + " " + randomWinColor,
         [
           {
             period,
