@@ -1169,7 +1169,6 @@ export const colourBettingWinnerResult = async (req, res) => {
 
     if (findGame.gameMode == "Manual") {
       await ColourBetting.updateMany({ gameId, period }, { status: "pending" });
-
       return sendResponse(
         res,
         StatusCodes.OK,
