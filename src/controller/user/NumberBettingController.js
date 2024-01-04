@@ -1703,7 +1703,7 @@ function allDateStamps(game, time, type) {
   let currentTimeAndDateStamp = moment().unix();
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
-  let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
+  let newEightSecondsTimeStamp = moment(newTimeStamp).add(0, "seconds");
   let gameHoursNextTimeStamp = moment(newEightSecondsTimeStamp)
     .add(time, type)
     .unix();
