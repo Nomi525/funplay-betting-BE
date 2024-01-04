@@ -1307,7 +1307,7 @@ export const colourBettingWinnerResult = async (req, res) => {
             return sendResponse(
               res,
               StatusCodes.OK,
-              `Victory Alert! The Winning Color is 1263 ${randomWinColour}`,
+              `Victory Alert! The Winning Color is ${randomWinColour}`,
               []
             );
           } else {

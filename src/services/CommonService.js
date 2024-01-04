@@ -641,13 +641,13 @@ export const declareColorWinner = async (
                 { status: "fail" }
               );
               return {
-                message: `Victory Alert! The Winning Color is 642 ${randomWinColour}`,
+                message: `Victory Alert! The Winning Color is ${randomWinColour}`,
               };
             } else {
               await Promise.all(
                 getAllColourBets.map(async (item, index) => {
                   if (index === 0) {
-                    console.log(`auto win 550 line period is 1234567 ${item}`);
+                    console.log(`auto win 550 line period is ${item}`);
                     // Handling the winner
                     console.log(item.userIds, " item.userIds", item);
                     item.userIds.map(async (userId) => {
