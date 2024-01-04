@@ -1209,11 +1209,11 @@ export const colourBettingWinnerResult = async (req, res) => {
         res,
         StatusCodes.OK,
         ResponseMessage.COLOR_WINNER +
-        "testcolor4 " +
         checkAlreadyWin[0].colourName,
         [
           {
             period: checkAlreadyWin[0].period,
+            periodFor: checkAlreadyWin[0].selectedTime,
             colourName: checkAlreadyWin[0].colourName,
             totalBetAmount: checkAlreadyWin.reduce(
               (total, data) => Number(total) + Number(data.betAmount),

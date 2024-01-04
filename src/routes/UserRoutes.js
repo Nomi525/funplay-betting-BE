@@ -179,7 +179,7 @@ userRoutes.get(
 userRoutes.get("/get-login-user-bet", Auth, getLoginUserColourBet);
 
 //#region Winner api
-userRoutes.get('/get-color-betting-winner/:gameType/:gameId/:period', Auth, colourBettingWinnerResult)
+userRoutes.get('/get-color-betting-winner/:gameType/:gameId/:period/:periodFor', Auth, colourBettingWinnerResult)
 
 // Color Period
 userRoutes.get("/get-all-game-period/:gameId", Auth, getAllGamePeriod);
