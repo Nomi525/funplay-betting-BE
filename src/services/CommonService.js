@@ -534,7 +534,7 @@ export const declareColorWinner = async (
   const gameId = _id;
   if (gameMode == "Manual") {
     await ColourBetting.updateMany(
-      { gameId,gameType, period, selectedTime },
+      { gameId, gameType, period, selectedTime, gameType },
       { status: "pending" }
     );
     return {
@@ -740,7 +740,7 @@ export const declareColorWinner = async (
           } else {
             // console.log('579 fail');
             await ColourBetting.updateMany(
-              { gameId, selectedTime, period,gameType },
+              { gameId, selectedTime, period, gameType },
               { status: "fail" }
             );
             return {
@@ -750,7 +750,7 @@ export const declareColorWinner = async (
         } else {
           // console.log('586 fail');
           await ColourBetting.updateMany(
-            { gameId, selectedTime, period,gameType },
+            { gameId, selectedTime, period, gameType },
             { status: "fail" }
           );
           return {
