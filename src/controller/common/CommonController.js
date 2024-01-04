@@ -137,6 +137,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     _id: 0,
                     gameId: "$gameId",
                     period: "$period",
+                    periodFor: "$periodFor",
                     createdAt: "$createdAt",
                 },
             },
@@ -154,6 +155,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     gameName: "$game.gameName",
                     gameId: "$gameId",
                     period: "$period",
+                    periodFor: "$periodFor",
                     createdAt: "$createdAt",
                 }
             },
@@ -198,6 +200,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
+                            periodFor: item.periodFor,
                             totalUsers: uniqueColorUserIds.length,
                             totalBetAmount: findColours.reduce((sum, data) => sum + data.betAmount, 0),
                             winner
