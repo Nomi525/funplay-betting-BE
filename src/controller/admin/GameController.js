@@ -991,33 +991,88 @@ export const getCommunityGameList = async (req, res) => {
 //#region Get all game times
 export const getAllGamePeriodSelectedTimeList = async (req, res) => {
   try {
-    const { gameId } = req.params
-    const gameSelectedTimeList = await ColourBetting.aggregate([
-      {
-        $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
-      },
-      {
-        $group: {
-          _id: {
-            period: '$period',
-            selectedTime: '$selectedTime'
+    const { gameId, gameType } = req.params;
+    let gameSelectedTimeList;
+     if (gameType == "2colorBetting" || gameType == "3colorBetting" ){
+      gameSelectedTimeList = await ColourBetting.aggregate([
+        {
+          $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
+        },
+        {
+          $group: {
+            _id: {
+              period: '$period',
+              selectedTime: '$selectedTime'
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            period: '$_id.period',
+            selectedTime: '$_id.selectedTime'
+          }
+        },
+        {
+          $sort: {
+            period: 1
           }
         }
-      },
-      {
-        $project: {
-          _id: 0,
-          period: '$_id.period',
-          selectedTime: '$_id.selectedTime'
+      ]);
+     } else if (gameType == "penaltyBetting"){
+      gameSelectedTimeList = await PenaltyBetting.aggregate([
+        {
+          $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
+        },
+        {
+          $group: {
+            _id: {
+              period: '$period',
+              selectedTime: '$selectedTime'
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            period: '$_id.period',
+            selectedTime: '$_id.selectedTime'
+          }
+        },
+        {
+          $sort: {
+            period: 1
+          }
         }
-      },
-      {
-        $sort: {
-          period: 1
+      ]);
+     } else if (gameType == "cardBetting"){
+      gameSelectedTimeList = await CardBetting.aggregate([
+        {
+          $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
+        },
+        {
+          $group: {
+            _id: {
+              period: '$period',
+              selectedTime: '$selectedTime'
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            period: '$_id.period',
+            selectedTime: '$_id.selectedTime'
+          }
+        },
+        {
+          $sort: {
+            period: 1
+          }
         }
-      }
-    ]);
-    // console.log(gameSelectedTimeList);
+      ]);
+     }
+   
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -1053,7 +1108,7 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the penaltyBetting collection
     const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
       "period",
-      { isWin: true, selectedTime: periodFor }
+      { isWin: true, selectedTime: periodFor, gameId }
     );
 
     // Find periods with isWin: true in the communitybetting collection
@@ -1065,7 +1120,7 @@ export const getAllGamePeriodData = async (req, res) => {
     // Find periods with isWin: true in the cardbetting collection
     const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
       "period",
-      { isWin: true, selectedTime: periodFor }
+      { isWin: true, selectedTime: periodFor, gameId }
     );
 
     if (gameType === "numberBetting") {
@@ -1636,6 +1691,7 @@ export const getAllGamePeriodData = async (req, res) => {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
             period: { $nin: isWinTruePeriodsforpenaltyBetting }, // Exclude periods with isWin: true
+            periodFor: periodFor
           },
         },
         {
@@ -1648,6 +1704,11 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $unwind: "$penaltybettingsData",
+        },
+        {
+          $match: {
+            "penaltybettingsData.selectedTime": periodFor,
+          },
         },
         {
           $group: {
@@ -1694,7 +1755,8 @@ export const getAllGamePeriodData = async (req, res) => {
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
-              period: Number(result.period)
+              period: Number(result.period),
+              selectedTime: periodFor
             }
           },
           {
@@ -1840,6 +1902,7 @@ export const getAllGamePeriodData = async (req, res) => {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
             period: { $nin: isWinTruePeriodsforCardBetting }, // Exclude periods with isWin: true
+            periodFor: periodFor
           },
         },
         {
@@ -1863,6 +1926,11 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $unwind: "$cardBettingsData",
+        },
+        {
+          $match: {
+            "cardBettingsData.selectedTime": periodFor,
+          },
         },
         {
           $group: {
@@ -1911,7 +1979,8 @@ export const getAllGamePeriodData = async (req, res) => {
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
-              period: Number(result.period)
+              period: Number(result.period),
+              selectedTime: periodFor
             }
           },
           {
