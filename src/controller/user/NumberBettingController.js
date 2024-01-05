@@ -2514,238 +2514,245 @@ export const numberBettingWinnerResult = async (req, res) => {
           },
         ]
       );
-    }
-
-    const totalUserInPeriod = await NumberBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          period: Number(period),
-          is_deleted: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$userId",
-          period: { $first: "$period" },
-          userTotalBets: { $sum: 1 },
-        },
-      },
-    ]);
-
-    if (totalUserInPeriod.length) {
-      const hasUserTotalBets = totalUserInPeriod.some(
-        (user) => user.userTotalBets >= 1
-      );
-      if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
-        const getAllNumberBets = await NumberBetting.aggregate([
-          {
-            $match: { period: Number(period) },
-          },
-          {
-            $group: {
-              _id: "$number",
-              period: { $first: "$period" },
-              totalUser: { $sum: 1 },
-              userIds: { $push: "$userId" },
-              totalBetAmount: { $sum: "$betAmount" },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              period: 1,
-              number: "$_id",
-              totalUser: 1,
-              userIds: 1,
-              totalBetAmount: 1,
-            },
-          },
-          {
-            $sort: { totalBetAmount: 1 },
-          },
-        ]);
-
-        // const checkUser = await NumberBetting.aggregate([
-        //   {
-        //     $match: { period: Number(period) }
-        //   },
-        //   {
-        //     $group: {
-        //       _id: "$userId",
-        //       totalUser: { $sum: 1 }
-        //     }
-        //   },
-        //   {
-        //     $project: {
-        //       totalUser: 1
-        //     }
-        //   }
-        // ])
-
-        if (getAllNumberBets.length) {
-          const tieNumbers = getAllNumberBets.filter(
-            (item) => item.totalBetAmount === getAllNumberBets[0].totalBetAmount
-          );
-          if (getAllNumberBets.length == 1) {
-            const randomWinNumber = getRandomNumberExcluding(
-              tieNumbers.map((item) => item.number),
-              1,
-              100
-            );
-            await NumberBetting.create({
-              userId: null,
-              period,
-              gameId,
-              number: randomWinNumber,
-              is_deleted: 0,
-              isWin: true,
-              status: "successfully",
-            });
-            await NumberBetting.updateMany(
-              {
-                period,
-                gameId,
-                isWin: false,
-                status: "pending",
-                is_deleted: 0,
-              },
-              { status: "fail" }
-            );
-            return sendResponse(
-              res,
-              StatusCodes.OK,
-              `Victory Alert! The Winning Number is ${randomWinNumber}`,
-              []
-            );
-          } else {
-            await Promise.all(
-              getAllNumberBets.map(async (item, index) => {
-                if (index === 0) {
-                  // Handling the winner
-                  item.userIds.map(async (userId) => {
-                    const findUser = await NumberBetting.findOne({
-                      userId,
-                      period: item.period,
-                      number: item.number,
-                      is_deleted: 0,
-                    });
-                    if (findUser) {
-                      // let rewardAmount = multiplicationLargeSmallValue(
-                      //   findUser.betAmount,
-                      //   0.95
-                      // );
-                      let rewardAmount =
-                        findUser.betAmount +
-                        findUser.betAmount * findGame.winningCoin;
-                      await NumberBetting.updateOne(
-                        {
-                          userId,
-                          gameId,
-                          period: item.period,
-                          isWin: false,
-                          status: "pending",
-                          number: item.number,
-                          is_deleted: 0,
-                        },
-                        { isWin: true, status: "successfully", rewardAmount }
-                      );
-                      const balance = await getSingleData(
-                        { userId },
-                        NewTransaction
-                      );
-                      if (balance) {
-                        let winningAmount =
-                          Number(findUser.betAmount) + Number(rewardAmount);
-                        balance.totalCoin =
-                          Number(balance.totalCoin) + Number(winningAmount);
-                        await balance.save();
-                        const userData = await getSingleData(
-                          { _id: userId },
-                          User
-                        );
-                        let mailInfo = await ejs.renderFile(
-                          "src/views/GameWinner.ejs",
-                          {
-                            gameName: "Number Betting",
-                          }
-                        );
-                        await sendMail(
-                          userData.email,
-                          "Number betting game win",
-                          mailInfo
-                        );
-                      }
-                    } else {
-                      return sendResponse(
-                        res,
-                        StatusCodes.BAD_REQUEST,
-                        "User not found",
-                        []
-                      );
-                    }
-                  });
-                } else {
-                  // Handling the losers
-                  item.userIds.map(async (userId) => {
-                    await NumberBetting.updateOne(
-                      {
-                        userId,
-                        gameId,
-                        period: item.period,
-                        isWin: false,
-                        status: "pending",
-                        number: item.number,
-                        is_deleted: 0,
-                      },
-                      { status: "fail" }
-                    );
-                  });
-                }
-              })
-            );
-          }
-          return sendResponse(
-            res,
-            StatusCodes.OK,
-            ResponseMessage.NUMBER_WINNER + " " + getAllNumberBets[0].number,
-            getAllNumberBets[0]
-          );
-        } else {
-          await NumberBetting.updateMany(
-            { gameId, period },
-            { status: "fail" }
-          );
-          return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
-        }
-      } else {
-        await NumberBetting.updateMany({ gameId, period }, { status: "fail" });
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
-      }
     } else {
-      const randomWinNumber = Math.floor(Math.random() * 100) + 1;
-      await NumberBetting.create({
-        userId: null,
-        period,
-        gameId,
-        number: randomWinNumber,
-        is_deleted: 0,
-        isWin: true,
-        status: "successfully",
-      });
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.NUMBER_WINNER + " " + randomWinNumber,
-        [
-          {
-            period,
-            number: randomWinNumber,
-            totalBetAmount: 0,
-          },
-        ]
+        ResponseMessage.DATA_NOT_FOUND,
+        []
       );
     }
+
+    // const totalUserInPeriod = await NumberBetting.aggregate([
+    //   {
+    //     $match: {
+    //       gameId: new mongoose.Types.ObjectId(gameId),
+    //       period: Number(period),
+    //       is_deleted: 0,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$userId",
+    //       period: { $first: "$period" },
+    //       userTotalBets: { $sum: 1 },
+    //     },
+    //   },
+    // ]);
+
+    // if (totalUserInPeriod.length) {
+    //   const hasUserTotalBets = totalUserInPeriod.some(
+    //     (user) => user.userTotalBets >= 1
+    //   );
+    //   if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
+    //     const getAllNumberBets = await NumberBetting.aggregate([
+    //       {
+    //         $match: { period: Number(period) },
+    //       },
+    //       {
+    //         $group: {
+    //           _id: "$number",
+    //           period: { $first: "$period" },
+    //           totalUser: { $sum: 1 },
+    //           userIds: { $push: "$userId" },
+    //           totalBetAmount: { $sum: "$betAmount" },
+    //         },
+    //       },
+    //       {
+    //         $project: {
+    //           _id: 0,
+    //           period: 1,
+    //           number: "$_id",
+    //           totalUser: 1,
+    //           userIds: 1,
+    //           totalBetAmount: 1,
+    //         },
+    //       },
+    //       {
+    //         $sort: { totalBetAmount: 1 },
+    //       },
+    //     ]);
+
+    //     // const checkUser = await NumberBetting.aggregate([
+    //     //   {
+    //     //     $match: { period: Number(period) }
+    //     //   },
+    //     //   {
+    //     //     $group: {
+    //     //       _id: "$userId",
+    //     //       totalUser: { $sum: 1 }
+    //     //     }
+    //     //   },
+    //     //   {
+    //     //     $project: {
+    //     //       totalUser: 1
+    //     //     }
+    //     //   }
+    //     // ])
+
+    //     if (getAllNumberBets.length) {
+    //       const tieNumbers = getAllNumberBets.filter(
+    //         (item) => item.totalBetAmount === getAllNumberBets[0].totalBetAmount
+    //       );
+    //       if (getAllNumberBets.length == 1) {
+    //         const randomWinNumber = getRandomNumberExcluding(
+    //           tieNumbers.map((item) => item.number),
+    //           1,
+    //           100
+    //         );
+    //         await NumberBetting.create({
+    //           userId: null,
+    //           period,
+    //           gameId,
+    //           number: randomWinNumber,
+    //           is_deleted: 0,
+    //           isWin: true,
+    //           status: "successfully",
+    //         });
+    //         await NumberBetting.updateMany(
+    //           {
+    //             period,
+    //             gameId,
+    //             isWin: false,
+    //             status: "pending",
+    //             is_deleted: 0,
+    //           },
+    //           { status: "fail" }
+    //         );
+    //         return sendResponse(
+    //           res,
+    //           StatusCodes.OK,
+    //           `Victory Alert! The Winning Number is ${randomWinNumber}`,
+    //           []
+    //         );
+    //       } else {
+    //         await Promise.all(
+    //           getAllNumberBets.map(async (item, index) => {
+    //             if (index === 0) {
+    //               // Handling the winner
+    //               item.userIds.map(async (userId) => {
+    //                 const findUser = await NumberBetting.findOne({
+    //                   userId,
+    //                   period: item.period,
+    //                   number: item.number,
+    //                   is_deleted: 0,
+    //                 });
+    //                 if (findUser) {
+    //                   // let rewardAmount = multiplicationLargeSmallValue(
+    //                   //   findUser.betAmount,
+    //                   //   0.95
+    //                   // );
+    //                   let rewardAmount =
+    //                     findUser.betAmount +
+    //                     findUser.betAmount * findGame.winningCoin;
+    //                   await NumberBetting.updateOne(
+    //                     {
+    //                       userId,
+    //                       gameId,
+    //                       period: item.period,
+    //                       isWin: false,
+    //                       status: "pending",
+    //                       number: item.number,
+    //                       is_deleted: 0,
+    //                     },
+    //                     { isWin: true, status: "successfully", rewardAmount }
+    //                   );
+    //                   const balance = await getSingleData(
+    //                     { userId },
+    //                     NewTransaction
+    //                   );
+    //                   if (balance) {
+    //                     let winningAmount =
+    //                       Number(findUser.betAmount) + Number(rewardAmount);
+    //                     balance.totalCoin =
+    //                       Number(balance.totalCoin) + Number(winningAmount);
+    //                     await balance.save();
+    //                     const userData = await getSingleData(
+    //                       { _id: userId },
+    //                       User
+    //                     );
+    //                     let mailInfo = await ejs.renderFile(
+    //                       "src/views/GameWinner.ejs",
+    //                       {
+    //                         gameName: "Number Betting",
+    //                       }
+    //                     );
+    //                     await sendMail(
+    //                       userData.email,
+    //                       "Number betting game win",
+    //                       mailInfo
+    //                     );
+    //                   }
+    //                 } else {
+    //                   return sendResponse(
+    //                     res,
+    //                     StatusCodes.BAD_REQUEST,
+    //                     "User not found",
+    //                     []
+    //                   );
+    //                 }
+    //               });
+    //             } else {
+    //               // Handling the losers
+    //               item.userIds.map(async (userId) => {
+    //                 await NumberBetting.updateOne(
+    //                   {
+    //                     userId,
+    //                     gameId,
+    //                     period: item.period,
+    //                     isWin: false,
+    //                     status: "pending",
+    //                     number: item.number,
+    //                     is_deleted: 0,
+    //                   },
+    //                   { status: "fail" }
+    //                 );
+    //               });
+    //             }
+    //           })
+    //         );
+    //       }
+    //       return sendResponse(
+    //         res,
+    //         StatusCodes.OK,
+    //         ResponseMessage.NUMBER_WINNER + " " + getAllNumberBets[0].number,
+    //         getAllNumberBets[0]
+    //       );
+    //     } else {
+    //       await NumberBetting.updateMany(
+    //         { gameId, period },
+    //         { status: "fail" }
+    //       );
+    //       return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
+    //     }
+    //   } else {
+    //     await NumberBetting.updateMany({ gameId, period }, { status: "fail" });
+    //     return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
+    //   }
+    // } else {
+    //   const randomWinNumber = Math.floor(Math.random() * 100) + 1;
+    //   await NumberBetting.create({
+    //     userId: null,
+    //     period,
+    //     gameId,
+    //     number: randomWinNumber,
+    //     is_deleted: 0,
+    //     isWin: true,
+    //     status: "successfully",
+    //   });
+    //   return sendResponse(
+    //     res,
+    //     StatusCodes.OK,
+    //     ResponseMessage.NUMBER_WINNER + " " + randomWinNumber,
+    //     [
+    //       {
+    //         period,
+    //         number: randomWinNumber,
+    //         totalBetAmount: 0,
+    //       },
+    //     ]
+    //   );
+    // }
   } catch (error) {
     return handleErrorResponse(res, error);
   }

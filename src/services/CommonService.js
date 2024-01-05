@@ -14,6 +14,7 @@ import {
   mongoose,
   getSingleData,
   NewTransaction,
+  User
 } from "../index.js";
 var key =
   "a6dfc106fadd4849e8b23759afea1b86c6c4c4b782c2cf08335c61dc4610fae5efe05ee361a4850f56ddb9457a96bbe01d2820d5106851db64cf210f70ec5e98";
@@ -371,13 +372,13 @@ export const declareNumberWinner = async (game, period) => {
               $sort: { totalBetAmount: 1 },
             },
           ]);
-
+          const totalUserCount = await getTotalUserCount(NumberBetting, gameId, period);
           if (getAllNumberBets.length) {
             const tieNumbers = getAllNumberBets.filter(
               (item) =>
                 item.totalBetAmount === getAllNumberBets[0].totalBetAmount
             );
-            if (getAllNumberBets.length == 1) {
+            if (totalUserCount == 1) {
               const randomWinNumber = getRandomNumberExcluding(
                 tieNumbers.map((item) => item.number),
                 1,
@@ -443,16 +444,7 @@ export const declareNumberWinner = async (game, period) => {
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
                           await balance.save();
-                          const userData = await getSingleData(
-                            { _id: userId },
-                            User
-                          );
                         }
-                      } else {
-                        return {
-                          message: "User not found",
-                          data: [],
-                        };
                       }
                     });
                   } else {
@@ -1235,4 +1227,36 @@ export const declareCardWinner = async (game, period, selectedTime) => {
     }
   }
 };
+//#endregion
+
+//#region Get total user count
+export const getTotalUserCount = async (model, gameId, period) => {
+  const getNumberUser = await model.aggregate([
+    {
+      $match: {
+        gameId: new mongoose.Types.ObjectId(gameId),
+        period: Number(period)
+      }
+    },
+    {
+      $group: {
+        _id: "$userId",
+        totalUser: { $sum: 1 }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalUsers: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        totalUsers: 1
+      }
+    }
+  ])
+  return getNumberUser.length ? getNumberUser[0].totalUsers : 0
+}
 //#endregion
