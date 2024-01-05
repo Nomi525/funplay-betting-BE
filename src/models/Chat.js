@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import { mongoose } from "../index.js";
 const chatSchema = new mongoose.Schema(
   {
     room_id: {
@@ -23,4 +23,4 @@ const chatSchema = new mongoose.Schema(
   }
 );
 const Chat = mongoose.model("Chat", chatSchema);
-module.exports = Chat;
+export { Chat };

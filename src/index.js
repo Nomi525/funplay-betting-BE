@@ -11,6 +11,7 @@ import nodemailer from "nodemailer";
 import { StatusCodes } from "http-status-codes";
 import chai, { expect } from "chai";
 import chaiHttp from "chai-http";
+import http from "http";
 import path from "path";
 import Joi from "joi";
 import crypto from "crypto";
@@ -31,7 +32,7 @@ import {
   getAllDataCount,
   deleteById,
   createReward,
-  updateApi
+  updateApi,
 } from "./services/QueryService.js";
 import { validatorRequest } from "./utils/Validator.js";
 import { validatorMiddlware } from "./middleware/Validation.js";
@@ -96,7 +97,7 @@ import {
   deleteBanner,
   allBannerGet,
   getPeriodsDetailsForAllGame,
-  getAllGameRecodesGameWise
+  getAllGameRecodesGameWise,
 } from "./controller/common/CommonController.js";
 import {
   addEditQuery,
@@ -195,7 +196,7 @@ import {
   getGameWiseUserList,
   getUserWiseGameList,
   getNumberGameTotal,
-  getAllWithdrawalRequest
+  getAllWithdrawalRequest,
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -223,7 +224,7 @@ import {
   getAllPermission,
   permissionGetById,
   permissionActiveDeActive,
-  deletePermission
+  deletePermission,
 } from "./controller/admin/PermissionController.js";
 
 import {
@@ -233,7 +234,7 @@ import {
   subadminActiveDeactive,
   getSingleSubadmin,
   getAllSubadmin,
-  getAllSubAdmin
+  getAllSubAdmin,
 } from "./controller/admin/SubadminController.js";
 
 // Number Betting
@@ -247,7 +248,7 @@ import {
   createAllGamePeriodFromCronJob,
   createAllGameWinnerFromCronJob,
   getPeriod,
-  numberBettingWinnerResult
+  numberBettingWinnerResult,
 } from "./controller/user/NumberBettingController.js";
 
 // Currency Coin
@@ -268,7 +269,7 @@ import {
   getAllGamePeriod,
   getByIdGamePeriod,
   getCommunityWinList,
-  colourBettingWinnerResult
+  colourBettingWinnerResult,
 } from "./controller/user/ColourBettingController.js";
 
 // Coumunnity Betting
@@ -294,7 +295,7 @@ import {
   declareWinnerOfNumberBetting,
   declareWinnerOfColorBetting,
   declareWinnerOfPenaltyBetting,
-  declareWinnerOfCardBetting
+  declareWinnerOfCardBetting,
 } from "./controller/admin/GameWinnerController.js";
 
 // Penalty Controller
@@ -302,12 +303,12 @@ import {
   addPenaltyBet,
   getAllGamePeriodOfPenaltyBetting,
   getByIdGamePeriodOfPenaltyBetting,
-  penaltyBettingWinnerResult
+  penaltyBettingWinnerResult,
 } from "./controller/user/PenaltyBettingController.js";
 
 // Crad Controller
 
-import { 
+import {
   addCardBet,
   getByIdGamePeriodOfCardBetting,
   getAllGamePeriodOfCardBetting,
@@ -351,13 +352,17 @@ import { CommunityBetting } from "./models/CommunityBetting.js";
 import { Period } from "./models/Period.js";
 import { PenaltyBetting } from "./models/PenaltyBetting.js";
 import { CardBetting } from "./models/CardBetting.js";
+import { Chat } from "./models/Chat.js";
 
 // Services
 import { sendMail } from "./config/Email.config.js";
 import { Auth } from "./middleware/Auth.js";
 import Upload from "./middleware/FileUpload.js";
 import { appServer } from "../server.js";
-import { multipleDelete, multipleDeleteUpdate } from "./services/AdminServices.js";
+import {
+  multipleDelete,
+  multipleDeleteUpdate,
+} from "./services/AdminServices.js";
 
 import {
   createError,
@@ -384,7 +389,7 @@ import {
   calculateAllGameReward,
   getAllBids,
   getRandomElement,
-  winCardNumberFun
+  winCardNumberFun,
 } from "./services/CommonService.js";
 dotenv.config();
 
@@ -659,5 +664,7 @@ export {
   colourBetResult,
   getNumberGameTotal,
   getCommunityWinList,
+  http,
+  Chat
   // updateEmail,
 };

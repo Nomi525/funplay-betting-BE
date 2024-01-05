@@ -1,7 +1,7 @@
 // const { verify } = require("jsonwebtoken");
-import { Socket } from "./Socket.config"; 
-import Chat from "./src/models/Chat";
-import User from "./src/models/User"
+import { Socket } from "./Socket.config.js";
+import { Chat, User } from "./src/index.js";
+import { writeFile } from "fs";
 
 // Socket.use((socket, next) => {
 //   try {
@@ -18,12 +18,21 @@ import User from "./src/models/User"
 // });
 
 Socket.on("connection", (sockets) => {
+  console.log("Socket connected");
+    sockets.on("UploadImage", async (file) => {
+      console.log(file); // <Buffer 25 50 44 ...>
+
+      // save the content to the disk, for example
+      writeFile("/tmp/upload", file, (err) => {
+        console.log(file);
+        console.log({ message: err ? "failure" : "success" });
+      });''
+    });
   sockets.on("JoinChat", async (room) => {
     sockets.join(room.room_id);
     let chat = await Chat.findOne({ room_id: room.room_id });
-
     Socket.in(chat.room_id).emit("Message", chat.messages);
-
+  
     let checkUserRegister = await User.findOne({ _id: room.user_id });
     if (checkUserRegister) {
       sockets.on("NewMessage", async (data) => {
@@ -36,7 +45,7 @@ Socket.on("connection", (sockets) => {
             {
               $push: {
                 messages: [
-                  { from: checkUserRegister.fullname, message: data.message },
+                  { from: checkUserRegister.fullName, message: data.message },
                 ],
               },
             }
@@ -60,3 +69,4 @@ Socket.on("connection", (sockets) => {
     }
   });
 });
+export { Socket };

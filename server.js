@@ -9,9 +9,8 @@ import {
   createAllGamePeriodFromCronJob,
   createAllGameWinnerFromCronJob,
 } from "./src/index.js";
-import { Server, app } from "./Socket.config";
-
-const app = express();
+import { Socket } from "./socket.js";
+import { server, app } from "./Socket.config.js";
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -46,16 +45,16 @@ app.use(function (err, req, res, next) {
 });
 
 // cron run for every seconds
-cron.schedule("* * * * * *", () => {
-  createAllGamePeriodFromCronJob();
-});
+// cron.schedule("* * * * * *", () => {
+//   createAllGamePeriodFromCronJob();
+// });
 
 // cron run for every seconds
 // cron.schedule('* * * * * *', () => {
 //   createAllGameWinnerFromCronJob();
 // });
 
-const appServer = app.listen(process.env.PORT, () => {
+const appServer = server.listen(process.env.PORT, () => {
   dbConnection();
   console.log(`server running on port: ${process.env.PORT}`);
 });
