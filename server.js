@@ -44,15 +44,15 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-// cron run for every seconds
-// cron.schedule("* * * * * *", () => {
-//   createAllGamePeriodFromCronJob();
-// });
+//cron run for every seconds
+cron.schedule("* * * * * *", () => {
+  createAllGamePeriodFromCronJob();
+});
 
-// cron run for every seconds
-// cron.schedule('* * * * * *', () => {
-//   createAllGameWinnerFromCronJob();
-// });
+// // cron run for every seconds
+cron.schedule('* * * * * *', () => { 
+  createAllGameWinnerFromCronJob();
+});
 
 const appServer = server.listen(process.env.PORT, () => {
   dbConnection();

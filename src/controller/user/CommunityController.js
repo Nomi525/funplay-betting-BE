@@ -159,7 +159,8 @@ export const getAllLiveCommunityBets = async (req, res) => {
       period,
       isWin: true,
       is_deleted: 0
-    }).sort({ rewardAmount: -1 });
+    }).populate("userId", "fullName profile email")
+    .populate("gameId", "gameName gameImage gameMode").sort({ rewardAmount: -1 });
 
     return sendResponse(
       res,

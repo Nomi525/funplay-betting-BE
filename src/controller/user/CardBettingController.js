@@ -20,12 +20,13 @@ import {
     ejs,
     CardBetting,
     getRandomElement,
+    getRandomNumberExcluding,
     winCardNumberFun
 } from "../../index.js";
 //#region Add penalty Betting
 export const addCardBet = async (req, res) => {
     try {
-        let { gameId, card, betAmount, period } = req.body;
+        let { gameId, card, betAmount, period ,selectedTime} = req.body;
         if (betAmount < 0) {
             return sendResponse(
                 res,
@@ -76,7 +77,8 @@ export const addCardBet = async (req, res) => {
                 card: card,
                 betAmount: parseInt(betAmount),
                 period,
-                status: "pending"
+                status: "pending",
+                selectedTime
             },
             CardBetting
         );
@@ -126,6 +128,7 @@ export const getByIdGamePeriodOfCardBetting = async (req, res) => {
                 $match: {
                     userId: new mongoose.Types.ObjectId(req.user),
                     gameId: new mongoose.Types.ObjectId(gameId),
+                    selectedTime: second,
                     createdAt: { $gte: twentyFourHoursAgo },
                     is_deleted: 0
                 }
@@ -214,6 +217,7 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
             {
                 $match: {
                     gameId: new mongoose.Types.ObjectId(gameId),
+                    selectedTime: second,
                     createdAt: { $gte: twentyFourHoursAgo },
                     is_deleted: 0,
                 },

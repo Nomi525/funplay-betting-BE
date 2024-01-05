@@ -122,6 +122,7 @@ import {
   getSingleGame,
   getSingleGameRules,
   gameRuleDelete,
+  getAllGamePeriodSelectedTimeList
 } from "./controller/admin/GameController.js";
 // import {
 //   addEditPrivacyPolicy,
@@ -390,10 +391,21 @@ import {
   getAllBids,
   getRandomElement,
   winCardNumberFun,
+  getRandomNumberExcluding,
+  declareNumberWinner,
+  declareColorWinner,
+  declarePenaltyWinner,
+  declareCardWinner,
 } from "./services/CommonService.js";
 dotenv.config();
 
 export {
+  getAllGamePeriodSelectedTimeList,
+  declareCardWinner,
+  declarePenaltyWinner,
+  declareColorWinner,
+  declareNumberWinner,
+  getRandomNumberExcluding,
   getRandomElement,
   winCardNumberFun,
   getAllBids,

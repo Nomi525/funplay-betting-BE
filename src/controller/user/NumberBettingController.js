@@ -21,6 +21,11 @@ import {
   sendMail,
   User,
   ejs,
+  getRandomNumberExcluding,
+  declareNumberWinner,
+  declareColorWinner,
+  declareCardWinner,
+  declarePenaltyWinner,
 } from "../../index.js";
 
 // export const addEditNumberBet = async (req, res) => {
@@ -1698,7 +1703,7 @@ function allDateStamps(game, time, type) {
   let currentTimeAndDateStamp = moment().unix();
   //current time for next slot time with stamp
   let newTimeStamp = moment.utc(Date.now()).toDate();
-  let newEightSecondsTimeStamp = moment(newTimeStamp).add(8, "seconds");
+  let newEightSecondsTimeStamp = moment(newTimeStamp).add(0, "seconds");
   let gameHoursNextTimeStamp = moment(newEightSecondsTimeStamp)
     .add(time, type)
     .unix();
@@ -1996,12 +2001,12 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-             if (periodCount) {
-               period =
-                 formattedDate + (periodCount + 1).toString().padStart(4, "0");
-             } else {
-               period = formattedDate + (1).toString().padStart(4, "0");
-             }
+            if (periodCount) {
+              period =
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            } else {
+              period = formattedDate + (1).toString().padStart(4, "0");
+            }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 // console.log("1 2 Color Betting");
@@ -2082,12 +2087,98 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-           if (periodCount) {
-             period =
-               formattedDate + (periodCount + 1).toString().padStart(4, "0");
-           } else {
-             period = formattedDate + (1).toString().padStart(4, "0");
-           }
+            if (periodCount) {
+              period =
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            } else {
+              period = formattedDate + (1).toString().padStart(4, "0");
+            }
+            if (!lastIndex) {
+              if (gameEndTimeStamp < gameHoursNextTimeStamp) {
+                // console.log("1 Penalty Betting");
+                await updateAndCreatePeriod(
+                  game._id,
+                  dateForPeriod,
+                  period,
+                  gameStartTimeStamp,
+                  gameEndTimeStamp,
+                  second
+                );
+              } else {
+                // console.log("2 Penalty Betting");
+                await updateAndCreatePeriod(
+                  game._id,
+                  dateForPeriod,
+                  period,
+                  gameStartTimeStamp,
+                  gameHoursNextTimeStamp,
+                  second
+                );
+              }
+            } else {
+              if (
+                game.isRepeat &&
+                currentTimeAndDateStamp >= lastIndex.endTime
+              ) {
+                if (gameEndTimeStamp < gameHoursNextTimeStamp) {
+                  // console.log("3 Penalty Betting");
+                  await updateAndCreatePeriod(
+                    game._id,
+                    dateForPeriod,
+                    period,
+                    currentTimeAndDateStamp,
+                    gameEndTimeStamp,
+                    second
+                  );
+                } else {
+                  // console.log("4 Penalty Betting");
+                  await updateAndCreatePeriod(
+                    game._id,
+                    dateForPeriod,
+                    period,
+                    currentTimeAndDateStamp,
+                    gameHoursNextTimeStamp,
+                    second
+                  );
+                }
+              }
+            }
+          }
+        });
+      } else if (game.gameName == "Card Betting") {
+        game.gameSecond.map(async (second, index) => {
+          const {
+            gameStartTimeStamp,
+            gameEndTimeStamp,
+            currentTimeAndDateStamp,
+            gameHoursNextTimeStamp,
+          } = allDateStamps(game, second, "seconds");
+          //date for period
+          const formattedDate = dateForPeriod.split("-").join("");
+          // this codition compare between current time stamp and game start time stamp and game end time stamp
+          if (
+            gameStartTimeStamp <= currentTimeAndDateStamp &&
+            gameEndTimeStamp > currentTimeAndDateStamp
+          ) {
+            let period = formattedDate + "0000";
+            const periodCount = await Period.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            const lastIndex = await Period.findOne({
+              gameId: game._id,
+              periodFor: second,
+              is_deleted: 0,
+            })
+              .sort({ createdAt: -1 })
+              .lean();
+
+            if (periodCount) {
+              period =
+                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+            } else {
+              period = formattedDate + (1).toString().padStart(4, "0");
+            }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 // console.log("1 Penalty Betting");
@@ -2167,7 +2258,7 @@ export const getPeriod = async (req, res) => {
     if (
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
-        moment().format("YYYY-MM-DD") &&
+      moment().format("YYYY-MM-DD") &&
       getAllPeriod.endTime > currentTimeAndDateStamp
     ) {
       return sendResponse(
@@ -2359,26 +2450,27 @@ export const getPeriod = async (req, res) => {
 
 export const createAllGameWinnerFromCronJob = async (req, res) => {
   try {
-    // const { gameType, type, gameId, period } = req.params;
-
-    // console.log("check");
-    // const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
-    var currentDate = moment().format("YYYY-MM-DDT00:00:00");
-    console.log(currentDate, "currentDate");
-
+    var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
     let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
-
-    let findGames = await Period.find({
+    // console.log('current10Second', currentTimeAndDateStampPlus10Second);
+    let findPeriods = await Period.find({
       date: currentDate,
-      endTime: currentTimeAndDateStampPlus10Second,
+      endTime: Number(currentTimeAndDateStampPlus10Second),
       is_deleted: 0,
     });
-
-    // console.log(findGames.length, "findGames");
-    // for (const game of findGames) {
-    // }
-
-    return 1;
+    findPeriods.map(async (findPeriod) => {
+      const findGame = await Game.findOne({ _id: findPeriod.gameId, is_deleted: 0 }).lean()
+      if (findGame.gameName == "Number Betting") {
+        await declareNumberWinner(findGame, findPeriod.period)
+      } else if (findGame.gameName == "2 Color Betting" || findGame.gameName == "3 Color Betting") {
+        const gameType = findGame.gameName == "2 Color Betting" ? "2colorBetting" : "3colorBetting"
+        await declareColorWinner(findGame, findPeriod.period, findPeriod.periodFor, gameType);
+      } else if (findGame.gameName == "Penalty Betting") {
+        await declarePenaltyWinner(findGame, findPeriod.period);
+      } else if (findGame.gameName == "Card Betting") {
+        await declareCardWinner(findGame, findPeriod.period);
+      }
+    })
   } catch (error) {
     return handleErrorResponse(res, error);
   }
@@ -2654,21 +2746,7 @@ export const numberBettingWinnerResult = async (req, res) => {
         ]
       );
     }
-    // return sendResponse(
-    //   res,
-    //   StatusCodes.BAD_REQUEST,
-    //   "User not found",
-    //   []
-    // );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
-
-function getRandomNumberExcluding(excludeNumbers, min, max) {
-  let randomNum;
-  do {
-    randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-  } while (excludeNumbers.includes(randomNum));
-  return randomNum;
-}

@@ -684,7 +684,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winColour } = req.body;
+    const { gameId, winnerId, winColour, periodFor } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
@@ -704,6 +704,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
     const checkAlreadyWin = await ColourBetting.find({
       gameId,
       isWin: true,
+      selectedTime: periodFor,
       period: Number(winnerId),
       is_deleted: 0,
     }).lean();
@@ -717,6 +718,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         period: winnerId,
         gameId: gameId,
         colourName: winColour,
+        selectedTime: periodFor,
         is_deleted: 0,
         isWin: false,
       },
@@ -751,6 +753,11 @@ export const declareWinnerOfColorBetting = async (req, res) => {
             findColorBetting.gameType == "2colorBetting"
               ? "2 Color Betting"
               : "3 Color Betting";
+          const userData = await getSingleData(
+            { _id: findColorBetting.userId },
+            User
+          );
+          // console.log(userData.email,'userData.email');
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: gameName,
           });
@@ -764,11 +771,17 @@ export const declareWinnerOfColorBetting = async (req, res) => {
 
     // Win color from given by admin
     if (!winFlage) {
+      let gameType =
+        findGame.gameName == "2 Color Betting"
+          ? "2colorBetting"
+          : "3colorBetting";
       const winAdminColor = await ColourBetting.create({
         gameId,
         userId: null,
         period: winnerId,
         colourName: winColour,
+        selectedTime: periodFor,
+        gameType,
         rewardAmount: 0,
         status: "successfully",
         is_deleted: 0,
@@ -780,7 +793,8 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       {
         gameId,
         period: winnerId,
-        color: { $ne: winColour },
+        colourName: { $ne: winColour },
+        selectedTime: periodFor,
         status: "pending",
         is_deleted: 0,
         isWin: false,
@@ -802,14 +816,14 @@ export const declareWinnerOfColorBetting = async (req, res) => {
 //#region Winner declare of Penalty Betting
 export const declareWinnerOfPenaltyBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winBetSide } = req.body;
+    const { gameId, winnerId, winBetSide, periodFor } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
       await PenaltyBetting.updateMany(
-        { gameId, period: winnerId },
+        { gameId, period: winnerId, selectedTime: periodFor },
         { status: "pending" }
       );
       return sendResponse(
@@ -823,6 +837,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       gameId,
       isWin: true,
       period: Number(winnerId),
+      selectedTime: periodFor,
       is_deleted: 0,
     }).lean();
 
@@ -836,6 +851,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
         period: winnerId,
         gameId: gameId,
         betSide: winBetSide,
+        selectedTime: periodFor,
         is_deleted: 0,
         isWin: false,
       },
@@ -866,6 +882,10 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
             Number(findPenaltyBetting.betAmount) +
             Number(rewardAmount);
           await balance.save();
+          const userData = await getSingleData(
+            { _id: findPenaltyBetting.userId },
+            User
+          );
           let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
             gameName: "Penalty Betting",
           });
@@ -883,6 +903,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
         userId: null,
         period: winnerId,
         betSide: winBetSide,
+        selectedTime: periodFor,
         rewardAmount: 0,
         status: "successfully",
         is_deleted: 0,
@@ -895,6 +916,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       {
         gameId,
         betSide: { $ne: winBetSide },
+        selectedTime: periodFor,
         period: winnerId,
         isWin: false,
         status: "pending",
@@ -917,14 +939,14 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
 //#region Winner declare of Number Betting
 export const declareWinnerOfCardBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winCard } = req.body;
+    const { gameId, winnerId, winCard, periodFor } = req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
     if (findGame.gameMode == "Auto") {
       await CardBetting.updateMany(
-        { gameId, period: winnerId },
+        { gameId, period: winnerId, selectedTime: periodFor },
         { status: "pending" }
       );
       return sendResponse(
@@ -938,6 +960,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
       gameId,
       isWin: true,
       period: Number(winnerId),
+      selectedTime: periodFor,
       is_deleted: 0,
     }).lean();
 
@@ -950,6 +973,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         period: winnerId,
         card: winCard,
         status: "pending",
+        selectedTime: periodFor,
         is_deleted: 0,
         isWin: false,
       },
@@ -992,11 +1016,6 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         }
         savedInstances.push(findCardBetting);
         winFlage = true;
-      } else {
-        console.error(
-          "Document is not an instance of Card Betting:",
-          findCardBetting
-        );
       }
       count++;
     }
@@ -1005,6 +1024,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         gameId,
         period: winnerId,
         card: { $ne: winCard },
+        selectedTime: periodFor,
         status: "pending",
         is_deleted: 0,
         isWin: false,
@@ -1020,6 +1040,7 @@ export const declareWinnerOfCardBetting = async (req, res) => {
         period: winnerId,
         card: winCard,
         winCardNumber,
+        selectedTime: periodFor,
         rewardAmount: 0,
         status: "successfully",
         is_deleted: 0,

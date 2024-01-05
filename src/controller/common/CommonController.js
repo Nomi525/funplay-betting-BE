@@ -137,6 +137,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     _id: 0,
                     gameId: "$gameId",
                     period: "$period",
+                    periodFor: "$periodFor",
                     createdAt: "$createdAt",
                 },
             },
@@ -154,6 +155,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     gameName: "$game.gameName",
                     gameId: "$gameId",
                     period: "$period",
+                    periodFor: "$periodFor",
                     createdAt: "$createdAt",
                 }
             },
@@ -167,18 +169,18 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
         let gamePeriod = [];
         if (getAllPeriod.length) {
             await Promise.all(
-                getAllPeriod.map(async (item,i) => {
-                    let sNo = i+1;
+                getAllPeriod.map(async (item, i) => {
+                    let sNo = i + 1;
                     if (item.gameName == "Number Betting") {
                         const findNumbers = await NumberBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinNumber = findNumbers.find((data) => data.isWin)
                         let uniqueNumberUserIds = getUniqueUserIds(findNumbers)
                         let winner = '';
-                        if(findWinNumber){
+                        if (findWinNumber) {
                             winner = findWinNumber.number
                         }
                         gamePeriod.push({
-                            sNo : sNo,
+                            sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueNumberUserIds.length,
@@ -191,39 +193,40 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                         let uniqueColorUserIds = getUniqueUserIds(findColours)
                         const findWinColour = findColours.find((data) => data.isWin)
                         let winner = '';
-                        if(findWinColour){
+                        if (findWinColour) {
                             winner = findWinColour.colourName
                         }
                         gamePeriod.push({
-                            sNo : sNo,
+                            sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
+                            periodFor: item.periodFor,
                             totalUsers: uniqueColorUserIds.length,
                             totalBetAmount: findColours.reduce((sum, data) => sum + data.betAmount, 0),
                             winner
                         })
                     } else if (item.gameName == "Community Betting") {
-                        const findCommunity = await CommunityBetting.find({gameId: item.gameId, period: item.period, is_deleted: 0 })
-                        const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount )
-                        let winner = [];
+                        const findCommunity = await CommunityBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount)
+                        // let winner = [];
                         let uniqueCommunityUserIds = getUniqueUserIds(findCommunity)
-                        if(findWinCommunity.length){
-                            // winner = findWinCommunity.betAmount
-                            winner = findWinCommunity
-                        }
+                        // if (findWinCommunity.length) {
+                        //     // winner = findWinCommunity.betAmount
+                        //     winner = findWinCommunity
+                        // }
                         gamePeriod.push({
-                            sNo : sNo,
+                            sNo: sNo,
                             period: item.period,
                             gameName: item.gameName,
                             totalUsers: uniqueCommunityUserIds.length,
                             totalBetAmount: findCommunity.reduce((sum, data) => sum + data.betAmount, 0),
-                            winner
+                            winner : findWinCommunity.length
                         })
                     }
                 })
             )
         }
-        gamePeriod = await Promise.all(gamePeriod.sort(((a,b) => a.sNo - b.sNo)))
+        gamePeriod = await Promise.all(gamePeriod.sort(((a, b) => a.sNo - b.sNo)))
         return sendResponse(
             res,
             StatusCodes.OK,
@@ -414,7 +417,8 @@ export const getAllGameRecodesGameWise = async (req, res) => {
 }
 //#endregion
 
-function getUniqueUserIds(data){
+// From get unique ids get in array of object
+function getUniqueUserIds(data) {
     let uniqueUserIds = new Set(data.map(entry => String(entry.userId)));
     return [...uniqueUserIds]
 }

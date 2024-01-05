@@ -18,7 +18,9 @@ import {
     checkDecimalValueGreaterThanOrEqual,
     sendMail,
     ejs,
-    PenaltyBetting
+    PenaltyBetting,
+    getRandomElement,
+    getRandomNumberExcluding
 } from "../../index.js";
 
 //#region Add penalty Betting
@@ -125,6 +127,7 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                 $match: {
                     userId: new mongoose.Types.ObjectId(req.user),
                     gameId: new mongoose.Types.ObjectId(gameId),
+                    selectedTime: second,
                     createdAt: { $gte: twentyFourHoursAgo },
                     is_deleted: 0
                 }
@@ -211,6 +214,7 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
             {
                 $match: {
                     gameId: new mongoose.Types.ObjectId(gameId),
+                    selectedTime: second,
                     createdAt: { $gte: twentyFourHoursAgo },
                     is_deleted: 0,
                 },
@@ -329,9 +333,9 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
 //#endregion
 
 // Function to get a random element from an array
-function getRandomElement(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+// function getRandomElement(arr) {
+//     return arr[Math.floor(Math.random() * arr.length)];
+// }
 
 // Function to get a random element from an array excluding specified elements
 function getRandomElementExcluding(excludeElements) {

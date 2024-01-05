@@ -26,7 +26,7 @@ const gameRewardSchema = new mongoose.Schema({
         default: 0
     },
     rewardAmount: {
-        type: String,
+        type: Number,
         required: false,
         default: 0
     },
