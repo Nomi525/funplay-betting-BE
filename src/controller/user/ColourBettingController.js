@@ -122,6 +122,7 @@ import {
 //   }
 // };
 
+//#region add Colour Bet
 export const addColourBet = async (req, res) => {
   try {
     let { gameId, colourName, betAmount, gameType, period, selectedTime } =
@@ -154,7 +155,6 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
-
     if (
       !checkDecimalValueGreaterThanOrEqual(checkBalance.totalCoin, betAmount)
     ) {
@@ -245,7 +245,6 @@ export const addColourBet = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 //#endregion
 
 //#region Colour betting result api
@@ -854,7 +853,6 @@ export const getAllGamePeriod = async (req, res) => {
 //     return handleErrorResponse(res, error);
 //   }
 // };
-
 //#endregion
 
 //#region Get all game Period
