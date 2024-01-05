@@ -26,7 +26,7 @@ import {
 //#region Add penalty Betting
 export const addPenaltyBet = async (req, res) => {
     try {
-        let { gameId, betSide, betAmount, period } = req.body;
+        let { gameId, betSide, betAmount, period, selectedTime } = req.body;
         if (betAmount < 0) {
             return sendResponse(
                 res,
@@ -77,6 +77,7 @@ export const addPenaltyBet = async (req, res) => {
                 betSide: betSide,
                 betAmount: parseInt(betAmount),
                 period,
+                selectedTime,
                 status: "pending"
             },
             PenaltyBetting

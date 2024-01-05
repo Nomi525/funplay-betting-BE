@@ -26,7 +26,7 @@ import {
 //#region Add penalty Betting
 export const addCardBet = async (req, res) => {
     try {
-        let { gameId, card, betAmount, period ,selectedTime} = req.body;
+        let { gameId, card, betAmount, period , selectedTime} = req.body;
         if (betAmount < 0) {
             return sendResponse(
                 res,

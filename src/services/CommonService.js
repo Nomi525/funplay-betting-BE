@@ -786,11 +786,11 @@ export const declareColorWinner = async (
 //#endregion
 
 //#region For Declare penalty winner
-export const declarePenaltyWinner = async (game, period) => {
+export const declarePenaltyWinner = async (game, period, selectedTime) => {
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
   if (gameMode == "Manual") {
-    await PenaltyBetting.updateMany({ gameId, period }, { status: "pending" });
+    await PenaltyBetting.updateMany({ gameId, period, selectedTime }, { status: "pending" });
     return {
       message: ResponseMessage.WINNER_DECLARE_MANUAL,
     };
@@ -798,6 +798,7 @@ export const declarePenaltyWinner = async (game, period) => {
     const checkAlreadyWin = await PenaltyBetting.find({
       gameId,
       isWin: true,
+      selectedTime,
       period: Number(period),
       is_deleted: 0,
     }).lean();
@@ -812,6 +813,7 @@ export const declarePenaltyWinner = async (game, period) => {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
             period: Number(period),
+            selectedTime,
             is_deleted: 0,
           },
         },
@@ -830,7 +832,7 @@ export const declarePenaltyWinner = async (game, period) => {
         if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
           const getAllSideBets = await PenaltyBetting.aggregate([
             {
-              $match: { period: Number(period) },
+              $match: { period: Number(period), selectedTime },
             },
             {
               $group: {
@@ -871,6 +873,7 @@ export const declarePenaltyWinner = async (game, period) => {
                 betSide: randomWinSide,
                 is_deleted: 0,
                 isWin: true,
+                selectedTime,
                 status: "successfully",
               });
               await PenaltyBetting.updateMany(
@@ -878,6 +881,7 @@ export const declarePenaltyWinner = async (game, period) => {
                   period,
                   gameId,
                   isWin: false,
+                  selectedTime,
                   status: "pending",
                   is_deleted: 0,
                 },
@@ -895,6 +899,7 @@ export const declarePenaltyWinner = async (game, period) => {
                       const findUser = await PenaltyBetting.findOne({
                         userId,
                         gameId,
+                        selectedTime,
                         period: item.period,
                         betSide: item.betSide,
                         is_deleted: 0,
@@ -909,6 +914,7 @@ export const declarePenaltyWinner = async (game, period) => {
                             gameId,
                             period: item.period,
                             isWin: false,
+                            selectedTime,
                             status: "pending",
                             betSide: item.betSide,
                             is_deleted: 0,
@@ -937,6 +943,7 @@ export const declarePenaltyWinner = async (game, period) => {
                           gameId,
                           period: item.period,
                           isWin: false,
+                          selectedTime,
                           status: "pending",
                           betSide: item.betSide,
                           is_deleted: 0,
@@ -956,7 +963,7 @@ export const declarePenaltyWinner = async (game, period) => {
             };
           } else {
             await PenaltyBetting.updateMany(
-              { gameId, period },
+              { gameId, period, selectedTime },
               { status: "fail" }
             );
             return {
@@ -965,7 +972,7 @@ export const declarePenaltyWinner = async (game, period) => {
           }
         } else {
           await PenaltyBetting.updateMany(
-            { gameId, period },
+            { gameId, period, selectedTime },
             { status: "fail" }
           );
           return {
@@ -980,6 +987,7 @@ export const declarePenaltyWinner = async (game, period) => {
           userId: null,
           period,
           gameId,
+          selectedTime,
           betSide: randomWinSide,
           is_deleted: 0,
           isWin: true,
@@ -995,11 +1003,11 @@ export const declarePenaltyWinner = async (game, period) => {
 //#endregion
 
 //#region For Declare card winner
-export const declareCardWinner = async (game, period) => {
+export const declareCardWinner = async (game, period, selectedTime) => {
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
   if (gameMode == "Manual") {
-    await CardBetting.updateMany({ gameId, period }, { status: "pending" });
+    await CardBetting.updateMany({ gameId, period, selectedTime }, { status: "pending" });
     return {
       message: ResponseMessage.WINNER_DECLARE_MANUAL,
     };
@@ -1007,6 +1015,7 @@ export const declareCardWinner = async (game, period) => {
     const checkAlreadyWin = await CardBetting.find({
       gameId,
       isWin: true,
+      selectedTime,
       period: Number(period),
       is_deleted: 0,
     }).lean();
@@ -1025,6 +1034,7 @@ export const declareCardWinner = async (game, period) => {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
             period: Number(period),
+            selectedTime,
             is_deleted: 0,
           },
         },
@@ -1043,7 +1053,7 @@ export const declareCardWinner = async (game, period) => {
         if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
           const getAllCardBets = await CardBetting.aggregate([
             {
-              $match: { period: Number(period) },
+              $match: { period: Number(period), selectedTime },
             },
             {
               $group: {
@@ -1083,16 +1093,18 @@ export const declareCardWinner = async (game, period) => {
                 period,
                 gameId,
                 card: randomWinCard,
-                is_deleted: 0,
+                selectedTime,
                 isWin: true,
                 winCardNumber,
                 status: "successfully",
+                is_deleted: 0,
               });
               await CardBetting.updateMany(
                 {
                   period,
                   gameId,
                   isWin: false,
+                  selectedTime,
                   status: "pending",
                   is_deleted: 0,
                 },
@@ -1111,6 +1123,7 @@ export const declareCardWinner = async (game, period) => {
                       const findUser = await CardBetting.findOne({
                         userId,
                         gameId,
+                        selectedTime,
                         period: item.period,
                         card: item.card,
                         is_deleted: 0,
@@ -1123,6 +1136,7 @@ export const declareCardWinner = async (game, period) => {
                           {
                             userId,
                             gameId,
+                            selectedTime,
                             period: item.period,
                             isWin: false,
                             status: "pending",
@@ -1156,6 +1170,7 @@ export const declareCardWinner = async (game, period) => {
                         {
                           userId,
                           gameId,
+                          selectedTime,
                           period: item.period,
                           isWin: false,
                           status: "pending",
@@ -1179,7 +1194,7 @@ export const declareCardWinner = async (game, period) => {
             };
           } else {
             await CardBetting.updateMany(
-              { gameId, period },
+              { gameId, period, selectedTime },
               { status: "fail" }
             );
             return {
@@ -1187,7 +1202,7 @@ export const declareCardWinner = async (game, period) => {
             };
           }
         } else {
-          await CardBetting.updateMany({ gameId, period }, { status: "fail" });
+          await CardBetting.updateMany({ gameId, period, selectedTime }, { status: "fail" });
           return {
             message: ResponseMessage.LOSER,
           };
@@ -1201,6 +1216,7 @@ export const declareCardWinner = async (game, period) => {
           userId: null,
           period,
           gameId,
+          selectedTime,
           card: randomWinCard,
           is_deleted: 0,
           isWin: true,
