@@ -4,6 +4,8 @@ import { Socket } from "../../../Socket.config.js";
 import { Chat } from "../../models/Chat.js";
 import { getAllData } from "../../services/QueryService.js";
 import { ResponseMessage } from "../../utils/ResponseMessage.js";
+import { handleErrorResponse } from "../../services/CommonService.js";
+import { User } from "../../models/User.js";
 
 // Socket.use((socket, next) => {
 //   try {
@@ -35,7 +37,7 @@ Socket.on("connection", (sockets) => {
     let chat = await Chat.findOne({ room_id: room.room_id });
     Socket.in(chat.room_id).emit("Message", chat.messages);
     let checkUserRegister = await User.findOne({ _id: room.user_id });
-    console.log(checkUserRegister);
+
     if (checkUserRegister) {
       sockets.on("NewMessage", async (data) => {
         console.log(data, "NewMessage");
@@ -47,7 +49,11 @@ Socket.on("connection", (sockets) => {
             {
               $push: {
                 messages: [
-                  { from: checkUserRegister.fullName, message: data.message },
+                  {
+                    from: checkUserRegister.fullName,
+                    message: data.message,
+                    user_id: room.user_id,
+                  },
                 ],
               },
             }
@@ -84,6 +90,42 @@ export const getChat = async (req, res) => {
       );
     } else {
       return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, []);
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+export const uploadImage = async (req, res) => {
+  try {
+    req.body.image = req.files ? req.files.key : null;
+    let filename = req.files.image[0].filename;
+    let checkUserRegister = await User.findOne({ _id: req.body.user_id });
+    if (checkUserRegister) {
+      await Chat.findOneAndUpdate(
+        { room_id: req.body.room_id },
+        {
+          $push: {
+            messages: {
+              from: checkUserRegister.fullName,
+              image: filename,
+              user_id: req.body.user_id,
+              time: new Date(),
+            },
+          },
+        }
+      );
+      return res.status(200).json({
+        status: StatusCodes.OK,
+        message: ResponseMessage.IMAGE_UPLOADED,
+        data: { image: filename },
+      });
+    } else {
+      return res.status(400).json({
+        status: StatusCodes.BAD_REQUEST,
+        message: ResponseMessage.BAD_REQUEST,
+        data: {},
+      });
     }
   } catch (error) {
     return handleErrorResponse(res, error);
