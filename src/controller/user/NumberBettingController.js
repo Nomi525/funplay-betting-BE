@@ -442,6 +442,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           period: 1,
           isWin: 1,
           status: 1,
+          createdAt : 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -457,11 +458,6 @@ export const getNumberGamePeriodById = async (req, res) => {
         $unwind: "$periodData",
       },
       {
-        $sort: {
-          period: -1,
-        },
-      },
-      {
         $project: {
           period: 1,
           price: 1,
@@ -472,11 +468,17 @@ export const getNumberGamePeriodById = async (req, res) => {
           startTime: "$periodData.startTime",
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
+          betCreatedAt: "$createdAt",
         },
       },
       {
         $match: {
           status: { $in: ["fail", "pending", "successfully"] },
+        },
+      },
+      {
+        $sort: {
+          betCreatedAt: -1,
         },
       },
     ]);
