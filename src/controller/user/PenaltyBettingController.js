@@ -26,7 +26,7 @@ import {
 //#region Add penalty Betting
 export const addPenaltyBet = async (req, res) => {
     try {
-        let { gameId, betSide, betAmount, period } = req.body;
+        let { gameId, betSide, betAmount, period, selectedTime } = req.body;
         if (betAmount < 0) {
             return sendResponse(
                 res,
@@ -77,6 +77,7 @@ export const addPenaltyBet = async (req, res) => {
                 betSide: betSide,
                 betAmount: parseInt(betAmount),
                 period,
+                selectedTime,
                 status: "pending"
             },
             PenaltyBetting
@@ -351,9 +352,10 @@ function getRandomElementExcluding(excludeElements) {
 export const penaltyBettingWinnerResult = async (req, res) => {
     try {
         const { gameId, period } = req.params;
+        const { second: periodFor } = req.query
         const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
         if (findGame.gameMode == "Manual") {
-            await PenaltyBetting.updateMany({ gameId, period }, { status: "pending" })
+            await PenaltyBetting.updateMany({ gameId, period, selectedTime: periodFor }, { status: "pending" })
             return sendResponse(
                 res,
                 StatusCodes.OK,
@@ -365,6 +367,7 @@ export const penaltyBettingWinnerResult = async (req, res) => {
             gameId,
             isWin: true,
             period: Number(period),
+            selectedTime: periodFor,
             is_deleted: 0,
         }).lean();
         if (checkAlreadyWin.length) {
@@ -380,161 +383,162 @@ export const penaltyBettingWinnerResult = async (req, res) => {
                     }
                 ]
             );
-        }
-        const totalUserInPeriod = await PenaltyBetting.aggregate([
-            {
-                $match: {
-                    gameId: new mongoose.Types.ObjectId(gameId),
-                    period: Number(period),
-                    is_deleted: 0
-                }
-            },
-            {
-                $group: {
-                    _id: "$userId",
-                    period: { $first: "$period" },
-                    userTotalBets: { $sum: 1 }
-                }
-            }
-        ])
-        if (totalUserInPeriod.length) {
-            const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
-            if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
-                const getAllSideBets = await PenaltyBetting.aggregate([
-                    {
-                        $match: { period: Number(period) }
-                    },
-                    {
-                        $group: {
-                            _id: "$betSide",
-                            period: { $first: "$period" },
-                            totalUser: { $sum: 1 },
-                            userIds: { $push: "$userId" },
-                            totalBetAmount: { $sum: "$betAmount" }
-                        }
-                    },
-                    {
-                        $project: {
-                            _id: 0,
-                            period: 1,
-                            betSide: "$_id",
-                            totalUser: 1,
-                            userIds: 1,
-                            totalBetAmount: 1,
-                        }
-                    },
-                    {
-                        $sort: { totalBetAmount: 1 }
-                    },
-                ]);
-
-                if (getAllSideBets.length) {
-                    const tieSides = getAllSideBets.filter(item => item.totalBetAmount === getAllSideBets[0].totalBetAmount);
-                    if (getAllSideBets.length == 1) {
-                        const randomWinSide = getRandomElementExcluding(tieSides.map(item => item.betSide));
-                        await PenaltyBetting.create({
-                            userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
-                        });
-                        await PenaltyBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
-                        return sendResponse(
-                            res,
-                            StatusCodes.OK,
-                            `${ResponseMessage.PENALTY_WINNER} ${randomWinSide}`,
-                            []
-                        );
-                    } else {
-                        await Promise.all(
-                            getAllSideBets.map(async (item, index) => {
-                                if (index === 0) {
-                                    // Handling the winner
-                                    item.userIds.map(async (userId) => {
-                                        const findUser = await PenaltyBetting.findOne({ userId, gameId, period: item.period, betSide: item.betSide, is_deleted: 0 });
-                                        if (findUser) {
-                                            // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
-                                            let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
-                                            await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 },
-                                                { isWin: true, status: 'successfully', rewardAmount }
-                                            );
-                                            const balance = await getSingleData({ userId }, NewTransaction);
-                                            if (balance) {
-                                                let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
-                                                balance.totalCoin = Number(balance.totalCoin) + Number(winningAmount);
-                                                await balance.save();
-                                                const userData = await getSingleData({ _id: userId }, User);
-                                                let gameName = 'Penalty Betting'
-                                                let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
-                                                    gameName: gameName
-                                                });
-                                                await sendMail(userData.email, "Penalty betting game win", mailInfo)
-                                            }
-                                        } else {
-                                            return sendResponse(
-                                                res,
-                                                StatusCodes.BAD_REQUEST,
-                                                "User not found",
-                                                []
-                                            );
-                                        }
-                                    });
-                                } else {
-                                    // Handling the losers
-                                    item.userIds.map(async (userId) => {
-                                        await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 }, { status: 'fail' });
-                                    });
-                                }
-                            })
-                        );
-                    }
-                    return sendResponse(
-                        res,
-                        StatusCodes.OK,
-                        ResponseMessage.PENALTY_WINNER + " " + getAllSideBets[0].betSide,
-                        getAllSideBets[0]
-                    );
-                } else {
-                    await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
-                    return sendResponse(
-                        res,
-                        StatusCodes.OK,
-                        ResponseMessage.LOSER,
-                        []
-                    );
-                }
-            } else {
-                await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
-                return sendResponse(
-                    res,
-                    StatusCodes.OK,
-                    ResponseMessage.LOSER,
-                    []
-                );
-            }
         } else {
-            let allSides = ["left", "right"];
-            let randomIndex = Math.floor(Math.random() * allSides.length);
-            let randomWinSide = allSides[randomIndex];
-            await PenaltyBetting.create({
-                userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
-            })
             return sendResponse(
                 res,
                 StatusCodes.OK,
-                ResponseMessage.PENALTY_WINNER + " " + randomWinSide,
-                [
-                    {
-                        period,
-                        betSide: randomWinSide,
-                        totalBetAmount: 0
-                    }
-                ]
+                ResponseMessage.DATA_NOT_FOUND,
+                []
             );
         }
-        // return sendResponse(
-        //     res,
-        //     StatusCodes.BAD_REQUEST,
-        //     "User not found",
-        //     []
-        // );
+        // const totalUserInPeriod = await PenaltyBetting.aggregate([
+        //     {
+        //         $match: {
+        //             gameId: new mongoose.Types.ObjectId(gameId),
+        //             period: Number(period),
+        //             is_deleted: 0
+        //         }
+        //     },
+        //     {
+        //         $group: {
+        //             _id: "$userId",
+        //             period: { $first: "$period" },
+        //             userTotalBets: { $sum: 1 }
+        //         }
+        //     }
+        // ])
+        // if (totalUserInPeriod.length) {
+        //     const hasUserTotalBets = totalUserInPeriod.some(user => user.userTotalBets >= 1);
+        //     if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
+        //         const getAllSideBets = await PenaltyBetting.aggregate([
+        //             {
+        //                 $match: { period: Number(period) }
+        //             },
+        //             {
+        //                 $group: {
+        //                     _id: "$betSide",
+        //                     period: { $first: "$period" },
+        //                     totalUser: { $sum: 1 },
+        //                     userIds: { $push: "$userId" },
+        //                     totalBetAmount: { $sum: "$betAmount" }
+        //                 }
+        //             },
+        //             {
+        //                 $project: {
+        //                     _id: 0,
+        //                     period: 1,
+        //                     betSide: "$_id",
+        //                     totalUser: 1,
+        //                     userIds: 1,
+        //                     totalBetAmount: 1,
+        //                 }
+        //             },
+        //             {
+        //                 $sort: { totalBetAmount: 1 }
+        //             },
+        //         ]);
+
+        //         if (getAllSideBets.length) {
+        //             const tieSides = getAllSideBets.filter(item => item.totalBetAmount === getAllSideBets[0].totalBetAmount);
+        //             if (getAllSideBets.length == 1) {
+        //                 const randomWinSide = getRandomElementExcluding(tieSides.map(item => item.betSide));
+        //                 await PenaltyBetting.create({
+        //                     userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+        //                 });
+        //                 await PenaltyBetting.updateMany({ period, gameId, isWin: false, status: 'pending', is_deleted: 0 }, { status: 'fail' });
+        //                 return sendResponse(
+        //                     res,
+        //                     StatusCodes.OK,
+        //                     `${ResponseMessage.PENALTY_WINNER} ${randomWinSide}`,
+        //                     []
+        //                 );
+        //             } else {
+        //                 await Promise.all(
+        //                     getAllSideBets.map(async (item, index) => {
+        //                         if (index === 0) {
+        //                             // Handling the winner
+        //                             item.userIds.map(async (userId) => {
+        //                                 const findUser = await PenaltyBetting.findOne({ userId, gameId, period: item.period, betSide: item.betSide, is_deleted: 0 });
+        //                                 if (findUser) {
+        //                                     // let rewardAmount = multiplicationLargeSmallValue(findUser.betAmount, 0.95);
+        //                                     let rewardAmount = findUser.betAmount + findUser.betAmount * findGame.winningCoin;
+        //                                     await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 },
+        //                                         { isWin: true, status: 'successfully', rewardAmount }
+        //                                     );
+        //                                     const balance = await getSingleData({ userId }, NewTransaction);
+        //                                     if (balance) {
+        //                                         let winningAmount = Number(findUser.betAmount) + Number(rewardAmount)
+        //                                         balance.totalCoin = Number(balance.totalCoin) + Number(winningAmount);
+        //                                         await balance.save();
+        //                                         const userData = await getSingleData({ _id: userId }, User);
+        //                                         let gameName = 'Penalty Betting'
+        //                                         let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
+        //                                             gameName: gameName
+        //                                         });
+        //                                         await sendMail(userData.email, "Penalty betting game win", mailInfo)
+        //                                     }
+        //                                 } else {
+        //                                     return sendResponse(
+        //                                         res,
+        //                                         StatusCodes.BAD_REQUEST,
+        //                                         "User not found",
+        //                                         []
+        //                                     );
+        //                                 }
+        //                             });
+        //                         } else {
+        //                             // Handling the losers
+        //                             item.userIds.map(async (userId) => {
+        //                                 await PenaltyBetting.updateOne({ userId, gameId, period: item.period, isWin: false, status: 'pending', betSide: item.betSide, is_deleted: 0 }, { status: 'fail' });
+        //                             });
+        //                         }
+        //                     })
+        //                 );
+        //             }
+        //             return sendResponse(
+        //                 res,
+        //                 StatusCodes.OK,
+        //                 ResponseMessage.PENALTY_WINNER + " " + getAllSideBets[0].betSide,
+        //                 getAllSideBets[0]
+        //             );
+        //         } else {
+        //             await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
+        //             return sendResponse(
+        //                 res,
+        //                 StatusCodes.OK,
+        //                 ResponseMessage.LOSER,
+        //                 []
+        //             );
+        //         }
+        //     } else {
+        //         await PenaltyBetting.updateMany({ gameId, period }, { status: "fail" })
+        //         return sendResponse(
+        //             res,
+        //             StatusCodes.OK,
+        //             ResponseMessage.LOSER,
+        //             []
+        //         );
+        //     }
+        // } else {
+        //     let allSides = ["left", "right"];
+        //     let randomIndex = Math.floor(Math.random() * allSides.length);
+        //     let randomWinSide = allSides[randomIndex];
+        //     await PenaltyBetting.create({
+        //         userId: null, period, gameId, betSide: randomWinSide, is_deleted: 0, isWin: true, status: 'successfully'
+        //     })
+        //     return sendResponse(
+        //         res,
+        //         StatusCodes.OK,
+        //         ResponseMessage.PENALTY_WINNER + " " + randomWinSide,
+        //         [
+        //             {
+        //                 period,
+        //                 betSide: randomWinSide,
+        //                 totalBetAmount: 0
+        //             }
+        //         ]
+        //     );
+        // }
     } catch (error) {
         return handleErrorResponse(res, error);
     }

@@ -1222,7 +1222,7 @@ export const colourBettingWinnerResult = async (req, res) => {
       return sendResponse(
         res,
         StatusCodes.OK,
-        "Result not found",
+        ResponseMessage.DATA_NOT_FOUND,
         []
       );
     }
