@@ -57,7 +57,7 @@ import {
   adminResendOtp,
   getUpdatedUser,
 } from "./controller/admin/AdminController.js";
-import { getChat, uploadImage } from "./controller/chat/ChatController.js";
+import { uploadImage } from "./controller/chat/ChatController.js";
 import {
   logout,
   editProfile,
@@ -598,7 +598,7 @@ export {
   userEditProfile,
   accountDeactivate,
   walletCreate,
-  getChat,
+  // getChat,
   uploadImage,
   disconnectWallet,
   validatorRequest,

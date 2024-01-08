@@ -10,7 +10,7 @@ import {
   getSingleGameTime,
   getPeriodsDetailsForAllGame,
   getAllGameRecodesGameWise,
-  getChat,
+  // getChat,
   uploadImage,
 } from "../index.js";
 const commonRoutes = express.Router();
@@ -42,7 +42,7 @@ commonRoutes.get(
   Auth,
   getAllGameRecodesGameWise
 );
-commonRoutes.get("/get-chat", getChat);
+// commonRoutes.get("/get-chat", getChat);
 commonRoutes.post("/upload-image", Upload, uploadImage);
 
 export { commonRoutes };
