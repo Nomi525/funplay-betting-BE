@@ -9,8 +9,7 @@ import {
   createAllGamePeriodFromCronJob,
   createAllGameWinnerFromCronJob,
 } from "./src/index.js";
-import { Socket } from "./socket.js";
-import { server, app } from "./Socket.config.js";
+import { server, app } from "./src/config/Socket.config.js";
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -50,7 +49,7 @@ cron.schedule("* * * * * *", () => {
 });
 
 // // cron run for every seconds
-cron.schedule('* * * * * *', () => { 
+cron.schedule('* * * * * *', () => {
   createAllGameWinnerFromCronJob();
 });
 

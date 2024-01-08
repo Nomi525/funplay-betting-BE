@@ -57,6 +57,7 @@ import {
   adminResendOtp,
   getUpdatedUser,
 } from "./controller/admin/AdminController.js";
+import { uploadImage } from "./controller/chat/ChatController.js";
 import {
   logout,
   editProfile,
@@ -122,7 +123,7 @@ import {
   getSingleGame,
   getSingleGameRules,
   gameRuleDelete,
-  getAllGamePeriodSelectedTimeList
+  getAllGamePeriodSelectedTimeList,
 } from "./controller/admin/GameController.js";
 // import {
 //   addEditPrivacyPolicy,
@@ -597,6 +598,8 @@ export {
   userEditProfile,
   accountDeactivate,
   walletCreate,
+  // getChat,
+  uploadImage,
   disconnectWallet,
   validatorRequest,
   validatorMiddlware,
@@ -677,6 +680,6 @@ export {
   getNumberGameTotal,
   getCommunityWinList,
   http,
-  Chat
+  Chat,
   // updateEmail,
 };

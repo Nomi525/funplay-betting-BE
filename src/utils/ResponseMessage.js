@@ -70,6 +70,7 @@ const ResponseMessage = {
   PASSWORD_NOT_SET: "Password not set",
   INVALID_MPIN: "Invalid MPIN",
   DATA_GET: "Get data",
+  IMAGE_UPLOADED: "Image uploaded successfully",
   SOME_ERROR_OCCUR: "Some error occur",
   EMAIL_ALREADY_EXIST: "Email already exist",
   OTP_SENT_TO_BOTH: "Otp sent successfully",

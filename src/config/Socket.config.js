@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { express, http } from "./src/index.js";
+import { express, http } from "../index.js";
 const app = express();
 const server = http.createServer(app);
 // const wsServer = new WebSocketServer({ server: server, path: "/api/stock-data" });
