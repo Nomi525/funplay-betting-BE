@@ -36,6 +36,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
+            status : "pending"
           },
         },
         {
@@ -81,6 +82,7 @@ export const getAllWinnersUser = async (req, res) => {
           $match: {
             is_deleted: 0,
             gameType: "3colorBetting",
+            status : "pending"
           },
         },
         {
@@ -128,6 +130,7 @@ export const getAllWinnersUser = async (req, res) => {
           $match: {
             is_deleted: 0,
             gameType: "2colorBetting",
+            status : "pending"
           },
         },
         {
@@ -174,6 +177,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
+            status : "pending"
           },
         },
         {

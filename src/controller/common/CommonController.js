@@ -189,7 +189,13 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                         })
                     } else if (item.gameName == "3 Color Betting" || item.gameName == "2 Color Betting") {
                         let gameType = item.gameName == "3 Color Betting" ? "3colorBetting" : "2colorBetting";
-                        const findColours = await ColourBetting.find({ gameType, gameId: item.gameId, period: item.period, is_deleted: 0 })
+                        const findColours = await ColourBetting.find({
+                            gameType,
+                            gameId: item.gameId,
+                            period: item.period,
+                            selectedTime: item.periodFor,
+                            is_deleted: 0
+                        })
                         let uniqueColorUserIds = getUniqueUserIds(findColours)
                         const findWinColour = findColours.find((data) => data.isWin)
                         let winner = '';
@@ -220,7 +226,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             gameName: item.gameName,
                             totalUsers: uniqueCommunityUserIds.length,
                             totalBetAmount: findCommunity.reduce((sum, data) => sum + data.betAmount, 0),
-                            winner : findWinCommunity.length
+                            winner: findWinCommunity.length
                         })
                     }
                 })

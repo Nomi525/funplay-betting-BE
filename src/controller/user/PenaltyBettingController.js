@@ -149,6 +149,7 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                     period: 1,
                     isWin: 1,
                     status: 1,
+                    createdAt: 1,
                     periodData: {
                         $filter: {
                             input: "$periodData",
@@ -164,11 +165,6 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                 $unwind: "$periodData"
             },
             {
-                $sort: {
-                    period: -1,
-                },
-            },
-            {
                 $project: {
                     period: 1,
                     price: 1,
@@ -180,13 +176,19 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                     endTime: "$periodData.endTime",
                     periodFor: "$periodData.periodFor",
                     createdAt: "$periodData.createdAt",
+                    betCreatedAt: "$createdAt",
                 }
             },
             {
                 $match: {
                     periodFor: second
                 }
-            }
+            },
+            {
+                $sort: {
+                    betCreatedAt: -1,
+                },
+            },
             // {
             //     $match: {
             //         status: { $in: ["fail", "pending", "successfully"] }

@@ -991,9 +991,9 @@ export const getCommunityGameList = async (req, res) => {
 //#region Get all game times
 export const getAllGamePeriodSelectedTimeList = async (req, res) => {
   try {
-    const { gameId, gameType } = req.params;
-    let gameSelectedTimeList;
-     if (gameType == "2colorBetting" || gameType == "3colorBetting" ){
+    const { gameType, gameId } = req.params;
+    let gameSelectedTimeList = [];
+    if (gameType == "2colorBetting" || gameType == "3colorBetting") {
       gameSelectedTimeList = await ColourBetting.aggregate([
         {
           $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
@@ -1019,7 +1019,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
           }
         }
       ]);
-     } else if (gameType == "penaltyBetting"){
+    } else if (gameType == "penaltyBetting") {
       gameSelectedTimeList = await PenaltyBetting.aggregate([
         {
           $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
@@ -1045,7 +1045,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
           }
         }
       ]);
-     } else if (gameType == "cardBetting"){
+    } else if (gameType == "cardBetting") {
       gameSelectedTimeList = await CardBetting.aggregate([
         {
           $match: { gameId: new mongoose.Types.ObjectId(gameId), isWin: false, status: "pending", is_deleted: 0 }
@@ -1071,8 +1071,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
           }
         }
       ]);
-     }
-   
+    }
     return sendResponse(
       res,
       StatusCodes.OK,
