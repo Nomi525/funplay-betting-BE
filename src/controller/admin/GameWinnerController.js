@@ -63,6 +63,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
+            uniqueUsers: { $addToSet: "$userId" }
           },
         },
         {
@@ -73,6 +74,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
+            totalUsers: { $size: "$uniqueUsers" } 
           },
         },
       ];
@@ -109,6 +111,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
+            uniqueUsers: { $addToSet: "$userId" }
           },
         },
         {
@@ -119,6 +122,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
+            totalUsers: { $size: "$uniqueUsers" }
           },
         },
       ];
@@ -157,6 +161,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
+            uniqueUsers: { $addToSet: "$userId" } 
           },
         },
         {
@@ -167,6 +172,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
+            totalUsers: { $size: "$uniqueUsers" }
           },
         },
       ];
@@ -204,6 +210,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
+            uniqueUsers: { $addToSet: "$userId" }
           },
         },
         {
@@ -214,6 +221,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
+            totalUsers: { $size: "$uniqueUsers" }
           },
         },
       ];
