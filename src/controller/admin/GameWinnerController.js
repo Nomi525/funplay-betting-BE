@@ -36,7 +36,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            status : "pending"
+            status: "pending"
           },
         },
         {
@@ -74,7 +74,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" } 
+            totalUsers: { $size: "$uniqueUsers" }
           },
         },
       ];
@@ -84,7 +84,7 @@ export const getAllWinnersUser = async (req, res) => {
           $match: {
             is_deleted: 0,
             gameType: "3colorBetting",
-            status : "pending"
+            status: "pending"
           },
         },
         {
@@ -134,7 +134,7 @@ export const getAllWinnersUser = async (req, res) => {
           $match: {
             is_deleted: 0,
             gameType: "2colorBetting",
-            status : "pending"
+            status: "pending"
           },
         },
         {
@@ -161,7 +161,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" } 
+            uniqueUsers: { $addToSet: "$userId" }
           },
         },
         {
@@ -183,7 +183,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            status : "pending"
+            status: "pending"
           },
         },
         {
@@ -228,15 +228,119 @@ export const getAllWinnersUser = async (req, res) => {
       communityBettingResults = await CommunityBetting.aggregate(
         communityBettingResults
       );
+
+      let penaltyBettingResults = [
+        {
+          $match: {
+            is_deleted: 0,
+            status: "pending"
+          },
+        },
+        {
+          $lookup: {
+            from: "games", // Replace 'games' with the actual name of the games collection
+            localField: "gameId",
+            foreignField: "_id",
+            as: "game",
+          },
+        },
+        {
+          $unwind: "$game",
+        },
+        {
+          $addFields: {
+            gameType: "penaltyBetting",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            betAmount: { $sum: "$betAmount" },
+            gameName: { $first: "$game.gameName" },
+            gameId: { $first: "$game._id" },
+            gameType: { $first: "$gameType" },
+            uniqueUsers: { $addToSet: "$userId" }
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            gameName: 1,
+            betAmount: 1,
+            count: 1,
+            gameId: 1,
+            gameType: 1,
+            totalUsers: { $size: "$uniqueUsers" }
+          },
+        },
+      ];
+      penaltyBettingResults = await PenaltyBetting.aggregate(
+        penaltyBettingResults
+      );
+
+      let cardBettingResults = [
+        {
+          $match: {
+            is_deleted: 0,
+            status: "pending"
+          },
+        },
+        {
+          $lookup: {
+            from: "games", // Replace 'games' with the actual name of the games collection
+            localField: "gameId",
+            foreignField: "_id",
+            as: "game",
+          },
+        },
+        {
+          $unwind: "$game",
+        },
+        {
+          $addFields: {
+            gameType: "cardBetting",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            betAmount: { $sum: "$betAmount" },
+            gameName: { $first: "$game.gameName" },
+            gameId: { $first: "$game._id" },
+            gameType: { $first: "$gameType" },
+            uniqueUsers: { $addToSet: "$userId" }
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            gameName: 1,
+            betAmount: 1,
+            count: 1,
+            gameId: 1,
+            gameType: 1,
+            totalUsers: { $size: "$uniqueUsers" }
+          },
+        },
+      ];
+      cardBettingResults = await CardBetting.aggregate(
+        cardBettingResults
+      );
       numberBetting = numberBetting[0];
       threeColourBettingResults = threeColourBettingResults[0];
       twoColourBettingResults = twoColourBettingResults[0];
       communityBettingResults = communityBettingResults[0];
+      penaltyBettingResults = penaltyBettingResults[0];
+      cardBettingResults = cardBettingResults[0];
       let netFinalResult = [
         numberBetting,
         threeColourBettingResults,
         twoColourBettingResults,
         communityBettingResults,
+        penaltyBettingResults,
+        cardBettingResults
       ];
       netFinalResult = netFinalResult.filter((d) => d != null);
       return sendResponse(
@@ -263,6 +367,18 @@ export const getAllWinnersUser = async (req, res) => {
           { userId: userId, gameId },
           { period, isWin: true },
           CommunityBetting
+        );
+      } if (gameType == "penaltyBetting") {
+        updateWinner = await dataUpdated(
+          { userId: userId, gameId },
+          { period, isWin: true },
+          PenaltyBetting
+        );
+      } if (gameType == "cardBetting") {
+        updateWinner = await dataUpdated(
+          { userId: userId, gameId },
+          { period, isWin: true },
+          CardBetting
         );
       } else {
         return sendResponse(
