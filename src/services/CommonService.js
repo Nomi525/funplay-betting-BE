@@ -439,8 +439,7 @@ export const declareNumberWinner = async (game, period) => {
                           NewTransaction
                         );
                         if (balance) {
-                          let winningAmount =
-                            Number(findUser.betAmount) + Number(rewardAmount);
+                          let winningAmount = Number(rewardAmount);
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
                           await balance.save();
@@ -687,8 +686,7 @@ export const declareColorWinner = async (
                           NewTransaction
                         );
                         if (balance) {
-                          let winningAmount =
-                            Number(findUser.betAmount) + Number(rewardAmount);
+                          let winningAmount = Number(rewardAmount);
                           console.log(winningAmount, "winningAmount");
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
@@ -898,8 +896,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                       });
                       if (findUser) {
                         console.log(findUser.betAmount, "1");
-                        let rewardAmount =
-                          findUser.betAmount + findUser.betAmount * winningCoin;
+                        let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
                         await PenaltyBetting.updateOne(
                           {
                             userId,
@@ -918,8 +915,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                           NewTransaction
                         );
                         if (balance) {
-                          let winningAmount =
-                            Number(findUser.betAmount) + Number(rewardAmount);
+                          let winningAmount = Number(rewardAmount);
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
                           await balance.save();
@@ -1147,8 +1143,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                           NewTransaction
                         );
                         if (balance) {
-                          let winningAmount =
-                            Number(findUser.betAmount) + Number(rewardAmount);
+                          let winningAmount = Number(rewardAmount);
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
                           await balance.save();

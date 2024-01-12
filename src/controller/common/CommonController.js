@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Currency } from "../../models/Currency.js";
-import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting } from "./../../index.js";
+import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting, PenaltyBetting, CardBetting } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -214,12 +214,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                     } else if (item.gameName == "Community Betting") {
                         const findCommunity = await CommunityBetting.find({ gameId: item.gameId, period: item.period, is_deleted: 0 })
                         const findWinCommunity = findCommunity.filter((data) => data.isWin).map(d => d.betAmount)
-                        // let winner = [];
                         let uniqueCommunityUserIds = getUniqueUserIds(findCommunity)
-                        // if (findWinCommunity.length) {
-                        //     // winner = findWinCommunity.betAmount
-                        //     winner = findWinCommunity
-                        // }
                         gamePeriod.push({
                             sNo: sNo,
                             period: item.period,
@@ -228,7 +223,51 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             totalBetAmount: findCommunity.reduce((sum, data) => sum + data.betAmount, 0),
                             winner: findWinCommunity.length
                         })
-                    }
+                    } else if (item.gameName == "Penalty Betting") {
+                        const findSides = await PenaltyBetting.find({
+                            gameId: item.gameId,
+                            period: item.period,
+                            selectedTime: item.periodFor,
+                            is_deleted: 0
+                        })
+                        let uniqueSideUserIds = getUniqueUserIds(findSides)
+                        const findWinSide = findSides.find((data) => data.isWin)
+                        let winner = '';
+                        if (findWinSide) {
+                            winner = findWinSide.betSide
+                        }
+                        gamePeriod.push({
+                            sNo: sNo,
+                            period: item.period,
+                            gameName: item.gameName,
+                            periodFor: item.periodFor,
+                            totalUsers: uniqueSideUserIds.length,
+                            totalBetAmount: findSides.reduce((sum, data) => sum + data.betAmount, 0),
+                            winner
+                        })
+                    } else if (item.gameName == "Card Betting") {
+                        const findCards = await CardBetting.find({
+                            gameId: item.gameId,
+                            period: item.period,
+                            selectedTime: item.periodFor,
+                            is_deleted: 0
+                        })
+                        let uniqueCardUserIds = getUniqueUserIds(findCards)
+                        const findWinCard = findCards.find((data) => data.isWin)
+                        let winner = '';
+                        if (findWinCard) {
+                            winner = findWinCard.card
+                        }
+                        gamePeriod.push({
+                            sNo: sNo,
+                            period: item.period,
+                            gameName: item.gameName,
+                            periodFor: item.periodFor,
+                            totalUsers: uniqueCardUserIds.length,
+                            totalBetAmount: findCards.reduce((sum, data) => sum + data.betAmount, 0),
+                            winner
+                        })
+                    }  
                 })
             )
         }
