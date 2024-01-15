@@ -1760,7 +1760,7 @@ export const getAllGamePeriodData = async (req, res) => {
           },
           {
             $group: {
-              _id: "userId",
+              _id: "$userId",
               totalUser: { $sum: 1 }
             }
           },
@@ -1907,40 +1907,29 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $lookup: {
             from: "cardbettings",
-            let: { periodId: "$period" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$period", "$$periodId"] },
-                      { $ne: ["$isWin", true] },
-                    ],
-                  },
-                },
-              },
-            ],
-            as: "cardBettingsData",
+            localField: "period",
+            foreignField: "period",
+            as: "cardbettingsData",
           },
         },
         {
-          $unwind: "$cardBettingsData",
+          $unwind: "$cardbettingsData",
         },
         {
           $match: {
-            "cardBettingsData.selectedTime": periodFor,
+            "cardbettingsData.selectedTime": periodFor,
           },
         },
         {
           $group: {
             _id: {
               period: "$period",
-              number: "$cardBettingsData.number",
+              card: "$cardbettingsData.card",
               periodId: "$_id",
             },
-            anyWinTrue: { $max: "$cardBettingsData.isWin" },
-            totalUser: { $addToSet: "$cardBettingsData.userId" },
-            totalBetAmount: { $sum: "$cardBettingsData.betAmount" },
+            anyWinTrue: { $max: "$cardbettingsData.isWin" },
+            totalUser: { $addToSet: "$cardbettingsData.userId" },
+            totalBetAmount: { $sum: "$cardbettingsData.betAmount" },
           },
         },
         {
@@ -1951,9 +1940,9 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $group: {
             _id: "$_id.period",
-            cardBettingsData: {
+            cardbettingsData: {
               $push: {
-                number: "$_id.number",
+                card: "$_id.card",
                 totalUser: { $sum: { $size: "$totalUser" } },
                 totalBetAmount: "$totalBetAmount",
               },
@@ -1964,15 +1953,13 @@ export const getAllGamePeriodData = async (req, res) => {
           $project: {
             _id: 0,
             period: "$_id",
-            periodId: "$periodId",
-            cardBettingsData: 1,
+            cardbettingsData: 1,
           },
         },
         {
           $sort: { period: -1 },
         },
       ]);
-
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getCardUser = await CardBetting.aggregate([
           {
@@ -1984,7 +1971,7 @@ export const getAllGamePeriodData = async (req, res) => {
           },
           {
             $group: {
-              _id: "userId",
+              _id: "$userId",
               totalUser: { $sum: 1 }
             }
           },
@@ -2004,7 +1991,7 @@ export const getAllGamePeriodData = async (req, res) => {
         return {
           period: result.period,
           totalUsers: getCardUser[0].totalUsers,
-          cardBettingsData: result.cardBettingsData
+          cardBettingsData: result.cardbettingsData
         }
       }))
 
