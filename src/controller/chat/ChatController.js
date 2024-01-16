@@ -66,6 +66,12 @@ Socket.on("connection", (sockets) => {
       );
     }
   });
+
+  // For Community live bets
+  sockets.on("CommunityLiveBets", async (data) => {
+    console.log('CommunityLiveBets');
+  });
+  // End live bet
 });
 
 // export const getChat = async (req, res) => {

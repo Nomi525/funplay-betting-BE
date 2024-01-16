@@ -397,10 +397,12 @@ import {
   declareColorWinner,
   declarePenaltyWinner,
   declareCardWinner,
+  capitalizeFirstLetter
 } from "./services/CommonService.js";
 dotenv.config();
 
 export {
+  capitalizeFirstLetter,
   getAllGamePeriodSelectedTimeList,
   declareCardWinner,
   declarePenaltyWinner,

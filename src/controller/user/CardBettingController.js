@@ -21,7 +21,8 @@ import {
     CardBetting,
     getRandomElement,
     getRandomNumberExcluding,
-    winCardNumberFun
+    winCardNumberFun,
+    capitalizeFirstLetter
 } from "../../index.js";
 //#region Add penalty Betting
 export const addCardBet = async (req, res) => {
@@ -145,7 +146,13 @@ export const getByIdGamePeriodOfCardBetting = async (req, res) => {
                 $project: {
                     _id: 0,
                     price: "$betAmount",
-                    card: 1,
+                    // card: 1,
+                    card: {
+                        $concat: [
+                            { $toUpper: { $substrCP: ["$card", 0, 1] } },
+                            { $substrCP: ["$card", 1, { $subtract: [{ $strLenCP: "$card" }, 1] }] }
+                        ]
+                    },
                     winCardNumber: 1,
                     period: 1,
                     isWin: 1,
@@ -391,14 +398,15 @@ export const cardBettingWinnerResult = async (req, res) => {
             is_deleted: 0,
         }).lean();
         if (checkAlreadyWin.length) {
+            let winCard = capitalizeFirstLetter(checkAlreadyWin[0].card)
             return sendResponse(
                 res,
                 StatusCodes.OK,
-                ResponseMessage.CARD_WINNER + " " + checkAlreadyWin[0].card + ' ' + checkAlreadyWin[0].winCardNumber,
+                ResponseMessage.CARD_WINNER + " " + winCard + ' ' + checkAlreadyWin[0].winCardNumber,
                 [
                     {
                         period: checkAlreadyWin[0].period,
-                        card: checkAlreadyWin[0].card,
+                        card: winCard,
                         totalBetAmount: checkAlreadyWin.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
                     }
                 ]
@@ -573,3 +581,7 @@ export const cardBettingWinnerResult = async (req, res) => {
     }
 }
 //#endregion
+
+// function capitalizeFirstLetter(str) {
+//     return str.replace(/^\w/, c => c.toUpperCase());
+// }
