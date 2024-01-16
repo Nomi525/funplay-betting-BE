@@ -99,6 +99,10 @@ export const referralCode = (length) => {
   }
   return code;
 };
+// Capitalize First Letter
+export const capitalizeFirstLetter = (str) => {
+  return str.replace(/^\w/, c => c.toUpperCase());
+}
 
 // Encryption function
 export const encryptObject = (object) => {

@@ -20,7 +20,8 @@ import {
     ejs,
     PenaltyBetting,
     getRandomElement,
-    getRandomNumberExcluding
+    getRandomNumberExcluding,
+    capitalizeFirstLetter
 } from "../../index.js";
 
 //#region Add penalty Betting
@@ -145,7 +146,13 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
                 $project: {
                     _id: 0,
                     price: "$betAmount",
-                    betSide: 1,
+                    // betSide: 1,
+                    betSide: {
+                        $concat: [
+                            { $toUpper: { $substrCP: ["$betSide", 0, 1] } },
+                            { $substrCP: ["$betSide", 1, { $subtract: [{ $strLenCP: "$betSide" }, 1] }] }
+                        ]
+                    },
                     period: 1,
                     isWin: 1,
                     status: 1,
@@ -373,14 +380,15 @@ export const penaltyBettingWinnerResult = async (req, res) => {
             is_deleted: 0,
         }).lean();
         if (checkAlreadyWin.length) {
+            let winBetSide = capitalizeFirstLetter(checkAlreadyWin[0].betSide)
             return sendResponse(
                 res,
                 StatusCodes.OK,
-                ResponseMessage.PENALTY_WINNER + " " + checkAlreadyWin[0].betSide,
+                ResponseMessage.PENALTY_WINNER + " " + winBetSide,
                 [
                     {
                         period: checkAlreadyWin[0].period,
-                        betSide: checkAlreadyWin[0].betSide,
+                        betSide: winBetSide,
                         totalBetAmount: checkAlreadyWin.reduce((total, data) => Number(total) + Number(data.betAmount), 0)
                     }
                 ]

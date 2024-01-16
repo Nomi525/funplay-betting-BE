@@ -22,6 +22,7 @@ import {
   sendMail,
   ejs,
   getRandomElement,
+  capitalizeFirstLetter
 } from "../../index.js";
 
 //#region Colour betting api
@@ -883,11 +884,17 @@ export const getByIdGamePeriod = async (req, res) => {
         $project: {
           _id: 0,
           price: "$betAmount",
-          colourName: 1,
+          // colourName: 1,
+          colourName: {
+            $concat: [
+              { $toUpper: { $substrCP: ["$colourName", 0, 1] } },
+              { $substrCP: ["$colourName", 1, { $subtract: [{ $strLenCP: "$colourName" }, 1] }] }
+            ]
+          },
           period: 1,
           isWin: 1,
           status: 1,
-          createdAt : 1,
+          createdAt: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -1205,14 +1212,15 @@ export const colourBettingWinnerResult = async (req, res) => {
     }).lean();
 
     if (checkAlreadyWin.length) {
+      let winColourName = capitalizeFirstLetter(checkAlreadyWin[0].colourName)
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.COLOR_WINNER + " " + checkAlreadyWin[0].colourName,
+        ResponseMessage.COLOR_WINNER + " " + winColourName,
         [
           {
             period: checkAlreadyWin[0].period,
-            colourName: checkAlreadyWin[0].colourName,
+            colourName: winColourName,
             totalBetAmount: checkAlreadyWin.reduce(
               (total, data) => Number(total) + Number(data.betAmount),
               0
@@ -1220,7 +1228,7 @@ export const colourBettingWinnerResult = async (req, res) => {
           },
         ]
       );
-    }else{
+    } else {
       return sendResponse(
         res,
         StatusCodes.OK,
