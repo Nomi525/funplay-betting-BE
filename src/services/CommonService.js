@@ -344,7 +344,23 @@ export const declareNumberWinner = async (game, period) => {
           },
         },
       ]);
-      if (totalUserInPeriod.length) {
+      const totalNumberInPeriod = await NumberBetting.aggregate([
+        {
+          $match: {
+            gameId: new mongoose.Types.ObjectId(gameId),
+            period: Number(period),
+            is_deleted: 0,
+          },
+        },
+        {
+          $group: {
+            _id: "$number",
+            period: { $first: "$period" },
+            totalBetInNumber: { $sum: 1 },
+          },
+        },
+      ]);
+      if (totalUserInPeriod.length && (totalNumberInPeriod.length && totalNumberInPeriod.length >= 2)) {
         const hasUserTotalBets = totalUserInPeriod.some(
           (user) => user.userTotalBets >= 1
         );
@@ -508,6 +524,16 @@ export const declareNumberWinner = async (game, period) => {
           isWin: true,
           status: "successfully",
         });
+        await NumberBetting.updateMany(
+          {
+            period,
+            gameId,
+            isWin: false,
+            status: "pending",
+            is_deleted: 0,
+          },
+          { status: "fail" }
+        );
         return {
           message: ResponseMessage.NUMBER_WINNER + " " + randomWinNumber,
           data: [],

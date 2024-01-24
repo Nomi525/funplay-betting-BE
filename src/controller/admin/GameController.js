@@ -53,10 +53,10 @@ export const addEditGame = async (req, res) => {
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
     newGameStartDate = moment(`${newGameStartDate} ${gameDurationFrom}`)
-      .utcOffset("-05:30")
+      .utcOffset("05:30")
       .format("YYYY-MM-DDTHH:mm:ss");
     newGameEndDate = moment(`${newGameEndDate} ${gameDurationTo}`)
-      .utcOffset("-05:30")
+      .utcOffset("05:30")
       .format("YYYY-MM-DDTHH:mm:ss");
     const findGameQuery = {
       gameName: { $regex: "^" + gameName + "$", $options: "i" },
