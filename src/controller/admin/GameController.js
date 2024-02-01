@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Socket } from "../../config/Socket.config.js";
 import {
   CardBetting,
   ColourBetting,
@@ -17,6 +18,7 @@ import {
   handleErrorResponse,
   mongoose,
   sendResponse,
+
 } from "../../index.js";
 
 //#region Game add and edit
@@ -168,7 +170,9 @@ export const addEditGame = async (req, res) => {
         Game
       );
       console.log(gameSecond, 'gameSecond');
+
       if (updateGame) {
+        Socket.emit('updateGame', updateGame)
         return sendResponse(
           res,
           StatusCodes.OK,

@@ -442,7 +442,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           period: 1,
           isWin: 1,
           status: 1,
-          createdAt : 1,
+          createdAt: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -1692,6 +1692,7 @@ const updateAndCreatePeriod = async (
     },
     { upsert: true }
   ).lean();
+
 };
 
 function allDateStamps(game, time, type) {
@@ -1731,6 +1732,7 @@ export async function createAllGamePeriodFromCronJob() {
     for (const game of findGame2) {
       //new code 28-12-2023 harsh && maulik
       if (game.gameName == "Number Betting") {
+
         const {
           gameStartTimeStamp,
           gameEndTimeStamp,
@@ -1745,6 +1747,7 @@ export async function createAllGamePeriodFromCronJob() {
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
           // console.log("1st condition");
+
           let period = formattedDate + "0000";
           const periodCount = await Period.countDocuments({
             gameId: game._id,
@@ -1765,6 +1768,7 @@ export async function createAllGamePeriodFromCronJob() {
           if (!lastIndex) {
             if (gameEndTimeStamp < gameHoursNextTimeStamp) {
               // console.log("1");
+
               await updateAndCreatePeriod(
                 game._id,
                 dateForPeriod,
@@ -1785,8 +1789,9 @@ export async function createAllGamePeriodFromCronJob() {
           } else {
             // console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
+              console.log("betting Numbr")
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                // console.log("3");
+                console.log("3");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -1795,15 +1800,17 @@ export async function createAllGamePeriodFromCronJob() {
                   gameEndTimeStamp
                 );
               } else {
-                // console.log("4");
-                await updateAndCreatePeriod(
+                console.log("4");
+                const periodnumber = await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
                   period,
                   currentTimeAndDateStamp,
                   gameHoursNextTimeStamp
                 );
+                console.log(periodnumber, "111")
               }
+
             }
           }
         }

@@ -95,7 +95,8 @@ import {
   getAllSubAdmin,
   declareWinnerOfPenaltyBetting,
   declareWinnerOfCardBetting,
-  getAllGamePeriodSelectedTimeList
+  getAllGamePeriodSelectedTimeList,
+
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -235,7 +236,7 @@ adminRoutes.post('/notification-delete', Auth, deleteNotification)
 //#endregion
 
 //#region 
-adminRoutes.post('/currency-convert',allCurrencyConverter);
+adminRoutes.post('/currency-convert', allCurrencyConverter);
 //#endregion
 
 
@@ -285,5 +286,6 @@ adminRoutes.post("/declare-card-betting-winner", Auth, declareWinnerOfCardBettin
 
 adminRoutes.get("/get-all-game-periods/:gameType/:gameId", Auth, getAllGamePeriodData);
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
+
 export { adminRoutes };
 

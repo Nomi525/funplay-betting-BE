@@ -272,6 +272,7 @@ import {
   getByIdGamePeriod,
   getCommunityWinList,
   colourBettingWinnerResult,
+  twelveHourAgoPeriod,
 } from "./controller/user/ColourBettingController.js";
 
 // Coumunnity Betting
@@ -400,6 +401,7 @@ import {
   capitalizeFirstLetter
 } from "./services/CommonService.js";
 dotenv.config();
+
 
 export {
   capitalizeFirstLetter,
@@ -681,6 +683,7 @@ export {
   colourBetResult,
   getNumberGameTotal,
   getCommunityWinList,
+  twelveHourAgoPeriod,
   http,
   Chat,
   // updateEmail,

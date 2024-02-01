@@ -37,7 +37,7 @@ export const adminEditUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const findUsers = await User.find({ isVerified: true, is_deleted: 0 }).sort(
+    const findUsers = await User.find({ is_deleted: 0 }).sort(
       { createdAt: -1 }
     );
     if (findUsers.length) {
@@ -414,7 +414,7 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
 export const getAllTransaction = async (req, res) => {
   try {
     const transactionHistory = await TransactionHistory.find({ is_deleted: 0 })
-      .populate("userId",'fullName email currency')
+      .populate("userId", 'fullName email currency')
       .sort({ createdAt: -1 });
     if (transactionHistory.length) {
       return sendResponse(

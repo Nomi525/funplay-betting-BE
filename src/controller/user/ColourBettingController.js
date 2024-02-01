@@ -22,7 +22,7 @@ import {
   sendMail,
   ejs,
   getRandomElement,
-  capitalizeFirstLetter
+  capitalizeFirstLetter, Period
 } from "../../index.js";
 
 //#region Colour betting api
@@ -1469,3 +1469,15 @@ export const colourBettingWinnerResult = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
+export async function twelveHourAgoPeriod() {
+  try {
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    const result = await Period.deleteMany({
+      createdAt: { $lt: twelveHoursAgo },
+    })
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}

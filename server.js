@@ -8,6 +8,7 @@ import {
   cron,
   createAllGamePeriodFromCronJob,
   createAllGameWinnerFromCronJob,
+  twelveHourAgoPeriod
 } from "./src/index.js";
 import { server, app } from "./src/config/Socket.config.js";
 app.use(cors());
@@ -51,6 +52,9 @@ cron.schedule("* * * * * *", () => {
 // // cron run for every seconds
 cron.schedule('* * * * * *', () => {
   createAllGameWinnerFromCronJob();
+});
+cron.schedule("0 0 * * * *", () => {
+  twelveHourAgoPeriod();
 });
 
 const appServer = server.listen(process.env.PORT, () => {
