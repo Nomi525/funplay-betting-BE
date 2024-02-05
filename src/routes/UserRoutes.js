@@ -1,3 +1,4 @@
+import { socketRoute } from "../config/Socket.config.js";
 import { updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
@@ -77,6 +78,7 @@ import {
   getAllGamePeriodOfCardBetting,
   cardBettingWinnerResult,
 } from "./../index.js";
+import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 const userRoutes = express.Router();
 
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
@@ -233,6 +235,9 @@ userRoutes.get('/get-all-card-betting-period/:gameId', Auth, getAllGamePeriodOfC
 userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinnerResult)
 
 //#endregion card Betting Routes
+
+socketRoute('/number-betting').on('connection', numberBettingSocket)
+socketRoute('/color-betting').on('connection', colorBettingSocket)
 
 
 export { userRoutes };

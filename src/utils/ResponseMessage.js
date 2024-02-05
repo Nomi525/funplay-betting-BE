@@ -259,6 +259,10 @@ const ResponseMessage = {
   CARD_BET_DELETED: "card deleted successfully.",
   CARD_WINNER: "Victory Alert! The Winning Card is",
   PERIOD_ALREADY_EXITS: "This period id has already win.",
+  PLEASE_PROVIDE_VALID_QR_UPI: "Please provide a UPI ID or a QR Code.",
+  UPIID_OR_CODE_UPDATED: 'UPI ID or QR Code updated successfully',
+  UPIID_QR_CODE_ADDED: "UPI ID or QR Code added successfully",
+  UPI_OR_CODE_FETCHED: "UPI OR Code fetched successfully",
 };
 
 export { ResponseMessage };

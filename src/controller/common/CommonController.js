@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Currency } from "../../models/Currency.js";
-import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting, PenaltyBetting, CardBetting } from "./../../index.js";
+import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting, PenaltyBetting, CardBetting, getUpiQr } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -267,7 +267,7 @@ export const getPeriodsDetailsForAllGame = async (req, res) => {
                             totalBetAmount: findCards.reduce((sum, data) => sum + data.betAmount, 0),
                             winner
                         })
-                    }  
+                    }
                 })
             )
         }

@@ -1789,7 +1789,7 @@ export async function createAllGamePeriodFromCronJob() {
           } else {
             // console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
-              console.log("betting Numbr")
+
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 console.log("3");
                 await updateAndCreatePeriod(
@@ -1808,7 +1808,7 @@ export async function createAllGamePeriodFromCronJob() {
                   currentTimeAndDateStamp,
                   gameHoursNextTimeStamp
                 );
-                console.log(periodnumber, "111")
+
               }
 
             }
@@ -2458,6 +2458,7 @@ export const getPeriod = async (req, res) => {
 // }
 
 export const createAllGameWinnerFromCronJob = async (req, res) => {
+
   try {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
     let currentTimeAndDateStampPlus10Second = moment().unix() + 10;

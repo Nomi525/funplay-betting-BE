@@ -46,6 +46,10 @@ var upload = multer({ storage }).fields([
         name: "communityBettingImage",
         maxCount: 1,
     },
+    {
+        name: "qrCode",
+        maxCount: 1,
+    }
 ]);
 
 export default function (req, res, next) {
@@ -71,6 +75,8 @@ export default function (req, res, next) {
 
                 var communityBettingImage = req.files.communityBettingImage ? req.files.communityBettingImage[0].filename : "";
                 req.communityBettingImageUrl = communityBettingImage;
+                var profile = req.files.profile ? req.files.profile[0].filename : "";
+                req.profileUrl = profile;
                 next();
             } else {
                 next();

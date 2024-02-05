@@ -56,6 +56,7 @@ import {
   getAdminSetting,
   adminResendOtp,
   getUpdatedUser,
+  addupdateUPiorQr, getUpiQr
 } from "./controller/admin/AdminController.js";
 import { uploadImage } from "./controller/chat/ChatController.js";
 import {
@@ -367,6 +368,7 @@ import {
   multipleDeleteUpdate,
 } from "./services/AdminServices.js";
 
+
 import {
   createError,
   sendResponse,
@@ -400,6 +402,7 @@ import {
   declareCardWinner,
   capitalizeFirstLetter
 } from "./services/CommonService.js";
+import { QrCodes } from "./models/QrCode.js";
 dotenv.config();
 
 
@@ -686,5 +689,6 @@ export {
   twelveHourAgoPeriod,
   http,
   Chat,
+  QrCodes, addupdateUPiorQr, getUpiQr
   // updateEmail,
 };

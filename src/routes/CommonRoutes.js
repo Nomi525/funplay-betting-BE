@@ -11,7 +11,7 @@ import {
   getPeriodsDetailsForAllGame,
   getAllGameRecodesGameWise,
   // getChat,
-  uploadImage,
+  uploadImage, getUpiQr
 } from "../index.js";
 const commonRoutes = express.Router();
 // Banner Api for admin and user
@@ -44,5 +44,6 @@ commonRoutes.get(
 );
 // commonRoutes.get("/get-chat", getChat);
 commonRoutes.post("/upload-image", Upload, uploadImage);
+commonRoutes.get("/get-qr-upi", getUpiQr)
 
 export { commonRoutes };
