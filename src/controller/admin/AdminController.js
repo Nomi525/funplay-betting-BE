@@ -466,7 +466,7 @@ export const addupdateUPiorQr = async (req, res) => {
 
     try {
 
-        let existingQrCode = await QrCodes.findOne({ $or: [{ qrCode }, { UpiID }] });
+        let existingQrCode = await QrCodes.findOne();
 
         if (existingQrCode) {
 
