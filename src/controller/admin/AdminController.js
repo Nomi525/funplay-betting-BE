@@ -454,15 +454,7 @@ export const getUpdatedUser = async (req, res) => {
 
 export const addupdateUPiorQr = async (req, res) => {
     const { UpiID } = req.body;
-    let qrCode = req.files.qrCode[0].filename
-    if (!qrCode && !UpiID) {
-        return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.PLEASE_PROVIDE_VALID_QR_UPI,
-            []
-        );
-    }
+    let qrCode = req.files && req.files.qrCode && req.files.qrCode.length > 0 ? req.files.qrCode[0].filename : undefined;
 
     try {
 
@@ -481,7 +473,7 @@ export const addupdateUPiorQr = async (req, res) => {
                 existingQrCode
             );
         } else {
-            // Create a new document in the 'upiQr' collection
+
             const newUpiQr = new QrCodes({ qrCode, UpiID });
             await newUpiQr.save();
 
