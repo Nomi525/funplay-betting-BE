@@ -7,8 +7,8 @@ import {
 //#region admin dashboard
 export const adminDashboard = async (req, res) => {
 
-    console.log("datata")
     try {
+
         const totalUsers = await getAllDataCount({ is_deleted: 0, isVerified: true }, User);
         const depositeData = await NewTransaction.find({});
         // const totalDeposit = depositeData.reduce((data, dis) => data + dis.tokenDollorValue, 0);
@@ -51,12 +51,55 @@ export const adminDashboard = async (req, res) => {
         let penaltyBettingWinningAmount = penaltyBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
         let cardBettingWinningAmount = cardBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
         const totalWinningAmountin24Hrs = numberBettingWinningAmount + colourBettingWinningAmount + communityBettingWinningAmount + penaltyBettingWinningAmount + cardBettingWinningAmount
-        console.log(totalWinningAmountin24Hrs, "totalWinningAmountin24Hrs")
+        console.log(totalWinningAmountin24Hrs, "4444")
+        // last one month distributed amount 
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1); // Subtract one month from the current date
+        const numberBettingForUser1 = await NumberBetting.find({ createdAt: { $gte: oneMonthAgo }, is_deleted: 0 });
+        const colourBettingForUser1 = await ColourBetting.find({ createdAt: { $gte: oneMonthAgo }, is_deleted: 0 });
+        const communityBettingForUser1 = await CommunityBetting.find({ createdAt: { $gte: oneMonthAgo }, is_deleted: 0 });
+        const penaltyBettingForUser1 = await PenaltyBetting.find({ createdAt: { $gte: oneMonthAgo }, is_deleted: 0 });
+        const cardBettingForUser1 = await CardBetting.find({ createdAt: { $gte: oneMonthAgo }, is_deleted: 0 });
+        let numberBettingWinningAmount1 = numberBettingForUser1.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0);
+        let colourBettingWinningAmount1 = colourBettingForUser1.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0);
+        let communityBettingWinningAmount1 = communityBettingForUser1.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0);
+        let penaltyBettingWinningAmount1 = penaltyBettingForUser1.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0);
+        let cardBettingWinningAmount1 = cardBettingForUser1.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0);
+        const totalWinningAmountLastMonth = numberBettingWinningAmount1 + colourBettingWinningAmount1 + communityBettingWinningAmount1 + penaltyBettingWinningAmount1 + cardBettingWinningAmount1;
+
+
+
+        //24 hrs deposit amount
+        const oneDayAgo1 = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+        const sumResult = await NewTransaction.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: oneDayAgo1 },
+                    is_deleted: 0
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalTokenDollorValue: {
+                        $sum: { $toDouble: "$tokenDollorValue" }
+                    }
+                }
+            }
+        ]);
+
+        const total = sumResult.length > 0 ? sumResult[0].totalTokenDollorValue : 0;
+
+
+        const allBetin24hrs = await getUniqueUserCounts()
+        console.log(allBetin24hrs);
+
 
         return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, {
             totalUsers, totalActiveUsers, totalNewLoginUsersIn24Hours, totalDeactivatedUsers, totalWinningAmountin24Hrs,
             totalDeposit, totalDepositUser: depositeData.length, totalZeroDepositUser, totalZeroDepositUserIn24Hours,
-            totalTransaction: totalTransaction.length
+            totalTransaction: totalTransaction.length, totalWinningAmountin24Hrs, totaldepositIn24Hours: total, totalDistributedAmountInLastMonth: totalWinningAmountLastMonth, totalDistributedToday: total,
+            allUserPlacedBetIn24Hours: allBetin24hrs
         });
     } catch (error) {
         console.log(error);
@@ -64,3 +107,48 @@ export const adminDashboard = async (req, res) => {
     }
 }
 // #endregion
+
+
+
+
+//get all bet count in 24 hrs all game function 
+const getUniqueUserCounts = async () => {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const aggregateUniqueUsers = (model) => model.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: oneDayAgo },
+                is_deleted: 0,
+            },
+        },
+        {
+            $group: {
+                _id: '$userId',
+            },
+        },
+        {
+            $count: 'uniqueUsersCount',
+        },
+    ]);
+
+    try {
+        // Running all aggregations concurrently
+        const results = await Promise.all([
+            aggregateUniqueUsers(NumberBetting),
+            aggregateUniqueUsers(PenaltyBetting),
+            aggregateUniqueUsers(CommunityBetting),
+            aggregateUniqueUsers(ColourBetting),
+            aggregateUniqueUsers(CardBetting),
+        ]);
+
+
+        const totalUniqueUsers = results.reduce((sum, current) => {
+            return sum + (current.length > 0 ? current[0].uniqueUsersCount : 0);
+        }, 0);
+        return totalUniqueUsers;
+    } catch (error) {
+        console.error('Error fetching unique user counts:', error);
+        throw error;
+    }
+};
