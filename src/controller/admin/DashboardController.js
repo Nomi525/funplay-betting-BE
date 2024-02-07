@@ -12,7 +12,7 @@ export const adminDashboard = async (req, res) => {
         const totalUsers = await getAllDataCount({ is_deleted: 0, isVerified: true }, User);
         const depositeData = await NewTransaction.find({});
         // const totalDeposit = depositeData.reduce((data, dis) => data + dis.tokenDollorValue, 0);
-        const totalDeposit = depositeData.reduce((data, dis) => plusLargeSmallValue(data, dis.tokenDollorValue), 0);
+        const totalDeposit = depositeData.reduce((data, dis) => plusLargeSmallValue(data, dis.totalCoin), 0);
         let totalDeactivatedUsers = await getAllDataCount({ $or: [{ is_deleted: 1 }, { isActive: false }] }, User);
         let totalActiveUsers = totalUsers - totalDeactivatedUsers;
 
@@ -99,7 +99,7 @@ export const adminDashboard = async (req, res) => {
             totalUsers, totalActiveUsers, totalNewLoginUsersIn24Hours, totalDeactivatedUsers, totalWinningAmountin24Hrs,
             totalDeposit, totalDepositUser: depositeData.length, totalZeroDepositUser, totalZeroDepositUserIn24Hours,
             totalTransaction: totalTransaction.length, totalWinningAmountin24Hrs, totaldepositIn24Hours: total, totalDistributedAmountInLastMonth: totalWinningAmountLastMonth, totalDistributedToday: total,
-            allUserPlacedBetIn24Hours: allBetin24hrs
+            allUserPlacedBetIn24Hours: allBetin24hrs.totalUniqueUsers, totalBetInPast24hrs: allBetin24hrs.totalBetCount
         });
     } catch (error) {
         console.log(error);
@@ -115,7 +115,7 @@ export const adminDashboard = async (req, res) => {
 const getUniqueUserCounts = async () => {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    const aggregateUniqueUsers = (model) => model.aggregate([
+    const aggregateUniqueUsersAndBetCounts = (model) => model.aggregate([
         {
             $match: {
                 createdAt: { $gte: oneDayAgo },
@@ -125,30 +125,42 @@ const getUniqueUserCounts = async () => {
         {
             $group: {
                 _id: '$userId',
+                betCount: { $sum: 1 }, // Counting bets per user
             },
         },
         {
-            $count: 'uniqueUsersCount',
+            $group: {
+                _id: null, // Grouping all documents together
+                uniqueUsersCount: { $sum: 1 }, // Counting unique users
+                totalBetCount: { $sum: '$betCount' }, // Summing up the bet counts from the first grouping
+            },
         },
     ]);
 
     try {
         // Running all aggregations concurrently
         const results = await Promise.all([
-            aggregateUniqueUsers(NumberBetting),
-            aggregateUniqueUsers(PenaltyBetting),
-            aggregateUniqueUsers(CommunityBetting),
-            aggregateUniqueUsers(ColourBetting),
-            aggregateUniqueUsers(CardBetting),
+            aggregateUniqueUsersAndBetCounts(NumberBetting),
+            aggregateUniqueUsersAndBetCounts(PenaltyBetting),
+            aggregateUniqueUsersAndBetCounts(CommunityBetting),
+            aggregateUniqueUsersAndBetCounts(ColourBetting),
+            aggregateUniqueUsersAndBetCounts(CardBetting),
         ]);
 
+        // Initializing variables to hold the sum of unique users and total bets
+        let totalUniqueUsers = 0;
+        let totalBetCount = 0;
 
-        const totalUniqueUsers = results.reduce((sum, current) => {
-            return sum + (current.length > 0 ? current[0].uniqueUsersCount : 0);
-        }, 0);
-        return totalUniqueUsers;
+        results.forEach(result => {
+            if (result.length > 0) {
+                totalUniqueUsers += result[0].uniqueUsersCount;
+                totalBetCount += result[0].totalBetCount;
+            }
+        });
+
+        return { totalUniqueUsers, totalBetCount };
     } catch (error) {
-        console.error('Error fetching unique user counts:', error);
+        console.error('Error fetching unique user counts and total bet counts:', error);
         throw error;
     }
 };
