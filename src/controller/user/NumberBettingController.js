@@ -1800,7 +1800,7 @@ export async function createAllGamePeriodFromCronJob() {
                   gameEndTimeStamp
                 );
               } else {
-                console.log("4");
+                // console.log("4");
                 const periodnumber = await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -1867,12 +1867,12 @@ export async function createAllGamePeriodFromCronJob() {
               );
             }
           } else {
-            console.log(
-              currentTimeAndDateStamp > lastIndex.endTime,
-              "check",
-              currentTimeAndDateStamp,
-              lastIndex.endTime
-            );
+            // console.log(
+            //   currentTimeAndDateStamp > lastIndex.endTime,
+            //   "check",
+            //   currentTimeAndDateStamp,
+            //   lastIndex.endTime
+            // );
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 console.log("3");
@@ -1884,7 +1884,7 @@ export async function createAllGamePeriodFromCronJob() {
                   gameEndTimeStamp
                 );
               } else {
-                console.log("4");
+                // console.log("4");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
