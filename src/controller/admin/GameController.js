@@ -1652,7 +1652,7 @@ export const getAllGamePeriodData = async (req, res) => {
           period: result.period,
           totalUsers: getPenaltyUser[0] ? getPenaltyUser[0].totalUsers : 0,
           penaltybettingsData: result.penaltybettingsData,
-          leastBetData
+          leastBetData // Array containing the least bet amount and associated bet side(s)
         };
       }));
     } else if (gameType === "cardBetting") {
@@ -1720,49 +1720,64 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
+
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getCardUser = await CardBetting.aggregate([
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
-              period: Number(result.period),
+              period: result.period,
               selectedTime: periodFor
             }
           },
           {
             $group: {
               _id: "$userId",
-              totalUser: { $sum: 1 }
+              minBet: { $min: "$betAmount" },
+              card: { $first: "$card" } // This assumes bets are sorted by amount in ascending order elsewhere
             }
           },
           {
             $group: {
               _id: null,
-              totalUsers: { $sum: 1 }
+              totalUsers: { $sum: 1 },
+              userMinBets: { $push: { userId: "$_id", minBet: "$minBet", card: "$card" } }
             }
           },
           {
             $project: {
               _id: 0,
-              totalUsers: 1
+              totalUsers: 1,
+              userMinBets: 1
             }
           }
-        ])
+        ]);
+
+        let leastBetAmount = Infinity;
+        let leastBetCards = [];
+        result.cardbettingsData.forEach(cardData => {
+          if (cardData.totalBetAmount < leastBetAmount) {
+            leastBetAmount = cardData.totalBetAmount;
+            leastBetCards = [cardData.card];
+          } else if (cardData.totalBetAmount === leastBetAmount) {
+            leastBetCards.push(cardData.card);
+          }
+        });
+
         return {
           period: result.period,
-          totalUsers: getCardUser[0].totalUsers,
-          cardBettingsData: result.cardbettingsData
-        }
-      }))
+          totalUsers: getCardUser.length > 0 ? getCardUser[0].totalUsers : 0,
+          cardBettingsData: result.cardbettingsData,
+          leastBetCards: leastBetCards.map(card => ({ card, totalBetAmount: leastBetAmount })),
+          userMinBets: getCardUser.length > 0 ? getCardUser[0].userMinBets : []
+        };
+      }));
+
+      return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, battingAggregationResult);
     }
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      battingAggregationResult
-    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
+
 };
 //#endregion
