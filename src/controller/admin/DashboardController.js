@@ -12,7 +12,7 @@ export const adminDashboard = async (req, res) => {
         const totalUsers = await getAllDataCount({ is_deleted: 0, isVerified: true }, User);
         const depositeData = await NewTransaction.find({});
         // const totalDeposit = depositeData.reduce((data, dis) => data + dis.tokenDollorValue, 0);
-        const totalDeposit = depositeData.reduce((data, dis) => plusLargeSmallValue(data, dis.totalCoin), 0);
+        const totalDeposit = depositeData.reduce((data, dis) => plusLargeSmallValue(data, dis.tokenDollorValue), 0);
         let totalDeactivatedUsers = await getAllDataCount({ $or: [{ is_deleted: 1 }, { isActive: false }] }, User);
         let totalActiveUsers = totalUsers - totalDeactivatedUsers;
 
