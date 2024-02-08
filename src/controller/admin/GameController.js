@@ -1564,41 +1564,97 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
+      // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
+      //   const getPenaltyUser = await PenaltyBetting.aggregate([
+      //     {
+      //       $match: {
+      //         gameId: new mongoose.Types.ObjectId(gameId),
+      //         period: Number(result.period),
+      //         selectedTime: periodFor
+      //       }
+      //     },
+      //     {
+      //       $group: {
+      //         _id: "$userId",
+      //         totalUser: { $sum: 1 }
+      //       }
+      //     },
+      //     {
+      //       $group: {
+      //         _id: null,
+      //         totalUsers: { $sum: 1 }
+      //       }
+      //     },
+      //     {
+      //       $project: {
+      //         _id: 0,
+      //         totalUsers: 1
+      //       }
+      //     }
+      //   ])
+      //   return {
+      //     period: result.period,
+      //     totalUsers: getPenaltyUser[0].totalUsers,
+      //     penaltybettingsData: result.penaltybettingsData
+      //   }
+      // }))
+
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getPenaltyUser = await PenaltyBetting.aggregate([
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
               period: Number(result.period),
-              selectedTime: periodFor
+              selectedTime: periodFor,
             }
           },
           {
             $group: {
               _id: "$userId",
-              totalUser: { $sum: 1 }
+              totalUser: { $sum: 1 },
             }
           },
           {
             $group: {
               _id: null,
-              totalUsers: { $sum: 1 }
+              totalUsers: { $sum: 1 },
             }
           },
           {
             $project: {
               _id: 0,
-              totalUsers: 1
+              totalUsers: 1,
             }
           }
-        ])
+        ]);
+
+        // Initialization for tracking the least bet amount and associated data
+        let leastBetAmount = Number.MAX_SAFE_INTEGER;
+        let leastBetData = [];
+
+        // Iterate through penaltybettingsData to find the least bet amount and associated bet side(s)
+        result.penaltybettingsData.forEach(betData => {
+          if (betData.totalBetAmount < leastBetAmount) {
+            leastBetAmount = betData.totalBetAmount;
+            leastBetData = [{
+              betSide: betData.betSide,
+              totalBetAmount: betData.totalBetAmount
+            }];
+          } else if (betData.totalBetAmount === leastBetAmount) {
+            leastBetData.push({
+              betSide: betData.betSide,
+              totalBetAmount: betData.totalBetAmount
+            });
+          }
+        });
+
         return {
           period: result.period,
-          totalUsers: getPenaltyUser[0].totalUsers,
-          penaltybettingsData: result.penaltybettingsData
-        }
-      }))
-
+          totalUsers: getPenaltyUser[0] ? getPenaltyUser[0].totalUsers : 0,
+          penaltybettingsData: result.penaltybettingsData,
+          leastBetData
+        };
+      }));
     } else if (gameType === "cardBetting") {
       battingAggregationResult = await Period.aggregate([
         {
