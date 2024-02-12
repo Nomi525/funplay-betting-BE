@@ -49,7 +49,16 @@ var upload = multer({ storage }).fields([
     {
         name: "qrCode",
         maxCount: 1,
-    }
+    },
+    {
+        name: "transactionScreenShort",
+        maxCount: 1,
+    },
+    {
+        name: "rejectScreenShort",
+        maxCount: 1,
+    },
+    
 ]);
 
 export default function (req, res, next) {
@@ -75,8 +84,15 @@ export default function (req, res, next) {
 
                 var communityBettingImage = req.files.communityBettingImage ? req.files.communityBettingImage[0].filename : "";
                 req.communityBettingImageUrl = communityBettingImage;
+
                 var profile = req.files.profile ? req.files.profile[0].filename : "";
                 req.profileUrl = profile;
+
+                var transactionScreenShort = req.files.transactionScreenShort ? req.files.transactionScreenShort[0].filename : "";
+                req.transactionScreenShortUrl = transactionScreenShort;
+
+                var rejectScreenShort = req.files.rejectScreenShort ? req.files.rejectScreenShort[0].filename : "";
+                req.rejectScreenShortUrl = rejectScreenShort;
                 next();
             } else {
                 next();

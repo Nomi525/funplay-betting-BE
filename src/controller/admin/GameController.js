@@ -1095,42 +1095,35 @@ export const getAllGamePeriodData = async (req, res) => {
     const { gameId, gameType } = req.params;
     const { periodFor } = req.query;
     console.log(gameId, gameType, periodFor, "44444")
-    let battingAggregationResult;
 
-    // Find periods with isWin: true in the numberbettings collection
+    let battingAggregationResult;
+    console.log("Before sending the response1099:", battingAggregationResult);
+
+    
     const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct(
       "period",
       { isWin: true }
     );
-    console.log(isWinTruePeriodsforNumberBetting,"NumberBetting");
 
-    // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
       "period",
       { isWin: true, selectedTime: periodFor, gameId, gameType }
     );
-    console.log(isWinTruePeriodsforColourBetting,"ColorBetting");
-    // Find periods with isWin: true in the penaltyBetting collection
+   
     const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
       "period",
       { isWin: true, selectedTime: periodFor, gameId }
     );
-    console.log(isWinTruePeriodsforpenaltyBetting,"PenaltyBetting");
-
-    // Find periods with isWin: true in the communitybetting collection
+    
     const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
       "period",
       { isWin: true }
     );
-    console.log(isWinTruePeriodsforCommunityBetting,"commitybetting");
-
-    // Find periods with isWin: true in the cardbetting collection
+    
     const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
       "period",
       { isWin: true, selectedTime: periodFor, gameId }
     );
-    console.log(isWinTruePeriodsforCardBetting,"Cardbetting");
-
 
     if (gameType === "numberBetting") {
       battingAggregationResult = await Period.aggregate([
@@ -1221,7 +1214,7 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
-   
+      console.log("Before sending the response1224:", battingAggregationResult);
 
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         let leastBetAmount = Number.MAX_SAFE_INTEGER;
@@ -1350,6 +1343,7 @@ export const getAllGamePeriodData = async (req, res) => {
       //     colourbettingsData: result.colourbettingsData
       //   }
       // }))
+      console.log("Before sending the response1353:", battingAggregationResult);
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         console.log("112");
         const getUserColor = await ColourBetting.aggregate([
@@ -1404,6 +1398,7 @@ export const getAllGamePeriodData = async (req, res) => {
       }));
 
     } else if (gameType === "communityBetting") {
+      console.log("hhhhh");
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
@@ -1474,6 +1469,7 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
+      console.log(battingAggregationResult,"battingAggregationResult1478");
 
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getCommunityUser = await CommunityBetting.aggregate([
@@ -1502,14 +1498,17 @@ export const getAllGamePeriodData = async (req, res) => {
             }
           }
         ])
+        console.log(getCommunityUser,"dddkkk");
         return {
           period: result.period,
           totalUsers: getCommunityUser[0].totalUsers,
           comunityBettingData: result.comunityBettingData
         }
       }))
+      console.log(battingAggregationResult,"ddddddd");
 
     } else if (gameType === "penaltyBetting") {
+      console.log("Before sending the response1517:", battingAggregationResult);
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
@@ -1608,7 +1607,7 @@ export const getAllGamePeriodData = async (req, res) => {
       //     penaltybettingsData: result.penaltybettingsData
       //   }
       // }))
-
+      console.log("Before sending the response1615:", battingAggregationResult);
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getPenaltyUser = await PenaltyBetting.aggregate([
           {
@@ -1666,6 +1665,7 @@ export const getAllGamePeriodData = async (req, res) => {
         };
       }));
     } else if (gameType === "cardBetting") {
+      console.log("Before sending the response1673:", battingAggregationResult);
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
@@ -1728,8 +1728,10 @@ export const getAllGamePeriodData = async (req, res) => {
         },
         {
           $sort: { period: -1 },
+           
         },
       ]);
+      console.log("Before sending the response1737:", battingAggregationResult);
 
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         const getCardUser = await CardBetting.aggregate([
@@ -1782,9 +1784,11 @@ export const getAllGamePeriodData = async (req, res) => {
           userMinBets: getCardUser.length > 0 ? getCardUser[0].userMinBets : []
         };
       }));
+      console.log(battingAggregationResult, "Final Result");
 
       return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, battingAggregationResult);
     }
+    
   } catch (error) {
     return handleErrorResponse(res, error);
   }

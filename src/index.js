@@ -59,6 +59,7 @@ import {
   addupdateUPiorQr, getUpiQr
 } from "./controller/admin/AdminController.js";
 import { uploadImage } from "./controller/chat/ChatController.js";
+
 import {
   logout,
   editProfile,
@@ -405,8 +406,8 @@ import {
 } from "./services/CommonService.js";
 import { QrCodes } from "./models/QrCode.js";
 dotenv.config();
-
-
+import {FaintCurrency} from "./models/FaintCurrency.js"
+// import { addFaintCurrency } from "./controller/admin/FaintCurrency.js";
 export {
   capitalizeFirstLetter,
   getAllGamePeriodSelectedTimeList,
@@ -691,6 +692,8 @@ export {
   http,
   Chat,
   QrCodes, addupdateUPiorQr, getUpiQr,
-  getAllBettingHistory
+  getAllBettingHistory,
+  FaintCurrency,
+  
   // updateEmail,
 };
