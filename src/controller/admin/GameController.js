@@ -1102,29 +1102,34 @@ export const getAllGamePeriodData = async (req, res) => {
       "period",
       { isWin: true }
     );
+    console.log(isWinTruePeriodsforNumberBetting,"NumberBetting");
 
     // Find periods with isWin: true in the colourbettings collection
     const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
       "period",
       { isWin: true, selectedTime: periodFor, gameId, gameType }
     );
+    console.log(isWinTruePeriodsforColourBetting,"ColorBetting");
     // Find periods with isWin: true in the penaltyBetting collection
     const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
       "period",
       { isWin: true, selectedTime: periodFor, gameId }
     );
+    console.log(isWinTruePeriodsforpenaltyBetting,"PenaltyBetting");
 
     // Find periods with isWin: true in the communitybetting collection
     const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
       "period",
       { isWin: true }
     );
+    console.log(isWinTruePeriodsforCommunityBetting,"commitybetting");
 
     // Find periods with isWin: true in the cardbetting collection
     const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
       "period",
       { isWin: true, selectedTime: periodFor, gameId }
     );
+    console.log(isWinTruePeriodsforCardBetting,"Cardbetting");
 
 
     if (gameType === "numberBetting") {
@@ -1216,6 +1221,7 @@ export const getAllGamePeriodData = async (req, res) => {
           $sort: { period: -1 },
         },
       ]);
+   
 
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
         let leastBetAmount = Number.MAX_SAFE_INTEGER;
@@ -1240,6 +1246,7 @@ export const getAllGamePeriodData = async (req, res) => {
 
     }
     else if (gameType === "3colorBetting" || gameType === "2colorBetting") {
+      console.log("hii");
       battingAggregationResult = await Period.aggregate([
         {
           $match: {
@@ -1304,7 +1311,9 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $sort: { period: -1 },
         },
+    
       ]);
+      console.log("hello")
       // console.log(battingAggregationResult);
       // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
       //   const getUserColor = await ColourBetting.aggregate([
@@ -1342,6 +1351,7 @@ export const getAllGamePeriodData = async (req, res) => {
       //   }
       // }))
       battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
+        console.log("112");
         const getUserColor = await ColourBetting.aggregate([
           {
             $match: {

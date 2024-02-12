@@ -200,6 +200,7 @@ import {
   getUserWiseGameList,
   getNumberGameTotal,
   getAllWithdrawalRequest,
+  getAllBettingHistory,
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -689,6 +690,7 @@ export {
   twelveHourAgoPeriod,
   http,
   Chat,
-  QrCodes, addupdateUPiorQr, getUpiQr
+  QrCodes, addupdateUPiorQr, getUpiQr,
+  getAllBettingHistory
   // updateEmail,
 };

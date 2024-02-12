@@ -77,6 +77,7 @@ import {
   getByIdGamePeriodOfCardBetting,
   getAllGamePeriodOfCardBetting,
   cardBettingWinnerResult,
+  getAllBettingHistory,
 } from "./../index.js";
 import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 const userRoutes = express.Router();
@@ -239,6 +240,7 @@ userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinn
 socketRoute('/number-betting').on('connection', numberBettingSocket)
 socketRoute('/color-betting').on('connection', colorBettingSocket)
 
+userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 
 export { userRoutes };
 

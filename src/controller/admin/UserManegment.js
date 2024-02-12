@@ -2,7 +2,7 @@ import {
   ResponseMessage, StatusCodes, sendResponse,
   getSingleData, getAllData, handleErrorResponse, User, dataUpdated,
   NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin
+  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin, CardBetting, PenaltyBetting, CommunityBetting
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -664,3 +664,35 @@ export const getAllWithdrawalRequest = async (req, res) => {
   }
 }
 //#endregion
+//get all game betting history
+export const getAllBettingHistory = async (req, res) => {
+  try {
+    const getAllCardBetting = await CardBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getAllNumberBetting = await NumberBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getAllColorBetting = await ColourBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getAllPenaltyBetting = await PenaltyBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getCommunityBetting = await CommunityBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+
+
+    const allBettingHistory = [].concat(getAllCardBetting, getAllNumberBetting, getAllColorBetting, getAllPenaltyBetting, getCommunityBetting);
+
+    
+    const formattedBettingHistory = allBettingHistory.map(item => ({
+      gameId: item.gameId,
+      gameName:item.gameName,
+      betAmount: item.betAmount,
+      period: item.period,
+      isWin: item.isWin,
+      createdAt: item.createdAt
+    }));
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GET_All_BETTING_HISTORY,
+      formattedBettingHistory
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}

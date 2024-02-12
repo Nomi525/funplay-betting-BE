@@ -263,6 +263,7 @@ const ResponseMessage = {
   UPIID_OR_CODE_UPDATED: 'UPI ID or QR Code updated successfully',
   UPIID_QR_CODE_ADDED: "UPI ID or QR Code added successfully",
   UPI_OR_CODE_FETCHED: "UPI OR Code fetched successfully",
+  GET_All_BETTING_HISTORY : "get all betting history successfully"
 };
 
 export { ResponseMessage };

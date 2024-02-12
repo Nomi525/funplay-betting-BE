@@ -284,7 +284,7 @@ adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBet
 adminRoutes.post("/declare-penalty-betting-winner", Auth, declareWinnerOfPenaltyBetting);
 adminRoutes.post("/declare-card-betting-winner", Auth, declareWinnerOfCardBetting);
 
-adminRoutes.get("/get-all-game-periods/:gameType/:gameId", Auth, getAllGamePeriodData);
+adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData);
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
 
