@@ -267,7 +267,8 @@ const ResponseMessage = {
   ADD_FAINT_CURRENCY  : "add faint currency",
   GET_All_FAINT_CURRENCY : "get all faint currency successfully",
   STATUS_APPROVED : "status approved successully",
-  STATUS_REJECT : "status reject successfully"
+  STATUS_REJECT : "status reject successfully",
+  INVALID_STATUS: "invalid status "
 };
 
 export { ResponseMessage };

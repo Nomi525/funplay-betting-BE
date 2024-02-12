@@ -78,10 +78,11 @@ import {
   getAllGamePeriodOfCardBetting,
   cardBettingWinnerResult,
   getAllBettingHistory,
+  uploadImage,
 } from "./../index.js";
 
 import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
-import { addFaintCurrency, changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
+import { addFaintCurrency} from "../controller/admin/FaintCurrency.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -243,10 +244,8 @@ socketRoute('/color-betting').on('connection', colorBettingSocket)
 
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 
-userRoutes.post('/add-faint-currency', Auth ,addFaintCurrency)
-userRoutes.post('/change-status-faint-currency' ,changeStatusOfFaintCurrency)
-userRoutes.get('/get-all-faint-currency', getAllFaintCurrency)
-
+userRoutes.post('/add-faint-currency', Auth , Upload, addFaintCurrency)
+ 
 
 
 export { userRoutes };

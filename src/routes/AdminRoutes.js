@@ -1,4 +1,5 @@
 import { getTransactionList, getwithdrwalcheck } from "../controller/admin/AdminController.js";
+import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
 import {
   Auth,
@@ -287,6 +288,9 @@ adminRoutes.post("/declare-card-betting-winner", Auth, declareWinnerOfCardBettin
 adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData);
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
+
+adminRoutes.post('/change-status-faint-currency' , Upload, changeStatusOfFaintCurrency)
+adminRoutes.get('/get-all-faint-currency', getAllFaintCurrency)
 
 export { adminRoutes };
 
