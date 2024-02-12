@@ -672,11 +672,8 @@ export const getAllBettingHistory = async (req, res) => {
     const getAllColorBetting = await ColourBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
     const getAllPenaltyBetting = await PenaltyBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
     const getCommunityBetting = await CommunityBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
-
-
     const allBettingHistory = [].concat(getAllCardBetting, getAllNumberBetting, getAllColorBetting, getAllPenaltyBetting, getCommunityBetting);
 
-    
     const formattedBettingHistory = allBettingHistory.map(item => ({
       gameId: item.gameId,
       gameName:item.gameName,
