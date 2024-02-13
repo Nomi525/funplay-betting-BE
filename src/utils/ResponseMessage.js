@@ -264,6 +264,7 @@ const ResponseMessage = {
   UPIID_QR_CODE_ADDED: "UPI ID or QR Code added successfully",
   UPI_OR_CODE_FETCHED: "UPI OR Code fetched successfully",
   GET_All_BETTING_HISTORY : "get all betting history successfully",
+
   ADD_FAINT_CURRENCY  : "Deposit request created successfully",
   GET_All_FAINT_CURRENCY : "get all deposit request successfully",
   STATUS_APPROVED : "deposit request status approved successully",
@@ -272,6 +273,7 @@ const ResponseMessage = {
   ALREADY_APPROVED: "deposit request status already approved",
   ALREADY_REJECTED:"deposit request status already rejected",
   GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully"
+
 
 };
 
