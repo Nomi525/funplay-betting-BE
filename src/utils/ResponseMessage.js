@@ -267,7 +267,8 @@ const ResponseMessage = {
   ADD_FAINT_CURRENCY  : "add faint currency",
   GET_All_FAINT_CURRENCY : "get all faint currency successfully",
   STATUS_APPROVED : "status approved successully",
-  STATUS_REJECT : "status reject successfully"
+  STATUS_REJECT : "status reject successfully",
+  GET_SINGLE_BETTING_HISTORY : "get all betting history successfully",
 };
 
 export { ResponseMessage };

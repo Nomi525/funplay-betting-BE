@@ -667,6 +667,31 @@ export const getAllWithdrawalRequest = async (req, res) => {
 //get all game betting history
 export const getAllBettingHistory = async (req, res) => {
   try {
+    if (req.body.id) {
+      const getAllCardBetting = await CardBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getAllNumberBetting = await NumberBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getAllColorBetting = await ColourBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getAllPenaltyBetting = await PenaltyBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getCommunityBetting = await CommunityBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const allBettingHistory = [].concat(getAllCardBetting, getAllNumberBetting, getAllColorBetting, getAllPenaltyBetting, getCommunityBetting);
+
+      const formattedBettingHistory = allBettingHistory.map(item => ({
+        gameId: item?.gameId,
+        gameName: item?.gameName,
+        betAmount: item?.betAmount,
+        period: item?.period,
+        isWin: item?.isWin,
+        createdAt: item?.createdAt
+      })).filter(item => Object.values(item).some(val => val !== undefined && val !== null));
+      
+
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GET_SINGLE_BETTING_HISTORY,
+        formattedBettingHistory
+      );
+    }
     const getAllCardBetting = await CardBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
     const getAllNumberBetting = await NumberBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
     const getAllColorBetting = await ColourBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
