@@ -243,10 +243,7 @@ socketRoute('/number-betting').on('connection', numberBettingSocket)
 socketRoute('/color-betting').on('connection', colorBettingSocket)
 
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
-
 userRoutes.post('/add-faint-currency', Auth , Upload, addFaintCurrency)
  
-
-
 export { userRoutes };
 

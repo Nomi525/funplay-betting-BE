@@ -25,8 +25,8 @@ const faintCurrencySchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: [ "approved", "pending", "reject"],
-        default:"pending",
+        enum: [ "Approved", "Pending", "Rejected"],
+        default:"Pending",
         required: false
     },
     rejectReason :{
