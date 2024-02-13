@@ -3,14 +3,12 @@ import {FaintCurrency, ResponseMessage, StatusCodes, Wallet, handleErrorResponse
 
 export const addFaintCurrency = async (req, res) => {
     try {
-        const { amount, UTRId, UPIMethod, status, approveAmount, rejectReason, rejectScreenShort} = req.body;
-        console.log(req.body,"jdjdj");
+        const { amount, UTRId, UPIMethod, status, rejectReason, rejectScreenShort} = req.body;
 
         const transactionScreenShort = req.transactionScreenShortUrl ;
-        console.log(transactionScreenShort,"sjsj");
 
                 let addFaintCurrency = new FaintCurrency({
-                    userId : req.user, amount:amount,  UTRId:UTRId, transactionScreenShort:transactionScreenShort, UPIMethod:UPIMethod , status:status, approveAmount:approveAmount, rejectReason:rejectReason,rejectScreenShort:rejectScreenShort
+                    userId : req.user, amount:amount,  UTRId:UTRId, transactionScreenShort:transactionScreenShort, UPIMethod:UPIMethod , status:status,rejectReason:rejectReason,rejectScreenShort:rejectScreenShort
                 });
                 let FaintCurrencyData = await addFaintCurrency.save();
                 if (FaintCurrencyData) {
@@ -38,7 +36,7 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
         if (status === "approved") {
           const updatedFaintCurrency = await FaintCurrency.updateOne(
             { _id: id },
-            { $set: { status: "approved", approveAmount : approvedAmount } }
+            { $set: { status: "approved"} }
           );
           const addApproveAmount = new Wallet({
             userId : findObjectID, balance: approvedAmount
@@ -70,7 +68,7 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
 
   export const getAllFaintCurrency= async (req, res) => {
     try {
-      const getAllData = await FaintCurrency.find()
+      const getAllData = await FaintCurrency.find().populate("userId", 'fullName').sort({ createdAt: -1 });
       
       return sendResponse(
         res,

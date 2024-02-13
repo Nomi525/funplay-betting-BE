@@ -29,11 +29,6 @@ const faintCurrencySchema = new mongoose.Schema({
         default:"pending",
         required: false
     },
-    approveAmount :{
-        type: Number,
-        required: false,
-        default: 0
-    },
     rejectReason :{
         type: String,
         required: false,
