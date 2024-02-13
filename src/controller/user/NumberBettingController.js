@@ -416,7 +416,7 @@ export const getNumberGamePeriodById = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
+    const game = await Game.findById(gameId);
     const getGamePeriodById = await NumberBetting.aggregate([
       {
         $match: {
@@ -469,6 +469,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           endTime: "$periodData.endTime",
           createdAt: "$periodData.createdAt",
           betCreatedAt: "$createdAt",
+          winningAmount: { $literal: game.winningCoin },
         },
       },
       {
@@ -1692,7 +1693,6 @@ const updateAndCreatePeriod = async (
     },
     { upsert: true }
   ).lean();
-
 };
 
 function allDateStamps(game, time, type) {
@@ -1732,7 +1732,6 @@ export async function createAllGamePeriodFromCronJob() {
     for (const game of findGame2) {
       //new code 28-12-2023 harsh && maulik
       if (game.gameName == "Number Betting") {
-
         const {
           gameStartTimeStamp,
           gameEndTimeStamp,
@@ -1789,7 +1788,6 @@ export async function createAllGamePeriodFromCronJob() {
           } else {
             // console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
-
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 console.log("3");
                 await updateAndCreatePeriod(
@@ -1808,9 +1806,7 @@ export async function createAllGamePeriodFromCronJob() {
                   currentTimeAndDateStamp,
                   gameHoursNextTimeStamp
                 );
-
               }
-
             }
           }
         }
@@ -2267,7 +2263,7 @@ export const getPeriod = async (req, res) => {
     if (
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
-      moment().format("YYYY-MM-DD") &&
+        moment().format("YYYY-MM-DD") &&
       getAllPeriod.endTime > currentTimeAndDateStamp
     ) {
       return sendResponse(
@@ -2458,7 +2454,6 @@ export const getPeriod = async (req, res) => {
 // }
 
 export const createAllGameWinnerFromCronJob = async (req, res) => {
-
   try {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
     let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
@@ -2469,18 +2464,40 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
       is_deleted: 0,
     });
     findPeriods.map(async (findPeriod) => {
-      const findGame = await Game.findOne({ _id: findPeriod.gameId, is_deleted: 0 }).lean()
+      const findGame = await Game.findOne({
+        _id: findPeriod.gameId,
+        is_deleted: 0,
+      }).lean();
       if (findGame.gameName == "Number Betting") {
-        await declareNumberWinner(findGame, findPeriod.period)
-      } else if (findGame.gameName == "2 Color Betting" || findGame.gameName == "3 Color Betting") {
-        const gameType = findGame.gameName == "2 Color Betting" ? "2colorBetting" : "3colorBetting"
-        await declareColorWinner(findGame, findPeriod.period, findPeriod.periodFor, gameType);
+        await declareNumberWinner(findGame, findPeriod.period);
+      } else if (
+        findGame.gameName == "2 Color Betting" ||
+        findGame.gameName == "3 Color Betting"
+      ) {
+        const gameType =
+          findGame.gameName == "2 Color Betting"
+            ? "2colorBetting"
+            : "3colorBetting";
+        await declareColorWinner(
+          findGame,
+          findPeriod.period,
+          findPeriod.periodFor,
+          gameType
+        );
       } else if (findGame.gameName == "Penalty Betting") {
-        await declarePenaltyWinner(findGame, findPeriod.period, findPeriod.periodFor);
+        await declarePenaltyWinner(
+          findGame,
+          findPeriod.period,
+          findPeriod.periodFor
+        );
       } else if (findGame.gameName == "Card Betting") {
-        await declareCardWinner(findGame, findPeriod.period, findPeriod.periodFor);
+        await declareCardWinner(
+          findGame,
+          findPeriod.period,
+          findPeriod.periodFor
+        );
       }
-    })
+    });
   } catch (error) {
     return handleErrorResponse(res, error);
   }

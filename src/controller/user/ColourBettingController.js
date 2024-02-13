@@ -22,7 +22,8 @@ import {
   sendMail,
   ejs,
   getRandomElement,
-  capitalizeFirstLetter, Period
+  capitalizeFirstLetter,
+  Period,
 } from "../../index.js";
 
 //#region Colour betting api
@@ -861,11 +862,13 @@ export const getByIdGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
+    const game = await Game.findById(gameId);
+
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const getGamePeriodById = await ColourBetting.aggregate([
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(req.user),
+          // userId: new mongoose.Types.ObjectId(req.user) || null,
           gameId: new mongoose.Types.ObjectId(gameId),
           selectedTime: second,
           createdAt: { $gte: twentyFourHoursAgo },
@@ -888,8 +891,14 @@ export const getByIdGamePeriod = async (req, res) => {
           colourName: {
             $concat: [
               { $toUpper: { $substrCP: ["$colourName", 0, 1] } },
-              { $substrCP: ["$colourName", 1, { $subtract: [{ $strLenCP: "$colourName" }, 1] }] }
-            ]
+              {
+                $substrCP: [
+                  "$colourName",
+                  1,
+                  { $subtract: [{ $strLenCP: "$colourName" }, 1] },
+                ],
+              },
+            ],
           },
           period: 1,
           isWin: 1,
@@ -922,6 +931,7 @@ export const getByIdGamePeriod = async (req, res) => {
           periodFor: "$periodData.periodFor",
           createdAt: "$periodData.createdAt",
           betCreatedAt: "$createdAt",
+          winningAmount: { $literal: game.winningCoin },
         },
       },
       {
@@ -935,6 +945,7 @@ export const getByIdGamePeriod = async (req, res) => {
         },
       },
     ]);
+
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -1189,11 +1200,14 @@ function getRandomElementExcluding(excludeElements, gameType) {
 export const colourBettingWinnerResult = async (req, res) => {
   try {
     const { gameType, gameId, period } = req.params;
-    const { second: periodFor } = req.query
+    const { second: periodFor } = req.query;
     const findGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
 
     if (findGame.gameMode == "Manual") {
-      await ColourBetting.updateMany({ gameId, gameType, period, selectedTime: periodFor }, { status: "pending" });
+      await ColourBetting.updateMany(
+        { gameId, gameType, period, selectedTime: periodFor },
+        { status: "pending" }
+      );
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -1212,7 +1226,7 @@ export const colourBettingWinnerResult = async (req, res) => {
     }).lean();
 
     if (checkAlreadyWin.length) {
-      let winColourName = capitalizeFirstLetter(checkAlreadyWin[0].colourName)
+      let winColourName = capitalizeFirstLetter(checkAlreadyWin[0].colourName);
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -1470,13 +1484,12 @@ export const colourBettingWinnerResult = async (req, res) => {
   }
 };
 
-
 export async function twelveHourAgoPeriod() {
   try {
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
     const result = await Period.deleteMany({
       createdAt: { $lt: twelveHoursAgo },
-    })
+    });
   } catch (error) {
     return handleErrorResponse(res, error);
   }
