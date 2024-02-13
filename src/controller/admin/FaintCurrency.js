@@ -1,5 +1,4 @@
-import {FaintCurrency, ResponseMessage, StatusCodes, Wallet, handleErrorResponse, sendResponse, } from "../../index.js"
-
+import {Decimal, FaintCurrency, NewTransaction, ResponseMessage, StatusCodes, Wallet, handleErrorResponse, sendResponse, } from "../../index.js"
 
 export const addFaintCurrency = async (req, res) => {
     try {
@@ -35,32 +34,34 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
           const findData = findFaintCurrency.userId;
           const findObjectID = findData.toString();
 
-          if (status === "approved") {
-              if (findFaintCurrency.status === "approved") {
+          if (status === "Approved") {
+              if (findFaintCurrency.status === "Approved") {
                   return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_APPROVED, []);
               }
-
+          
               const updatedFaintCurrency = await FaintCurrency.updateOne(
                   { _id: id },
-                  { $set: { status: "approved" } }
+                  { $set: { status: "Approved" } }
               );
 
-              const userWallet = await Wallet.findOne({ userId: findObjectID });
+              const userWallet = await NewTransaction.findOne({ userId: findObjectID });
+              console.log(userWallet,"ssh");
               if (userWallet) {
-                  userWallet.balance += findFaintCurrency.amount;
+                const amountToAdd = parseFloat(findFaintCurrency.amount);
+                userWallet.tokenDollorValue = new Decimal(userWallet.tokenDollorValue).plus(amountToAdd).toString();
                   await userWallet.save();
               }
 
+
               return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_APPROVED, updatedFaintCurrency);
-          } else if (status === "reject") {
-              if (findFaintCurrency.status === "reject") {
-                  // Already rejected, send appropriate message
+          } else if (status === "Rejected") {
+              if (findFaintCurrency.status === "Rejected") {
                   return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REJECTED, []);
               }
 
               const updatedFaintCurrency = await FaintCurrency.updateOne(
                   { _id: id },
-                  { $set: { status: "reject", rejectReason: rejectReason, rejectScreenShort: rejectScreenShort } }
+                  { $set: { status: "Rejected", rejectReason: rejectReason, rejectScreenShort: rejectScreenShort } }
               );
 
               return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_REJECT, updatedFaintCurrency);
