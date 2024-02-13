@@ -269,6 +269,7 @@ const ResponseMessage = {
   STATUS_APPROVED : "status approved successully",
   STATUS_REJECT : "status reject successfully",
   GET_SINGLE_BETTING_HISTORY : "get all betting history successfully",
+  INVALID_STATUS: "invalid status "
 };
 
 export { ResponseMessage };

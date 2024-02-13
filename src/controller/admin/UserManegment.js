@@ -718,3 +718,4 @@ export const getAllBettingHistory = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 }
+
