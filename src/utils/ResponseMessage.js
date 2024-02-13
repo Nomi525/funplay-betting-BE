@@ -268,6 +268,7 @@ const ResponseMessage = {
   GET_All_FAINT_CURRENCY : "get all faint currency successfully",
   STATUS_APPROVED : "status approved successully",
   STATUS_REJECT : "status reject successfully",
+  GET_SINGLE_BETTING_HISTORY : "get all betting history successfully",
   INVALID_STATUS: "invalid status "
 };
 
