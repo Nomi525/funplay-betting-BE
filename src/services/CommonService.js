@@ -306,6 +306,7 @@ export const declareNumberWinner = async (game, period) => {
       data: [],
     };
   } else {
+
     const checkAlreadyWin = await NumberBetting.find({
       gameId,
       isWin: true,
@@ -409,10 +410,10 @@ export const declareNumberWinner = async (game, period) => {
                 period,
                 gameId,
                 number: randomWinNumber,
-                betAmount:0,
+                betAmount: 0,
                 is_deleted: 0,
                 isWin: true,
-                status: "successfully",
+                status: "won",
               });
               await NumberBetting.updateMany(
                 {
@@ -422,7 +423,7 @@ export const declareNumberWinner = async (game, period) => {
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "fail" }
+                { status: "loose" }
               );
               return {
                 message: `Victory Alert! The Winning Number is ${randomWinNumber}`,
@@ -441,6 +442,7 @@ export const declareNumberWinner = async (game, period) => {
                         is_deleted: 0,
                       });
                       if (findUser) {
+                        console.log(findUser.betAmount, "datat")
                         let rewardAmount =
                           findUser.betAmount + findUser.betAmount * winningCoin;
                         await NumberBetting.updateOne(
@@ -453,13 +455,14 @@ export const declareNumberWinner = async (game, period) => {
                             number: item.number,
                             is_deleted: 0,
                           },
-                          { isWin: true, status: "successfully", rewardAmount }
+                          { isWin: true, status: "won", rewardAmount }
                         );
                         const balance = await getSingleData(
                           { userId },
                           NewTransaction
                         );
                         if (balance) {
+                          console.log("declareNumberWinner")
                           let winningAmount = Number(rewardAmount);
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
@@ -480,7 +483,7 @@ export const declareNumberWinner = async (game, period) => {
                           number: item.number,
                           is_deleted: 0,
                         },
-                        { status: "fail" }
+                        { status: "loose" }
                       );
                     });
                   }
@@ -497,7 +500,7 @@ export const declareNumberWinner = async (game, period) => {
           } else {
             await NumberBetting.updateMany(
               { gameId, period },
-              { status: "fail" }
+              { status: "loose" }
             );
             return {
               message: ResponseMessage.LOSER,
@@ -507,7 +510,7 @@ export const declareNumberWinner = async (game, period) => {
         } else {
           await NumberBetting.updateMany(
             { gameId, period },
-            { status: "fail" }
+            { status: "loose" }
           );
           return {
             message: ResponseMessage.LOSER,
@@ -521,10 +524,10 @@ export const declareNumberWinner = async (game, period) => {
           period,
           gameId,
           number: randomWinNumber,
-          betAmount:0,
+          betAmount: 0,
           is_deleted: 0,
           isWin: true,
-          status: "successfully",
+          status: "won",
         });
         await NumberBetting.updateMany(
           {
@@ -534,7 +537,7 @@ export const declareNumberWinner = async (game, period) => {
             status: "pending",
             is_deleted: 0,
           },
-          { status: "fail" }
+          { status: "loose" }
         );
         return {
           message: ResponseMessage.NUMBER_WINNER + " " + randomWinNumber,
@@ -553,6 +556,7 @@ export const declareColorWinner = async (
   selectedTime,
   gameType
 ) => {
+
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
   if (gameMode == "Manual") {
@@ -576,7 +580,6 @@ export const declareColorWinner = async (
       return {
         message:
           ResponseMessage.COLOR_WINNER +
-          " testcolor" +
           checkAlreadyWin[0].colourName,
       };
     } else {
@@ -649,10 +652,10 @@ export const declareColorWinner = async (
                 gameId,
                 gameType,
                 colourName: randomWinColour,
-                betAmount:0,
+                betAmount: 0,
                 is_deleted: 0,
                 isWin: true,
-                status: "successfully",
+                status: "won",
               });
               await ColourBetting.updateMany(
                 {
@@ -664,7 +667,7 @@ export const declareColorWinner = async (
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "fail" }
+                { status: "loose" }
               );
               return {
                 message: `Victory Alert! The Winning Color is ${randomWinColour}`,
@@ -698,7 +701,7 @@ export const declareColorWinner = async (
                       if (findUser) {
                         console.log(findUser.betAmount, findUser.betAmount, 0);
                         let rewardAmount =
-                          findUser.betAmount + findUser.betAmount * 0;
+                          findUser.betAmount + winningCoin;
                         console.log(rewardAmount, "rewardAmount");
                         await ColourBetting.updateOne(
                           {
@@ -712,7 +715,7 @@ export const declareColorWinner = async (
                             colourName: item.colourName,
                             is_deleted: 0,
                           },
-                          { isWin: true, status: "successfully", rewardAmount }
+                          { isWin: true, status: "won", rewardAmount }
                         );
                         const balance = await getSingleData(
                           { userId },
@@ -732,7 +735,7 @@ export const declareColorWinner = async (
                     // Handling the losers
                     item.userIds.map(async (userId) => {
                       console.log(
-                        `auto fail 569 line period is ${item.period}`
+                        `auto loose 569 line period is ${item.period}`
                       );
                       // console.log('568 loss');
                       await ColourBetting.updateOne(
@@ -747,7 +750,7 @@ export const declareColorWinner = async (
                           colourName: item.colourName,
                           is_deleted: 0,
                         },
-                        { status: "fail" }
+                        { status: "loose" }
                       );
                     });
                   }
@@ -761,27 +764,27 @@ export const declareColorWinner = async (
                 getAllColourBets[0].colourName,
             };
           } else {
-            // console.log('579 fail');
+            console.log('579 loose');
             await ColourBetting.updateMany(
               { gameId, selectedTime, period, gameType },
-              { status: "fail" }
+              { status: "loose" }
             );
             return {
               message: ResponseMessage.LOSER,
             };
           }
         } else {
-          // console.log('586 fail');
+          // console.log('586 loose');
           await ColourBetting.updateMany(
             { gameId, selectedTime, period, gameType },
-            { status: "fail" }
+            { status: "loose" }
           );
           return {
             message: ResponseMessage.LOSER,
           };
         }
       } else {
-        // console.log(`auto win 595 line not play in period ${item.period}`);
+        console.log(`auto win 595 line not play in period`);
         let allColors = ["red", "green", "orange"];
         if (gameType == "2colorBetting") {
           allColors = ["red", "green"];
@@ -795,10 +798,10 @@ export const declareColorWinner = async (
           gameId,
           gameType,
           colourName: randomWinColor,
-          betAmount:0,
+          betAmount: 0,
           is_deleted: 0,
           isWin: true,
-          status: "successfully",
+          status: "won",
         });
         return {
           message: ResponseMessage.COLOR_WINNER + " testcolor3" + randomWinColor,
@@ -895,11 +898,11 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                 period,
                 gameId,
                 betSide: randomWinSide,
-                betAmount:0,
+                betAmount: 0,
                 is_deleted: 0,
                 isWin: true,
                 selectedTime,
-                status: "successfully",
+                status: "won",
               });
               await PenaltyBetting.updateMany(
                 {
@@ -910,7 +913,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "fail" }
+                { status: "loose" }
               );
               return {
                 message: `${ResponseMessage.PENALTY_WINNER} ${randomWinSide}`,
@@ -943,7 +946,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                             betSide: item.betSide,
                             is_deleted: 0,
                           },
-                          { isWin: true, status: "successfully", rewardAmount }
+                          { isWin: true, status: "won", rewardAmount }
                         );
                         const balance = await getSingleData(
                           { userId },
@@ -971,7 +974,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                           betSide: item.betSide,
                           is_deleted: 0,
                         },
-                        { status: "fail" }
+                        { status: "loose" }
                       );
                     });
                   }
@@ -987,7 +990,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
           } else {
             await PenaltyBetting.updateMany(
               { gameId, period, selectedTime },
-              { status: "fail" }
+              { status: "loose" }
             );
             return {
               message: ResponseMessage.LOSER,
@@ -996,7 +999,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
         } else {
           await PenaltyBetting.updateMany(
             { gameId, period, selectedTime },
-            { status: "fail" }
+            { status: "loose" }
           );
           return {
             message: ResponseMessage.LOSER,
@@ -1012,10 +1015,10 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
           gameId,
           selectedTime,
           betSide: randomWinSide,
-          betAmount:0,
+          betAmount: 0,
           is_deleted: 0,
           isWin: true,
-          status: "successfully",
+          status: "won",
         });
         return {
           message: ResponseMessage.PENALTY_WINNER + " " + randomWinSide,
@@ -1117,11 +1120,11 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                 period,
                 gameId,
                 card: randomWinCard,
-                betAmount:0,
+                betAmount: 0,
                 selectedTime,
                 isWin: true,
                 winCardNumber,
-                status: "successfully",
+                status: "won",
                 is_deleted: 0,
               });
               await CardBetting.updateMany(
@@ -1133,7 +1136,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "fail" }
+                { status: "loose" }
               );
               return {
                 message: `${ResponseMessage.CARD_WINNER} ${randomWinCard} ${winCardNumber}`,
@@ -1171,7 +1174,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                           {
                             isWin: true,
                             winCardNumber,
-                            status: "successfully",
+                            status: "won",
                             rewardAmount,
                           }
                         );
@@ -1201,7 +1204,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                           card: item.card,
                           is_deleted: 0,
                         },
-                        { status: "fail" }
+                        { status: "loose" }
                       );
                     });
                   }
@@ -1219,14 +1222,14 @@ export const declareCardWinner = async (game, period, selectedTime) => {
           } else {
             await CardBetting.updateMany(
               { gameId, period, selectedTime },
-              { status: "fail" }
+              { status: "loose" }
             );
             return {
               message: ResponseMessage.LOSER,
             };
           }
         } else {
-          await CardBetting.updateMany({ gameId, period, selectedTime }, { status: "fail" });
+          await CardBetting.updateMany({ gameId, period, selectedTime }, { status: "loose" });
           return {
             message: ResponseMessage.LOSER,
           };
@@ -1242,11 +1245,11 @@ export const declareCardWinner = async (game, period, selectedTime) => {
           gameId,
           selectedTime,
           card: randomWinCard,
-          betAmount:0,
+          betAmount: 0,
           is_deleted: 0,
           isWin: true,
           winCardNumber,
-          status: "successfully",
+          status: "won",
         });
         return {
           message:

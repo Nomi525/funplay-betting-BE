@@ -442,7 +442,7 @@ export const getNumberGamePeriodById = async (req, res) => {
           period: 1,
           isWin: 1,
           status: 1,
-          createdAt : 1,
+          createdAt: 1,
           periodData: {
             $filter: {
               input: "$periodData",
@@ -1692,6 +1692,7 @@ const updateAndCreatePeriod = async (
     },
     { upsert: true }
   ).lean();
+
 };
 
 function allDateStamps(game, time, type) {
@@ -1731,6 +1732,7 @@ export async function createAllGamePeriodFromCronJob() {
     for (const game of findGame2) {
       //new code 28-12-2023 harsh && maulik
       if (game.gameName == "Number Betting") {
+
         const {
           gameStartTimeStamp,
           gameEndTimeStamp,
@@ -1745,7 +1747,8 @@ export async function createAllGamePeriodFromCronJob() {
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
           // console.log("1st condition");
-          let period = formattedDate + "0000";
+
+          let period = formattedDate + "000";
           const periodCount = await Period.countDocuments({
             gameId: game._id,
           });
@@ -1758,13 +1761,14 @@ export async function createAllGamePeriodFromCronJob() {
 
           if (periodCount) {
             period =
-              formattedDate + (periodCount + 1).toString().padStart(4, "0");
+              formattedDate + (periodCount + 1).toString().padStart(3, "0");
           } else {
-            period = formattedDate + (1).toString().padStart(4, "0");
+            period = formattedDate + (1).toString().padStart(3, "0");
           }
           if (!lastIndex) {
             if (gameEndTimeStamp < gameHoursNextTimeStamp) {
               // console.log("1");
+
               await updateAndCreatePeriod(
                 game._id,
                 dateForPeriod,
@@ -1785,8 +1789,9 @@ export async function createAllGamePeriodFromCronJob() {
           } else {
             // console.log(currentTimeAndDateStamp, "check", lastIndex.endTime);
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
+
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                // console.log("3");
+                console.log("3");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -1796,14 +1801,16 @@ export async function createAllGamePeriodFromCronJob() {
                 );
               } else {
                 // console.log("4");
-                await updateAndCreatePeriod(
+                const periodnumber = await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
                   period,
                   currentTimeAndDateStamp,
                   gameHoursNextTimeStamp
                 );
+
               }
+
             }
           }
         }
@@ -1821,7 +1828,7 @@ export async function createAllGamePeriodFromCronJob() {
           gameStartTimeStamp <= currentTimeAndDateStamp &&
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
-          let period = formattedDate + "0000";
+          let period = formattedDate + "000";
           const periodCount = await Period.countDocuments({
             gameId: game._id,
           });
@@ -1835,9 +1842,9 @@ export async function createAllGamePeriodFromCronJob() {
 
           if (periodCount) {
             period =
-              formattedDate + (periodCount + 1).toString().padStart(4, "0");
+              formattedDate + (periodCount + 1).toString().padStart(3, "0");
           } else {
-            period = formattedDate + (1).toString().padStart(4, "0");
+            period = formattedDate + (1).toString().padStart(3, "0");
           }
           if (!lastIndex) {
             if (gameEndTimeStamp < gameHoursNextTimeStamp) {
@@ -1860,12 +1867,12 @@ export async function createAllGamePeriodFromCronJob() {
               );
             }
           } else {
-            console.log(
-              currentTimeAndDateStamp > lastIndex.endTime,
-              "check",
-              currentTimeAndDateStamp,
-              lastIndex.endTime
-            );
+            // console.log(
+            //   currentTimeAndDateStamp > lastIndex.endTime,
+            //   "check",
+            //   currentTimeAndDateStamp,
+            //   lastIndex.endTime
+            // );
             if (game.isRepeat && currentTimeAndDateStamp >= lastIndex.endTime) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
                 console.log("3");
@@ -1877,7 +1884,7 @@ export async function createAllGamePeriodFromCronJob() {
                   gameEndTimeStamp
                 );
               } else {
-                console.log("4");
+                // console.log("4");
                 await updateAndCreatePeriod(
                   game._id,
                   dateForPeriod,
@@ -1904,7 +1911,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameStartTimeStamp <= currentTimeAndDateStamp &&
             gameEndTimeStamp > currentTimeAndDateStamp
           ) {
-            let period = formattedDate + "0000";
+            let period = formattedDate + "000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
               periodFor: second,
@@ -1919,9 +1926,9 @@ export async function createAllGamePeriodFromCronJob() {
 
             if (periodCount) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+                formattedDate + (periodCount + 1).toString().padStart(3, "0");
             } else {
-              period = formattedDate + (1).toString().padStart(4, "0");
+              period = formattedDate + (1).toString().padStart(3, "0");
             }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
@@ -1990,7 +1997,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameStartTimeStamp <= currentTimeAndDateStamp &&
             gameEndTimeStamp > currentTimeAndDateStamp
           ) {
-            let period = formattedDate + "0000";
+            let period = formattedDate + "000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
               periodFor: second,
@@ -2005,9 +2012,9 @@ export async function createAllGamePeriodFromCronJob() {
 
             if (periodCount) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+                formattedDate + (periodCount + 1).toString().padStart(3, "0");
             } else {
-              period = formattedDate + (1).toString().padStart(4, "0");
+              period = formattedDate + (1).toString().padStart(3, "0");
             }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
@@ -2076,7 +2083,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameStartTimeStamp <= currentTimeAndDateStamp &&
             gameEndTimeStamp > currentTimeAndDateStamp
           ) {
-            let period = formattedDate + "0000";
+            let period = formattedDate + "000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
               periodFor: second,
@@ -2091,9 +2098,9 @@ export async function createAllGamePeriodFromCronJob() {
 
             if (periodCount) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+                formattedDate + (periodCount + 1).toString().padStart(3, "0");
             } else {
-              period = formattedDate + (1).toString().padStart(4, "0");
+              period = formattedDate + (1).toString().padStart(3, "0");
             }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
@@ -2162,7 +2169,7 @@ export async function createAllGamePeriodFromCronJob() {
             gameStartTimeStamp <= currentTimeAndDateStamp &&
             gameEndTimeStamp > currentTimeAndDateStamp
           ) {
-            let period = formattedDate + "0000";
+            let period = formattedDate + "000";
             const periodCount = await Period.countDocuments({
               gameId: game._id,
               periodFor: second,
@@ -2177,9 +2184,9 @@ export async function createAllGamePeriodFromCronJob() {
 
             if (periodCount) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(4, "0");
+                formattedDate + (periodCount + 1).toString().padStart(3, "0");
             } else {
-              period = formattedDate + (1).toString().padStart(4, "0");
+              period = formattedDate + (1).toString().padStart(3, "0");
             }
             if (!lastIndex) {
               if (gameEndTimeStamp < gameHoursNextTimeStamp) {
@@ -2451,6 +2458,7 @@ export const getPeriod = async (req, res) => {
 // }
 
 export const createAllGameWinnerFromCronJob = async (req, res) => {
+
   try {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
     let currentTimeAndDateStampPlus10Second = moment().unix() + 10;

@@ -56,8 +56,10 @@ import {
   getAdminSetting,
   adminResendOtp,
   getUpdatedUser,
+  addupdateUPiorQr, getUpiQr
 } from "./controller/admin/AdminController.js";
 import { uploadImage } from "./controller/chat/ChatController.js";
+
 import {
   logout,
   editProfile,
@@ -199,6 +201,7 @@ import {
   getUserWiseGameList,
   getNumberGameTotal,
   getAllWithdrawalRequest,
+  getAllBettingHistory,
 } from "./controller/admin/UserManegment.js";
 import {
   notificationAddEdit,
@@ -272,6 +275,7 @@ import {
   getByIdGamePeriod,
   getCommunityWinList,
   colourBettingWinnerResult,
+  twelveHourAgoPeriod,
 } from "./controller/user/ColourBettingController.js";
 
 // Coumunnity Betting
@@ -366,6 +370,7 @@ import {
   multipleDeleteUpdate,
 } from "./services/AdminServices.js";
 
+
 import {
   createError,
   sendResponse,
@@ -399,8 +404,10 @@ import {
   declareCardWinner,
   capitalizeFirstLetter
 } from "./services/CommonService.js";
+import { QrCodes } from "./models/QrCode.js";
 dotenv.config();
-
+import {FaintCurrency} from "./models/FaintCurrency.js"
+// import { addFaintCurrency } from "./controller/admin/FaintCurrency.js";
 export {
   capitalizeFirstLetter,
   getAllGamePeriodSelectedTimeList,
@@ -681,7 +688,12 @@ export {
   colourBetResult,
   getNumberGameTotal,
   getCommunityWinList,
+  twelveHourAgoPeriod,
   http,
   Chat,
+  QrCodes, addupdateUPiorQr, getUpiQr,
+  getAllBettingHistory,
+  FaintCurrency,
+  
   // updateEmail,
 };

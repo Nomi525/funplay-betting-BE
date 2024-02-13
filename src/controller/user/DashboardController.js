@@ -11,6 +11,7 @@ import {
 
 export const userDashboard = async (req, res) => {
     try {
+        console.log("fafafafa")
         const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
         if (findUser) {
             const today = new Date();
@@ -41,7 +42,7 @@ export const userDashboard = async (req, res) => {
             let penaltyBettingWinningAmount = penaltyBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
             let cardBettingWinningAmount = cardBettingForUser.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0)
             const totalWinningAmountin24Hrs = numberBettingWinningAmount + colourBettingWinningAmount + communityBettingWinningAmount + penaltyBettingWinningAmount + cardBettingWinningAmount
-
+            console.log(totalWinningAmountin24Hrs, "totalWinningAmountin24Hrs")
             // For Total referral code count
             const totalReferralCount = await ReferralUser.countDocuments({ userId: findUser._id })
 
@@ -144,6 +145,8 @@ export const userDashboard = async (req, res) => {
             }
             let totalCoin = transactionDeposite ? transactionDeposite.totalCoin : 0
             let convertedCoin = transactionDeposite ? transactionDeposite.totalCoin / coinRate : 0;
+
+
             // console.log(totalDepositAmount,totalWithdrawalAmount);
             return sendResponse(
                 res,

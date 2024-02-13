@@ -2,7 +2,7 @@ import {
   ResponseMessage, StatusCodes, sendResponse,
   getSingleData, getAllData, handleErrorResponse, User, dataUpdated,
   NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin
+  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin, CardBetting, PenaltyBetting, CommunityBetting
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -37,7 +37,7 @@ export const adminEditUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const findUsers = await User.find({ isVerified: true, is_deleted: 0 }).sort(
+    const findUsers = await User.find({ is_deleted: 0 }).sort(
       { createdAt: -1 }
     );
     if (findUsers.length) {
@@ -414,7 +414,7 @@ export const gelAllUserDepositeAndWithdrawal = async (req, res) => {
 export const getAllTransaction = async (req, res) => {
   try {
     const transactionHistory = await TransactionHistory.find({ is_deleted: 0 })
-      .populate("userId",'fullName email currency')
+      .populate("userId", 'fullName email currency')
       .sort({ createdAt: -1 });
     if (transactionHistory.length) {
       return sendResponse(
@@ -664,3 +664,58 @@ export const getAllWithdrawalRequest = async (req, res) => {
   }
 }
 //#endregion
+//get all game betting history
+export const getAllBettingHistory = async (req, res) => {
+  try {
+    if (req.body.id) {
+      const getAllCardBetting = await CardBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getAllNumberBetting = await NumberBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getAllColorBetting = await ColourBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getAllPenaltyBetting = await PenaltyBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const getCommunityBetting = await CommunityBetting.findById(req.body.id).populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+      const allBettingHistory = [].concat(getAllCardBetting, getAllNumberBetting, getAllColorBetting, getAllPenaltyBetting, getCommunityBetting);
+
+      const formattedBettingHistory = allBettingHistory.map(item => ({
+        gameId: item?.gameId,
+        gameName: item?.gameName,
+        betAmount: item?.betAmount,
+        period: item?.period,
+        isWin: item?.isWin,
+        createdAt: item?.createdAt
+      })).filter(item => Object.values(item).some(val => val !== undefined && val !== null));
+      
+
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GET_SINGLE_BETTING_HISTORY,
+        formattedBettingHistory
+      );
+    }
+    const getAllCardBetting = await CardBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getAllNumberBetting = await NumberBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getAllColorBetting = await ColourBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getAllPenaltyBetting = await PenaltyBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const getCommunityBetting = await CommunityBetting.find().populate('gameId', 'gameName').select("betAmount period isWin createdAt ");
+    const allBettingHistory = [].concat(getAllCardBetting, getAllNumberBetting, getAllColorBetting, getAllPenaltyBetting, getCommunityBetting);
+
+    const formattedBettingHistory = allBettingHistory.map(item => ({
+      gameId: item.gameId,
+      gameName:item.gameName,
+      betAmount: item.betAmount,
+      period: item.period,
+      isWin: item.isWin,
+      createdAt: item.createdAt
+    }));
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GET_All_BETTING_HISTORY,
+      formattedBettingHistory
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+

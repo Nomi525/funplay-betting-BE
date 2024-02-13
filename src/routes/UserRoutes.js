@@ -1,3 +1,4 @@
+import { socketRoute } from "../config/Socket.config.js";
 import { updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
@@ -76,9 +77,13 @@ import {
   getByIdGamePeriodOfCardBetting,
   getAllGamePeriodOfCardBetting,
   cardBettingWinnerResult,
+  getAllBettingHistory,
+  uploadImage,
 } from "./../index.js";
-const userRoutes = express.Router();
 
+import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
+import { addFaintCurrency} from "../controller/admin/FaintCurrency.js";
+const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
 userRoutes.post("/update-login-status", updateLoginStatus);
@@ -233,6 +238,14 @@ userRoutes.get('/get-all-card-betting-period/:gameId', Auth, getAllGamePeriodOfC
 userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinnerResult)
 
 //#endregion card Betting Routes
+
+socketRoute('/number-betting').on('connection', numberBettingSocket)
+socketRoute('/color-betting').on('connection', colorBettingSocket)
+
+userRoutes.get('/get-all-betting-history', getAllBettingHistory)
+
+userRoutes.post('/add-faint-currency', Auth , Upload, addFaintCurrency)
+ 
 
 
 export { userRoutes };

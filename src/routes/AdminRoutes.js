@@ -1,4 +1,5 @@
 import { getTransactionList, getwithdrwalcheck } from "../controller/admin/AdminController.js";
+import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
 import {
   Auth,
@@ -95,7 +96,8 @@ import {
   getAllSubAdmin,
   declareWinnerOfPenaltyBetting,
   declareWinnerOfCardBetting,
-  getAllGamePeriodSelectedTimeList
+  getAllGamePeriodSelectedTimeList, addupdateUPiorQr
+
 } from "./../index.js";
 const adminRoutes = express.Router();
 
@@ -235,7 +237,7 @@ adminRoutes.post('/notification-delete', Auth, deleteNotification)
 //#endregion
 
 //#region 
-adminRoutes.post('/currency-convert',allCurrencyConverter);
+adminRoutes.post('/currency-convert', allCurrencyConverter);
 //#endregion
 
 
@@ -283,7 +285,12 @@ adminRoutes.post("/declare-colour-betting-winner", Auth, declareWinnerOfColorBet
 adminRoutes.post("/declare-penalty-betting-winner", Auth, declareWinnerOfPenaltyBetting);
 adminRoutes.post("/declare-card-betting-winner", Auth, declareWinnerOfCardBetting);
 
-adminRoutes.get("/get-all-game-periods/:gameType/:gameId", Auth, getAllGamePeriodData);
+adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData);
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
+adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
+
+adminRoutes.post('/change-status-faint-currency' ,Auth,  Upload, changeStatusOfFaintCurrency)
+adminRoutes.get('/get-all-faint-currency', getAllFaintCurrency)
+
 export { adminRoutes };
 

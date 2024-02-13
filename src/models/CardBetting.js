@@ -44,8 +44,8 @@ const cardBettingSchema = new mongoose.Schema(
       default: 0,
     },
     selectedTime: {
-        type: String,
-        required: false,
+      type: String,
+      required: false,
     },
     isWin: {
       type: Boolean,
@@ -54,7 +54,7 @@ const cardBettingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [null, "fail", "pending", "successfully"],
+      enum: [null, "loose", "pending", "won"],
       required: false,
       default: null,
     },

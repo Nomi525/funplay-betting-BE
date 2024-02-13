@@ -1,7 +1,7 @@
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting, ReferralWork,
-    Rating, Wallet, hashedPassword, handleErrorResponse, NewTransaction, ReferralUser
+    Rating, Wallet, hashedPassword, handleErrorResponse, NewTransaction, ReferralUser, QrCodes
 } from "./../../index.js";
 
 //#region admin login
@@ -450,3 +450,66 @@ export const getUpdatedUser = async (req, res) => {
 //#endregion
 
 
+
+
+export const addupdateUPiorQr = async (req, res) => {
+    const { UpiID } = req.body;
+    let qrCode = req.files && req.files.qrCode && req.files.qrCode.length > 0 ? req.files.qrCode[0].filename : undefined;
+
+    try {
+
+        let existingQrCode = await QrCodes.findOne();
+
+        if (existingQrCode) {
+
+            existingQrCode.qrCode = qrCode || existingQrCode.qrCode;
+            existingQrCode.UpiID = UpiID || existingQrCode.UpiID;
+
+            await existingQrCode.save();
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                ResponseMessage.UPIID_OR_CODE_UPDATED,
+                existingQrCode
+            );
+        } else {
+
+            const newUpiQr = new QrCodes({ qrCode, UpiID });
+            await newUpiQr.save();
+
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                ResponseMessage.UPIID_QR_CODE_ADDED,
+                newUpiQr
+            );
+        }
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+};
+
+
+export const getUpiQr = async (req, res) => {
+    try {
+        const result = await QrCodes.find();
+
+        if (!result || result.length === 0) {
+
+            return sendResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                ResponseMessage.DATA_NOT_FOUND,
+                []
+            );
+        }
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.UPI_OR_CODE_FETCHED,
+            result
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+};

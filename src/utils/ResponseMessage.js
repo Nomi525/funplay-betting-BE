@@ -259,6 +259,16 @@ const ResponseMessage = {
   CARD_BET_DELETED: "card deleted successfully.",
   CARD_WINNER: "Victory Alert! The Winning Card is",
   PERIOD_ALREADY_EXITS: "This period id has already win.",
+  PLEASE_PROVIDE_VALID_QR_UPI: "Please provide a UPI ID or a QR Code.",
+  UPIID_OR_CODE_UPDATED: 'UPI ID or QR Code updated successfully',
+  UPIID_QR_CODE_ADDED: "UPI ID or QR Code added successfully",
+  UPI_OR_CODE_FETCHED: "UPI OR Code fetched successfully",
+  GET_All_BETTING_HISTORY : "get all betting history successfully",
+  ADD_FAINT_CURRENCY  : "add faint currency",
+  GET_All_FAINT_CURRENCY : "get all faint currency successfully",
+  STATUS_APPROVED : "status approved successully",
+  STATUS_REJECT : "status reject successfully",
+  INVALID_STATUS: "invalid status "
 };
 
 export { ResponseMessage };
