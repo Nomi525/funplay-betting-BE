@@ -13,14 +13,17 @@ import {
   mongoose,
   plusLargeSmallValue,
   sendResponse,
-  checkDecimalValueGreaterThanOrEqual
+  checkDecimalValueGreaterThanOrEqual,
 } from "../../index.js";
 
 //#region Add edit community betting
 export const addEditCommunityBets = async (req, res) => {
   try {
     let { gameId, period, betAmount } = req.body;
-    let getCommunityGame = await getSingleData({ _id: gameId, is_deleted: 0 }, Game);
+    let getCommunityGame = await getSingleData(
+      { _id: gameId, is_deleted: 0 },
+      Game
+    );
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -29,14 +32,13 @@ export const addEditCommunityBets = async (req, res) => {
         []
       );
     }
-    const betCountInPeriod = await CommunityBetting.find({ gameId, period, is_deleted: 0 });
+    const betCountInPeriod = await CommunityBetting.find({
+      gameId,
+      period,
+      is_deleted: 0,
+    });
     if (betCountInPeriod.length >= getCommunityGame.noOfUsers) {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        "Bet limit expire",
-        []
-      );
+      return sendResponse(res, StatusCodes.BAD_REQUEST, "Bet limit expire", []);
     }
 
     const checkBalance = await NewTransaction.findOne({
@@ -54,10 +56,7 @@ export const addEditCommunityBets = async (req, res) => {
     }
 
     if (
-      !checkDecimalValueGreaterThanOrEqual(
-        checkBalance.totalCoin,
-        betAmount
-      )
+      !checkDecimalValueGreaterThanOrEqual(checkBalance.totalCoin, betAmount)
     ) {
       return sendResponse(
         res,
@@ -72,7 +71,7 @@ export const addEditCommunityBets = async (req, res) => {
         userId: req.user,
         gameId,
         betAmount: betAmount,
-        period
+        period,
       },
       CommunityBetting
     );
@@ -158,9 +157,11 @@ export const getAllLiveCommunityBets = async (req, res) => {
       gameId,
       period,
       isWin: true,
-      is_deleted: 0
-    }).populate("userId", "fullName profile email")
-    .populate("gameId", "gameName gameImage gameMode").sort({ rewardAmount: -1 });
+      is_deleted: 0,
+    })
+      .populate("userId", "fullName profile email")
+      .populate("gameId", "gameName gameImage gameMode")
+      .sort({ rewardAmount: -1 });
 
     return sendResponse(
       res,
@@ -187,10 +188,10 @@ export const getAllLastDayCommunityBettingWinners = async (req, res) => {
     // endOfYesterday.setHours(23, 59, 59, 999);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     // const currentTime = moment().utcOffset("+05:30").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]")
-        // var currentTimestamp = moment(
-        //   `${currentDate2} ${currentTime}:00`,
-        //   "YYYY-MM-DD HH:mm:ss"
-        // );
+    // var currentTimestamp = moment(
+    //   `${currentDate2} ${currentTime}:00`,
+    //   "YYYY-MM-DD HH:mm:ss"
+    // );
     const getLastDayWinners = await CommunityBetting.find({
       gameId,
       isWin: true,
@@ -260,7 +261,7 @@ export const getAllCommunityGamePeriod = async (req, res) => {
               $cond: [{ $eq: ["$isWin", true] }, "$betAmount", null],
             },
           },
-          period: { $first: "$period" },      
+          period: { $first: "$period" },
         },
       },
       {
@@ -284,7 +285,7 @@ export const getAllCommunityGamePeriod = async (req, res) => {
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
       getAllPeriods
-    ); 
+    );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
@@ -325,4 +326,3 @@ export const getAllCommunityGamePeriod = async (req, res) => {
 //     }
 // };
 //#endregion
-

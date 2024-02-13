@@ -178,7 +178,7 @@ export const connectToWallet = async (req, res) => {
       "wallet.walletType": wallet?.walletType,
       "wallet.isConnected": true,
     });
-    console.log(walletUser, "userrrsss");
+
     if (walletUser) {
       // Update the existing user's wallet and mark as verified
       await User.updateOne(
