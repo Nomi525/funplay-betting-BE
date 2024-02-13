@@ -24,47 +24,62 @@ export const addFaintCurrency = async (req, res) => {
 };
 
 
+
 export const changeStatusOfFaintCurrency = async (req, res) => {
-    try {
-      const { approvedAmount, id, status, rejectReason} = req.body;
+  try {
+      const { id, status, rejectReason } = req.body;
       const rejectScreenShort = req.rejectScreenShortUrl;
       const findFaintCurrency = await FaintCurrency.findById(id);
-      const findData = findFaintCurrency.userId
-      const findObjectID = findData.toString()
-  
+
       if (findFaintCurrency) {
-        if (status === "approved") {
-          const updatedFaintCurrency = await FaintCurrency.updateOne(
-            { _id: id },
-            { $set: { status: "approved"} }
-          );
-          const addApproveAmount = new Wallet({
-            userId : findObjectID, balance: approvedAmount
-        });
-         await addApproveAmount.save();
-          return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_APPROVED, updatedFaintCurrency);
-        } else if (status === "reject") {
-          const updatedFaintCurrency = await FaintCurrency.updateOne(
-            { _id: id },
-            { $set: { status: "reject", rejectReason:rejectReason, rejectScreenShort:rejectScreenShort } }
-          );
-  
-          return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_REJECT, updatedFaintCurrency);
-        } else {
-          return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_STATUS, []);
-        }
+          const findData = findFaintCurrency.userId;
+          const findObjectID = findData.toString();
+
+          if (status === "approved") {
+              if (findFaintCurrency.status === "approved") {
+                  return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_APPROVED, []);
+              }
+
+              const updatedFaintCurrency = await FaintCurrency.updateOne(
+                  { _id: id },
+                  { $set: { status: "approved" } }
+              );
+
+              const userWallet = await Wallet.findOne({ userId: findObjectID });
+              if (userWallet) {
+                  userWallet.balance += findFaintCurrency.amount;
+                  await userWallet.save();
+              }
+
+              return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_APPROVED, updatedFaintCurrency);
+          } else if (status === "reject") {
+              if (findFaintCurrency.status === "reject") {
+                  // Already rejected, send appropriate message
+                  return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REJECTED, []);
+              }
+
+              const updatedFaintCurrency = await FaintCurrency.updateOne(
+                  { _id: id },
+                  { $set: { status: "reject", rejectReason: rejectReason, rejectScreenShort: rejectScreenShort } }
+              );
+
+              return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_REJECT, updatedFaintCurrency);
+          } else {
+              return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_STATUS, []);
+          }
       } else {
-        return sendResponse(
-          res,
-          StatusCodes.NOT_FOUND,
-          ResponseMessage.USER_NOT_EXIST,
-          []
-        );
+          return sendResponse(
+              res,
+              StatusCodes.NOT_FOUND,
+              ResponseMessage.USER_NOT_EXIST,
+              []
+          );
       }
-    } catch (err) {
+  } catch (err) {
       return handleErrorResponse(res, err);
-    }
-  };
+  }
+};
+
 
   export const getAllFaintCurrency= async (req, res) => {
     try {
