@@ -2117,6 +2117,7 @@ async function getPenaltyBettingData(gameId, periodFor, gameType) {
     "period",
     { isWin: true, selectedTime: periodFor, gameId }
   );
+  console.log(isWinTruePeriodsforpenaltyBetting,"won data");
   if (gameType === "penaltyBetting") {
     console.log("Before sending the response1517:", battingAggregationResult);
     battingAggregationResult = await Period.aggregate([
