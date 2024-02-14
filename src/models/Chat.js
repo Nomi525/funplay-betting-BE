@@ -10,8 +10,8 @@ const chatSchema = new mongoose.Schema(
         from: String,
         message: String,
         image: String,
-        user_id:{type: mongoose.Schema.Types.ObjectId,required:false},
-        time: { type: Date, default: new Date() },
+        user_id: { type: mongoose.Schema.Types.ObjectId, required: false },
+        time: { type: Date, default: Date.now },
       },
     ],
     is_deleted: {
