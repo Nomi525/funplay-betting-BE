@@ -2184,6 +2184,7 @@ async function getPenaltyBettingData(gameId, periodFor, gameType) {
         $sort: { period: -1 },
       },
     ]);
+    console.log("Before sending the respons:", battingAggregationResult);
     // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
     //   const getPenaltyUser = await PenaltyBetting.aggregate([
     //     {
@@ -2267,7 +2268,6 @@ async function getPenaltyBettingData(gameId, periodFor, gameType) {
           });
         }
       });
-
       return {
         period: result.period,
         totalUsers: getPenaltyUser[0] ? getPenaltyUser[0].totalUsers : 0,

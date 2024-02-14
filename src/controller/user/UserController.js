@@ -692,11 +692,129 @@ export const verifyOtp = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+// export const userCheckEmail = async (req, res) => {
+//   let { email, type, registerType } = req.body;
+//   email = email ? email.toLowerCase() : null;
+//   try {
+//     const existingUser = await getSingleData({ email }, User);
+//     if (existingUser) {
+//       if (type == "signup") {
+//         if (registerType == "Password" || registerType == "OTP") {
+//           if (existingUser?.registerType == "Password") {
+//             return sendResponse(
+//               res,
+//               StatusCodes.BAD_REQUEST,
+//               ResponseMessage.USER_ALREADY_EXIST,
+//               []
+//             );
+//           }
+//           if (existingUser?.isVerified) {
+//             return sendResponse(
+//               res,
+//               StatusCodes.BAD_REQUEST,
+//               ResponseMessage.USER_ALREADY_EXIST,
+//               []
+//             );
+//           }
+//           if (
+//             existingUser &&
+//             registerType == "Password" &&
+//             existingUser?.isVerified
+//           ) {
+//             return sendResponse(
+//               res,
+//               StatusCodes.BAD_REQUEST,
+//               ResponseMessage.USER_ALREADY_EXIST,
+//               []
+//             );
+//           }
+//         }
+//       }
+
+//       if (type == "login") {
+//         if (!existingUser.isActive || existingUser.is_deleted == 1) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.DEACTIVATED_USER,
+//             []
+//           );
+//         }
+//         if (
+//           existingUser.registerType == "OTP" &&
+//           existingUser.password == null &&
+//           existingUser.isVerified
+//         ) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.PASSWORD_NOT_SET,
+//             []
+//           );
+//         }
+
+//         if (
+//           existingUser.registerType == "OTP" &&
+//           existingUser.password == null &&
+//           !existingUser.isVerified
+//         ) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.USER_NOT_EXIST,
+//             []
+//           );
+//         }
+
+//         if (
+//           existingUser.registerType == "Password" &&
+//           existingUser.password == null
+//         ) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.USER_NOT_EXIST,
+//             []
+//           );
+//         }
+//       }
+//       return sendResponse(
+//         res,
+//         StatusCodes.OK,
+//         ResponseMessage.DATA_GET,
+//         existingUser
+//       );
+//     } else {
+//       console.log("OUT");
+
+//       return sendResponse(
+//         res,
+//         StatusCodes.NOT_FOUND,
+//         ResponseMessage.USER_NOT_EXIST,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const userCheckEmail = async (req, res) => {
-  let { email, type, registerType } = req.body;
+  let { email, type, registerType, mobileNumber } = req.body;
   email = email ? email.toLowerCase() : null;
   try {
-    const existingUser = await getSingleData({ email }, User);
+    let existingUser;
+
+    if (email) {
+      existingUser = await getSingleData({ email }, User);
+    }
+    
+    if (mobileNumber) {
+      existingUser = await getSingleData({ mobileNumber }, User);
+      console.log(existingUser,"number");
+    }
+
     if (existingUser) {
       if (type == "signup") {
         if (registerType == "Password" || registerType == "OTP") {
@@ -740,6 +858,20 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
+
+        // Add conditions for mobile number login
+        if (
+          existingUser.registerType == "MobileNumber" &&
+          existingUser.password == null
+        ) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.USER_NOT_EXIST,
+            []
+          );
+        }
+
         if (
           existingUser.registerType == "OTP" &&
           existingUser.password == null &&
@@ -778,6 +910,7 @@ export const userCheckEmail = async (req, res) => {
           );
         }
       }
+
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -799,6 +932,7 @@ export const userCheckEmail = async (req, res) => {
   }
 };
 
+
 export const singupFromEmailPassword = async (req, res) => {
   try {
     let {
@@ -810,17 +944,20 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
+    let userFind;
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const checkEmailValue = emailRegex.test(email);
-    if (checkEmailValue) {
-      email = email ? email.toLowerCase() : null;
-    }
-    let userFind;
-    if (checkEmailValue) {
-      userFind = await getSingleData({ email }, User);
-    } else {
-      userFind = await getSingleData({ mobileNumber: email }, User);
-    }
+    
+    userFind = await getSingleData(
+      {
+        $or: [
+          checkEmailValue ? { email: email } : { mobileNumber: email },
+        ],
+      },
+      User
+    );
+
     if (type == "login") {
       if (userFind) {
         if (userFind.is_deleted != 0) {
