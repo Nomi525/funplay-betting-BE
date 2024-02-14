@@ -92,6 +92,7 @@ userRoutes.post("/verify-otp", verifyOtp);
 userRoutes.post("/resend-otp", resendOtp);
 userRoutes.post(
   "/signup-password",
+  [validatorMiddlware("signupValidator")],
   singupFromEmailPassword
 );
 userRoutes.post("/check-wallet-connectivity", checkWalletAddress);

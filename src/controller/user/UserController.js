@@ -801,20 +801,21 @@ export const verifyOtp = async (req, res) => {
 // };
 
 export const userCheckEmail = async (req, res) => {
-  let { email, type, registerType, mobileNumber } = req.body;
-  email = email ? email.toLowerCase() : null;
+  let { email, type, registerType } = req.body;
   try {
     let existingUser;
 
-    if (email) {
-      existingUser = await getSingleData({ email }, User);
-    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const checkEmailValue = emailRegex.test(email);
     
-    if (mobileNumber) {
-      existingUser = await getSingleData({ mobileNumber }, User);
-      console.log(existingUser,"number");
-    }
-
+    existingUser = await getSingleData(
+      {
+        $or: [
+          checkEmailValue ? { email: email } : { mobileNumber: email },
+        ],
+      },
+      User
+    );
     if (existingUser) {
       if (type == "signup") {
         if (registerType == "Password" || registerType == "OTP") {
@@ -834,11 +835,7 @@ export const userCheckEmail = async (req, res) => {
               []
             );
           }
-          if (
-            existingUser &&
-            registerType == "Password" &&
-            existingUser?.isVerified
-          ) {
+          if (existingUser && registerType == "Password" && existingUser?.isVerified) {
             return sendResponse(
               res,
               StatusCodes.BAD_REQUEST,
@@ -847,6 +844,7 @@ export const userCheckEmail = async (req, res) => {
             );
           }
         }
+
       }
 
       if (type == "login") {
@@ -858,24 +856,9 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
-
-        // Add conditions for mobile number login
-        if (
-          existingUser.registerType == "MobileNumber" &&
-          existingUser.password == null
-        ) {
-          return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.USER_NOT_EXIST,
-            []
-          );
-        }
-
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null &&
-          existingUser.isVerified
+          existingUser.password == null && existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -887,8 +870,7 @@ export const userCheckEmail = async (req, res) => {
 
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null &&
-          !existingUser.isVerified
+          existingUser.password == null && !existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -898,10 +880,8 @@ export const userCheckEmail = async (req, res) => {
           );
         }
 
-        if (
-          existingUser.registerType == "Password" &&
-          existingUser.password == null
-        ) {
+        if (existingUser.registerType == "Password" &&
+          existingUser.password == null) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -909,8 +889,8 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
+
       }
-
       return sendResponse(
         res,
         StatusCodes.OK,
@@ -918,7 +898,7 @@ export const userCheckEmail = async (req, res) => {
         existingUser
       );
     } else {
-      console.log("OUT");
+      console.log("OUT")
 
       return sendResponse(
         res,
@@ -944,20 +924,17 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
-    let userFind;
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const checkEmailValue = emailRegex.test(email);
-    
-    userFind = await getSingleData(
-      {
-        $or: [
-          checkEmailValue ? { email: email } : { mobileNumber: email },
-        ],
-      },
-      User
-    );
-
+    if (checkEmailValue) {
+      email = email ? email.toLowerCase() : null;
+    }
+    let userFind;
+    if (checkEmailValue) {
+      userFind = await getSingleData({ email }, User);
+    } else {
+      userFind = await getSingleData({ mobileNumber: email }, User);
+    }
     if (type == "login") {
       if (userFind) {
         if (userFind.is_deleted != 0) {
