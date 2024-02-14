@@ -12,7 +12,6 @@ export const addEditPrivacyPolicy = async (req, res) => {
                         $set: {
                             "privacyPolicy.description": req.body.description,
                             "privacyPolicy.title": req.body.title,
-                            
                         },
                     });
                     let updatedData = await CMS.find({ deletedStatus: 0 });
