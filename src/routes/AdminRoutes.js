@@ -289,8 +289,8 @@ adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData)
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
 
-adminRoutes.post('/change-status-faint-currency' ,Auth,  Upload, changeStatusOfFaintCurrency)
-adminRoutes.get('/get-all-faint-currency', getAllFaintCurrency)
+adminRoutes.post('/change-status-faint-currency' ,  Upload, changeStatusOfFaintCurrency)
+adminRoutes.get('/get-all-faint-currency',Auth, getAllFaintCurrency)
 
 export { adminRoutes };
 
