@@ -109,7 +109,7 @@ export const addEditTermsAndCondition = async (req, res) => {
                     "termsAndCondition.description": req.body.description,
                     "termsAndCondition.title": req.body.title,
                 }).save();
-                // let result = await CMS.find({ deletedStatus: 0 });
+                
                 if (termsAndCondition) {
                     return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TERMS_ADDED, termsAndCondition);
                 } else {
