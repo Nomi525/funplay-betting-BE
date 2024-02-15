@@ -262,8 +262,10 @@ export const userSignUpSignInOtp = async (req, res) => {
     if (checkEmailValue) {
       email = email ? email.toLowerCase() : null;
       existingUser = await getSingleData({ email }, User);
+      console.log(existingUser,"sj");
     } else {
       existingUser = await getSingleData({ mobileNumber: email }, User);
+     
     }
     if (existingUser?.registerType == "Password" && type !== "signup") {
       return sendResponse(
@@ -362,8 +364,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         );
       }
       let referCode = referralCode(8);
-      let findReferralUser = null;
-      // For Referral Code
+      let findReferralUser = null; 
       if (referralByCode) {
         findReferralUser = await User.findOne({ referralCode: referralByCode });
         if (!findReferralUser) {
@@ -404,6 +405,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       }
       let message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_MOBILE;
       if (checkEmailValue) {
+        console.log("add");
         let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
         await sendMail(userData.email, "Verify Otp", mailInfo);
         message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL;
@@ -411,6 +413,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(res, StatusCodes.CREATED, message, userData);
     }
   } catch (error) {
+    console.log(error,"hh");
     return handleErrorResponse(res, error);
   }
 };
@@ -692,11 +695,130 @@ export const verifyOtp = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+// export const userCheckEmail = async (req, res) => {
+//   let { email, type, registerType } = req.body;
+//   email = email ? email.toLowerCase() : null;
+//   try {
+//     const existingUser = await getSingleData({ email }, User);
+//     if (existingUser) {
+//       if (type == "signup") {
+//         if (registerType == "Password" || registerType == "OTP") {
+//           if (existingUser?.registerType == "Password") {
+//             return sendResponse(
+//               res,
+//               StatusCodes.BAD_REQUEST,
+//               ResponseMessage.USER_ALREADY_EXIST,
+//               []
+//             );
+//           }
+//           if (existingUser?.isVerified) {
+//             return sendResponse(
+//               res,
+//               StatusCodes.BAD_REQUEST,
+//               ResponseMessage.USER_ALREADY_EXIST,
+//               []
+//             );
+//           }
+//           if (
+//             existingUser &&
+//             registerType == "Password" &&
+//             existingUser?.isVerified
+//           ) {
+//             return sendResponse(
+//               res,
+//               StatusCodes.BAD_REQUEST,
+//               ResponseMessage.USER_ALREADY_EXIST,
+//               []
+//             );
+//           }
+//         }
+//       }
+
+//       if (type == "login") {
+//         if (!existingUser.isActive || existingUser.is_deleted == 1) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.DEACTIVATED_USER,
+//             []
+//           );
+//         }
+//         if (
+//           existingUser.registerType == "OTP" &&
+//           existingUser.password == null &&
+//           existingUser.isVerified
+//         ) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.PASSWORD_NOT_SET,
+//             []
+//           );
+//         }
+
+//         if (
+//           existingUser.registerType == "OTP" &&
+//           existingUser.password == null &&
+//           !existingUser.isVerified
+//         ) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.USER_NOT_EXIST,
+//             []
+//           );
+//         }
+
+//         if (
+//           existingUser.registerType == "Password" &&
+//           existingUser.password == null
+//         ) {
+//           return sendResponse(
+//             res,
+//             StatusCodes.BAD_REQUEST,
+//             ResponseMessage.USER_NOT_EXIST,
+//             []
+//           );
+//         }
+//       }
+//       return sendResponse(
+//         res,
+//         StatusCodes.OK,
+//         ResponseMessage.DATA_GET,
+//         existingUser
+//       );
+//     } else {
+//       console.log("OUT");
+
+//       return sendResponse(
+//         res,
+//         StatusCodes.NOT_FOUND,
+//         ResponseMessage.USER_NOT_EXIST,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const userCheckEmail = async (req, res) => {
   let { email, type, registerType } = req.body;
-  email = email ? email.toLowerCase() : null;
   try {
-    const existingUser = await getSingleData({ email }, User);
+    let existingUser;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const checkEmailValue = emailRegex.test(email);
+    
+    existingUser = await getSingleData(
+      {
+        $or: [
+          checkEmailValue ? { email: email } : { mobileNumber: email },
+        ],
+      },
+      User
+    );
     if (existingUser) {
       if (type == "signup") {
         if (registerType == "Password" || registerType == "OTP") {
@@ -716,11 +838,7 @@ export const userCheckEmail = async (req, res) => {
               []
             );
           }
-          if (
-            existingUser &&
-            registerType == "Password" &&
-            existingUser?.isVerified
-          ) {
+          if (existingUser && registerType == "Password" && existingUser?.isVerified) {
             return sendResponse(
               res,
               StatusCodes.BAD_REQUEST,
@@ -729,6 +847,7 @@ export const userCheckEmail = async (req, res) => {
             );
           }
         }
+
       }
 
       if (type == "login") {
@@ -742,8 +861,7 @@ export const userCheckEmail = async (req, res) => {
         }
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null &&
-          existingUser.isVerified
+          existingUser.password == null && existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -755,8 +873,7 @@ export const userCheckEmail = async (req, res) => {
 
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null &&
-          !existingUser.isVerified
+          existingUser.password == null && !existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -766,10 +883,8 @@ export const userCheckEmail = async (req, res) => {
           );
         }
 
-        if (
-          existingUser.registerType == "Password" &&
-          existingUser.password == null
-        ) {
+        if (existingUser.registerType == "Password" &&
+          existingUser.password == null) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -777,6 +892,7 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
+
       }
       return sendResponse(
         res,
@@ -785,7 +901,7 @@ export const userCheckEmail = async (req, res) => {
         existingUser
       );
     } else {
-      console.log("OUT");
+      console.log("OUT")
 
       return sendResponse(
         res,
@@ -798,6 +914,7 @@ export const userCheckEmail = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 
 export const singupFromEmailPassword = async (req, res) => {
   try {

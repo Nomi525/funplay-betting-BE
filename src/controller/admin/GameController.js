@@ -2117,6 +2117,7 @@ async function getPenaltyBettingData(gameId, periodFor, gameType) {
     "period",
     { isWin: true, selectedTime: periodFor, gameId }
   );
+  console.log(isWinTruePeriodsforpenaltyBetting,"won data");
   if (gameType === "penaltyBetting") {
     console.log("Before sending the response1517:", battingAggregationResult);
     battingAggregationResult = await Period.aggregate([
@@ -2183,6 +2184,7 @@ async function getPenaltyBettingData(gameId, periodFor, gameType) {
         $sort: { period: -1 },
       },
     ]);
+    console.log("Before sending the respons:", battingAggregationResult);
     // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
     //   const getPenaltyUser = await PenaltyBetting.aggregate([
     //     {
@@ -2266,7 +2268,6 @@ async function getPenaltyBettingData(gameId, periodFor, gameType) {
           });
         }
       });
-
       return {
         period: result.period,
         totalUsers: getPenaltyUser[0] ? getPenaltyUser[0].totalUsers : 0,

@@ -111,11 +111,11 @@ export const adminEditProfile = async (req, res) => {
 //#endregion
 
 //#region get withdrwal check
-export const getwithdrwalcheck = (req, res) => {
+export const getwithdrwalcheck = async (req, res) => {
     try {
-        let userBankDetails =
-            [{ "bankName": "YES Bank", "AccountNo": 65656565656565, "IFSCCode": "YES0987" }]
-
+        let userBankDetails = [
+            { "bankName": "YES Bank", "AccountNo": 65656565656565, "IFSCCode": "YES0987" }
+        ];
 
         let walletDetails = {
             walletName: "paytm",
@@ -125,14 +125,15 @@ export const getwithdrwalcheck = (req, res) => {
 
         let fundDetails = {
             mode: "credit"
-        }
-        // Combining all the details into one array
-        let userDetailsArray = { userBankDetails: userBankDetails, walletDetails: walletDetails, fundDetails: fundDetails }
-        return sendResponse(res, StatusCodes.OK, ResponseMessage.USER_WALLET_DETAIL, userDetailsArray);
+        };
+        let userDetailsArray = { userBankDetails, walletDetails, fundDetails };
+
+        await sendResponse(res, StatusCodes.OK, ResponseMessage.USER_WALLET_DETAIL, userDetailsArray);
     } catch (error) {
-        return handleErrorResponse(res, error);
+        await handleErrorResponse(res, error);
     }
-}
+};
+
 //#endregion
 
 //#region admin change password
