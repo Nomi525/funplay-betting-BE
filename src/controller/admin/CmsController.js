@@ -105,13 +105,16 @@ export const addEditTermsAndCondition = async (req, res) => {
                     }
                 }
             } else {
+                
                 let termsAndCondition = new CMS({
                     "termsAndCondition.description": req.body.description,
                     "termsAndCondition.title": req.body.title,
-                }).save();
+                });
                 
-                if (termsAndCondition) {
-                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TERMS_ADDED, termsAndCondition);
+                let savedTerms = await termsAndCondition.save();
+
+                if (savedTerms) {
+                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.TERMS_ADDED, savedTerms);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }

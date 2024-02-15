@@ -83,6 +83,7 @@ import {
 
 import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency} from "../controller/admin/FaintCurrency.js";
+import { userDashboard1 } from "../controller/user/DashboardController.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -244,6 +245,9 @@ socketRoute('/color-betting').on('connection', colorBettingSocket)
 
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 userRoutes.post('/add-faint-currency', Auth , Upload, addFaintCurrency)
+
+
+userRoutes.get('/userDashboard1',Auth, userDashboard1)
  
 export { userRoutes };
 
