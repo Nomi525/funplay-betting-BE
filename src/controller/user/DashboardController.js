@@ -360,22 +360,164 @@ export const userDashboard = async (req, res) => {
   }
 };
 
+// export const userDashboard1 = async (req, res) => {
+//   try {
+//     console.log("req.user:", req.user);
+//     const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
+//     const numberBettingForUser = await getBettingData(NumberBetting, findUser._id);
+//     const colourBettingForUser = await getBettingData(ColourBetting, findUser._id);
+//     const communityBettingForUser = await getBettingData(CommunityBetting, findUser._id);
+//     const penaltyBettingForUser = await getBettingData(PenaltyBetting, findUser._id);
+//     const cardBettingForUser = await getBettingData(CardBetting, findUser._id);
+//     if (!findUser) {
+//       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
+//     }
+
+//     const today = new Date();
+//     const transactions = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
+//     const totalTransaction = transactions.length;
+
+//     const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
+
+//     if (!findUser.currency) {
+//       findUser.currency = "USD";
+//       await findUser.save();
+//     }
+//     const currency = await CurrencyCoin.findOne({ currencyName: findUser.currency });
+//     const coinRate = currency?.coin;
+
+//     // One months rewards get
+//     const oneMonthAgo = new Date();
+//     oneMonthAgo.setMonth(today.getMonth() - 1);
+//     const rewardOneMonthQuery = {
+//       createdAt: {
+//         $gte: oneMonthAgo,
+//         $lte: today,
+//       },
+//     };
+
+//     // One Week Reward
+//     const oneWeekAgo = new Date();
+//     oneWeekAgo.setDate(today.getDate() - 7);
+//     const rewardOneWeekQuery = {
+//       createdAt: {
+//         $gte: oneWeekAgo,
+//         $lte: today,
+//       },
+//     };
+
+//     // Today Rewas count get
+//     today.setHours(0, 0, 0, 0);
+//     const endOfDay = new Date(today);
+//     endOfDay.setHours(23, 59, 59, 999);
+//     const rewardTodayQuery = {
+//       createdAt: {
+//         $gte: today,
+//         $lte: endOfDay,
+//       },
+//     };
+
+//     const totalWithdrawal = transactions.filter((tran) => tran.type == "withdrawal");
+//     const totalDeposit = transactions.filter((tran) => tran.type == "deposit");
+
+//     const totalOneDayReward = await calculateAllGameReward(rewardTodayQuery);
+//     const totalOneMonthReward = await calculateAllGameReward(rewardOneMonthQuery);
+//     const totalOneWeekReward = await calculateAllGameReward(rewardOneWeekQuery);
+
+//     let totalDepositAmount = totalDeposit.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
+//     let totalWithdrawalAmount = totalWithdrawal.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
+
+//     const totalNumberBettingReward1 = numberBettingForUser.reduce(
+//       (total, data) => Number(total) + Number(data.rewardAmount),
+//       0
+//     );
+//     const totalColourBettingReward1 = colourBettingForUser.reduce(
+//       (total, data) => Number(total) + Number(data.rewardAmount),
+//       0
+//     );
+//     const totalCommunityBettingReward1 = communityBettingForUser.reduce(
+//       (total, data) => Number(total) + Number(data.rewardAmount),
+//       0
+//     );
+//     const totalPenaltyBettingReward1 = penaltyBettingForUser.reduce(
+//       (total, data) => Number(total) + Number(data.rewardAmount),
+//       0
+//     );
+//     const totalCardBettingReward1 = cardBettingForUser.reduce(
+//       (total, data) => Number(total) + Number(data.rewardAmount),
+//       0
+//     );
+
+// console.log( totalNumberBettingReward1, 
+//   totalColourBettingReward1 ,
+//   totalCommunityBettingReward1 ,
+//   totalPenaltyBettingReward1 ,
+//   totalCardBettingReward1 ,"rewarddd")
+
+//     const totalReward =
+//       totalNumberBettingReward1 +
+//       totalColourBettingReward1 +
+//       totalCommunityBettingReward1 +
+//       totalPenaltyBettingReward1 +
+//       totalCardBettingReward1;
+
+      
+//     let totalBalance = 0;
+//     let totalDepositeBalance = 0;
+//     if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
+//       totalBalance = transactionDeposite.tokenDollorValue;
+//       totalDepositeBalance = transactionDeposite.betAmount;
+//     }
+
+//     let totalCoin = transactionDeposite ? transactionDeposite.totalCoin : 0;
+//     let convertedCoin = transactionDeposite ? transactionDeposite.totalCoin / coinRate : 0;
+
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.DASHBOARD_DATA_GET, {
+//       totalTransaction,
+//       totalOneDayReward,
+//       totalOneWeekReward,
+//       totalOneMonthReward,
+//       totalWithdrawalRequests: totalWithdrawal.length,
+//       totalBalance: transactionDeposite ? transactionDeposite.tokenDollorValue : 0,
+//       totalCoin,
+//       currency: findUser ? findUser.currency : "USD",
+//       convertedCoin,
+//       totalDepositAmount: minusLargeSmallValue(totalDepositAmount, totalWithdrawalAmount),
+//       totalReward,
+//       walletDetails: findUser.wallet,
+//     });
+//   } catch (error) {
+//     console.log(error, "jj");
+//     return handleErrorResponse(res, error);
+//   }
+// };
 export const userDashboard1 = async (req, res) => {
   try {
     console.log("req.user:", req.user);
     const findUser = await getSingleData({ _id: req.user, is_deleted: 0 }, User);
-    const numberBettingForUser = await getBettingData(NumberBetting, findUser._id);
-    const colourBettingForUser = await getBettingData(ColourBetting, findUser._id);
-    const communityBettingForUser = await getBettingData(CommunityBetting, findUser._id);
-    const penaltyBettingForUser = await getBettingData(PenaltyBetting, findUser._id);
-    const cardBettingForUser = await getBettingData(CardBetting, findUser._id);
+
     if (!findUser) {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.USER_NOT_EXIST, []);
     }
-console.log(numberBettingForUser,"jj");
+
     const today = new Date();
-    const transactions = await getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory);
-    const totalTransaction = transactions.length;
+
+    // Fetch all betting data and transactions in parallel
+    const [
+      numberBettingForUser,
+      colourBettingForUser,
+      communityBettingForUser,
+      penaltyBettingForUser,
+      cardBettingForUser,
+      transactions,
+    ] = await Promise.all([
+      getBettingData(NumberBetting, findUser._id),
+      getBettingData(ColourBetting, findUser._id),
+      getBettingData(CommunityBetting, findUser._id),
+      getBettingData(PenaltyBetting, findUser._id),
+      getBettingData(CardBetting, findUser._id),
+      getAllData({ userId: findUser._id, is_deleted: 0 }, TransactionHistory),
+    ]);
 
     const transactionDeposite = await getSingleData({ userId: findUser._id, is_deleted: 0 }, NewTransaction);
 
@@ -383,76 +525,56 @@ console.log(numberBettingForUser,"jj");
       findUser.currency = "USD";
       await findUser.save();
     }
+
     const currency = await CurrencyCoin.findOne({ currencyName: findUser.currency });
     const coinRate = currency?.coin;
 
-    // One months rewards get
-    const oneMonthAgo = new Date();
+    // Optimize date calculations
+    const oneMonthAgo = new Date(today);
     oneMonthAgo.setMonth(today.getMonth() - 1);
-    const rewardOneMonthQuery = {
-      createdAt: {
-        $gte: oneMonthAgo,
-        $lte: today,
-      },
-    };
 
-    // One Week Reward
-    const oneWeekAgo = new Date();
+    const oneWeekAgo = new Date(today);
     oneWeekAgo.setDate(today.getDate() - 7);
-    const rewardOneWeekQuery = {
-      createdAt: {
-        $gte: oneWeekAgo,
-        $lte: today,
-      },
-    };
 
-    // Today Rewas count get
-    today.setHours(0, 0, 0, 0);
     const endOfDay = new Date(today);
     endOfDay.setHours(23, 59, 59, 999);
-    const rewardTodayQuery = {
-      createdAt: {
-        $gte: today,
-        $lte: endOfDay,
-      },
-    };
 
-    const totalWithdrawal = transactions.filter((tran) => tran.type == "withdrawal");
-    const totalDeposit = transactions.filter((tran) => tran.type == "deposit");
+    // Parallelize async operations for reward calculations
+    const [totalOneDayReward, totalOneWeekReward, totalOneMonthReward] = await Promise.all([
+      calculateAllGameReward({
+        createdAt: {
+          $gte: today,
+          $lte: endOfDay,
+        },
+      }),
+      calculateAllGameReward({
+        createdAt: {
+          $gte: oneWeekAgo,
+          $lte: today,
+        },
+      }),
+      calculateAllGameReward({
+        createdAt: {
+          $gte: oneMonthAgo,
+          $lte: today,
+        },
+      }),
+    ]);
 
-    const totalOneDayReward = await calculateAllGameReward(rewardTodayQuery);
-    const totalOneMonthReward = await calculateAllGameReward(rewardOneMonthQuery);
-    const totalOneWeekReward = await calculateAllGameReward(rewardOneWeekQuery);
+    // Extract deposit and withdrawal transactions
+    const totalWithdrawal = transactions.filter((tran) => tran.type === "withdrawal");
+    const totalDeposit = transactions.filter((tran) => tran.type === "deposit");
 
-    let totalDepositAmount = totalDeposit.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
-    let totalWithdrawalAmount = totalWithdrawal.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
+    // Calculate total deposit and withdrawal amounts
+    const totalDepositAmount = totalDeposit.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
+    const totalWithdrawalAmount = totalWithdrawal.reduce((total, data) => plusLargeSmallValue(total, data.tokenDollorValue), 0);
 
-    const totalNumberBettingReward1 = numberBettingForUser.reduce(
-      (total, data) => Number(total) + Number(data.rewardAmount),
-      0
-    );
-    const totalColourBettingReward1 = colourBettingForUser.reduce(
-      (total, data) => Number(total) + Number(data.rewardAmount),
-      0
-    );
-    const totalCommunityBettingReward1 = communityBettingForUser.reduce(
-      (total, data) => Number(total) + Number(data.rewardAmount),
-      0
-    );
-    const totalPenaltyBettingReward1 = penaltyBettingForUser.reduce(
-      (total, data) => Number(total) + Number(data.rewardAmount),
-      0
-    );
-    const totalCardBettingReward1 = cardBettingForUser.reduce(
-      (total, data) => Number(total) + Number(data.rewardAmount),
-      0
-    );
-
-console.log( totalNumberBettingReward1, 
-  totalColourBettingReward1 ,
-  totalCommunityBettingReward1 ,
-  totalPenaltyBettingReward1 ,
-  totalCardBettingReward1 ,"rewarddd")
+    // Calculate total betting rewards
+    const totalNumberBettingReward1 = calculateTotalBettingReward(numberBettingForUser);
+    const totalColourBettingReward1 = calculateTotalBettingReward(colourBettingForUser);
+    const totalCommunityBettingReward1 = calculateTotalBettingReward(communityBettingForUser);
+    const totalPenaltyBettingReward1 = calculateTotalBettingReward(penaltyBettingForUser);
+    const totalCardBettingReward1 = calculateTotalBettingReward(cardBettingForUser);
 
     const totalReward =
       totalNumberBettingReward1 +
@@ -461,7 +583,7 @@ console.log( totalNumberBettingReward1,
       totalPenaltyBettingReward1 +
       totalCardBettingReward1;
 
-      
+    // Calculate total balance, total coin, and converted coin
     let totalBalance = 0;
     let totalDepositeBalance = 0;
     if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
@@ -469,16 +591,17 @@ console.log( totalNumberBettingReward1,
       totalDepositeBalance = transactionDeposite.betAmount;
     }
 
-    let totalCoin = transactionDeposite ? transactionDeposite.totalCoin : 0;
-    let convertedCoin = transactionDeposite ? transactionDeposite.totalCoin / coinRate : 0;
+    const totalCoin = transactionDeposite ? transactionDeposite.totalCoin : 0;
+    const convertedCoin = transactionDeposite ? transactionDeposite.totalCoin / coinRate : 0;
 
+    // Return the response
     return sendResponse(res, StatusCodes.OK, ResponseMessage.DASHBOARD_DATA_GET, {
-      totalTransaction,
+      totalTransaction: transactions.length,
       totalOneDayReward,
       totalOneWeekReward,
       totalOneMonthReward,
       totalWithdrawalRequests: totalWithdrawal.length,
-      totalBalance: transactionDeposite ? transactionDeposite.tokenDollorValue : 0,
+      totalBalance,
       totalCoin,
       currency: findUser ? findUser.currency : "USD",
       convertedCoin,
@@ -491,6 +614,10 @@ console.log( totalNumberBettingReward1,
     return handleErrorResponse(res, error);
   }
 };
+
+function calculateTotalBettingReward(bettingData) {
+  return bettingData.reduce((total, data) => Number(total) + Number(data.rewardAmount), 0);
+}
 
 export const topWeeklyMonthlyPlayers = async (req, res) => {
   try {

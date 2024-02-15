@@ -262,8 +262,10 @@ export const userSignUpSignInOtp = async (req, res) => {
     if (checkEmailValue) {
       email = email ? email.toLowerCase() : null;
       existingUser = await getSingleData({ email }, User);
+      console.log(existingUser,"sj");
     } else {
       existingUser = await getSingleData({ mobileNumber: email }, User);
+     
     }
     if (existingUser?.registerType == "Password" && type !== "signup") {
       return sendResponse(
@@ -362,8 +364,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         );
       }
       let referCode = referralCode(8);
-      let findReferralUser = null;
-      // For Referral Code
+      let findReferralUser = null; 
       if (referralByCode) {
         findReferralUser = await User.findOne({ referralCode: referralByCode });
         if (!findReferralUser) {
@@ -404,6 +405,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       }
       let message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_MOBILE;
       if (checkEmailValue) {
+        console.log("add");
         let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
         await sendMail(userData.email, "Verify Otp", mailInfo);
         message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL;
@@ -411,6 +413,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(res, StatusCodes.CREATED, message, userData);
     }
   } catch (error) {
+    console.log(error,"hh");
     return handleErrorResponse(res, error);
   }
 };
