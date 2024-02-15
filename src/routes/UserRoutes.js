@@ -81,7 +81,7 @@ import {
   uploadImage,
 } from "./../index.js";
 
-import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
+// import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency} from "../controller/admin/FaintCurrency.js";
 import { userDashboard1 } from "../controller/user/DashboardController.js";
 const userRoutes = express.Router();
@@ -240,8 +240,8 @@ userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinn
 
 //#endregion card Betting Routes
 
-socketRoute('/number-betting').on('connection', numberBettingSocket)
-socketRoute('/color-betting').on('connection', colorBettingSocket)
+// socketRoute('/number-betting').on('connection', numberBettingSocket)
+// socketRoute('/color-betting').on('connection', colorBettingSocket)
 
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 userRoutes.post('/add-faint-currency', Auth , Upload, addFaintCurrency)
