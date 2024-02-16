@@ -61,9 +61,9 @@ const communityBettingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [null, "loose", "pending", "won"],
+      enum: [null, "fail", "pending", "successfully"],
       required: false,
-      default: "pending",
+      default: null,
     },
     is_deleted: {
       type: Number,
