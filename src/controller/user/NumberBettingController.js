@@ -2248,23 +2248,29 @@ export const getPeriod = async (req, res) => {
     const { gameId } = req.params;
     const { second } = req.query;
     const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
+    // console.log(currentTimeAndDateStamp,"jj");
+    // console.log(new Date(currentTimeAndDateStamp),"sjh");
     let query = {
       date: moment().format("YYYY-MM-DD"),
       gameId,
       is_deleted: 0,
     };
+    console.log(query,"data");
     if (second) {
       query.periodFor = second;
     }
     let getGamePeriod = await Period.find(query)
       .sort({ createdAt: -1 })
-      .limit(1);
+      .limit(1).populate("gameId");
+      console.log(getGamePeriod,"ghgg");
+
     let getAllPeriod = getGamePeriod[0];
+    console.log(  moment(getAllPeriod.gameId.gameTimeTo).unix() ,"hh");
     if (
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
         moment().format("YYYY-MM-DD") &&
-      getAllPeriod.endTime > currentTimeAndDateStamp
+     moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp
     ) {
       return sendResponse(
         res,

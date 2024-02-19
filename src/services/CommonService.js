@@ -413,7 +413,7 @@ export const declareNumberWinner = async (game, period) => {
                 betAmount: 0,
                 is_deleted: 0,
                 isWin: true,
-                status: "won",
+                status: "successfully",
               });
               await NumberBetting.updateMany(
                 {
@@ -423,7 +423,7 @@ export const declareNumberWinner = async (game, period) => {
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "loose" }
+                { status: "fail" }
               );
               return {
                 message: `Victory Alert! The Winning Number is ${randomWinNumber}`,
@@ -902,7 +902,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                 is_deleted: 0,
                 isWin: true,
                 selectedTime,
-                status: "won",
+                status: "successfully",
               });
               await PenaltyBetting.updateMany(
                 {
@@ -913,7 +913,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "loose" }
+                { status: "fail" }
               );
               return {
                 message: `${ResponseMessage.PENALTY_WINNER} ${randomWinSide}`,
@@ -946,7 +946,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                             betSide: item.betSide,
                             is_deleted: 0,
                           },
-                          { isWin: true, status: "won", rewardAmount }
+                          { isWin: true, status: "successfully", rewardAmount }
                         );
                         const balance = await getSingleData(
                           { userId },
@@ -974,7 +974,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                           betSide: item.betSide,
                           is_deleted: 0,
                         },
-                        { status: "loose" }
+                        { status: "fail" }
                       );
                     });
                   }
@@ -990,7 +990,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
           } else {
             await PenaltyBetting.updateMany(
               { gameId, period, selectedTime },
-              { status: "loose" }
+              { status: "fail" }
             );
             return {
               message: ResponseMessage.LOSER,
@@ -999,7 +999,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
         } else {
           await PenaltyBetting.updateMany(
             { gameId, period, selectedTime },
-            { status: "loose" }
+            { status: "fail" }
           );
           return {
             message: ResponseMessage.LOSER,
@@ -1018,7 +1018,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
           betAmount: 0,
           is_deleted: 0,
           isWin: true,
-          status: "won",
+          status: "successfully",
         });
         return {
           message: ResponseMessage.PENALTY_WINNER + " " + randomWinSide,
@@ -1124,7 +1124,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                 selectedTime,
                 isWin: true,
                 winCardNumber,
-                status: "won",
+                status: "successfully",
                 is_deleted: 0,
               });
               await CardBetting.updateMany(
@@ -1136,7 +1136,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "loose" }
+                { status: "fail" }
               );
               return {
                 message: `${ResponseMessage.CARD_WINNER} ${randomWinCard} ${winCardNumber}`,
@@ -1174,7 +1174,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                           {
                             isWin: true,
                             winCardNumber,
-                            status: "won",
+                            status: "successfully",
                             rewardAmount,
                           }
                         );
@@ -1204,7 +1204,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                           card: item.card,
                           is_deleted: 0,
                         },
-                        { status: "loose" }
+                        { status: "fail" }
                       );
                     });
                   }
@@ -1222,7 +1222,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
           } else {
             await CardBetting.updateMany(
               { gameId, period, selectedTime },
-              { status: "loose" }
+              { status: "fail" }
             );
             return {
               message: ResponseMessage.LOSER,
@@ -1249,7 +1249,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
           is_deleted: 0,
           isWin: true,
           winCardNumber,
-          status: "won",
+          status: "successfully",
         });
         return {
           message:

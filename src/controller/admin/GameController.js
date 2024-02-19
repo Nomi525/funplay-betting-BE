@@ -50,6 +50,7 @@ export const addEditGame = async (req, res) => {
       entryFee,
       winningCoin,
     } = req.body;
+
     gameSecond = gameSecond ? gameSecond : [];
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
@@ -140,8 +141,10 @@ export const addEditGame = async (req, res) => {
         { _id: gameId },
         {
           gameName,
-          gameStartDate: moment(gameStartDate).format("YYYY-MM-DD"),
-          gameEndDate: moment(gameEndDate).format("YYYY-MM-DD"),
+          // gameStartDate: moment(gameStartDate).format("YYYY-MM-DD"),
+          // gameEndDate: moment(gameEndDate).format("YYYY-MM-DD"),
+          gameStartDate: newGameStartDate,
+          gameEndDate: newGameEndDate,
           gameImage,
           gameDurationFrom,
           gameDurationTo,
