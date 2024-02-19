@@ -201,7 +201,6 @@ export const adminDashboard = async (req, res) => {
       totalZeroDepositUser,
       totalZeroDepositUserIn24Hours,
       totalTransaction: totalTransaction.length,
-      totalWinningAmountin24Hrs,
       totaldepositIn24Hours: total,
       totalDistributedAmountInLastMonth: totalWinningAmountLastMonth,
       totalDistributedToday: total,

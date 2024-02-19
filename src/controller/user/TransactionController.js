@@ -159,7 +159,7 @@ export const addNewTransaction = async (req, res) => {
           }
         }
         const createTransction = await dataCreate(createObject, NewTransaction);
-        await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenAmount, tokenDollorValue: value, type: "deposit" }, TransactionHistory)
+        await dataCreate({ userId: req.user, networkChainId, tokenName, tokenAmount, walletAddress, tokenDollorValue: value, type: "deposit" }, TransactionHistory)
 
         return { status: 'CREATED', data: createTransction }
       }
@@ -295,7 +295,7 @@ export const withdrawalRequest = async (req, res) => {
 
             const transactionData = await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-              walletAddress, tokenAmount, tokenDollorValue: value, coin, type: "withdrawal"
+              walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
 
             // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, tetherType, coin }, WithdrawalRequest)
@@ -316,7 +316,7 @@ export const withdrawalRequest = async (req, res) => {
 
             const transactionData = await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-              walletAddress, tokenAmount, tokenDollorValue: value, coin, type: "withdrawal"
+              walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
             // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
@@ -336,7 +336,7 @@ export const withdrawalRequest = async (req, res) => {
 
             const transactionData = await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-              walletAddress, tokenAmount, tokenDollorValue: value, coin, type: "withdrawal"
+              walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
             // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
@@ -355,7 +355,7 @@ export const withdrawalRequest = async (req, res) => {
 
             const transactionData = await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-              walletAddress, tokenAmount, tokenDollorValue: value, coin, type: "withdrawal"
+              walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
             // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
@@ -373,7 +373,7 @@ export const withdrawalRequest = async (req, res) => {
             await findTransaction.save();
             const transactionData = await dataCreate({
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-              walletAddress, tokenAmount, tokenDollorValue: value, coin, type: "withdrawal"
+              walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
             // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
@@ -393,7 +393,7 @@ export const withdrawalRequest = async (req, res) => {
 
               const transactionData = await dataCreate({
                 userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-                walletAddress, tokenAmount, tokenDollorValue: value, tetherType, coin, type: "withdrawal"
+                walletAddress, tokenDollorValue: value, tetherType, coin, type: "withdrawal"
               }, TransactionHistory)
               // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
               return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
@@ -413,7 +413,7 @@ export const withdrawalRequest = async (req, res) => {
 
               const transactionData = await dataCreate({
                 userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
-                walletAddress, tokenAmount, tokenDollorValue: value, tetherType, coin, type: "withdrawal"
+                walletAddress, tokenDollorValue: value, tetherType, coin, type: "withdrawal"
               }, TransactionHistory)
               // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
               return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }

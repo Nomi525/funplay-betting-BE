@@ -887,7 +887,6 @@ export const getByIdGamePeriod = async (req, res) => {
         $project: {
           _id: 0,
           price: "$betAmount",
-          // colourName: 1,
           colourName: {
             $concat: [
               { $toUpper: { $substrCP: ["$colourName", 0, 1] } },
@@ -895,7 +894,12 @@ export const getByIdGamePeriod = async (req, res) => {
                 $substrCP: [
                   "$colourName",
                   1,
-                  { $subtract: [{ $strLenCP: "$colourName" }, 1] },
+                  {
+                    $max: [
+                      0, // Ensure that the length is nonnegative
+                      { $subtract: [{ $strLenCP: "$colourName" }, 1] },
+                    ],
+                  },
                 ],
               },
             ],
@@ -915,6 +919,7 @@ export const getByIdGamePeriod = async (req, res) => {
           },
         },
       },
+      
       {
         $unwind: "$periodData",
       },

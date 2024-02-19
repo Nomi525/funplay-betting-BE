@@ -561,7 +561,7 @@ export const declareColorWinner = async (
   const gameId = _id;
   if (gameMode == "Manual") {
     await ColourBetting.updateMany(
-      { gameId, gameType, period, selectedTime, gameType },
+      { gameId, gameType, period, selectedTime },
       { status: "pending" }
     );
     return {
@@ -655,7 +655,7 @@ export const declareColorWinner = async (
                 betAmount: 0,
                 is_deleted: 0,
                 isWin: true,
-                status: "won",
+                status: "successfully",
               });
               await ColourBetting.updateMany(
                 {
@@ -801,7 +801,7 @@ export const declareColorWinner = async (
           betAmount: 0,
           is_deleted: 0,
           isWin: true,
-          status: "won",
+          status: "successfully",
         });
         return {
           message: ResponseMessage.COLOR_WINNER + " testcolor3" + randomWinColor,

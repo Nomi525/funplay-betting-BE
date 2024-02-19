@@ -141,7 +141,8 @@ import {
   //#region Delete multiple permission
   export const multiplePermissionDeletes = async (req, res) => {
     try {
-      const DeletemultiplePermission = multipleDelete(req.body, Permission);
+      const DeletemultiplePermission = await multipleDelete(req.body, Permission);
+  
       if (DeletemultiplePermission) {
         return sendResponse(
           res,
@@ -161,6 +162,7 @@ import {
       return handleErrorResponse(res, error);
     }
   };
+  
   //#endregion
   
   export const deletePermission = async (req, res) => {
