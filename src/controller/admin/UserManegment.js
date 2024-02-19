@@ -452,7 +452,7 @@ export const allCurrencyConverter = async (req, res) => {
 };
 
 //#region Get game wise user list
-export const getGameWiseUserList = async (req, res) => {
+export const getGameWiseUserList = (req, res) => {
   try {
     const findGameHistory = [
       {
@@ -489,40 +489,6 @@ export const getGameWiseUserList = async (req, res) => {
       },
     ];
 
-    // const { gameId } = req.params;
-    // const findGameHistory = await GameHistory.aggregate([
-    //     { $match: { gameId: new mongoose.Types.ObjectId(gameId) } },
-    //     {
-    //         $group: {
-    //             _id: '$userId',
-    //             totalBetAmount: { $sum: { $toDouble: '$betAmount' } },
-    //             totalWinAmount: { $sum: { $toDouble: '$winAmount' } },
-    //             totalLoseAmount: { $sum: { $toDouble: '$loseAmount' } },
-    //             game: { $first: '$gameId' },
-    //             user: { $first: '$userId' },
-    //         }
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: 'users',
-    //             localField: '_id',
-    //             foreignField: '_id',
-    //             as: 'userDetails',
-    //         },
-    //     },
-    //     {
-    //         $project: {
-    //             //   _id: 0,
-    //             'userDetails._id': 1,
-    //             'userDetails.email': 1,
-    //             'userDetails.fullName': 1,
-    //             totalBetAmount: 1,
-    //             totalWinAmount: 1,
-    //             totalLoseAmount: 1,
-    //         },
-    //     },
-    // ]).sort({ _id: -1 })
-
     if (findGameHistory.length) {
       return sendResponse(
         res,
@@ -547,7 +513,6 @@ export const getGameWiseUserList = async (req, res) => {
 //#region Get game wise user list
 export const getUserWiseGameList = async (req, res) => {
   try {
-    const { userId } = req.params;
     const colourBetting = await ColourBetting.find({ is_deleted: 0 })
     let totalBetAmount = 0;
     let totalWinAmount = 0;
@@ -561,6 +526,7 @@ export const getUserWiseGameList = async (req, res) => {
         } else {
           totalLossAmount = totalLossAmount + data.betAmount
         }
+        return data;
       })
     }
 
