@@ -1350,6 +1350,23 @@ export const editProfile = async (req, res) => {
         );
       }
     }
+        if (req.body.mobileNumber) {
+      const checkMobileNumber = await getSingleData(
+        {
+          _id: { $ne: req.user },
+          mobileNumber: req.body.mobileNumber,
+        },
+        User
+      );
+      if (checkMobileNumber) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+          []
+        );
+      }
+    }
     if (findData.email != req.body.email) {
       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
       const objectEncrtypt = await encryptObject({
@@ -1399,6 +1416,7 @@ export const editProfile = async (req, res) => {
         {
           profile: req.body.profile,
           fullName: req.body.fullName,
+          mobileNumber: req.body.mobileNumber,
           bankDetails: {
             bankName: req.body.bankName,
             branch: req.body.branch,
@@ -1406,6 +1424,7 @@ export const editProfile = async (req, res) => {
             accountNumber: req.body.accountNumber,
             IFSCCode: req.body.IFSCCode,
           },
+
         },
         User
       );
