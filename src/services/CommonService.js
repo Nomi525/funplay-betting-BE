@@ -14,7 +14,7 @@ import {
   mongoose,
   getSingleData,
   NewTransaction,
-  User
+  User,
 } from "../index.js";
 var key =
   "a6dfc106fadd4849e8b23759afea1b86c6c4c4b782c2cf08335c61dc4610fae5efe05ee361a4850f56ddb9457a96bbe01d2820d5106851db64cf210f70ec5e98";
@@ -101,8 +101,8 @@ export const referralCode = (length) => {
 };
 // Capitalize First Letter
 export const capitalizeFirstLetter = (str) => {
-  return str.replace(/^\w/, c => c.toUpperCase());
-}
+  return str.replace(/^\w/, (c) => c.toUpperCase());
+};
 
 // Encryption function
 export const encryptObject = (object) => {
@@ -306,7 +306,6 @@ export const declareNumberWinner = async (game, period) => {
       data: [],
     };
   } else {
-
     const checkAlreadyWin = await NumberBetting.find({
       gameId,
       isWin: true,
@@ -361,7 +360,11 @@ export const declareNumberWinner = async (game, period) => {
           },
         },
       ]);
-      if (totalUserInPeriod.length && (totalNumberInPeriod.length && totalNumberInPeriod.length >= 2)) {
+      if (
+        totalUserInPeriod.length &&
+        totalNumberInPeriod.length &&
+        totalNumberInPeriod.length >= 2
+      ) {
         const hasUserTotalBets = totalUserInPeriod.some(
           (user) => user.userTotalBets >= 1
         );
@@ -393,7 +396,11 @@ export const declareNumberWinner = async (game, period) => {
               $sort: { totalBetAmount: 1 },
             },
           ]);
-          const totalUserCount = await getTotalUserCount(NumberBetting, gameId, period);
+          const totalUserCount = await getTotalUserCount(
+            NumberBetting,
+            gameId,
+            period
+          );
           if (getAllNumberBets.length) {
             const tieNumbers = getAllNumberBets.filter(
               (item) =>
@@ -442,7 +449,7 @@ export const declareNumberWinner = async (game, period) => {
                         is_deleted: 0,
                       });
                       if (findUser) {
-                        console.log(findUser.betAmount, "datat")
+                        console.log(findUser.betAmount, "datat");
                         let rewardAmount =
                           findUser.betAmount + findUser.betAmount * winningCoin;
                         await NumberBetting.updateOne(
@@ -455,14 +462,14 @@ export const declareNumberWinner = async (game, period) => {
                             number: item.number,
                             is_deleted: 0,
                           },
-                          { isWin: true, status: "won", rewardAmount }
+                          { isWin: true, status: "successfully", rewardAmount }
                         );
                         const balance = await getSingleData(
                           { userId },
                           NewTransaction
                         );
                         if (balance) {
-                          console.log("declareNumberWinner")
+                          console.log("declareNumberWinner");
                           let winningAmount = Number(rewardAmount);
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
@@ -483,7 +490,7 @@ export const declareNumberWinner = async (game, period) => {
                           number: item.number,
                           is_deleted: 0,
                         },
-                        { status: "loose" }
+                        { status: "fail" }
                       );
                     });
                   }
@@ -500,7 +507,7 @@ export const declareNumberWinner = async (game, period) => {
           } else {
             await NumberBetting.updateMany(
               { gameId, period },
-              { status: "loose" }
+              { status: "fail" }
             );
             return {
               message: ResponseMessage.LOSER,
@@ -510,7 +517,7 @@ export const declareNumberWinner = async (game, period) => {
         } else {
           await NumberBetting.updateMany(
             { gameId, period },
-            { status: "loose" }
+            { status: "fail" }
           );
           return {
             message: ResponseMessage.LOSER,
@@ -527,7 +534,7 @@ export const declareNumberWinner = async (game, period) => {
           betAmount: 0,
           is_deleted: 0,
           isWin: true,
-          status: "won",
+          status: "successfully",
         });
         await NumberBetting.updateMany(
           {
@@ -537,7 +544,7 @@ export const declareNumberWinner = async (game, period) => {
             status: "pending",
             is_deleted: 0,
           },
-          { status: "loose" }
+          { status: "fail" }
         );
         return {
           message: ResponseMessage.NUMBER_WINNER + " " + randomWinNumber,
@@ -556,7 +563,6 @@ export const declareColorWinner = async (
   selectedTime,
   gameType
 ) => {
-
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
   if (gameMode == "Manual") {
@@ -578,9 +584,7 @@ export const declareColorWinner = async (
     }).lean();
     if (checkAlreadyWin.length) {
       return {
-        message:
-          ResponseMessage.COLOR_WINNER +
-          checkAlreadyWin[0].colourName,
+        message: ResponseMessage.COLOR_WINNER + checkAlreadyWin[0].colourName,
       };
     } else {
       const totalUserInPeriod = await ColourBetting.aggregate([
@@ -667,7 +671,7 @@ export const declareColorWinner = async (
                   status: "pending",
                   is_deleted: 0,
                 },
-                { status: "loose" }
+                { status: "fail" }
               );
               return {
                 message: `Victory Alert! The Winning Color is ${randomWinColour}`,
@@ -700,8 +704,7 @@ export const declareColorWinner = async (
                       });
                       if (findUser) {
                         console.log(findUser.betAmount, findUser.betAmount, 0);
-                        let rewardAmount =
-                          findUser.betAmount + winningCoin;
+                        let rewardAmount = findUser.betAmount + winningCoin;
                         console.log(rewardAmount, "rewardAmount");
                         await ColourBetting.updateOne(
                           {
@@ -715,7 +718,7 @@ export const declareColorWinner = async (
                             colourName: item.colourName,
                             is_deleted: 0,
                           },
-                          { isWin: true, status: "won", rewardAmount }
+                          { isWin: true, status: "successfully", rewardAmount }
                         );
                         const balance = await getSingleData(
                           { userId },
@@ -750,7 +753,7 @@ export const declareColorWinner = async (
                           colourName: item.colourName,
                           is_deleted: 0,
                         },
-                        { status: "loose" }
+                        { status: "fail" }
                       );
                     });
                   }
@@ -764,10 +767,10 @@ export const declareColorWinner = async (
                 getAllColourBets[0].colourName,
             };
           } else {
-            console.log('579 loose');
+            console.log("579 loose");
             await ColourBetting.updateMany(
               { gameId, selectedTime, period, gameType },
-              { status: "loose" }
+              { status: "fail" }
             );
             return {
               message: ResponseMessage.LOSER,
@@ -777,7 +780,7 @@ export const declareColorWinner = async (
           // console.log('586 loose');
           await ColourBetting.updateMany(
             { gameId, selectedTime, period, gameType },
-            { status: "loose" }
+            { status: "fail" }
           );
           return {
             message: ResponseMessage.LOSER,
@@ -804,7 +807,8 @@ export const declareColorWinner = async (
           status: "successfully",
         });
         return {
-          message: ResponseMessage.COLOR_WINNER + " testcolor3" + randomWinColor,
+          message:
+            ResponseMessage.COLOR_WINNER + " testcolor3" + randomWinColor,
         };
       }
     }
@@ -817,7 +821,10 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
   if (gameMode == "Manual") {
-    await PenaltyBetting.updateMany({ gameId, period, selectedTime }, { status: "pending" });
+    await PenaltyBetting.updateMany(
+      { gameId, period, selectedTime },
+      { status: "pending" }
+    );
     return {
       message: ResponseMessage.WINNER_DECLARE_MANUAL,
     };
@@ -934,7 +941,8 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                       });
                       if (findUser) {
                         console.log(findUser.betAmount, "1");
-                        let rewardAmount = findUser.betAmount + findUser.betAmount * winningCoin;
+                        let rewardAmount =
+                          findUser.betAmount + findUser.betAmount * winningCoin;
                         await PenaltyBetting.updateOne(
                           {
                             userId,
@@ -1034,7 +1042,10 @@ export const declareCardWinner = async (game, period, selectedTime) => {
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
   if (gameMode == "Manual") {
-    await CardBetting.updateMany({ gameId, period, selectedTime }, { status: "pending" });
+    await CardBetting.updateMany(
+      { gameId, period, selectedTime },
+      { status: "pending" }
+    );
     return {
       message: ResponseMessage.WINNER_DECLARE_MANUAL,
     };
@@ -1229,7 +1240,10 @@ export const declareCardWinner = async (game, period, selectedTime) => {
             };
           }
         } else {
-          await CardBetting.updateMany({ gameId, period, selectedTime }, { status: "loose" });
+          await CardBetting.updateMany(
+            { gameId, period, selectedTime },
+            { status: "loose" }
+          );
           return {
             message: ResponseMessage.LOSER,
           };
@@ -1271,28 +1285,28 @@ export const getTotalUserCount = async (model, gameId, period) => {
     {
       $match: {
         gameId: new mongoose.Types.ObjectId(gameId),
-        period: Number(period)
-      }
+        period: Number(period),
+      },
     },
     {
       $group: {
         _id: "$userId",
-        totalUser: { $sum: 1 }
-      }
+        totalUser: { $sum: 1 },
+      },
     },
     {
       $group: {
         _id: null,
-        totalUsers: { $sum: 1 }
-      }
+        totalUsers: { $sum: 1 },
+      },
     },
     {
       $project: {
         _id: 0,
-        totalUsers: 1
-      }
-    }
-  ])
-  return getNumberUser.length ? getNumberUser[0].totalUsers : 0
-}
+        totalUsers: 1,
+      },
+    },
+  ]);
+  return getNumberUser.length ? getNumberUser[0].totalUsers : 0;
+};
 //#endregion

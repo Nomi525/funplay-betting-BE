@@ -56,7 +56,7 @@ const cardBettingSchema = new mongoose.Schema(
       type: String,
       enum: [null, "fail", "pending", "successfully"],
       required: false,
-      default: null,
+      default: "pending",
     },
     is_deleted: {
       type: Number,

@@ -36,7 +36,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            status: "pending"
+            status: "pending",
           },
         },
         {
@@ -63,7 +63,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" }
+            uniqueUsers: { $addToSet: "$userId" },
           },
         },
         {
@@ -74,7 +74,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" }
+            totalUsers: { $size: "$uniqueUsers" },
           },
         },
       ];
@@ -84,7 +84,7 @@ export const getAllWinnersUser = async (req, res) => {
           $match: {
             is_deleted: 0,
             gameType: "3colorBetting",
-            status: "pending"
+            status: "pending",
           },
         },
         {
@@ -111,7 +111,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" }
+            uniqueUsers: { $addToSet: "$userId" },
           },
         },
         {
@@ -122,7 +122,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" }
+            totalUsers: { $size: "$uniqueUsers" },
           },
         },
       ];
@@ -134,7 +134,7 @@ export const getAllWinnersUser = async (req, res) => {
           $match: {
             is_deleted: 0,
             gameType: "2colorBetting",
-            status: "pending"
+            status: "pending",
           },
         },
         {
@@ -161,7 +161,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" }
+            uniqueUsers: { $addToSet: "$userId" },
           },
         },
         {
@@ -172,7 +172,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" }
+            totalUsers: { $size: "$uniqueUsers" },
           },
         },
       ];
@@ -183,7 +183,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            status: "pending"
+            status: "pending",
           },
         },
         {
@@ -210,7 +210,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" }
+            uniqueUsers: { $addToSet: "$userId" },
           },
         },
         {
@@ -221,7 +221,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" }
+            totalUsers: { $size: "$uniqueUsers" },
           },
         },
       ];
@@ -233,7 +233,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            status: "pending"
+            status: "pending",
           },
         },
         {
@@ -260,7 +260,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" }
+            uniqueUsers: { $addToSet: "$userId" },
           },
         },
         {
@@ -271,7 +271,7 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" }
+            totalUsers: { $size: "$uniqueUsers" },
           },
         },
       ];
@@ -283,7 +283,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            status: "pending"
+            status: "pending",
           },
         },
         {
@@ -310,7 +310,7 @@ export const getAllWinnersUser = async (req, res) => {
             gameName: { $first: "$game.gameName" },
             gameId: { $first: "$game._id" },
             gameType: { $first: "$gameType" },
-            uniqueUsers: { $addToSet: "$userId" }
+            uniqueUsers: { $addToSet: "$userId" },
           },
         },
         {
@@ -321,13 +321,11 @@ export const getAllWinnersUser = async (req, res) => {
             count: 1,
             gameId: 1,
             gameType: 1,
-            totalUsers: { $size: "$uniqueUsers" }
+            totalUsers: { $size: "$uniqueUsers" },
           },
         },
       ];
-      cardBettingResults = await CardBetting.aggregate(
-        cardBettingResults
-      );
+      cardBettingResults = await CardBetting.aggregate(cardBettingResults);
       numberBetting = numberBetting[0];
       threeColourBettingResults = threeColourBettingResults[0];
       twoColourBettingResults = twoColourBettingResults[0];
@@ -340,7 +338,7 @@ export const getAllWinnersUser = async (req, res) => {
         twoColourBettingResults,
         communityBettingResults,
         penaltyBettingResults,
-        cardBettingResults
+        cardBettingResults,
       ];
       netFinalResult = netFinalResult.filter((d) => d != null);
       return sendResponse(
@@ -368,13 +366,15 @@ export const getAllWinnersUser = async (req, res) => {
           { period, isWin: true },
           CommunityBetting
         );
-      } if (gameType == "penaltyBetting") {
+      }
+      if (gameType == "penaltyBetting") {
         updateWinner = await dataUpdated(
           { userId: userId, gameId },
           { period, isWin: true },
           PenaltyBetting
         );
-      } if (gameType == "cardBetting") {
+      }
+      if (gameType == "cardBetting") {
         updateWinner = await dataUpdated(
           { userId: userId, gameId },
           { period, isWin: true },
@@ -590,7 +590,9 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           is_deleted: 0,
           status: "pending",
         });
+        console.log(winnerUser, "helloo");
         if (winnerUser) {
+          console.log("winnerUser");
           let rewardAmount = winningAmount;
           winnerUser.isWin = true;
           winnerUser.status = "successfully";
@@ -725,6 +727,7 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     // } else {
     for (const findNumberBetting of findNumberBettingArray) {
       if (findNumberBetting instanceof NumberBetting) {
+        console.log("isWin");
         // let rewardAmount = findNumberBetting.betAmount * 0.95;
         let rewardAmount =
           findNumberBetting.betAmount +
