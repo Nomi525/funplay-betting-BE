@@ -868,7 +868,7 @@ export const getByIdGamePeriod = async (req, res) => {
     const getGamePeriodById = await ColourBetting.aggregate([
       {
         $match: {
-          // userId: new mongoose.Types.ObjectId(req.user) || null,
+          userId: new mongoose.Types.ObjectId(req.user) || null,
           gameId: new mongoose.Types.ObjectId(gameId),
           selectedTime: second,
           createdAt: { $gte: twentyFourHoursAgo },
