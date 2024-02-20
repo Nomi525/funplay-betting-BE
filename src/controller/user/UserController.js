@@ -257,7 +257,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       req.body;
     const otp = 4444;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const checkEmailValue = emailRegex.test(email);
+    const checkEmailValue = emailRegex.test(email);npm 
     let existingUser;
     if (checkEmailValue) {
       email = email ? email.toLowerCase() : null;
