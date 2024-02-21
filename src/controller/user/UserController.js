@@ -253,7 +253,8 @@ export const connectToWallet = async (req, res) => {
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { fullName, email, currency, referralByCode, registerType, type } =
+    let { fullName, email, currency, referralByCode, registerType, type, countryCode,
+      country } =
       req.body;
     const otp = 4444;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -262,18 +263,26 @@ export const userSignUpSignInOtp = async (req, res) => {
     if (checkEmailValue) {
       email = email ? email.toLowerCase() : null;
       existingUser = await getSingleData({ email }, User);
-      console.log(existingUser,"sj");
+      console.log(existingUser, "sj");
     } else {
       existingUser = await getSingleData({ mobileNumber: email }, User);
-     
+
     }
     if (existingUser?.registerType == "Password" && type !== "signup") {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
-        []
-      );
+      // return sendResponse(
+      //   res,
+      //   StatusCodes.BAD_REQUEST,
+      //   ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
+      //   []
+      // );
+      let otp = "4444"
+      existingUser.otp = otp
+      existingUser.save()
+      let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+      await sendMail(existingUser.email, "Verify Otp", mailInfo);
+      let message = "otp send successfully";
+      return sendResponse(res, StatusCodes.CREATED, message, existingUser);
+
     }
     if (
       existingUser?.registerType == "OTP" &&
@@ -364,7 +373,7 @@ export const userSignUpSignInOtp = async (req, res) => {
         );
       }
       let referCode = referralCode(8);
-      let findReferralUser = null; 
+      let findReferralUser = null;
       if (referralByCode) {
         findReferralUser = await User.findOne({ referralCode: referralByCode });
         if (!findReferralUser) {
@@ -384,7 +393,8 @@ export const userSignUpSignInOtp = async (req, res) => {
           currency,
           otp,
           referralCode: referCode,
-          registerType,
+          registerType, countryCode,
+          country,
           referralByCode: referralByCode ? referralByCode : null,
         },
         User
@@ -413,7 +423,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(res, StatusCodes.CREATED, message, userData);
     }
   } catch (error) {
-    console.log(error,"hh");
+    console.log(error, "hh");
     return handleErrorResponse(res, error);
   }
 };
@@ -810,7 +820,7 @@ export const userCheckEmail = async (req, res) => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const checkEmailValue = emailRegex.test(email);
-    
+
     existingUser = await getSingleData(
       {
         $or: [
@@ -1320,7 +1330,7 @@ export const loginFromMpin = async (req, res) => {
 
 export const editProfile = async (req, res) => {
   try {
-    // console.log(req.body,'hiii')
+    console.log(req.body, 'hiii')
     const findData = await getSingleData(
       { _id: req.user, is_deleted: 0 },
       User
@@ -1350,7 +1360,7 @@ export const editProfile = async (req, res) => {
         );
       }
     }
-        if (req.body.mobileNumber) {
+    if (req.body.mobileNumber) {
       const checkMobileNumber = await getSingleData(
         {
           _id: { $ne: req.user },
@@ -1417,17 +1427,20 @@ export const editProfile = async (req, res) => {
           profile: req.body.profile,
           fullName: req.body.fullName,
           mobileNumber: req.body.mobileNumber,
+          countryCode: req.body.countryCode,
+          country: req.body.country,
           bankDetails: {
             bankName: req.body.bankName,
             branch: req.body.branch,
             accountHolder: req.body.accountHolder,
             accountNumber: req.body.accountNumber,
-            IFSCCode: req.body.IFSCCode,
-          },
+            IFSCCode: req.body.IFSCCode
 
+          },
         },
         User
       );
+      console.log(userData, "userData")
       if (userData) {
         return sendResponse(
           res,
@@ -1944,9 +1957,9 @@ export const userEditProfile = async (req, res) => {
     let otp = 4444;
     const user = await User.findById(Id);
     if (req.files.profile) {
-      fs.unlink("./public/uploads/" + user.profile, () => {});
+      fs.unlink("./public/uploads/" + user.profile, () => { });
     } else if (req.body.removeProfileUrl) {
-      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => {});
+      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
       user.profile = "";
       await user.save();
     } else {
