@@ -84,6 +84,7 @@ import {
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
+import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -248,6 +249,8 @@ userRoutes.post('/add-faint-currency', Auth, Upload, addFaintCurrency)
 userRoutes.get("/total-coin", Auth, totalCoin)
 
 userRoutes.get('/userDashboard1', Auth, userDashboard1)
+userRoutes.post('/user-withdrawal-request', Auth, withdrawalUserRequest)
+
 
 export { userRoutes };
 

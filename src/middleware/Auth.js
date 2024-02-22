@@ -21,6 +21,7 @@ import { jwt, StatusCodes, ResponseMessage, sendResponse, User } from '../index.
 
 export async function Auth(req, res, next) {
     const token = req.header("auth");
+    console.log(token,"token");
     if (!token) {
         return sendResponse(res, StatusCodes.UNAUTHORIZED, ResponseMessage.TOKEN_NOT_AUTHORIZED, [])
     } else {

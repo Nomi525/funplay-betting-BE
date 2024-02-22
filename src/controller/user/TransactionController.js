@@ -15,7 +15,8 @@ import {
   TransactionHistory,
   minusLargeSmallValue,
   plusLargeSmallValue,
-  CurrencyCoin
+  CurrencyCoin,
+  Withdrawal
 } from "../../index.js";
 
 export const addNewTransaction = async (req, res) => {
@@ -263,6 +264,7 @@ export const addNewTransaction = async (req, res) => {
 export const withdrawalRequest = async (req, res) => {
   try {
     const { walletAddress, tokenName, tokenAmount, tetherType } = req.body;
+    console.log(req.user,"hdh");
     const findTransaction = await NewTransaction.findOne({ userId: req.user, $or: [{ bitcoinWalletAddress: walletAddress }, { ethereumWalletAddress: walletAddress }], })
     const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
     let userCurrency = await User.findOne({ _id: req.user, is_deleted: 0 });
@@ -318,7 +320,6 @@ export const withdrawalRequest = async (req, res) => {
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
-            // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
           }
           return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
@@ -510,6 +511,46 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.TRANSCTION_NOT_FOUND, []);
     }
   } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+
+export const withdrawalUserRequest = async (req, res) => {
+  try {
+    const { withdrawalAmount } = req.body;
+    const findUser = await User.find({ _id: req.user });
+
+    if (findUser.length > 0) {
+      const checkUser = await NewTransaction.find({ userId: req.user });
+      console.log(checkUser,"jj");
+      const checkTotalCoin = checkUser[0].totalCoin;
+      const convertRupees = checkTotalCoin * 0.01;
+      console.log(convertRupees,"hh");
+
+      if (convertRupees >= withdrawalAmount) {
+        const deductedCoins = withdrawalAmount / 0.01; 
+        checkUser[0].totalCoin -= deductedCoins;
+        await checkUser[0].save();
+
+        const createSubadmin = await dataCreate(
+          {
+            userId: req.user,
+            email: findUser[0].email,
+            requestedAmount: withdrawalAmount,
+          },
+          Withdrawal
+        );
+
+        return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+      } else {
+        return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
+      }
+    } else {
+      return sendResponse(res, StatusCodes.NOT_FOUND, "User not found", []);
+    }
+  } catch (error) {
+    console.error("Error in withdrawalUserRequest:", error);
     return handleErrorResponse(res, error);
   }
 };

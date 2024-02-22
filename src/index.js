@@ -204,6 +204,7 @@ import {
   getAllWithdrawalRequest,
   getAllBettingHistory,
 } from "./controller/admin/UserManegment.js";
+
 import {
   notificationAddEdit,
   getAllNotification,
@@ -409,6 +410,7 @@ import {
 import { QrCodes } from "./models/QrCode.js";
 dotenv.config();
 import {FaintCurrency} from "./models/FaintCurrency.js"
+import { Withdrawal } from "./models/Withdrawal.js";
 // import { addFaintCurrency } from "./controller/admin/FaintCurrency.js";
 export {
   totalCoin,
@@ -452,6 +454,7 @@ export {
   getPeriod,
   Period,
   cron,
+  Withdrawal,
   createAllGamePeriodFromCronJob,
   createAllGameWinnerFromCronJob,
   getCommunityGamePeriodById,
