@@ -2247,30 +2247,30 @@ export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
+
     const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
-    // console.log(currentTimeAndDateStamp,"jj");
-    // console.log(new Date(currentTimeAndDateStamp),"sjh");
+  
     let query = {
       date: moment().format("YYYY-MM-DD"),
       gameId,
       is_deleted: 0,
     };
-    console.log(query,"data");
+    console.log(query, "data");
     if (second) {
       query.periodFor = second;
     }
     let getGamePeriod = await Period.find(query)
       .sort({ createdAt: -1 })
       .limit(1).populate("gameId");
-      console.log(getGamePeriod,"ghgg");
+    console.log(getGamePeriod, "ghgg");
 
     let getAllPeriod = getGamePeriod[0];
-    console.log(  moment(getAllPeriod.gameId.gameTimeTo).unix() ,"hh");
+    console.log(moment(getAllPeriod.gameId.gameTimeTo).unix(), "hh");
     if (
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
-        moment().format("YYYY-MM-DD") &&
-     moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp
+      moment().format("YYYY-MM-DD") &&
+      moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp
     ) {
       return sendResponse(
         res,
@@ -2480,6 +2480,8 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
         findGame.gameName == "2 Color Betting" ||
         findGame.gameName == "3 Color Betting"
       ) {
+
+        console.log("2 colour betting ")
         const gameType =
           findGame.gameName == "2 Color Betting"
             ? "2colorBetting"

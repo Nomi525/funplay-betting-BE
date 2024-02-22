@@ -868,7 +868,7 @@ export const getByIdGamePeriod = async (req, res) => {
     const getGamePeriodById = await ColourBetting.aggregate([
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(req.user) || null,
+          userId: new mongoose.Types.ObjectId(req.user),
           gameId: new mongoose.Types.ObjectId(gameId),
           selectedTime: second,
           createdAt: { $gte: twentyFourHoursAgo },
@@ -919,7 +919,7 @@ export const getByIdGamePeriod = async (req, res) => {
           },
         },
       },
-      
+
       {
         $unwind: "$periodData",
       },
@@ -1004,8 +1004,8 @@ function processData(data) {
 
 export const getCommunityWinList = async (req, res) => {
   try {
-    const currentDate = new Date(); 
-    currentDate.setUTCHours(0, 0, 0, 0); 
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0);
     const threeDaysAgo = new Date();
     threeDaysAgo.setUTCHours(0, 0, 0, 0);
     threeDaysAgo.setDate(currentDate.getDate() - 3);
