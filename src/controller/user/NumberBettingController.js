@@ -2255,23 +2255,27 @@ export const getPeriod = async (req, res) => {
       gameId,
       is_deleted: 0,
     };
+<<<<<<< HEAD
     console.log(query,"data");
 
+=======
+    console.log(query, "data");
+>>>>>>> f5c3e7bc60ce29573d60012b73c0a00a05b441ee
     if (second) {
       query.periodFor = second;
     }
     let getGamePeriod = await Period.find(query)
       .sort({ createdAt: -1 })
       .limit(1).populate("gameId");
+    console.log(getGamePeriod, "ghgg");
 
     let getAllPeriod = getGamePeriod[0];
-    console.log(  moment(getAllPeriod.gameId.gameTimeTo).unix() ,"hh");
-    
+    console.log(moment(getAllPeriod.gameId.gameTimeTo).unix(), "hh");
     if (
       getGamePeriod.length &&
       moment(getAllPeriod.date).format("YYYY-MM-DD") ==
-        moment().format("YYYY-MM-DD") &&
-     moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp
+      moment().format("YYYY-MM-DD") &&
+      moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp
     ) {
       return sendResponse(
         res,
@@ -2481,6 +2485,8 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
         findGame.gameName == "2 Color Betting" ||
         findGame.gameName == "3 Color Betting"
       ) {
+
+        console.log("2 colour betting ")
         const gameType =
           findGame.gameName == "2 Color Betting"
             ? "2colorBetting"

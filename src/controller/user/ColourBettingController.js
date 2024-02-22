@@ -919,7 +919,7 @@ export const getByIdGamePeriod = async (req, res) => {
           },
         },
       },
-      
+
       {
         $unwind: "$periodData",
       },
@@ -1004,8 +1004,8 @@ function processData(data) {
 
 export const getCommunityWinList = async (req, res) => {
   try {
-    const currentDate = new Date(); 
-    currentDate.setUTCHours(0, 0, 0, 0); 
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0);
     const threeDaysAgo = new Date();
     threeDaysAgo.setUTCHours(0, 0, 0, 0);
     threeDaysAgo.setDate(currentDate.getDate() - 3);

@@ -28,6 +28,7 @@ import {
   calculateAllGameReward,
   getAllBids,
   Game,
+  axios
 } from "../../index.js";
 
 // export const userDashboard = async (req, res) => {
@@ -193,15 +194,15 @@ import {
 //         (tran) => tran.type == "deposit"
 //       );
 
-     
+
 //       const totalOneDayReward = await calculateAllGameReward(rewardTodayQuery);
 
-      
+
 //       const totalOneMonthReward = await calculateAllGameReward(
 //         rewardOneMonthQuery
 //       );
 
-     
+
 //       const totalOneWeekReward = await calculateAllGameReward(
 //         rewardOneWeekQuery
 //       );
@@ -271,14 +272,14 @@ import {
 //           walletDetails: findUser.wallet,
 //         }
 //       );
-   
+
 //       // return sendResponse(
 //       //   res,
 //       //   StatusCodes.BAD_REQUEST,
 //       //   ResponseMessage.USER_NOT_EXIST,
 //       //   []
 //       // );
-    
+
 //   } catch (error) {
 //     console.log(error,"jj");
 //     return handleErrorResponse(res, error);
@@ -302,7 +303,7 @@ const calculateWinningAmount = (bettingData) => {
 };
 
 const getAllBettingData = async (model) => {
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60  * 60 * 1000);
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   return await model.find({
     createdAt: { $gte: twentyFourHoursAgo },
     is_deleted: 0,
@@ -500,52 +501,53 @@ export const userDashboard1 = async (req, res) => {
     let totalBalance = 0;
     let totalDepositeBalance = 0;
     if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
-      console.log(transactionDeposite,"sjsj");
+      console.log(transactionDeposite, "sjsj");
       totalBalance = transactionDeposite.tokenDollorValue;
+
       totalDepositeBalance = transactionDeposite.betAmount;
     }
-  
-const game = await Game.find({
-    _id: numberBettingForUser[0]?.gameId,
-});
+    console.log(totalBalance, "55555")
+    const game = await Game.find({
+      _id: numberBettingForUser[0]?.gameId,
+    });
 
-let totalCoin = 0;
-console.log(numberBettingForUser, "dhd");
+    let totalCoin = 0;
+    console.log(numberBettingForUser, "dhd");
 
-for (const bet of numberBettingForUser) {
-    console.log(bet.isWin, "jj");
-    if (bet.isWin === true) {
+    for (const bet of numberBettingForUser) {
+      console.log(bet.isWin, "jj");
+      if (bet.isWin === true) {
         totalCoin += game[0]?.winningCoin * bet.betAmount;
-    } else {
-        totalCoin += transactionDeposite.totalCoin;
-    }
-}
-
-const bettingDataArray = [colourBettingForUser, communityBettingForUser, penaltyBettingForUser, cardBettingForUser];
-
-for (const bettingData of bettingDataArray) {
-  const gameId = bettingData?.[0]?.gameId;
-
-  if (gameId) {
-      const game = await Game.find({ _id: gameId });
-
-      if (bettingData?.[0]?.isWin === true) {
-          totalCoin += game[0]?.winningCoin * transactionDeposite.betAmount + game[0]?.winningCoin;
       } else {
-          totalCoin += transactionDeposite.totalCoin;
+        totalCoin += transactionDeposite.totalCoin;
       }
-  }
-}
+    }
 
-// Handle the case when no valid gameIds are found
-if (bettingDataArray.every(bettingData => !bettingData?.[0]?.gameId) && numberBettingData.length === 0) {
-    console.error("No valid gameIds found.");
-}
+    const bettingDataArray = [colourBettingForUser, communityBettingForUser, penaltyBettingForUser, cardBettingForUser];
 
-console.log("Total Coin:", totalCoin);
+    for (const bettingData of bettingDataArray) {
+      const gameId = bettingData?.[0]?.gameId;
+
+      if (gameId) {
+        const game = await Game.find({ _id: gameId });
+
+        if (bettingData?.[0]?.isWin === true) {
+          totalCoin += game[0]?.winningCoin * transactionDeposite.betAmount + game[0]?.winningCoin;
+        } else {
+          totalCoin += transactionDeposite.totalCoin;
+        }
+      }
+    }
+
+    // Handle the case when no valid gameIds are found
+    // if (bettingDataArray.every(bettingData => !bettingData?.[0]?.gameId) && numberBettingData.length === 0) {
+    //   console.error("No valid gameIds found.");
+    // }
+
+    console.log("Total Coin:", totalCoin);
 
 
-const convertedCoin = totalCoin / coinRate || 0;
+    const convertedCoin = totalCoin / coinRate || 0;
 
     const [totalOneDayReward, totalOneWeekReward, totalOneMonthReward] =
       await Promise.all([
@@ -598,11 +600,11 @@ function calculateTotalBettingReward(bettingData) {
 
 export const topWeeklyMonthlyPlayers = async (req, res) => {
   try {
-      const weeklyUsers = await getActiveWinnerPlayers('weekly')
-      const monthlyUsers = await getActiveWinnerPlayers('monthly')
-      return sendResponse(res, StatusCodes.OK, ResponseMessage.TOP_WEEKLY_PLAYER, { weeklyUsers, monthlyUsers });
+    const weeklyUsers = await getActiveWinnerPlayers('weekly')
+    const monthlyUsers = await getActiveWinnerPlayers('monthly')
+    return sendResponse(res, StatusCodes.OK, ResponseMessage.TOP_WEEKLY_PLAYER, { weeklyUsers, monthlyUsers });
   } catch (error) {
-      return handleErrorResponse(res, error);
+    return handleErrorResponse(res, error);
   }
 }
 
@@ -611,36 +613,36 @@ async function getActiveWinnerPlayers(timeRange) {
   const currentDate = new Date();
   let startDate, endDate;
   if (timeRange === 'weekly') {
-      // startDate = new Date(currentDate);
-      // startDate.setHours(0, 0, 0, 0);
-      // startDate.setDate(currentDate.getDate() - currentDate.getDay());
-      // endDate = new Date(currentDate);
-      // endDate.setHours(23, 59, 59, 999);
-      endDate = new Date(currentDate);
-      startDate = new Date(currentDate);
-      startDate.setDate(currentDate.getDate() - 7);
+    // startDate = new Date(currentDate);
+    // startDate.setHours(0, 0, 0, 0);
+    // startDate.setDate(currentDate.getDate() - currentDate.getDay());
+    // endDate = new Date(currentDate);
+    // endDate.setHours(23, 59, 59, 999);
+    endDate = new Date(currentDate);
+    startDate = new Date(currentDate);
+    startDate.setDate(currentDate.getDate() - 7);
   } else if (timeRange === 'monthly') {
-      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59, 999);
   } else {
-      throw new Error('Invalid time range');
+    throw new Error('Invalid time range');
   }
   const query = {
-      createdAt: { $gte: startDate, $lte: endDate },
-      isWin: true
+    createdAt: { $gte: startDate, $lte: endDate },
+    isWin: true
   };
   const result = await ColourBetting.aggregate([
-      { $match: query },
-      {
-          $group: {
-              _id: "$userId",
-              uniqueUsers: { $addToSet: "$userId" }
-          }
+    { $match: query },
+    {
+      $group: {
+        _id: "$userId",
+        uniqueUsers: { $addToSet: "$userId" }
       }
+    }
   ]);
   const uniqueUserIds = result.map(group => group._id);
   const userDataResult = await User.find({ _id: { $in: uniqueUserIds } })
-      .select('fullName profile email currency')
+    .select('fullName profile email currency')
   return userDataResult;
 }
 
@@ -648,3 +650,22 @@ async function getActiveWinnerPlayers(timeRange) {
 //     const bettingData = await bettingModel.find({ ...query, is_deleted: 0 });
 //     return bettingData.reduce((total, data) => total + Number(data.rewardAmount), 0);
 // }
+
+
+
+
+export const totalCoin = async (req, res) => {
+  try {
+
+    const userCoin = await NewTransaction.find({ userId: req.user }); // Ensure you're accessing the ID correctly
+    const totalCoin = userCoin[0].totalCoin;
+    const usd = await CurrencyCoin.find({ currencyName: "USD", is_deleted: 0 })
+    let usdCoin = usd[0].coin
+
+    const coinDollarValue = totalCoin / usdCoin;
+    return sendResponse(res, StatusCodes.OK, 'Total coin in USD', { coinDollarValue: coinDollarValue, totalCoin: totalCoin });
+  } catch (error) {
+    console.error(error);
+    return handleErrorResponse(res, error);
+  }
+};

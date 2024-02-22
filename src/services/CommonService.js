@@ -1242,7 +1242,7 @@ export const declareCardWinner = async (game, period, selectedTime) => {
         } else {
           await CardBetting.updateMany(
             { gameId, period, selectedTime },
-            { status: "fail" }
+            { status: "loose" }
           );
           return {
             message: ResponseMessage.LOSER,

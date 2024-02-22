@@ -10,14 +10,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       required: false,
-      default : null
+      default: null
     },
     userName: {
       type: String,
       required: false,
     },
     mobileNumber: {
-      type: Number,
+      type: String,
       Unique: true,
     },
     referralCode: {
@@ -133,6 +133,14 @@ const userSchema = new mongoose.Schema(
     is_deleted: {
       type: Number,
       default: 0,
+    },
+    country: {
+      type: String,
+      required: false,
+    },
+    countryCode: {
+      type: String,
+      required: false,
     },
   },
   { timestamps: true }

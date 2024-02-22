@@ -184,6 +184,7 @@ import { adminDashboard } from "./controller/admin/DashboardController.js";
 import {
   userDashboard,
   topWeeklyMonthlyPlayers,
+  totalCoin,
 } from "./controller/user/DashboardController.js";
 import {
   acceptWithdrawalRequest,
@@ -372,6 +373,7 @@ import {
 
 
 import {
+
   createError,
   sendResponse,
   passwordHash,
@@ -409,6 +411,7 @@ dotenv.config();
 import {FaintCurrency} from "./models/FaintCurrency.js"
 // import { addFaintCurrency } from "./controller/admin/FaintCurrency.js";
 export {
+  totalCoin,
   capitalizeFirstLetter,
   getAllGamePeriodSelectedTimeList,
   declareCardWinner,
