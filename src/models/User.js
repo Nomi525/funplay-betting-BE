@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       required: false,
     },
     mobileNumber: {
-      type: Number,
+      type: String,
       Unique: true,
     },
     referralCode: {
@@ -134,11 +134,11 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    countryCode: {
+    country: {
       type: String,
       required: false,
     },
-    country: {
+    countryCode: {
       type: String,
       required: false,
     },

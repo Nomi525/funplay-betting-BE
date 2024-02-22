@@ -253,8 +253,7 @@ export const connectToWallet = async (req, res) => {
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { fullName, email, currency, referralByCode, registerType, type, countryCode,
-      country } =
+    let { fullName, email, currency, referralByCode, registerType, type } =
       req.body;
     const otp = 4444;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -269,20 +268,12 @@ export const userSignUpSignInOtp = async (req, res) => {
 
     }
     if (existingUser?.registerType == "Password" && type !== "signup") {
-      // return sendResponse(
-      //   res,
-      //   StatusCodes.BAD_REQUEST,
-      //   ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
-      //   []
-      // );
-      let otp = "4444"
-      existingUser.otp = otp
-      existingUser.save()
-      let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-      await sendMail(existingUser.email, "Verify Otp", mailInfo);
-      let message = "otp send successfully";
-      return sendResponse(res, StatusCodes.CREATED, message, existingUser);
-
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
+        []
+      );
     }
     if (
       existingUser?.registerType == "OTP" &&
@@ -393,8 +384,7 @@ export const userSignUpSignInOtp = async (req, res) => {
           currency,
           otp,
           referralCode: referCode,
-          registerType, countryCode,
-          country,
+          registerType,
           referralByCode: referralByCode ? referralByCode : null,
         },
         User
@@ -1328,9 +1318,141 @@ export const loginFromMpin = async (req, res) => {
   }
 };
 
+// export const editProfile = async (req, res) => {
+//   try {
+//     // console.log(req.body,'hiii')
+//     const findData = await getSingleData(
+//       { _id: req.user, is_deleted: 0 },
+//       User
+//     );
+//     if (!findData) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.NOT_FOUND,
+//         ResponseMessage.USER_NOT_FOUND,
+//         []
+//       );
+//     }
+//     if (req.body.email) {
+//       const checkEmail = await getSingleData(
+//         {
+//           _id: { $ne: req.user },
+//           email: { $regex: "^" + req.body.email + "$", $options: "i" },
+//         },
+//         User
+//       );
+//       if (checkEmail) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.EMAIL_ALREADY_EXIST,
+//           []
+//         );
+//       }
+//     }
+//         if (req.body.mobileNumber) {
+//       const checkMobileNumber = await getSingleData(
+//         {
+//           _id: { $ne: req.user },
+//           mobileNumber: req.body.mobileNumber,
+//         },
+//         User
+//       );
+//       if (checkMobileNumber) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+//           []
+//         );
+//       }
+//     }
+//     if (findData.email != req.body.email) {
+//       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+//       const objectEncrtypt = await encryptObject({
+//         userId: findData._id,
+//         email: req.body.email,
+//       });
+//       if (req.body.email) {
+//         let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
+//           objectEncrtypt,
+//         });
+//         await sendMail(req.body.email, "Verify Email", mailInfo);
+//       }
+//       const updateProfile = await dataUpdated(
+//         { _id: findData._id, is_deleted: 0 },
+//         {
+//           isVerified: false,
+//           email: req.body.email,
+//           profile: req.body.profile,
+//           fullName: req.body.fullName,
+//           bankDetails: {
+//             bankName: req.body.bankName,
+//             branch: req.body.branch,
+//             accountHolder: req.body.accountHolder,
+//             accountNumber: req.body.accountNumber,
+//             IFSCCode: req.body.IFSCCode,
+//           },
+//         },
+//         User
+//       );
+//       let message;
+//       if (
+//         req.body.bankName ||
+//         req.body.branch ||
+//         req.body.accountHolder ||
+//         req.body.accountNumber ||
+//         req.body.IFSCCode
+//       ) {
+//         message = ResponseMessage.BANK_DETAILS_UPDATED;
+//       } else {
+//         message = ResponseMessage.PROFILE_UPDATED;
+//       }
+//       return sendResponse(res, StatusCodes.OK, message, updateProfile);
+//     } else {
+//       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+//       const userData = await dataUpdated(
+//         { _id: findData._id, is_deleted: 0 },
+//         {
+//           profile: req.body.profile,
+//           fullName: req.body.fullName,
+//           mobileNumber: req.body.mobileNumber,
+//           bankDetails: {
+//             bankName: req.body.bankName,
+//             branch: req.body.branch,
+//             accountHolder: req.body.accountHolder,
+//             accountNumber: req.body.accountNumber,
+//             IFSCCode: req.body.IFSCCode,
+//           },
+
+//         },
+//         User
+//       );
+//       if (userData) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.PROFILE_UPDATED,
+//           userData
+//         );
+//       } else {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.USER_NOT_FOUND,
+//           []
+//         );
+//       }
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const editProfile = async (req, res) => {
   try {
-    console.log(req.body, 'hiii')
+    // console.log(req.body,'hiii')
     const findData = await getSingleData(
       { _id: req.user, is_deleted: 0 },
       User
@@ -1403,6 +1525,8 @@ export const editProfile = async (req, res) => {
             accountNumber: req.body.accountNumber,
             IFSCCode: req.body.IFSCCode,
           },
+          country: req.body.country,
+          countryCode: req.body.countryCode
         },
         User
       );
@@ -1427,20 +1551,19 @@ export const editProfile = async (req, res) => {
           profile: req.body.profile,
           fullName: req.body.fullName,
           mobileNumber: req.body.mobileNumber,
-          countryCode: req.body.countryCode,
-          country: req.body.country,
           bankDetails: {
             bankName: req.body.bankName,
             branch: req.body.branch,
             accountHolder: req.body.accountHolder,
             accountNumber: req.body.accountNumber,
-            IFSCCode: req.body.IFSCCode
-
+            IFSCCode: req.body.IFSCCode,
           },
+          country: req.body.country,
+          countryCode: req.body.countryCode
+
         },
         User
       );
-      console.log(userData, "userData")
       if (userData) {
         return sendResponse(
           res,
@@ -1462,7 +1585,6 @@ export const editProfile = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 export const emailVerify = async (req, res) => {
   try {
     // let { userId, email } = req.query;

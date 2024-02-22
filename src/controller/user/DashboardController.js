@@ -28,6 +28,7 @@ import {
   calculateAllGameReward,
   getAllBids,
   Game,
+  axios
 } from "../../index.js";
 
 // export const userDashboard = async (req, res) => {
@@ -502,9 +503,10 @@ export const userDashboard1 = async (req, res) => {
     if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
       console.log(transactionDeposite, "sjsj");
       totalBalance = transactionDeposite.tokenDollorValue;
+
       totalDepositeBalance = transactionDeposite.betAmount;
     }
-
+    console.log(totalBalance, "55555")
     const game = await Game.find({
       _id: numberBettingForUser[0]?.gameId,
     });
@@ -541,7 +543,6 @@ export const userDashboard1 = async (req, res) => {
     // if (bettingDataArray.every(bettingData => !bettingData?.[0]?.gameId) && numberBettingData.length === 0) {
     //   console.error("No valid gameIds found.");
     // }
-
 
     console.log("Total Coin:", totalCoin);
 
@@ -649,3 +650,22 @@ async function getActiveWinnerPlayers(timeRange) {
 //     const bettingData = await bettingModel.find({ ...query, is_deleted: 0 });
 //     return bettingData.reduce((total, data) => total + Number(data.rewardAmount), 0);
 // }
+
+
+
+
+export const totalCoin = async (req, res) => {
+  try {
+
+    const userCoin = await NewTransaction.find({ userId: req.user }); // Ensure you're accessing the ID correctly
+    const totalCoin = userCoin[0].totalCoin;
+    const usd = await CurrencyCoin.find({ currencyName: "USD", is_deleted: 0 })
+    let usdCoin = usd[0].coin
+
+    const coinDollarValue = totalCoin / usdCoin;
+    return sendResponse(res, StatusCodes.OK, 'Total coin in USD', { coinDollarValue: coinDollarValue, totalCoin: totalCoin });
+  } catch (error) {
+    console.error(error);
+    return handleErrorResponse(res, error);
+  }
+};

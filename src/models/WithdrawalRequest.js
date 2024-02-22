@@ -22,24 +22,24 @@ const withdrawalRequestSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    tetherType: {
+    tetherType :{
         type: String,
         required: false
     },
-    coin: {
+    coin : {
         type: Number,
         required: false,
-        default: 0
+        default : 0
     },
-    status: {
-        type: String,
-        enum: ['pending', 'accept', 'reject'],
-        default: 'pending'
+    status : {
+        type : String,
+        enum : ['pendding','accept','reject'],
+        default : 'pendding'
     },
     is_deleted: {
         type: Number,
         required: false,
-        default: 0
+        default : 0
     },
 }, { timestamps: true });
 
