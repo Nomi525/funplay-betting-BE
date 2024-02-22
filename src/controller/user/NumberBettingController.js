@@ -2255,12 +2255,7 @@ export const getPeriod = async (req, res) => {
       gameId,
       is_deleted: 0,
     };
-<<<<<<< HEAD
-    console.log(query,"data");
-
-=======
     console.log(query, "data");
->>>>>>> f5c3e7bc60ce29573d60012b73c0a00a05b441ee
     if (second) {
       query.periodFor = second;
     }
