@@ -15,7 +15,7 @@ export const getAllUserWithdrawalRequest = async (req, res) => {
               res,
               StatusCodes.OK,
               "get all withdrawal Request",
-              getSingle
+              getData
           );
       } else {
           return sendResponse(
