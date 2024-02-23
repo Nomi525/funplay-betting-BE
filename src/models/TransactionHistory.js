@@ -39,8 +39,8 @@ const transactionHistorySchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pendding', 'accept', 'reject'],
-        default: 'pendding'
+        enum: ['pending', 'accept', 'reject'],
+        default: 'pending'
     },
     type: {
         type: String,

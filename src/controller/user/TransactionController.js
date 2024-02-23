@@ -529,7 +529,7 @@ export const withdrawalUserRequest = async (req, res) => {
       const convertRupees = checkTotalCoin * 0.01;
       const checkAdminSetting = await AdminSetting.find({});
       const adminwithdrawalAmount = checkAdminSetting[0].withdrawalAmount
-      if (type == "fiatcurrency") {
+      if (type == "Fiat Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
           if (convertRupees >= withdrawalAmount) {
             const deductedCoins = withdrawalAmount / 0.01;
@@ -553,8 +553,7 @@ export const withdrawalUserRequest = async (req, res) => {
         } else {
           return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient withdrawal amount", []);
         }
-      } else if (type == "cryptocurrency") {
-        console.log("cryptocurrency")
+      } else if (type == "Crypto Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
           if (convertRupees >= withdrawalAmount) {
             const deductedCoins = withdrawalAmount / 0.01;
