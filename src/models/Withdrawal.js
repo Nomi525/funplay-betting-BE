@@ -16,7 +16,7 @@ const withdrawalSchema = new mongoose.Schema({
     },
     type : {
         type : String,
-        enum : ['cryptocurrency','fiatcurrency'],
+        enum : ["Fiat Currency", "Crypto Currency"],
         required: false
     },
     bitcoinWalletAddress:{
@@ -33,8 +33,8 @@ const withdrawalSchema = new mongoose.Schema({
     },
     status : {
         type : String,
-        enum : ['pending','accept','reject'],
-        default : 'pending'
+        enum : ["Approved", "Rejected", "Pending"],
+        default : 'Pending'
     },
     rejectReason :{
         type : String,

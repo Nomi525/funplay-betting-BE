@@ -9,7 +9,7 @@ import {
 
 export const getAllUserWithdrawalRequest = async (req, res) => {
   try {
-      const getData = await Withdrawal.find({ });
+      const getData = await Withdrawal.find({ }).sort({ createdAt: -1 });;
       if (getData) {
           return sendResponse(
               res,
@@ -61,20 +61,19 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
     try {
       const id = req.params.id;
       const { status, rejectReason } = req.body;
-  
       const getSingle = await Withdrawal.findById(id);
       if (!getSingle) {
         return sendResponse(res, StatusCodes.NOT_FOUND, "Withdrawal request not found", []);
       }
   
-      if (status === "accept" && getSingle.status !== "accept") {
+      if (status === "Approved" && getSingle.status !== "Approved") {
         const updatedStatus = await Withdrawal.updateOne(
           { _id: id },
-          { $set: { status: "accept" } }
+          { $set: { status: "Approved" } }
         );
   
         return sendResponse(res, StatusCodes.OK, "Withdrawal request accepted successfully", updatedStatus);
-      } else if (status === "reject" && getSingle.status !== "reject") {
+      } else if (status === "Rejected" && getSingle.status !== "Rejected") {
         const AddAmount = getSingle.requestedAmount;
         const convertIntoCoin = AddAmount / 0.01;
   
@@ -87,7 +86,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
   
           const updatedStatuss = await Withdrawal.updateOne(
             { _id: id },
-            { $set: { status: "reject", rejectReason: rejectReason } }
+            { $set: { status: "Rejected", rejectReason: rejectReason } }
           );
   
           return sendResponse(res, StatusCodes.OK, "Withdrawal request rejected successfully", updatedStatuss);
