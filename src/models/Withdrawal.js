@@ -10,6 +10,10 @@ const withdrawalSchema = new mongoose.Schema({
         type : String,
         required: false
     },
+    name:{
+        type : String,
+        required: false
+    },
     requestedAmount: {
         type: Number,
         required: false
@@ -36,6 +40,10 @@ const withdrawalSchema = new mongoose.Schema({
         enum : ["Approved", "Rejected", "Pending"],
         default : 'Pending'
     },
+    currency :{
+        type : String,
+        required: false
+    }, 
     rejectReason :{
         type : String,
         required: false,

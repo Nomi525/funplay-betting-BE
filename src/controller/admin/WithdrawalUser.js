@@ -5,6 +5,7 @@ import {
     Withdrawal,
     ResponseMessage,
     NewTransaction,
+    CurrencyCoin,
 } from "../../index.js";
 
 export const getAllUserWithdrawalRequest = async (req, res) => {
@@ -62,6 +63,8 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
       const id = req.params.id;
       const { status, rejectReason } = req.body;
       const getSingle = await Withdrawal.findById(id);
+      const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName : getSingle.currency});
+      const checkCoins = checkCurrency[0].coin;
       if (!getSingle) {
         return sendResponse(res, StatusCodes.NOT_FOUND, "Withdrawal request not found", []);
       }
@@ -75,15 +78,13 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
         return sendResponse(res, StatusCodes.OK, "Withdrawal request accepted successfully", updatedStatus);
       } else if (status === "Rejected" && getSingle.status !== "Rejected") {
         const AddAmount = getSingle.requestedAmount;
-        const convertIntoCoin = AddAmount / 0.01;
-  
+        const convertIntoCoin = AddAmount * checkCoins;
         const CheckUser = getSingle.userId;
         const userTransaction = await NewTransaction.findOne({ userId: CheckUser });
-  
+ 
         if (userTransaction) {
           userTransaction.totalCoin += convertIntoCoin;
           await userTransaction.save();
-  
           const updatedStatuss = await Withdrawal.updateOne(
             { _id: id },
             { $set: { status: "Rejected", rejectReason: rejectReason } }

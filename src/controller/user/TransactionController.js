@@ -522,26 +522,32 @@ export const withdrawalUserRequest = async (req, res) => {
   try {
     const { withdrawalAmount, type } = req.body;
     const findUser = await User.find({ _id: req.user });
-
+    console.log(findUser[0].currency,"hh");
+    
+     const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName: findUser[0].currency});
     if (findUser.length > 0) {
+      const currency = checkCurrency[0].coin;
       const checkTransaction = await NewTransaction.find({ userId: req.user });
       const checkTotalCoin = checkTransaction[0].totalCoin;
-      const convertRupees = checkTotalCoin * 0.01;
+      const convertcurrency = checkTotalCoin/currency;
       const checkAdminSetting = await AdminSetting.find({});
       const adminwithdrawalAmount = checkAdminSetting[0].withdrawalAmount
       if (type == "Fiat Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
-          if (convertRupees >= withdrawalAmount) {
-            const deductedCoins = withdrawalAmount / 0.01;
+          if (convertcurrency >= withdrawalAmount) {
+            const deductedCoins = withdrawalAmount * currency;
             checkTransaction[0].totalCoin -= deductedCoins;
+            
             await checkTransaction[0].save();
-
+            console.log(checkTransaction,'gg');
             const createSubadmin = await dataCreate(
               {
                 userId: req.user,
                 email: findUser[0].email,
+                name: findUser[0].findUser,
                 requestedAmount: withdrawalAmount,
-                type: type
+                type: type,
+                currency: findUser[0].currency
               },
               Withdrawal
             );
@@ -555,11 +561,10 @@ export const withdrawalUserRequest = async (req, res) => {
         }
       } else if (type == "Crypto Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
-          if (convertRupees >= withdrawalAmount) {
-            const deductedCoins = withdrawalAmount / 0.01;
+          if (convertcurrency >= withdrawalAmount) {
+            const deductedCoins = withdrawalAmount * currency;
             checkTransaction[0].totalCoin -= deductedCoins;
             await checkTransaction[0].save();
-
             const createSubadmin = await dataCreate(
               {
                 userId: req.user,
@@ -568,7 +573,9 @@ export const withdrawalUserRequest = async (req, res) => {
                 type: type,
                 bitcoinWalletAddress: checkTransaction[0].bitcoinWalletAddress[0],
                 ethereumWalletAddress: checkTransaction[0].ethereumWalletAddress[0],
-                networkChainId: checkTransaction[0].networkChainId
+                networkChainId: checkTransaction[0].networkChainId,
+                name: findUser[0].findUser,
+                currency: findUser[0].currency
               },
               Withdrawal
             );
