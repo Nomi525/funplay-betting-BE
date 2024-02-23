@@ -14,6 +14,23 @@ const withdrawalSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    type : {
+        type : String,
+        enum : ['cryptocurrency','fiatcurrency'],
+        required: false
+    },
+    bitcoinWalletAddress:{
+        type : String,
+        required: false
+    }, 
+    ethereumWalletAddress:{
+        type : String,
+        required: false
+    },
+    networkChainId:{
+        type : String,
+        required: false
+    },
     status : {
         type : String,
         enum : ['pending','accept','reject'],

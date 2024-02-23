@@ -40,7 +40,6 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
       const { status, rejectReason } = req.body;
   
       const getSingle = await Withdrawal.findById(id);
-  
       if (!getSingle) {
         return sendResponse(res, StatusCodes.NOT_FOUND, "Withdrawal request not found", []);
       }
