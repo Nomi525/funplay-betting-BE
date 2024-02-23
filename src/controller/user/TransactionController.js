@@ -582,7 +582,7 @@ export const withdrawalUserRequest = async (req, res) => {
           return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient withdrawal amount", []);
         }
       } else {
-        console.log("invalid type")
+        return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid type", []);
       }
     } else {
       return sendResponse(res, StatusCodes.NOT_FOUND, "User not found", []);

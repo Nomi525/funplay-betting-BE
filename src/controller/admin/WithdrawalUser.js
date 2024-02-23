@@ -7,6 +7,29 @@ import {
     NewTransaction,
 } from "../../index.js";
 
+export const getAllUserWithdrawalRequest = async (req, res) => {
+  try {
+      const getData = await Withdrawal.find({ });
+      if (getData) {
+          return sendResponse(
+              res,
+              StatusCodes.OK,
+              "get all withdrawal Request",
+              getSingle
+          );
+      } else {
+          return sendResponse(
+              res,
+              StatusCodes.NOT_FOUND,
+              "get all request not fetch",
+              []
+          );
+      }
+
+  } catch (error) {
+      return handleErrorResponse(res, error);
+  }
+};
 
 export const getUserWithdrawalRequest = async (req, res) => {
     try {
