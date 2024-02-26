@@ -1586,108 +1586,6 @@ export const loginFromMpin = async (req, res) => {
 //   }
 // };
 
-// export const editProfile = async (req, res) => {
-//   try {
-//     const findData = await getSingleData(
-//       { _id: req.user, is_deleted: 0 },
-//       User
-//     );
-    
-//     if (!findData) {
-//       return sendResponse(
-//         res,
-//         StatusCodes.NOT_FOUND,
-//         ResponseMessage.USER_NOT_FOUND,
-//         []
-//       );
-//     }
-
-//     if (req.body.email) {
-//       const checkEmail = await getSingleData(
-//         {
-//           _id: { $ne: req.user },
-//           email: { $regex: "^" + req.body.email + "$", $options: "i" },
-//         },
-//         User
-//       );
-//       if (checkEmail) {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.EMAIL_ALREADY_EXIST,
-//           []
-//         );
-//       }
-//     }
-
-//     if (req.body.mobileNumber) {
-//       const checkMobileNumber = await getSingleData(
-//         {
-//           _id: { $ne: req.user },
-//           mobileNumber: req.body.mobileNumber,
-//         },
-//         User
-//       );
-//       if (checkMobileNumber) {
-//         return sendResponse(
-//           res,
-//           StatusCodes.BAD_REQUEST,
-//           ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
-//           []
-//         );
-//       }
-//     }
-
-//     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-
-//     if (req.body.bankDetails && req.body.bankDetails.length > 0) {
-//       req.body.bankDetails = [
-//         ...findData.bankDetails, 
-//         ...req.body.bankDetails,
-//       ];
-//     } else {
-//       req.body.bankDetails = findData.bankDetails;
-//     }
-
-//     const updateData = {
-//       profile: req.body.profile,
-//       fullName: req.body.fullName,
-//       country: req.body.country,
-//       countryCode: req.body.countryCode,
-//       bankDetails: req.body.bankDetails,
-//     };
-
-//     if (req.body.email && findData.email !== req.body.email) {
-//       updateData.isVerified = false;
-//       updateData.email = req.body.email;
-
-//       const objectEncrypt = await encryptObject({
-//         userId: findData._id,
-//         email: req.body.email,
-//       });
-//       let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
-//         objectEncrypt,
-//       });
-//       await sendMail(req.body.email, "Verify Email", mailInfo);
-//     }
-
-//     const updateProfile = await dataUpdated(
-//       { _id: findData._id, is_deleted: 0 },
-//       updateData,
-//       User
-//     );
-
-//     let message = ResponseMessage.PROFILE_UPDATED;
-//     if (req.body.bankDetails && req.body.bankDetails.length > 0) {
-//       message = ResponseMessage.BANK_DETAILS_UPDATED;
-//     }
-
-//     return sendResponse(res, StatusCodes.OK, message, updateProfile);
-//   } catch (error) {
-//     console.log(error);
-//     return handleErrorResponse(res, error);
-//   }
-// };
 export const editProfile = async (req, res) => {
   try {
     const findData = await getSingleData(
@@ -1743,13 +1641,6 @@ export const editProfile = async (req, res) => {
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     if (req.body.bankDetails && req.body.bankDetails.length > 0) {
-      // Check if the accountNumber already exists in the bank details
-      const existingAccountNumbers = findData.bankDetails.map(bank => bank.accountNumber);
-      
-      req.body.bankDetails = req.body.bankDetails.filter(newBank => {
-        return !existingAccountNumbers.includes(newBank.accountNumber);
-      });
-
       req.body.bankDetails = [
         ...findData.bankDetails, 
         ...req.body.bankDetails,
@@ -1797,6 +1688,7 @@ export const editProfile = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 
 
 export const emailVerify = async (req, res) => {
