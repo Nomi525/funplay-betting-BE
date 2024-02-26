@@ -553,7 +553,7 @@ export const withdrawalUserRequest = async (req, res) => {
 
             return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
           }
-          return sendResponse(res, StatusCodes.OK, "Already previous request is pending", []);
+          return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
@@ -585,7 +585,7 @@ export const withdrawalUserRequest = async (req, res) => {
 
             return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
           }
-          return sendResponse(res, StatusCodes.CREATED, "Already previous request is pending", []);
+          return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
