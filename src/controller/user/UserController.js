@@ -1585,7 +1585,19 @@ export const loginFromMpin = async (req, res) => {
 //     return handleErrorResponse(res, error);
 //   }
 // };
-
+//some chnges in this api i can't pass array in payload
+// {
+//   "bankDetails": 
+//     {
+//       "bankName": "Neha",
+//       "branch": " Branch",
+//       "accountHolder": "John Doe",
+//       "accountNumber": 255,
+//       "IFSCCode": "ABC1234567"
+//     }
+  
+  
+// } how to do 
 export const editProfile = async (req, res) => {
   try {
     const findData = await getSingleData(
@@ -1646,21 +1658,21 @@ export const editProfile = async (req, res) => {
       updatedBankDetails = findData.bankDetails;
     }
 
-    if (req.body.bankDetails && req.body.bankDetails.length > 0) {
-      for (const newBankDetail of req.body.bankDetails) {
-        const existingAccountNumbers = updatedBankDetails.map(bank => bank.accountNumber);
-        if (!existingAccountNumbers.includes(newBankDetail.accountNumber)) {
-          updatedBankDetails.push(newBankDetail);
-        } else {
-          return sendResponse(
-            res,
-            StatusCodes.BAD_REQUEST,
-            ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
-            []
-          );
-        }
+    if (req.body.bankDetails) {
+      const newBankDetail = req.body.bankDetails;
+      const existingAccountNumbers = updatedBankDetails.map(bank => bank.accountNumber);
+      if (!existingAccountNumbers.includes(newBankDetail.accountNumber)) {
+        updatedBankDetails.push(newBankDetail);
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
+          []
+        );
       }
     }
+
     const updateData = {
       profile: req.body.profile,
       fullName: req.body.fullName,
@@ -1690,7 +1702,7 @@ export const editProfile = async (req, res) => {
     );
 
     let message = ResponseMessage.PROFILE_UPDATED;
-    if (req.body.bankDetails && req.body.bankDetails.length > 0) {
+    if (req.body.bankDetails) {
       message = ResponseMessage.BANK_DETAILS_UPDATED;
     }
 
@@ -1700,6 +1712,7 @@ export const editProfile = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 
 
 
