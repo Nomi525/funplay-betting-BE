@@ -10,7 +10,7 @@ import {
 
 export const getAllUserWithdrawalRequest = async (req, res) => {
   try {
-      const getData = await Withdrawal.find({ }).sort({ createdAt: -1 });;
+      const getData = await Withdrawal.find({ }).populate("userId", "fullName").sort({ createdAt: -1 });;
       if (getData) {
           return sendResponse(
               res,
