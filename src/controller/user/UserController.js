@@ -1449,6 +1449,7 @@ export const loginFromMpin = async (req, res) => {
 //     return handleErrorResponse(res, error);
 //   }
 // };
+
 //main
 // export const editProfile = async (req, res) => {
 //   try {
@@ -1585,19 +1586,7 @@ export const loginFromMpin = async (req, res) => {
 //     return handleErrorResponse(res, error);
 //   }
 // };
-//some chnges in this api i can't pass array in payload
-// {
-//   "bankDetails": 
-//     {
-//       "bankName": "Neha",
-//       "branch": " Branch",
-//       "accountHolder": "John Doe",
-//       "accountNumber": 255,
-//       "IFSCCode": "ABC1234567"
-//     }
-  
-  
-// } how to do 
+
 export const editProfile = async (req, res) => {
   try {
     const findData = await getSingleData(
@@ -1610,7 +1599,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        []
+        [] 
       );
     }
 
@@ -1666,7 +1655,7 @@ export const editProfile = async (req, res) => {
       } else {
         return sendResponse(
           res,
-          StatusCodes.BAD_REQUEST,
+          StatusCodes.OK,
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
@@ -1706,7 +1695,7 @@ export const editProfile = async (req, res) => {
       message = ResponseMessage.BANK_DETAILS_UPDATED;
     }
 
-    return sendResponse(res, StatusCodes.OK, message, updateProfile);
+    return sendResponse(res, StatusCodes.OK, ResponseMessage.PROFILE_UPDATED, updateProfile);
   } catch (error) {
     console.log(error);
     return handleErrorResponse(res, error);
