@@ -2,8 +2,9 @@ import {CurrencyCoin, Decimal, FaintCurrency, NewTransaction, ResponseMessage, S
 
 export const addFaintCurrency = async (req, res) => {
     try {
+        console.log("hh");
         const { amount, UTRId, UPIMethod, status, rejectReason, rejectScreenShort} = req.body;
-
+console.log(req.user,"user");
         const transactionScreenShort = req.transactionScreenShortUrl ;
 
                 let addFaintCurrency = new FaintCurrency({
@@ -30,9 +31,10 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
       const rejectScreenShort = req.rejectScreenShortUrl;
       const findFaintCurrency = await FaintCurrency.findById(id);
       
+      console.log(findFaintCurrency,'ff');
       if (findFaintCurrency) {
           const findData = findFaintCurrency.userId;
-          const findCoin = await User.find({ is_deleted :0, _id :findData});
+          const findCoin = await User.find({ is_deleted:0,  _id : findData});
           const checkUserCurrency = findCoin[0].currency;
           const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName : checkUserCurrency});
           const checkCoins = checkCurrency[0].coin;
@@ -44,19 +46,22 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
                   return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_APPROVED, []);
               }
           
-              const updatedFaintCurrency = await FaintCurrency.updateOne(
-                  { _id: id },
-                  { $set: { status: "Approved" } }
-              );
-
               const userCoin = await NewTransaction.findOne({ userId: findObjectID });
+              console.log(userCoin,"userCoin");
               if (userCoin) {
+                const updatedFaintCurrency = await FaintCurrency.updateOne(
+                    { _id: id },
+                    { $set: { status: "Approved" } }
+                );
                 const amountToAdd = parseFloat(findFaintCurrency.amount);
-                const convertIntoCoin = amountToAdd*checkCoins;
+                const convertIntoCoin = amountToAdd * checkCoins;
+                console.log(convertIntoCoin,"convertIntoCoin");
                 userCoin.totalCoin += convertIntoCoin;
+
                   await userCoin.save();
+                  return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_APPROVED, updatedFaintCurrency);
               }
-              return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_APPROVED, updatedFaintCurrency);
+              return sendResponse(res, StatusCodes.OK, "Please connect wallet", []);
           } else if (status === "Rejected") {
               if (findFaintCurrency.status === "Rejected") {
                   return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_REJECTED, []);
@@ -79,6 +84,7 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
           );
       }
   } catch (err) {
+    console.log(err,"error");
       return handleErrorResponse(res, err);
   }
 };

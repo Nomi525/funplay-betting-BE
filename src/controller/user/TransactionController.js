@@ -522,7 +522,6 @@ export const withdrawalUserRequest = async (req, res) => {
   try {
     const { withdrawalAmount, type } = req.body;
     const findUser = await User.find({ _id: req.user });
-    console.log(findUser[0].currency,"hh");
     
      const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName: findUser[0].currency});
     if (findUser.length > 0) {
@@ -535,11 +534,11 @@ export const withdrawalUserRequest = async (req, res) => {
       if (type == "Fiat Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
           if (convertcurrency >= withdrawalAmount) {
+            const findUserRequest = await Withdrawal.find({userId: req.user, status :"Pending"})
+            if(!findUserRequest.length){
             const deductedCoins = withdrawalAmount * currency;
             checkTransaction[0].totalCoin -= deductedCoins;
-            
             await checkTransaction[0].save();
-            console.log(checkTransaction,'gg');
             const createSubadmin = await dataCreate(
               {
                 userId: req.user,
@@ -553,6 +552,8 @@ export const withdrawalUserRequest = async (req, res) => {
             );
 
             return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+          }
+          return sendResponse(res, StatusCodes.OK, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
@@ -562,6 +563,8 @@ export const withdrawalUserRequest = async (req, res) => {
       } else if (type == "Crypto Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
           if (convertcurrency >= withdrawalAmount) {
+            const findUserRequest = await Withdrawal.find({userId: req.user, status :"Pending"})
+            if(!findUserRequest.length){
             const deductedCoins = withdrawalAmount * currency;
             checkTransaction[0].totalCoin -= deductedCoins;
             await checkTransaction[0].save();
@@ -581,6 +584,8 @@ export const withdrawalUserRequest = async (req, res) => {
             );
 
             return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+          }
+          return sendResponse(res, StatusCodes.CREATED, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
