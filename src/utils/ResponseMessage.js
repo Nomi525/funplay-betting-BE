@@ -105,6 +105,7 @@ const ResponseMessage = {
   GAME_EXIST: "Game already exist",
   EMAIL_PASSWORD_VERIFY: "Please verify otp to update profile ",
   PROFILE_UPDATED: "Profile updated successfully",
+  BANK_DETAIL_ALREADY_EXIST: "Already bank detail exist",
   // EMAIL_ALREADY_EXIST: "Email is already in use please use another",
   SET_PASSWORD: "Password set successfully",
   SET_PASSWORD_ALREADY: "Password already set",
