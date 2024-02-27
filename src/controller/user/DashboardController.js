@@ -656,14 +656,21 @@ async function getActiveWinnerPlayers(timeRange) {
 
 export const totalCoin = async (req, res) => {
   try {
+    const findUser = await User.find({ _id: req.user });
+    const findCurrency = findUser[0].currency;
 
-    const userCoin = await NewTransaction.find({ userId: req.user }); // Ensure you're accessing the ID correctly
-    const totalCoin = userCoin[0].totalCoin;
-    const usd = await CurrencyCoin.find({ currencyName: "USD", is_deleted: 0 })
-    let usdCoin = usd[0].coin
-
+    const userCoin = await NewTransaction.find({ userId: req.user });
+    let totalCoin = 0;  
+    let coinDollarValue = 0;
+    if (userCoin.length > 0) {
+      totalCoin = userCoin[0].totalCoin;
+      const usd = await CurrencyCoin.find({ currencyName: findCurrency, is_deleted: 0 });
+      let usdCoin = usd[0].coin;
     const coinDollarValue = totalCoin / usdCoin;
-    return sendResponse(res, StatusCodes.OK, 'Total coin in USD', { coinDollarValue: coinDollarValue, totalCoin: totalCoin });
+    return sendResponse(res, StatusCodes.OK, `Total coin in ${findCurrency}`, { coinDollarValue: coinDollarValue, totalCoin: totalCoin });
+    }
+
+    return sendResponse(res, StatusCodes.OK, `Total coin`, { coinDollarValue: coinDollarValue, totalCoin: totalCoin });
   } catch (error) {
     console.error(error);
     return handleErrorResponse(res, error);

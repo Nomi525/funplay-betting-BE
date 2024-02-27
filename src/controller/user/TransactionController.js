@@ -568,12 +568,14 @@ export const withdrawalUserRequest = async (req, res) => {
             const deductedCoins = withdrawalAmount * currency;
             checkTransaction[0].totalCoin -= deductedCoins;
             await checkTransaction[0].save();
+      
             const createSubadmin = await dataCreate(
               {
                 userId: req.user,
                 email: findUser[0].email,
                 requestedAmount: withdrawalAmount,
                 type: type,
+                tokenName : tokenName,
                 bitcoinWalletAddress: checkTransaction[0].bitcoinWalletAddress[0],
                 ethereumWalletAddress: checkTransaction[0].ethereumWalletAddress[0],
                 networkChainId: checkTransaction[0].networkChainId,
@@ -590,7 +592,7 @@ export const withdrawalUserRequest = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
         } else {
-          return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient withdrawal amount", []);
+          return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
         }
       } else {
         return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid type", []);

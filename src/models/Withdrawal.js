@@ -23,6 +23,11 @@ const withdrawalSchema = new mongoose.Schema({
         enum : ["Fiat Currency", "Crypto Currency"],
         required: false
     },
+    tokenName: {
+        type : String,
+        enum : ["Bitcoin", "BNB", "Polygon", "Ethereum"],
+        required: false
+    },
     bitcoinWalletAddress:{
         type : String,
         required: false
@@ -42,7 +47,7 @@ const withdrawalSchema = new mongoose.Schema({
     },
     requestType : {
         type: String,
-        default:'Withdraw'
+        default:'Withdrawal'
     },
     currency :{
         type : String,
