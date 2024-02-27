@@ -133,7 +133,9 @@ import {
 export const connectToWallet = async (req, res) => {
   try {
     const { email, currency, referralByCode, password, wallet } = req.body;
-    const walletArray = [JSON.parse(wallet)];
+    // const walletArray = [JSON.parse(wallet)];
+    const walletArray = JSON.parse(wallet);
+
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
 
@@ -145,7 +147,6 @@ export const connectToWallet = async (req, res) => {
 
     if (existingUser) {
       console.log(req.body, "hii222");
-      // Update existing user's wallet
       await User.updateOne(
         {
           email: lowercasedEmail,
