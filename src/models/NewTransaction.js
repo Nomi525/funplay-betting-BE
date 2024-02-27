@@ -8,19 +8,23 @@ const newTransactionSchema = new mongoose.Schema({
     },
     walletAddress : { 
         type: String, 
-        required: false 
+        required: false,
+        default:0
     },
     bitcoinWalletAddress : {
         type: Array, 
-        required: false 
+        required: false,
+        default:0 
     },
     ethereumWalletAddress : {
         type: Array, 
-        required: false 
+        required: false,
+        default:0 
     },
     networkChainId : { 
         type: String, 
-        required: false 
+        required: false,
+        default:0 
     },
     tokenBitcoin: { 
         type: String,

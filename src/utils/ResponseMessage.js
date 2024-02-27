@@ -105,6 +105,7 @@ const ResponseMessage = {
   GAME_EXIST: "Game already exist",
   EMAIL_PASSWORD_VERIFY: "Please verify otp to update profile ",
   PROFILE_UPDATED: "Profile updated successfully",
+  BANK_DETAIL_ALREADY_EXIST: "Bank details already exists",
   // EMAIL_ALREADY_EXIST: "Email is already in use please use another",
   SET_PASSWORD: "Password set successfully",
   SET_PASSWORD_ALREADY: "Password already set",
@@ -272,8 +273,9 @@ const ResponseMessage = {
   INVALID_STATUS: "invalid status",
   ALREADY_APPROVED: "deposit request status already approved",
   ALREADY_REJECTED:"deposit request status already rejected",
-  GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully"
-
+  ALREADY_PENDING: "Already deposit request in pending",
+  GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully",
+  SLOTS_BOOKED_IN_COMMUNITY_BETTING : "Slots fetched"
 
 };
 

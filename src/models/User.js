@@ -95,7 +95,7 @@ const userSchema = new mongoose.Schema(
       required: false,
       default: "No",
     },
-    bankDetails: {
+    bankDetails:[ {
       bankName: {
         type: String,
         required: false,
@@ -116,7 +116,7 @@ const userSchema = new mongoose.Schema(
         type: String,
         required: false,
       },
-    },
+    }],
     currency: {
       type: String,
       required: false,

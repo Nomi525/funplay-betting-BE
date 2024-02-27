@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Currency } from "../../models/Currency.js";
-import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting, PenaltyBetting, CardBetting, getUpiQr } from "./../../index.js";
+import { Game, NewTransaction, multiplicationLargeSmallValue, plusLargeSmallValue, ResponseMessage, StatusCodes, User, BannerModel, GameTime, sendResponse, dataCreate, dataUpdated, getSingleData, getAllData, handleErrorResponse, GameRules, ColourBetting, NumberBetting, Period, CommunityBetting, PenaltyBetting, CardBetting, getUpiQr, CurrencyCoin } from "./../../index.js";
 
 export const addEditBanner = async (req, res) => {
     try {
@@ -99,7 +99,7 @@ export const getSingleGameRule = async (req, res) => {
 //#region Gel all currecy
 export const getAllCurrency = async (req, res) => {
     try {
-        const getCurrecy = await getAllData({ is_deleted: 0 }, Currency)
+        const getCurrecy = await getAllData({ is_deleted: 0 }, CurrencyCoin)
         if (getCurrecy.length) {
             return sendResponse(res, StatusCodes.OK, ResponseMessage.CURRENCY_GET, getCurrecy);
         } else {

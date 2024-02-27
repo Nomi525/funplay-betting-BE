@@ -1,5 +1,5 @@
 import { socketRoute } from "../config/Socket.config.js";
-import { updateEmail, userCheckEmail } from "../controller/user/UserController.js";
+import { deleteBankDetail, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
   Upload,
@@ -79,11 +79,14 @@ import {
   cardBettingWinnerResult,
   getAllBettingHistory,
   uploadImage,
+  getSlotsBookedByPeriod
 } from "./../index.js";
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
-import { addFaintCurrency } from "../controller/admin/FaintCurrency.js";
+import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
+import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
+import { getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -248,6 +251,16 @@ userRoutes.post('/add-faint-currency', Auth, Upload, addFaintCurrency)
 userRoutes.get("/total-coin", Auth, totalCoin)
 
 userRoutes.get('/userDashboard1', Auth, userDashboard1)
+userRoutes.post('/user-withdrawal-request', Auth, withdrawalUserRequest)
+userRoutes.post('/community-betting-slots-booked', Auth, getSlotsBookedByPeriod)
+
+
+userRoutes.post('/remove-bankDetail', Auth, deleteBankDetail)
+
+userRoutes.get('/get-user-faint-currency', Auth, getUserFaintCurrency)
+userRoutes.get('/get-user-withdrawal-currency', Auth, getUserWithdrawalRequest)
+
+
 
 export { userRoutes };
 

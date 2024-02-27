@@ -14,6 +14,7 @@ export const adminLogin = async (req, res) => {
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
+            console.log(findAdmin,"ff");
             if (findAdmin.role.Role_type == "Sub Admin") {
                 if (!findAdmin.isActive) {
                     return sendResponse(

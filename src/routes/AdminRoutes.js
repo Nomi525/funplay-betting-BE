@@ -1,6 +1,7 @@
 import { getTransactionList, getwithdrwalcheck } from "../controller/admin/AdminController.js";
 import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
+import { approveRejectWithdrawalRequest, getAllUserWithdrawalRequest, getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
 import {
   Auth,
   Upload,
@@ -291,6 +292,11 @@ adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
 
 adminRoutes.post('/change-status-faint-currency' ,  Upload, changeStatusOfFaintCurrency)
 adminRoutes.get('/get-all-faint-currency',Auth, getAllFaintCurrency)
+
+adminRoutes.get('/get-single-withdrawal-request/:id',Auth, getUserWithdrawalRequest);
+adminRoutes.get('/get-all-request-withdrawal',Auth, getAllUserWithdrawalRequest);
+adminRoutes.post('/accept-reject-withdrawal-request/:id',Auth, approveRejectWithdrawalRequest);
+
 
 export { adminRoutes };
 

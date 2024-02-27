@@ -258,12 +258,8 @@ export const acceptWithdrawalRequest = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid status", []);
     }
 
-    // const withdrawalRequest = await getSingleData(
-    //   { _id: withdrawalRequestId, status: "pendding" },
-    //   WithdrawalRequest
-    // );
     const withdrawalRequest = await getSingleData(
-      { _id: withdrawalRequestId, status: "pendding", type: "withdrawal" },
+      { _id: withdrawalRequestId, status: "pending", type: "withdrawal" },
       TransactionHistory
     );
     if (!withdrawalRequest) {

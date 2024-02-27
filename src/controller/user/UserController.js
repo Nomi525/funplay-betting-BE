@@ -133,7 +133,9 @@ import {
 export const connectToWallet = async (req, res) => {
   try {
     const { email, currency, referralByCode, password, wallet } = req.body;
-    const walletArray = [JSON.parse(wallet)];
+    // const walletArray = [JSON.parse(wallet)];
+    const walletArray = JSON.parse(wallet);
+
     const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
 
@@ -145,7 +147,6 @@ export const connectToWallet = async (req, res) => {
 
     if (existingUser) {
       console.log(req.body, "hii222");
-      // Update existing user's wallet
       await User.updateOne(
         {
           email: lowercasedEmail,
@@ -171,8 +172,6 @@ export const connectToWallet = async (req, res) => {
         token: token,
       });
     }
-    console.log(req.body, "hii", "33333");
-    // Check if wallet address already exists in any user's wallet
     const walletUser = await User.findOne({
       "wallet.walletAddress": wallet?.walletAddress,
       "wallet.walletType": wallet?.walletType,
@@ -1450,21 +1449,159 @@ export const loginFromMpin = async (req, res) => {
 //   }
 // };
 
+//main
+// export const editProfile = async (req, res) => {
+//   try {
+//     // console.log(req.body,'hiii')
+//     const findData = await getSingleData(
+//       { _id: req.user, is_deleted: 0 },
+//       User
+//     );
+//     if (!findData) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.NOT_FOUND,
+//         ResponseMessage.USER_NOT_FOUND,
+//         []
+//       );
+//     }
+//     if (req.body.email) {
+//       const checkEmail = await getSingleData(
+//         {
+//           _id: { $ne: req.user },
+//           email: { $regex: "^" + req.body.email + "$", $options: "i" },
+//         },
+//         User
+//       );
+//       if (checkEmail) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.EMAIL_ALREADY_EXIST,
+//           []
+//         );
+//       }
+//     }
+//     if (req.body.mobileNumber) {
+//       const checkMobileNumber = await getSingleData(
+//         {
+//           _id: { $ne: req.user },
+//           mobileNumber: req.body.mobileNumber,
+//         },
+//         User
+//       );
+//       if (checkMobileNumber) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+//           []
+//         );
+//       }
+//     }
+//     if (findData.email != req.body.email) {
+//       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+//       const objectEncrtypt = await encryptObject({
+//         userId: findData._id,
+//         email: req.body.email,
+//       });
+//       if (req.body.email) {
+//         let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
+//           objectEncrtypt,
+//         });
+//         await sendMail(req.body.email, "Verify Email", mailInfo);
+//       }
+//       const updateProfile = await dataUpdated(
+//         { _id: findData._id, is_deleted: 0 },
+//         {
+//           isVerified: false,
+//           email: req.body.email,
+//           profile: req.body.profile,
+//           fullName: req.body.fullName,
+//           bankDetails: [{
+//             bankName: req.body.bankName,
+//             branch: req.body.branch,
+//             accountHolder: req.body.accountHolder,
+//             accountNumber: req.body.accountNumber,
+//             IFSCCode: req.body.IFSCCode,
+//           }],
+//           country: req.body.country,
+//           countryCode: req.body.countryCode
+//         },
+//         User
+//       );
+//       let message;
+//       if (
+//         req.body.bankName ||
+//         req.body.branch ||
+//         req.body.accountHolder ||
+//         req.body.accountNumber ||
+//         req.body.IFSCCode
+//       ) {
+//         message = ResponseMessage.BANK_DETAILS_UPDATED;
+//       } else {
+//         message = ResponseMessage.PROFILE_UPDATED;
+//       }
+//       return sendResponse(res, StatusCodes.OK, message, updateProfile);
+//     } else {
+//       req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+//       const userData = await dataUpdated(
+//         { _id: findData._id, is_deleted: 0 },
+//         {
+//           profile: req.body.profile,
+//           fullName: req.body.fullName,
+//           mobileNumber: req.body.mobileNumber,
+//           bankDetails: [{
+//             bankName: req.body.bankName,
+//             branch: req.body.branch,
+//             accountHolder: req.body.accountHolder,
+//             accountNumber: req.body.accountNumber,
+//             IFSCCode: req.body.IFSCCode,
+//         }],
+//           country: req.body.country,
+//           countryCode: req.body.countryCode
+
+//         },
+//         User
+//       );
+//       if (userData) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.OK,
+//           ResponseMessage.PROFILE_UPDATED,
+//           userData
+//         );
+//       } else {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.USER_NOT_FOUND,
+//           []
+//         );
+//       }
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const editProfile = async (req, res) => {
   try {
-    // console.log(req.body,'hiii')
     const findData = await getSingleData(
       { _id: req.user, is_deleted: 0 },
       User
     );
+
     if (!findData) {
       return sendResponse(
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        []
+        [] 
       );
     }
+
     if (req.body.email) {
       const checkEmail = await getSingleData(
         {
@@ -1482,6 +1619,7 @@ export const editProfile = async (req, res) => {
         );
       }
     }
+
     if (req.body.mobileNumber) {
       const checkMobileNumber = await getSingleData(
         {
@@ -1499,92 +1637,180 @@ export const editProfile = async (req, res) => {
         );
       }
     }
-    if (findData.email != req.body.email) {
-      req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-      const objectEncrtypt = await encryptObject({
+
+    req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+
+    let updatedBankDetails = [];
+    
+    if (findData.bankDetails && findData.bankDetails.length > 0) {
+      updatedBankDetails = findData.bankDetails;
+    }
+
+    if (req.body.bankDetails) {
+      const newBankDetail = req.body.bankDetails;
+      const existingAccountNumbers = updatedBankDetails.map(bank => bank.accountNumber);
+      if (!existingAccountNumbers.includes(newBankDetail.accountNumber)) {
+        updatedBankDetails.push(newBankDetail);
+      } else {
+        return sendResponse(
+          res,
+          StatusCodes.CONFLICT,
+          ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
+          []
+        );
+    
+      }
+    }
+
+    const updateData = {
+      profile: req.body.profile,
+      fullName: req.body.fullName,
+      country: req.body.country,
+      countryCode: req.body.countryCode,
+      bankDetails: updatedBankDetails,
+    };
+
+    if (req.body.email && findData.email !== req.body.email) {
+      updateData.isVerified = false;
+      updateData.email = req.body.email;
+
+      const objectEncrypt = await encryptObject({
         userId: findData._id,
         email: req.body.email,
       });
-      if (req.body.email) {
-        let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
-          objectEncrtypt,
-        });
-        await sendMail(req.body.email, "Verify Email", mailInfo);
-      }
-      const updateProfile = await dataUpdated(
-        { _id: findData._id, is_deleted: 0 },
-        {
-          isVerified: false,
-          email: req.body.email,
-          profile: req.body.profile,
-          fullName: req.body.fullName,
-          bankDetails: {
-            bankName: req.body.bankName,
-            branch: req.body.branch,
-            accountHolder: req.body.accountHolder,
-            accountNumber: req.body.accountNumber,
-            IFSCCode: req.body.IFSCCode,
-          },
-          country: req.body.country,
-          countryCode: req.body.countryCode
-        },
-        User
-      );
-      let message;
-      if (
-        req.body.bankName ||
-        req.body.branch ||
-        req.body.accountHolder ||
-        req.body.accountNumber ||
-        req.body.IFSCCode
-      ) {
-        message = ResponseMessage.BANK_DETAILS_UPDATED;
-      } else {
-        message = ResponseMessage.PROFILE_UPDATED;
-      }
-      return sendResponse(res, StatusCodes.OK, message, updateProfile);
-    } else {
-      req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
-      const userData = await dataUpdated(
-        { _id: findData._id, is_deleted: 0 },
-        {
-          profile: req.body.profile,
-          fullName: req.body.fullName,
-          mobileNumber: req.body.mobileNumber,
-          bankDetails: {
-            bankName: req.body.bankName,
-            branch: req.body.branch,
-            accountHolder: req.body.accountHolder,
-            accountNumber: req.body.accountNumber,
-            IFSCCode: req.body.IFSCCode,
-          },
-          country: req.body.country,
-          countryCode: req.body.countryCode
-
-        },
-        User
-      );
-      if (userData) {
-        return sendResponse(
-          res,
-          StatusCodes.OK,
-          ResponseMessage.PROFILE_UPDATED,
-          userData
-        );
-      } else {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.USER_NOT_FOUND,
-          []
-        );
-      }
+      let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
+        objectEncrypt,
+      });
+      await sendMail(req.body.email, "Verify Email", mailInfo);
     }
+
+    const updateProfile = await dataUpdated(
+      { _id: findData._id, is_deleted: 0 },
+      updateData,
+      User
+    );
+    let message;
+    if (req.body.bankDetails && req.body.bankDetails.length > 0) {
+      message = ResponseMessage.BANK_DETAILS_UPDATED;
+    } else {
+      message = ResponseMessage.PROFILE_UPDATED;
+    }
+
+    return sendResponse(res, StatusCodes.OK, message, updateProfile);
   } catch (error) {
     console.log(error);
     return handleErrorResponse(res, error);
   }
 };
+
+
+
+
+// export const editProfile = async (req, res) => {
+//   try {
+//     const findData = await getSingleData(
+//       { _id: req.user, is_deleted: 0 },
+//       User
+//     );
+    
+//     if (!findData) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.NOT_FOUND,
+//         ResponseMessage.USER_NOT_FOUND,
+//         []
+//       );
+//     }
+
+//     if (req.body.email) {
+//       const checkEmail = await getSingleData(
+//         {
+//           _id: { $ne: req.user },
+//           email: { $regex: "^" + req.body.email + "$", $options: "i" },
+//         },
+//         User
+//       );
+//       if (checkEmail) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.EMAIL_ALREADY_EXIST,
+//           []
+//         );
+//       }
+//     }
+
+//     if (req.body.mobileNumber) {
+//       const checkMobileNumber = await getSingleData(
+//         {
+//           _id: { $ne: req.user },
+//           mobileNumber: req.body.mobileNumber,
+//         },
+//         User
+//       );
+//       if (checkMobileNumber) {
+//         return sendResponse(
+//           res,
+//           StatusCodes.BAD_REQUEST,
+//           ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+//           []
+//         );
+//       }
+//     }
+
+//     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
+
+//     if (req.body.bankDetails && req.body.bankDetails.length > 0) {
+//       req.body.bankDetails = [
+//         ...findData.bankDetails, 
+//         ...req.body.bankDetails,
+//       ];
+//     } else {
+//       req.body.bankDetails = findData.bankDetails;
+//     }
+
+//     const updateData = {
+//       profile: req.body.profile,
+//       fullName: req.body.fullName,
+//       country: req.body.country,
+//       countryCode: req.body.countryCode,
+//       bankDetails: req.body.bankDetails,
+//     };
+
+//     if (req.body.email && findData.email !== req.body.email) {
+//       updateData.isVerified = false;
+//       updateData.email = req.body.email;
+
+//       const objectEncrypt = await encryptObject({
+//         userId: findData._id,
+//         email: req.body.email,
+//       });
+//       let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
+//         objectEncrypt,
+//       });
+//       await sendMail(req.body.email, "Verify Email", mailInfo);
+//     }
+
+//     const updateProfile = await dataUpdated(
+//       { _id: findData._id, is_deleted: 0 },
+//       updateData,
+//       User
+//     );
+
+//     let message = ResponseMessage.PROFILE_UPDATED;
+//     if (req.body.bankDetails && req.body.bankDetails.length > 0) {
+//       message = ResponseMessage.BANK_DETAILS_UPDATED;
+//     }
+
+//     return sendResponse(res, StatusCodes.OK, message, updateProfile);
+//   } catch (error) {
+//     console.log(error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+
+
 export const emailVerify = async (req, res) => {
   try {
     // let { userId, email } = req.query;
@@ -2227,3 +2453,33 @@ export const userGetCMSDetail = async (req, res) => {
   }
 };
 //#endregion
+
+//delete bank detail 
+
+export const deleteBankDetail = async (req, res) => {
+  try {
+    const userId = req.user;
+    const bankDetailIdToRemove = req.body.bankDetailId; 
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { bankDetails: { _id: bankDetailIdToRemove } } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: StatusCodes.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: 'Bank detail deleted successfully',
+      data: updatedUser,
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};

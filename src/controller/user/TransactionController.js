@@ -15,7 +15,10 @@ import {
   TransactionHistory,
   minusLargeSmallValue,
   plusLargeSmallValue,
-  CurrencyCoin
+  CurrencyCoin,
+  Withdrawal,
+  adminSetting,
+  AdminSetting
 } from "../../index.js";
 
 export const addNewTransaction = async (req, res) => {
@@ -263,6 +266,7 @@ export const addNewTransaction = async (req, res) => {
 export const withdrawalRequest = async (req, res) => {
   try {
     const { walletAddress, tokenName, tokenAmount, tetherType } = req.body;
+    console.log(req.user, "hdh");
     const findTransaction = await NewTransaction.findOne({ userId: req.user, $or: [{ bitcoinWalletAddress: walletAddress }, { ethereumWalletAddress: walletAddress }], })
     const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
     let userCurrency = await User.findOne({ _id: req.user, is_deleted: 0 });
@@ -318,7 +322,6 @@ export const withdrawalRequest = async (req, res) => {
               userId: req.user, networkChainId: findTransaction.networkChainId, tokenName, tokenAmount,
               walletAddress, tokenDollorValue: value, coin, type: "withdrawal"
             }, TransactionHistory)
-            // await dataCreate({ userId: req.user, walletAddress, tokenName, tokenAmount, tokenValue: value, coin, tetherType }, WithdrawalRequest)
             return { status: 200, message: ResponseMessage.WITHDRAWAL_CREATED, data: transactionData }
           }
           return { status: 400, message: ResponseMessage.INSUFFICIENT_BALANCE, data: [] }
@@ -510,6 +513,93 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.TRANSCTION_NOT_FOUND, []);
     }
   } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+
+export const withdrawalUserRequest = async (req, res) => {
+  try {
+    const { withdrawalAmount, type } = req.body;
+    const findUser = await User.find({ _id: req.user });
+    
+     const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName: findUser[0].currency});
+    if (findUser.length > 0) {
+      const currency = checkCurrency[0].coin;
+      const checkTransaction = await NewTransaction.find({ userId: req.user });
+      const checkTotalCoin = checkTransaction[0].totalCoin;
+      const convertcurrency = checkTotalCoin/currency;
+      const checkAdminSetting = await AdminSetting.find({});
+      const adminwithdrawalAmount = checkAdminSetting[0].withdrawalAmount
+      if (type == "Fiat Currency") {
+        if (withdrawalAmount >= adminwithdrawalAmount) {
+          if (convertcurrency >= withdrawalAmount) {
+            const findUserRequest = await Withdrawal.find({userId: req.user, status :"Pending"})
+            if(!findUserRequest.length){
+            const deductedCoins = withdrawalAmount * currency;
+            checkTransaction[0].totalCoin -= deductedCoins;
+            await checkTransaction[0].save();
+            const createSubadmin = await dataCreate(
+              {
+                userId: req.user,
+                email: findUser[0].email,
+                name: findUser[0].findUser,
+                requestedAmount: withdrawalAmount,
+                type: type,
+                currency: findUser[0].currency
+              },
+              Withdrawal
+            );
+
+            return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+          }
+          return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
+          } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
+          }
+        } else {
+          return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
+        }
+      } else if (type == "Crypto Currency") {
+        if (withdrawalAmount >= adminwithdrawalAmount) {
+          if (convertcurrency >= withdrawalAmount) {
+            const findUserRequest = await Withdrawal.find({userId: req.user, status :"Pending"})
+            if(!findUserRequest.length){
+            const deductedCoins = withdrawalAmount * currency;
+            checkTransaction[0].totalCoin -= deductedCoins;
+            await checkTransaction[0].save();
+            const createSubadmin = await dataCreate(
+              {
+                userId: req.user,
+                email: findUser[0].email,
+                requestedAmount: withdrawalAmount,
+                type: type,
+                bitcoinWalletAddress: checkTransaction[0].bitcoinWalletAddress[0],
+                ethereumWalletAddress: checkTransaction[0].ethereumWalletAddress[0],
+                networkChainId: checkTransaction[0].networkChainId,
+                name: findUser[0].findUser,
+                currency: findUser[0].currency
+              },
+              Withdrawal
+            );
+
+            return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+          }
+          return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
+          } else {
+            return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
+          }
+        } else {
+          return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient withdrawal amount", []);
+        }
+      } else {
+        return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid type", []);
+      }
+    } else {
+      return sendResponse(res, StatusCodes.NOT_FOUND, "User not found", []);
+    }
+  } catch (error) {
+    console.error("Error in withdrawalUserRequest:", error);
     return handleErrorResponse(res, error);
   }
 };
