@@ -1,5 +1,5 @@
 import { socketRoute } from "../config/Socket.config.js";
-import { updateEmail, userCheckEmail } from "../controller/user/UserController.js";
+import { deleteBankDetail, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
   Upload,
@@ -250,6 +250,9 @@ userRoutes.get("/total-coin", Auth, totalCoin)
 
 userRoutes.get('/userDashboard1', Auth, userDashboard1)
 userRoutes.post('/user-withdrawal-request', Auth, withdrawalUserRequest)
+
+
+userRoutes.post('/remove-bankDetail', Auth, deleteBankDetail)
 
 
 export { userRoutes };

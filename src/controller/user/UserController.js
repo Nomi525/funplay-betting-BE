@@ -171,8 +171,6 @@ export const connectToWallet = async (req, res) => {
         token: token,
       });
     }
-    console.log(req.body, "hii", "33333");
-    // Check if wallet address already exists in any user's wallet
     const walletUser = await User.findOne({
       "wallet.walletAddress": wallet?.walletAddress,
       "wallet.walletType": wallet?.walletType,
@@ -1655,10 +1653,11 @@ export const editProfile = async (req, res) => {
       } else {
         return sendResponse(
           res,
-          StatusCodes.OK,
+          StatusCodes.CONFLICT,
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
+    
       }
     }
 
@@ -1689,13 +1688,14 @@ export const editProfile = async (req, res) => {
       updateData,
       User
     );
-
-    let message = ResponseMessage.PROFILE_UPDATED;
-    if (req.body.bankDetails) {
+    let message;
+    if (req.body.bankDetails && req.body.bankDetails.length > 0) {
       message = ResponseMessage.BANK_DETAILS_UPDATED;
+    } else {
+      message = ResponseMessage.PROFILE_UPDATED;
     }
 
-    return sendResponse(res, StatusCodes.OK, ResponseMessage.PROFILE_UPDATED, updateProfile);
+    return sendResponse(res, StatusCodes.OK, message, updateProfile);
   } catch (error) {
     console.log(error);
     return handleErrorResponse(res, error);
@@ -2452,3 +2452,33 @@ export const userGetCMSDetail = async (req, res) => {
   }
 };
 //#endregion
+
+//delete bank detail 
+
+export const deleteBankDetail = async (req, res) => {
+  try {
+    const userId = req.user;
+    const bankDetailIdToRemove = req.body.bankDetailId; 
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { bankDetails: { _id: bankDetailIdToRemove } } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: StatusCodes.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: 'Bank detail deleted successfully',
+      data: updatedUser,
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
