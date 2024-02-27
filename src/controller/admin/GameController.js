@@ -49,8 +49,9 @@ export const addEditGame = async (req, res) => {
       winnersPercentage,
       entryFee,
       winningCoin,
+      minSlot,
+      maxSlot
     } = req.body;
-
     gameSecond = gameSecond ? gameSecond : [];
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
@@ -114,6 +115,8 @@ export const addEditGame = async (req, res) => {
             winnersPercentage,
             entryFee,
             winningCoin,
+            minSlot,
+            maxSlot
           },
           Game
         );
@@ -168,6 +171,8 @@ export const addEditGame = async (req, res) => {
           winnersPercentage,
           entryFee,
           winningCoin,
+          minSlot,
+          maxSlot
         },
         Game
       );

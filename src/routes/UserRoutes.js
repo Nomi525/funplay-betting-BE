@@ -79,6 +79,7 @@ import {
   cardBettingWinnerResult,
   getAllBettingHistory,
   uploadImage,
+  getSlotsBookedByPeriod
 } from "./../index.js";
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
@@ -250,6 +251,7 @@ userRoutes.get("/total-coin", Auth, totalCoin)
 
 userRoutes.get('/userDashboard1', Auth, userDashboard1)
 userRoutes.post('/user-withdrawal-request', Auth, withdrawalUserRequest)
+userRoutes.post('/community-betting-slots-booked', Auth, getSlotsBookedByPeriod)
 
 
 export { userRoutes };

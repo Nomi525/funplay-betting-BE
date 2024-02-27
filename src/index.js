@@ -295,6 +295,7 @@ import {
   getLoginUserCommunityBets,
   getCommunityGamePeriodById,
   getAllCommunityGamePeriod,
+  getSlotsBookedByPeriod
 } from "./controller/user/CommunityController.js";
 import {
   getAllWinnersUser,
@@ -700,7 +701,7 @@ export {
   QrCodes, addupdateUPiorQr, getUpiQr,
   getAllBettingHistory,
   FaintCurrency,
-  
+  getSlotsBookedByPeriod
   // updateEmail,
 };
 
