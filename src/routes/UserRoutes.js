@@ -82,7 +82,7 @@ import {
 } from "./../index.js";
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
-import { addFaintCurrency } from "../controller/admin/FaintCurrency.js";
+import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
 import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
 const userRoutes = express.Router();
@@ -253,6 +253,8 @@ userRoutes.post('/user-withdrawal-request', Auth, withdrawalUserRequest)
 
 
 userRoutes.post('/remove-bankDetail', Auth, deleteBankDetail)
+userRoutes.get('/get-user-faint-currency', Auth, getUserFaintCurrency)
+
 
 
 export { userRoutes };

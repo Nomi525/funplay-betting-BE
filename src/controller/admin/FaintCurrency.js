@@ -124,3 +124,17 @@ export const getAllFaintCurrency = async (req, res) => {
     }
 }
 
+export const getUserFaintCurrency = async (req, res) => {
+    try {
+        const getAllData = await FaintCurrency.find({userId:req.user}).populate("userId", 'fullName').sort({ createdAt: -1 });
+
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GET_All_FAINT_CURRENCY,
+            getAllData
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
