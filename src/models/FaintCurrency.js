@@ -29,6 +29,10 @@ const faintCurrencySchema = new mongoose.Schema({
         default:"Pending",
         required: false
     },
+    requestType : {
+        type: String,
+        default:'Deposit'
+    },
     rejectReason :{
         type: String,
         required: false,

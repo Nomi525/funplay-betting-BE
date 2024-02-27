@@ -138,3 +138,27 @@ export const getUserFaintCurrency = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+export const getUserWithdrawalRequest = async (req, res) => {
+    try {
+        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName").sort({ createdAt: -1 });;
+        if (getData) {
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                "get all withdrawal Request",
+                getData
+            );
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.NOT_FOUND,
+                "get all request not fetch",
+                []
+            );
+        }
+  
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+  };

@@ -85,6 +85,7 @@ import {
 import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
 import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
+import { getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -253,7 +254,9 @@ userRoutes.post('/user-withdrawal-request', Auth, withdrawalUserRequest)
 
 
 userRoutes.post('/remove-bankDetail', Auth, deleteBankDetail)
+
 userRoutes.get('/get-user-faint-currency', Auth, getUserFaintCurrency)
+userRoutes.get('/get-user-withdrawal-currency', Auth, getUserWithdrawalRequest)
 
 
 

@@ -32,32 +32,6 @@ export const getAllUserWithdrawalRequest = async (req, res) => {
   }
 };
 
-export const getUserWithdrawalRequest = async (req, res) => {
-    try {
-        const id = req.params.id;
-        console.log(id, "h");
-        const getSingle = await Withdrawal.findById({ _id: id });
-        if (getSingle) {
-            return sendResponse(
-                res,
-                StatusCodes.OK,
-                "get single withdrawal Request",
-                getSingle
-            );
-        } else {
-            return sendResponse(
-                res,
-                StatusCodes.NOT_FOUND,
-                "get single request not fetch",
-                []
-            );
-        }
-
-    } catch (error) {
-        return handleErrorResponse(res, error);
-    }
-};
-
 export const approveRejectWithdrawalRequest = async (req, res) => {
     try {
       const id = req.params.id;
@@ -102,3 +76,27 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
     }
   };
   
+  //user
+  export const getUserWithdrawalRequest = async (req, res) => {
+    try {
+        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName").sort({ createdAt: -1 });;
+        if (getData) {
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                "get all withdrawal Request",
+                getData
+            );
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.NOT_FOUND,
+                "get all request not fetch",
+                []
+            );
+        }
+  
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+  };
