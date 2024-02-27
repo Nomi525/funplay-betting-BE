@@ -326,3 +326,21 @@ export const getAllCommunityGamePeriod = async (req, res) => {
 //     }
 // };
 //#endregion
+
+
+export const getSlotsBookedByPeriod = async (req, res) => {
+  const {periodId} = req.body;
+  try{
+      const slotBooked = await CommunityBetting.find({period: periodId}).countDocuments();
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.SLOTS_BOOKED_IN_COMMUNITY_BETTING,
+        {slotBooked}
+      );
+
+  }catch(error){
+    return handleErrorResponse(res, error);
+  }
+
+}

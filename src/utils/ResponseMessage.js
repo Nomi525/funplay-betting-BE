@@ -274,8 +274,8 @@ const ResponseMessage = {
   ALREADY_APPROVED: "deposit request status already approved",
   ALREADY_REJECTED:"deposit request status already rejected",
   ALREADY_PENDING: "Already deposit request in pending",
-  GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully"
-
+  GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully",
+  SLOTS_BOOKED_IN_COMMUNITY_BETTING : "Slots fetched"
 
 };
 
