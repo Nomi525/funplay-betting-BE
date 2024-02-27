@@ -111,7 +111,7 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
 
 export const getAllFaintCurrency = async (req, res) => {
     try {
-        const getAllData = await FaintCurrency.find().populate("userId", 'fullName').sort({ createdAt: -1 });
+        const getAllData = await FaintCurrency.find().populate("userId", 'fullName currency').sort({ createdAt: -1 });
 
         return sendResponse(
             res,
