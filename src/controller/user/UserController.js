@@ -145,7 +145,6 @@ export const connectToWallet = async (req, res) => {
 
     if (existingUser) {
       console.log(req.body, "hii222");
-      // Update existing user's wallet
       await User.updateOne(
         {
           email: lowercasedEmail,
