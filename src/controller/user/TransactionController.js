@@ -520,7 +520,7 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
 
 export const withdrawalUserRequest = async (req, res) => {
   try {
-    const { withdrawalAmount, type } = req.body;
+    const { withdrawalAmount, type, walletAddress, tokenName } = req.body;
     const findUser = await User.find({ _id: req.user });
     
      const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName: findUser[0].currency});
@@ -576,6 +576,7 @@ export const withdrawalUserRequest = async (req, res) => {
                 requestedAmount: withdrawalAmount,
                 type: type,
                 tokenName : tokenName,
+                walletAddress : walletAddress,
                 bitcoinWalletAddress: checkTransaction[0].bitcoinWalletAddress[0],
                 ethereumWalletAddress: checkTransaction[0].ethereumWalletAddress[0],
                 networkChainId: checkTransaction[0].networkChainId,
