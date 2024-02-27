@@ -40,6 +40,10 @@ const withdrawalSchema = new mongoose.Schema({
         enum : ["Approved", "Rejected", "Pending"],
         default : 'Pending'
     },
+    requestType : {
+        type: String,
+        default:'Withdraw'
+    },
     currency :{
         type : String,
         required: false

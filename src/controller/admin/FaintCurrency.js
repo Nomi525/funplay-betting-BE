@@ -124,3 +124,41 @@ export const getAllFaintCurrency = async (req, res) => {
     }
 }
 
+export const getUserFaintCurrency = async (req, res) => {
+    try {
+        const getAllData = await FaintCurrency.find({userId:req.user}).populate("userId", 'fullName').sort({ createdAt: -1 });
+
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            ResponseMessage.GET_All_FAINT_CURRENCY,
+            getAllData
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
+
+export const getUserWithdrawalRequest = async (req, res) => {
+    try {
+        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName").sort({ createdAt: -1 });;
+        if (getData) {
+            return sendResponse(
+                res,
+                StatusCodes.OK,
+                "get all withdrawal Request",
+                getData
+            );
+        } else {
+            return sendResponse(
+                res,
+                StatusCodes.NOT_FOUND,
+                "get all request not fetch",
+                []
+            );
+        }
+  
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+  };
