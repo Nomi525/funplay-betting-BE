@@ -558,7 +558,7 @@ export const withdrawalUserRequest = async (req, res) => {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
         } else {
-          return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient withdrawal amount", []);
+          return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
         }
       } else if (type == "Crypto Currency") {
         if (withdrawalAmount >= adminwithdrawalAmount) {
