@@ -1,5 +1,5 @@
 import { CurrencyCoin, Decimal, FaintCurrency, NewTransaction, ResponseMessage, StatusCodes, User, Wallet, handleErrorResponse, sendResponse, } from "../../index.js"
-
+import {UserNotification} from "../../models/UserNotification.js"
 export const addFaintCurrency = async (req, res) => {
     try {
         const checkUserWallet = await NewTransaction.find({ userId: req.user })
@@ -53,7 +53,7 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
         const { id, status, rejectReason } = req.body;
         const rejectScreenShort = req.rejectScreenShortUrl;
         const findFaintCurrency = await FaintCurrency.findById(id);
-
+        console.log({findFaintCurrency})
         if (findFaintCurrency) {
             const findData = findFaintCurrency.userId;
             const findCoin = await User.find({ is_deleted: 0, _id: findData });
@@ -78,6 +78,12 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
                     const convertIntoCoin = amountToAdd * checkCoins;
                     userCoin.totalCoin += convertIntoCoin;
                     await userCoin.save();
+                    const notificationData = {
+                        userId: findFaintCurrency.userId,
+                        title: "Deposit request approved",
+                        description: `Request for deposit amount ${findFaintCurrency.amount} accepted.`
+                    }
+                    const newNotification = await UserNotification.create(notificationData);
                     return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_APPROVED, updatedFaintCurrency);
                 }
                 return sendResponse(res, StatusCodes.OK, "Please connect wallet", []);
@@ -90,6 +96,13 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
                     { $set: { status: "Rejected", rejectReason: rejectReason, rejectScreenShort: rejectScreenShort } }
                 );
 
+                const notificationData = {
+                    userId: findFaintCurrency.userId,
+                    title: "Deposit request rejected",
+                    description: `Request for deposit amount ${findFaintCurrency.amount} rejected. ${rejectReason}`,
+                    image: rejectScreenShort
+                }
+                const newNotification = await UserNotification.create(notificationData);
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.STATUS_REJECT, updatedFaintCurrency);
             } else {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INVALID_STATUS, []);
@@ -124,9 +137,27 @@ export const getAllFaintCurrency = async (req, res) => {
     }
 }
 
+// export const getUserFaintCurrency = async (req, res) => {
+//     try {
+//         const getAllData = await FaintCurrency.find({userId:req.user}).populate("userId", 'fullName').sort({ createdAt: -1 });
+
+//         return sendResponse(
+//             res,
+//             StatusCodes.OK,
+//             ResponseMessage.GET_All_FAINT_CURRENCY,
+//             getAllData
+//         );
+//     } catch (error) {
+//         return handleErrorResponse(res, error);
+//     }
+// }
+
 export const getUserFaintCurrency = async (req, res) => {
     try {
-        const getAllData = await FaintCurrency.find({userId:req.user}).populate("userId", 'fullName').sort({ createdAt: -1 });
+        const getAllData = await FaintCurrency.find({userId:req.user}).populate({
+            path: 'userId',
+            select: 'fullName currency'
+          }).sort({ createdAt: -1 });
 
         return sendResponse(
             res,
@@ -138,4 +169,5 @@ export const getUserFaintCurrency = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
 

@@ -79,7 +79,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
   //user
   export const getUserWithdrawalRequest = async (req, res) => {
     try {
-        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName").sort({ createdAt: -1 });;
+        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName currency").sort({ createdAt: -1 });;
         if (getData) {
             return sendResponse(
                 res,
