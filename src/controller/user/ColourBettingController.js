@@ -961,6 +961,7 @@ export const getByIdGamePeriod = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 //#endregion
 
 function processData(data) {
