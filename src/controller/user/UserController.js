@@ -1670,26 +1670,29 @@ export const editProfile = async (req, res) => {
       await sendMail(req.body.email, "Verify Email", mailInfo);
     }
     if (req.body.mobileNumber !== undefined) {
-      const checkMobileNumber = await getSingleData(
-        {
-          _id: { $ne: req.user },
-          mobileNumber: req.body.mobileNumber,
-        },
-        User
-      );
-    
-      console.log("Check Mobile Number Result:", checkMobileNumber);
-    
-      if (checkMobileNumber) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
-          []
+      if (req.body.mobileNumber.trim() === "") {
+        updateData.mobileNumber = req.body.mobileNumber;
+      } else {
+        const checkMobileNumber = await getSingleData(
+          {
+            _id: { $ne: req.user },
+            mobileNumber: req.body.mobileNumber,
+          },
+          User
         );
+      
+        if (checkMobileNumber) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+            []
+          );
+        }
+        updateData.mobileNumber = req.body.mobileNumber;
       }
-      updateData.mobileNumber = req.body.mobileNumber;
     }
+    
 
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
