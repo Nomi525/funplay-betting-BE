@@ -927,10 +927,10 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
     if (checkEmailValue) {
-      email = email ? email.toLowerCase() : null;
+      email = email ? email : null;
     }
     let userFind;
     if (checkEmailValue) {
