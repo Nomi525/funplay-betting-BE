@@ -1603,6 +1603,7 @@ export const editProfile = async (req, res) => {
       );
     }
 
+
     if (req.body.email) {
       const checkEmail = await getSingleData(
         {
@@ -1611,6 +1612,7 @@ export const editProfile = async (req, res) => {
         },
         User
       );
+
       if (checkEmail) {
         return sendResponse(
           res,
@@ -1621,27 +1623,10 @@ export const editProfile = async (req, res) => {
       }
     }
 
-    if (req.body.mobileNumber) {
-      const checkMobileNumber = await getSingleData(
-        {
-          _id: { $ne: req.user },
-          mobileNumber: req.body.mobileNumber,
-        },
-        User
-      );
-      if (checkMobileNumber) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
-          []
-        );
-      }
-    }
-
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
+   
     
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
@@ -1683,6 +1668,27 @@ export const editProfile = async (req, res) => {
         objectEncrypt,
       });
       await sendMail(req.body.email, "Verify Email", mailInfo);
+    }
+    if (req.body.mobileNumber !== undefined) {
+      const checkMobileNumber = await getSingleData(
+        {
+          _id: { $ne: req.user },
+          mobileNumber: req.body.mobileNumber,
+        },
+        User
+      );
+    
+      console.log("Check Mobile Number Result:", checkMobileNumber);
+    
+      if (checkMobileNumber) {
+        return sendResponse(
+          res,
+          StatusCodes.BAD_REQUEST,
+          ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+          []
+        );
+      }
+      updateData.mobileNumber = req.body.mobileNumber;
     }
 
     const updateProfile = await dataUpdated(
