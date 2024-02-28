@@ -807,7 +807,8 @@ export const userCheckEmail = async (req, res) => {
   try {
     let existingUser;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
 
     existingUser = await getSingleData(
