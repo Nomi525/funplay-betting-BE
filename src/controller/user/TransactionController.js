@@ -551,7 +551,7 @@ export const withdrawalUserRequest = async (req, res) => {
               Withdrawal
             );
 
-            return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+            return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
           }
           return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
@@ -586,7 +586,7 @@ export const withdrawalUserRequest = async (req, res) => {
               Withdrawal
             );
 
-            return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+            return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
           }
           return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
