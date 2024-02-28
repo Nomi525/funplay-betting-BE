@@ -1,0 +1,6 @@
+projectKey=bettingproject
+serverUrl=http://localhost:9000
+serverVersion=10.3.0.82913
+dashboardUrl=http://localhost:9000/dashboard?id=bettingproject
+ceTaskId=AY2yN4u4hOQ-o-PZjBg0
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AY2yN4u4hOQ-o-PZjBg0

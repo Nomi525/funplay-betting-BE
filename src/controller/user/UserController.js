@@ -1599,7 +1599,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        [] 
+        []
       );
     }
 
@@ -1642,7 +1642,7 @@ export const editProfile = async (req, res) => {
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
-    
+
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
     }
@@ -1659,7 +1659,7 @@ export const editProfile = async (req, res) => {
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
-    
+
       }
     }
 
@@ -1713,7 +1713,7 @@ export const editProfile = async (req, res) => {
 //       { _id: req.user, is_deleted: 0 },
 //       User
 //     );
-    
+
 //     if (!findData) {
 //       return sendResponse(
 //         res,
@@ -2460,7 +2460,7 @@ export const userGetCMSDetail = async (req, res) => {
 export const deleteBankDetail = async (req, res) => {
   try {
     const userId = req.user;
-    const bankDetailIdToRemove = req.body.bankDetailId; 
+    const bankDetailIdToRemove = req.body.bankDetailId;
 
     const updatedUser = await User.findOneAndUpdate(
       { _id: userId },
