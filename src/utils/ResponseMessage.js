@@ -21,7 +21,7 @@ const ResponseMessage = {
   ENTER_EMAIL_PASSWORD: "Please enter email and mobileNumber",
   USER_LOGOUT: "User logged out",
   ADMIN_LOGOUT: "Admin logged out",
-  USER_NOT_EXIST: "User not exist",
+  USER_NOT_EXIST: "Invalid user credentials",
   ADMIN_NOT_EXIST: "Admin not exist",
   USER_LIST: "Users list fetched",
   USER_WALLET_DETAIL: "Wallet detail fetched",
