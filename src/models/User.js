@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      lowercase: true,
       required: false,
       default: null
     },
@@ -24,10 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    // referralByCode: {
-    //   type: String,
-    //   required: false,
-    // },
+    referralByCode: {
+      type: String,
+      required: false,
+    },
     // referralUser: [
     //   {
     //     type: mongoose.Schema.Types.ObjectId,

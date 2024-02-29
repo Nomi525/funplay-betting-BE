@@ -520,7 +520,7 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
 
 export const withdrawalUserRequest = async (req, res) => {
   try {
-    const { withdrawalAmount, type } = req.body;
+    const { withdrawalAmount, type, walletAddress, tokenName } = req.body;
     const findUser = await User.find({ _id: req.user });
     
      const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName: findUser[0].currency});
@@ -551,7 +551,7 @@ export const withdrawalUserRequest = async (req, res) => {
               Withdrawal
             );
 
-            return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+            return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
           }
           return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
@@ -568,12 +568,15 @@ export const withdrawalUserRequest = async (req, res) => {
             const deductedCoins = withdrawalAmount * currency;
             checkTransaction[0].totalCoin -= deductedCoins;
             await checkTransaction[0].save();
+      
             const createSubadmin = await dataCreate(
               {
                 userId: req.user,
                 email: findUser[0].email,
                 requestedAmount: withdrawalAmount,
                 type: type,
+                tokenName : tokenName,
+                walletAddress : walletAddress,
                 bitcoinWalletAddress: checkTransaction[0].bitcoinWalletAddress[0],
                 ethereumWalletAddress: checkTransaction[0].ethereumWalletAddress[0],
                 networkChainId: checkTransaction[0].networkChainId,
@@ -583,14 +586,14 @@ export const withdrawalUserRequest = async (req, res) => {
               Withdrawal
             );
 
-            return sendResponse(res, StatusCodes.CREATED, "Withdrawal request added", createSubadmin);
+            return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
           }
           return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
         } else {
-          return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient withdrawal amount", []);
+          return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
         }
       } else {
         return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid type", []);
