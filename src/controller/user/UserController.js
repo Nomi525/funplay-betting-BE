@@ -927,6 +927,7 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
+    console.log(req.body,"hh");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
     if (checkEmailValue) {
@@ -1045,6 +1046,7 @@ export const singupFromEmailPassword = async (req, res) => {
         let referCode = referralCode(8);
         let findReferralUser = null;
         // For Referral Code
+        console.log(referralByCode,"jjj");
         if (referralByCode) {
           findReferralUser = await getSingleData(
             { referralCode: referralByCode, is_deleted: 0 },
@@ -1075,12 +1077,15 @@ export const singupFromEmailPassword = async (req, res) => {
           User
         );
         if (findReferralUser) {
-          await ReferralUser.create({
-            userId: findReferralUser._id,
-            referralUser: createUser._id,
-            referralByCode: referralByCode,
-          });
-        }
+          const referralUserData = {
+              userId: findReferralUser._id,
+              referralUser: createUser._id,
+              referralByCode: referralByCode || null,
+          };
+  
+          const referralUserInstance = new ReferralUser(referralUserData);
+          await referralUserInstance.save();
+      }
         if (createUser) {
           await createReward(
             createUser._id,
