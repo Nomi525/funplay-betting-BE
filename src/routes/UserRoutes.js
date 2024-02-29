@@ -79,8 +79,9 @@ import {
   cardBettingWinnerResult,
   getAllBettingHistory,
   uploadImage,
-  getSlotsBookedByPeriod
+  getSlotsBookedByPeriod,
 } from "./../index.js";
+import {getUserNotifications} from "../controller/user/UserNotificationController.js"
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
@@ -259,6 +260,7 @@ userRoutes.post('/remove-bankDetail', Auth, deleteBankDetail)
 
 userRoutes.get('/get-user-faint-currency', Auth, getUserFaintCurrency)
 userRoutes.get('/get-user-withdrawal-currency', Auth, getUserWithdrawalRequest)
+userRoutes.get('/get-notifications', Auth, getUserNotifications)
 
 
 

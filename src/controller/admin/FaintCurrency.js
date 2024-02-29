@@ -53,7 +53,6 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
         const { id, status, rejectReason } = req.body;
         const rejectScreenShort = req.rejectScreenShortUrl;
         const findFaintCurrency = await FaintCurrency.findById(id);
-        console.log({findFaintCurrency})
         if (findFaintCurrency) {
             const findData = findFaintCurrency.userId;
             const findCoin = await User.find({ is_deleted: 0, _id: findData });

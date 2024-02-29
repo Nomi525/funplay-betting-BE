@@ -413,6 +413,7 @@ dotenv.config();
 import {FaintCurrency} from "./models/FaintCurrency.js"
 import { Withdrawal } from "./models/Withdrawal.js";
 // import { addFaintCurrency } from "./controller/admin/FaintCurrency.js";
+import {getUserNotifications} from "./controller/user/UserNotificationController.js"
 export {
   totalCoin,
   capitalizeFirstLetter,
@@ -701,7 +702,8 @@ export {
   QrCodes, addupdateUPiorQr, getUpiQr,
   getAllBettingHistory,
   FaintCurrency,
-  getSlotsBookedByPeriod
+  getSlotsBookedByPeriod,
+  getUserNotifications
   // updateEmail,
 };
 
