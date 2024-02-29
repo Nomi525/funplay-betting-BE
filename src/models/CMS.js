@@ -37,10 +37,6 @@ const cmsSchema = new mongoose.Schema(
             }, title: {
                 type: String,
                 require: false,
-            },
-            CMSImage :{
-                type: String,
-                require: false,
             }
         },
         deletedStatus: {

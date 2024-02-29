@@ -147,7 +147,7 @@ adminRoutes.get("/get-sub-admin", getAllSubAdmin);
 // ********* CMS Api ************ //
 adminRoutes.post("/cms/add-edit-privacy-policy", Auth, addEditPrivacyPolicy);
 adminRoutes.post("/cms/about-us", Auth, addEditAboutUs);
-adminRoutes.post("/cms/terms-and-condition", Auth,Upload, addEditTermsAndCondition);
+adminRoutes.post("/cms/terms-and-condition", Auth, addEditTermsAndCondition);
 adminRoutes.get("/cms", Auth, getCMSDetail);
 
 adminRoutes.get('/checkWallet', Auth, getwithdrwalcheck)
