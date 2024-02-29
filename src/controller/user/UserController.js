@@ -807,7 +807,8 @@ export const userCheckEmail = async (req, res) => {
   try {
     let existingUser;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
 
     existingUser = await getSingleData(
@@ -926,10 +927,11 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    console.log(req.body,"hh");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
     if (checkEmailValue) {
-      email = email ? email.toLowerCase() : null;
+      email = email ? email : null;
     }
     let userFind;
     if (checkEmailValue) {
@@ -1044,6 +1046,7 @@ export const singupFromEmailPassword = async (req, res) => {
         let referCode = referralCode(8);
         let findReferralUser = null;
         // For Referral Code
+        console.log(referralByCode,"jjj");
         if (referralByCode) {
           findReferralUser = await getSingleData(
             { referralCode: referralByCode, is_deleted: 0 },
@@ -1074,12 +1077,15 @@ export const singupFromEmailPassword = async (req, res) => {
           User
         );
         if (findReferralUser) {
-          await ReferralUser.create({
-            userId: findReferralUser._id,
-            referralUser: createUser._id,
-            referralByCode: referralByCode,
-          });
-        }
+          const referralUserData = {
+              userId: findReferralUser._id,
+              referralUser: createUser._id,
+              referralByCode: referralByCode || null,
+          };
+  
+          const referralUserInstance = new ReferralUser(referralUserData);
+          await referralUserInstance.save();
+      }
         if (createUser) {
           await createReward(
             createUser._id,
@@ -1602,6 +1608,7 @@ export const editProfile = async (req, res) => {
       );
     }
 
+
     if (req.body.email) {
       const checkEmail = await getSingleData(
         {
@@ -1610,6 +1617,7 @@ export const editProfile = async (req, res) => {
         },
         User
       );
+
       if (checkEmail) {
         return sendResponse(
           res,
@@ -1620,27 +1628,10 @@ export const editProfile = async (req, res) => {
       }
     }
 
-    if (req.body.mobileNumber) {
-      const checkMobileNumber = await getSingleData(
-        {
-          _id: { $ne: req.user },
-          mobileNumber: req.body.mobileNumber,
-        },
-        User
-      );
-      if (checkMobileNumber) {
-        return sendResponse(
-          res,
-          StatusCodes.BAD_REQUEST,
-          ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
-          []
-        );
-      }
-    }
-
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
+   
     
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
@@ -1683,6 +1674,30 @@ export const editProfile = async (req, res) => {
       });
       await sendMail(req.body.email, "Verify Email", mailInfo);
     }
+    if (req.body.mobileNumber !== undefined) {
+      if (req.body.mobileNumber.trim() === "") {
+        updateData.mobileNumber = req.body.mobileNumber;
+      } else {
+        const checkMobileNumber = await getSingleData(
+          {
+            _id: { $ne: req.user },
+            mobileNumber: req.body.mobileNumber,
+          },
+          User
+        );
+      
+        if (checkMobileNumber) {
+          return sendResponse(
+            res,
+            StatusCodes.BAD_REQUEST,
+            ResponseMessage.MOBILE_NUMBER_ALREADY_EXIST,
+            []
+          );
+        }
+        updateData.mobileNumber = req.body.mobileNumber;
+      }
+    }
+    
 
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
