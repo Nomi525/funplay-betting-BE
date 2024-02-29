@@ -7,7 +7,7 @@ import {
     NewTransaction,
     CurrencyCoin,
 } from "../../index.js";
-
+import {UserNotification} from "../../models/UserNotification.js"
 export const getAllUserWithdrawalRequest = async (req, res) => {
   try {
       const getData = await Withdrawal.find({ }).populate("userId", "fullName").sort({ createdAt: -1 });;
@@ -48,7 +48,12 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
           { _id: id },
           { $set: { status: "Approved" } }
         );
-  
+        const notificationData = {
+          userId: getSingle.userId,
+          title: "Withdrawal request approved",
+          description: `Request for withdrawal amount ${getSingle.requestedAmount} accepted.`
+      }
+        const newNotification = await UserNotification.create(notificationData);  
         return sendResponse(res, StatusCodes.OK, "Withdrawal request accepted successfully", updatedStatus);
       } else if (status === "Rejected" && getSingle.status !== "Rejected") {
         const AddAmount = getSingle.requestedAmount;
@@ -63,7 +68,13 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
             { _id: id },
             { $set: { status: "Rejected", rejectReason: rejectReason } }
           );
-  
+            
+          const notificationData = {
+            userId: getSingle.userId,
+            title: "Withdrawal request rejected",
+            description: `Request for withdrawal amount ${getSingle.requestedAmount} rejected. ${rejectReason}`
+          }
+          const newNotification = await UserNotification.create(notificationData); 
           return sendResponse(res, StatusCodes.OK, "Withdrawal request rejected successfully", updatedStatuss);
         } else {
           return sendResponse(res, StatusCodes.BAD_REQUEST, "User transaction not found", []);
@@ -79,7 +90,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
   //user
   export const getUserWithdrawalRequest = async (req, res) => {
     try {
-        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName").sort({ createdAt: -1 });;
+        const getData = await Withdrawal.find({userId:req.user}).populate("userId", "fullName currency").sort({ createdAt: -1 });;
         if (getData) {
             return sendResponse(
                 res,
