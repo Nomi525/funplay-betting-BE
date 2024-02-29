@@ -1729,6 +1729,7 @@ export async function createAllGamePeriodFromCronJob() {
       gameTimeTo: { $gte: currentDate },
       is_deleted: 0,
     });
+    // console.log(findGame2, "gdgdgdg")
     for (const game of findGame2) {
       //new code 28-12-2023 harsh && maulik
       if (game.gameName == "Number Betting") {
@@ -1893,6 +1894,7 @@ export async function createAllGamePeriodFromCronJob() {
           }
         }
       } else if (game.gameName == "3 Color Betting") {
+
         game.gameSecond.map(async (second, index) => {
           const {
             gameStartTimeStamp,
@@ -1979,6 +1981,7 @@ export async function createAllGamePeriodFromCronJob() {
           }
         });
       } else if (game.gameName == "2 Color Betting") {
+
         game.gameSecond.map(async (second, index) => {
           const {
             gameStartTimeStamp,
@@ -2003,9 +2006,9 @@ export async function createAllGamePeriodFromCronJob() {
               periodFor: second,
               is_deleted: 0,
             })
+
               .sort({ createdAt: -1 })
               .lean();
-
             if (periodCount) {
               period =
                 formattedDate + (periodCount + 1).toString().padStart(3, "0");
@@ -2249,7 +2252,7 @@ export const getPeriod = async (req, res) => {
     const { second } = req.query;
 
     const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
-  
+
     let query = {
       date: moment().format("YYYY-MM-DD"),
       gameId,
@@ -2262,7 +2265,7 @@ export const getPeriod = async (req, res) => {
     let getGamePeriod = await Period.find(query)
       .sort({ createdAt: -1 })
       .limit(1).populate("gameId");
-    console.log(getGamePeriod, "ghgg");
+
 
     let getAllPeriod = getGamePeriod[0];
     console.log(moment(getAllPeriod.gameId.gameTimeTo).unix(), "hh");

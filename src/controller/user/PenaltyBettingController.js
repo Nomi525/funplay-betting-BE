@@ -123,7 +123,7 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
     const game = await Game.findById(gameId);
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    console.log(twentyFourHoursAgo,"hhh");
+
     const getGamePeriodById = await PenaltyBetting.aggregate([
       {
         $match: {
