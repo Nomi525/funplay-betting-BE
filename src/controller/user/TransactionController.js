@@ -551,15 +551,9 @@ export const withdrawalUserRequest = async (req, res) => {
                 Withdrawal
               );
 
-<<<<<<< HEAD
               return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
             }
             return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
-=======
-            return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
-          }
-          return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
->>>>>>> 24f44e80072593721b9f0844408771bcea26bd69
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
