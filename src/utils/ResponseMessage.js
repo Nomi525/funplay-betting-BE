@@ -201,7 +201,7 @@ const ResponseMessage = {
   COLOR_RESULT: "Get color bet result successfully",
   GAME_TYPE_REQUIRED: "Game type is required",
   COLOR_USER_LIST: "Get color list successfully",
-  COMMUNITY_BET_CRATED: "Community bet add successfully",
+  COMMUNITY_BET_CRATED: "Bet add successfully",
   COMMUNITY_BET_GET: "Get community bets successfully",
   COMMUNITY_BET_GET_LAST_DAY: "Get last day bets of community betting",
   COMMUNITY_BET_GET_LIVE_DATA: "Get live bets of community betting",
