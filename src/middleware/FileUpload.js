@@ -58,6 +58,10 @@ var upload = multer({ storage }).fields([
         name: "rejectScreenShort",
         maxCount: 1,
     },
+    {
+        name: "CMSImage",
+        maxCount: 1,
+    },
     
 ]);
 
@@ -93,6 +97,10 @@ export default function (req, res, next) {
 
                 var rejectScreenShort = req.files.rejectScreenShort ? req.files.rejectScreenShort[0].filename : "";
                 req.rejectScreenShortUrl = rejectScreenShort;
+
+                var CMSImage = req.files.CMSImage ? req.files.CMSImage[0].filename : "";
+                req.CMSImage = CMSImage;
+
                 next();
             } else {
                 next();

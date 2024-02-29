@@ -38,6 +38,10 @@ const cmsSchema = new mongoose.Schema(
                 type: String,
                 require: false,
             },
+            CMSImage :{
+                type: String,
+                require: false,
+            }
         },
         deletedStatus: {
             type: Number,

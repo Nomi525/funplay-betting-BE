@@ -93,6 +93,7 @@ export const addEditTermsAndCondition = async (req, res) => {
                 if (exist.termsAndCondition !== null) {
                     const updateTermsandCondition = await CMS.updateOne({
                         $set: {
+                            "CMSImage":req.CMSImage,
                             "termsAndCondition.description": req.body.description,
                             "termsAndCondition.title": req.body.title,
                         },
@@ -107,6 +108,7 @@ export const addEditTermsAndCondition = async (req, res) => {
             } else {
                 
                 let termsAndCondition = new CMS({
+                    "CMSImage": req.CMSImage,
                     "termsAndCondition.description": req.body.description,
                     "termsAndCondition.title": req.body.title,
                 });
