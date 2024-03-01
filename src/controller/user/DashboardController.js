@@ -501,18 +501,18 @@ export const userDashboard1 = async (req, res) => {
     let totalBalance = 0;
     let totalDepositeBalance = 0;
     if (transactionDeposite && parseFloat(transactionDeposite.betAmount) > 0) {
-      console.log(transactionDeposite, "sjsj");
+
       totalBalance = transactionDeposite.tokenDollorValue;
 
       totalDepositeBalance = transactionDeposite.betAmount;
     }
-    console.log(totalBalance, "55555")
+
     const game = await Game.find({
       _id: numberBettingForUser[0]?.gameId,
     });
 
     let totalCoin = 0;
-    console.log(numberBettingForUser, "dhd");
+
 
     for (const bet of numberBettingForUser) {
       console.log(bet.isWin, "jj");

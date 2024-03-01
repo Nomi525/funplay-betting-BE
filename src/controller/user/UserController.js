@@ -146,7 +146,7 @@ export const connectToWallet = async (req, res) => {
     }
 
     if (existingUser) {
-      console.log(req.body, "hii222");
+
       await User.updateOne(
         {
           email: lowercasedEmail,
@@ -412,7 +412,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(res, StatusCodes.CREATED, message, userData);
     }
   } catch (error) {
-    console.log(error, "hh");
+
     return handleErrorResponse(res, error);
   }
 };
@@ -927,7 +927,7 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
-    console.log(req.body, "hh");
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
     if (checkEmailValue) {

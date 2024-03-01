@@ -24,7 +24,10 @@ import {
   getRandomElement,
   capitalizeFirstLetter,
   Period,
+
 } from "../../index.js";
+import { ColourBettingNew } from "../../models/ColourBetting.js";
+import { PeriodNew } from "../../models/Period.js";
 
 //#region Colour betting api
 // export const addColourBet = async (req, res) => {
@@ -1040,35 +1043,105 @@ export const getAllGamePeriod = async (req, res) => {
 //   }
 // };
 
+// export const getByIdGamePeriod = async (req, res) => {
+//   try {
+
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     // First, find ColourBetting documents
+//     const colourBettingDocs = await ColourBetting.find({
+//       userId: new mongoose.Types.ObjectId(req.user),
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       selectedTime: second,
+//       createdAt: { $gte: twentyFourHoursAgo },
+//       is_deleted: 0,
+//     }).lean(); // .lean() for performance, since we only need plain JS objects
+
+//     // Assuming 'period' field in ColourBetting refers to 'period' in 'periods' collection
+//     // Fetch all related period documents. This assumes 'period' values are unique or you have a way to map them uniquely.
+//     const periodIds = colourBettingDocs.map(doc => doc.period);
+//     const periodDocs = await Period.find({ period: { $in: periodIds }, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
+
+//     // Map periodDocs by period for quick lookup
+//     const periodMap = {};
+//     periodDocs.forEach(doc => {
+//       periodMap[doc.period] = doc;
+//     });
+
+//     // Now format the colourBettingDocs with period details from periodMap
+//     const result = colourBettingDocs.map(doc => {
+//       const periodData = periodMap[doc.period];
+//       return {
+//         period: doc.period,
+//         price: doc.betAmount,
+//         colourName: doc.colourName.charAt(0).toUpperCase() + doc.colourName.slice(1),
+//         isWin: doc.isWin,
+//         status: doc.status,
+//         date: periodData.date,
+//         startTime: periodData.startTime,
+//         endTime: periodData.endTime,
+//         periodFor: periodData.periodFor,
+//         createdAt: periodData.createdAt,
+//         betCreatedAt: doc.createdAt,
+//       };
+//     }).filter(doc => doc.periodFor === second) // Filter by second if needed
+//       .sort((a, b) => b.betCreatedAt - a.betCreatedAt); // Sort by betCreatedAt descending
+
+
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getByIdGamePeriod = async (req, res) => {
   try {
-    console.log("djdjjdj")
     const { gameId } = req.params;
     const { second } = req.query;
+    const userId = req.user
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    // First, find ColourBetting documents
-    const colourBettingDocs = await ColourBetting.find({
-      userId: new mongoose.Types.ObjectId(req.user),
-      gameId: new mongoose.Types.ObjectId(gameId),
-      selectedTime: second,
-      createdAt: { $gte: twentyFourHoursAgo },
-      is_deleted: 0,
-    }).lean(); // .lean() for performance, since we only need plain JS objects
+    // Function to fetch ColourBetting or ColourBettingNew documents
+    const fetchColourBettingDocs = async (model, userId, gameId, second, twentyFourHoursAgo) => {
+      return model.find({
+        userId: new mongoose.Types.ObjectId(userId),
+        gameId: new mongoose.Types.ObjectId(gameId),
+        selectedTime: second,
+        createdAt: { $gte: twentyFourHoursAgo },
+        is_deleted: 0,
+      }).lean();
+    };
 
-    // Assuming 'period' field in ColourBetting refers to 'period' in 'periods' collection
-    // Fetch all related period documents. This assumes 'period' values are unique or you have a way to map them uniquely.
-    const periodIds = colourBettingDocs.map(doc => doc.period);
-    const periodDocs = await Period.find({ period: { $in: periodIds }, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
+    // Fetch documents from both ColourBetting and ColourBettingNew
+    const colourBettingDocs = await fetchColourBettingDocs(ColourBetting, req.user, gameId, second, twentyFourHoursAgo);
+    const colourBettingNewDocs = await fetchColourBettingDocs(ColourBettingNew, req.user, gameId, second, twentyFourHoursAgo);
 
-    // Map periodDocs by period for quick lookup
+    // Combine documents from both models
+    const allColourBettingDocs = [...colourBettingDocs, ...colourBettingNewDocs];
+    //console.log(allColourBettingDocs, "allcolurbettingsS")
+    // Function to fetch Period or PeriodNew documents
+    const fetchPeriodDocs = async (model, periodIds, gameId) => {
+      return model.find({ period: { $in: periodIds }, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
+    };
+
+    // Fetch and combine period documents from both models
+    const periodIds = allColourBettingDocs.map(doc => doc.period);
+    const periodDocs = await fetchPeriodDocs(Period, periodIds, gameId);
+    const periodNewDocs = await fetchPeriodDocs(PeriodNew, periodIds, gameId);
+    const allPeriodDocs = [...periodDocs, ...periodNewDocs];
+    // console.log(allPeriodDocs, "allperiodcocd")
+    // Map allPeriodDocs by period for quick lookup
     const periodMap = {};
-    periodDocs.forEach(doc => {
+    allPeriodDocs.forEach(doc => {
       periodMap[doc.period] = doc;
     });
 
-    // Now format the colourBettingDocs with period details from periodMap
-    const result = colourBettingDocs.map(doc => {
+    const game = await Game.findOne({ _id: gameId })
+
+    // Format the allColourBettingDocs with period details from periodMap
+    const result = allColourBettingDocs.map(doc => {
       const periodData = periodMap[doc.period];
       return {
         period: doc.period,
@@ -1082,16 +1155,17 @@ export const getByIdGamePeriod = async (req, res) => {
         periodFor: periodData.periodFor,
         createdAt: periodData.createdAt,
         betCreatedAt: doc.createdAt,
+        winningAmount: game.winningCoin
       };
-    }).filter(doc => doc.periodFor === second) // Filter by second if needed
-      .sort((a, b) => b.betCreatedAt - a.betCreatedAt); // Sort by betCreatedAt descending
-
-
+    }).filter(doc => doc.periodFor === second)
+      .sort((a, b) => b.betCreatedAt - a.betCreatedAt);
+    console.log(result, "fff result ")
     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
+
 
 //#endregion
 

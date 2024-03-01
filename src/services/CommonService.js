@@ -787,7 +787,7 @@ export const declareColorWinner = async (
           };
         }
       } else {
-        console.log(`auto win 595 line not play in period`);
+
         let allColors = ["red", "green", "orange"];
         if (gameType == "2colorBetting") {
           allColors = ["red", "green"];

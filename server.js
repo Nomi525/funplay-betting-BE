@@ -58,12 +58,15 @@ cron.schedule('* * * * * *', () => {
 // });
 
 
-cron.schedule('*/10 * * * *', () => {
-  console.log('Running data transfer job every 5 minutes');
+
+
+cron.schedule('0 */4 * * *', () => {
+  console.log('Running data transfer job every 4 hours');
   transferData();
 });
-cron.schedule('*/10 * * * *', () => {
-  console.log('Running data transfer job every 5 minutes');
+
+cron.schedule('0 */4 * * *', () => {
+  console.log('Running data transfer job every 4 hours');
   transferAllData();
 });
 

@@ -70,7 +70,7 @@
 
 
 
-// // start number betting socket 
+// // start number betting socket
 // export const numberBettingSocket = (socket) => {
 //     console.log(socket.id, "socket is ")
 //     socket.on('addEditNumberBet', async (data) => {
@@ -175,4 +175,4 @@
 
 
 
-console.log("555555")
+
