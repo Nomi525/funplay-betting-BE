@@ -248,7 +248,7 @@ adminRoutes.post("/currency-convert", allCurrencyConverter);
 // Currency Coin Routes
 adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
 adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
-adminRoutes.get(
+adminRoutes.get( 
   "/get-single-currency-coin/:currencyCoinId",
   Auth,
   getSingleCurrencyCoin
@@ -295,7 +295,7 @@ adminRoutes.get('/get-all-faint-currency',Auth, getAllFaintCurrency)
 
 adminRoutes.get('/get-single-withdrawal-request/:id',Auth, getUserWithdrawalRequest);
 adminRoutes.get('/get-all-request-withdrawal',Auth, getAllUserWithdrawalRequest);
-adminRoutes.post('/accept-reject-withdrawal-request/:id',Auth, approveRejectWithdrawalRequest);
+adminRoutes.post('/accept-reject-withdrawal-request/:id',Auth, Upload,  approveRejectWithdrawalRequest);
 
 
 export { adminRoutes };

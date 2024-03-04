@@ -1,54 +1,61 @@
-import { mongoose } from '../index.js';
+import { mongoose } from "../index.js";
 
-const faintCurrencySchema = new mongoose.Schema({
+const faintCurrencySchema = new mongoose.Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: false,
-    }, 
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
     amount: {
-        type: Number,
-        required: false
+      type: Number,
+      required: false,
     },
     UTRId: {
-        type: Number,
-        required: false
+      type: Number,
+      required: false,
     },
     transactionScreenShort: {
-       type: String, 
-        required: false,
-        default: 0
+      type: String,
+      required: false,
+      default: 0,
     },
     UPIMethod: {
-        type: String,
-        required: false
+      type: String,
+      required: false,
     },
     status: {
-        type: String,
-        enum: [ "Approved", "Pending", "Rejected"],
-        default:"Pending",
-        required: false
+      type: String,
+      enum: ["Approved", "Pending", "Rejected"],
+      default: "Pending",
+      required: false,
     },
-    requestType : {
-        type: String,
-        default:'Deposit'
+    requestType: {
+      type: String,
+      default: "Deposit",
     },
-    rejectReason :{
-        type: String,
-        required: false,
-        default: 0
+    rejectReason: {
+      type: String,
+      required: false,
+      default: 0,
     },
-    rejectScreenShort :{
-        type: String,
-        required: false,
-        default: 0
+    rejectScreenShort: {
+      type: String,
+      required: false,
+      default: 0,
+    },
+    mobileNumber: {
+      type: String,
+      required: false,
     },
     is_deleted: {
-        type: Number,
-        default: 0
-    }
-}, { timestamps: true });
+      type: Number,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
 
-const FaintCurrency = mongoose.model('faintCurrency', faintCurrencySchema);
+const FaintCurrency = mongoose.model("faintCurrency", faintCurrencySchema);
 
 export { FaintCurrency };
