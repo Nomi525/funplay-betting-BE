@@ -97,7 +97,7 @@ import {
   getAllSubAdmin,
   declareWinnerOfPenaltyBetting,
   declareWinnerOfCardBetting,
-  getAllGamePeriodSelectedTimeList, addupdateUPiorQr
+  getAllGamePeriodSelectedTimeList, addupdateUPiorQr, getCommunityGameperiod
 
 } from "./../index.js";
 const adminRoutes = express.Router();
@@ -290,13 +290,14 @@ adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData)
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
 
-adminRoutes.post('/change-status-faint-currency' ,  Upload, changeStatusOfFaintCurrency)
-adminRoutes.get('/get-all-faint-currency',Auth, getAllFaintCurrency)
+adminRoutes.post('/change-status-faint-currency', Upload, changeStatusOfFaintCurrency)
+adminRoutes.get('/get-all-faint-currency', Auth, getAllFaintCurrency)
 
-adminRoutes.get('/get-single-withdrawal-request/:id',Auth, getUserWithdrawalRequest);
-adminRoutes.get('/get-all-request-withdrawal',Auth, getAllUserWithdrawalRequest);
-adminRoutes.post('/accept-reject-withdrawal-request/:id',Auth, approveRejectWithdrawalRequest);
+adminRoutes.get('/get-single-withdrawal-request/:id', Auth, getUserWithdrawalRequest);
+adminRoutes.get('/get-all-request-withdrawal', Auth, getAllUserWithdrawalRequest);
+adminRoutes.post('/accept-reject-withdrawal-request/:id', Auth, approveRejectWithdrawalRequest);
 
 
 export { adminRoutes };
 
+adminRoutes.get("/get-all-community-periods/:gameType/:gameId", getCommunityGameperiod);

@@ -2715,110 +2715,176 @@ export const getAllGamePeriodData = async (req, res) => {
       }));
 
     } else if (gameType === "communityBetting") {
-      battingAggregationResult = await Period.aggregate([
+      // battingAggregationResult = await Period.aggregate([
+      //   {
+      //     $match: {
+      //       gameId: new mongoose.Types.ObjectId(gameId),
+      //       period: { $nin: isWinTruePeriodsforCommunityBetting },
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "communitybettings",
+      //       localField: "period",
+      //       foreignField: "period",
+      //       as: "communitybettingsData",
+      //     },
+      //   },
+      //   {
+      //     $unwind: "$communitybettingsData",
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "users",
+      //       localField: "communitybettingsData.userId",
+      //       foreignField: "_id",
+      //       as: "usersData",
+      //     },
+      //   },
+      //   {
+      //     $group: {
+      //       _id: {
+      //         period: "$period",
+      //         periodId: "$_id",
+      //         userId: "$communitybettingsData.userId",
+      //       },
+      //       anyWinTrue: { $max: "$communitybettingsData.isWin" },
+      //       totalBetAmount: { $sum: "$communitybettingsData.betAmount" },
+      //       usersData: { $first: "$usersData" },
+      //     },
+      //   },
+      //   {
+      //     $match: {
+      //       anyWinTrue: { $ne: true },
+      //     },
+      //   },
+      //   {
+      //     $group: {
+      //       _id: "$_id.period",
+      //       periodId: { $first: "$_id.periodId" },
+      //       comunityBettingData: {
+      //         $push: {
+      //           userEmail: { $arrayElemAt: ["$usersData.email", 0] },
+      //           userName: { $arrayElemAt: ["$usersData.fullName", 0] },
+      //           userId: "$_id.userId",
+      //           betAmount: "$totalBetAmount",
+      //         },
+      //       },
+      //       totalUniqueUsers: { $addToSet: "$_id.userId" }, // Count total unique users
+      //     },
+      //   },
+      //   {
+      //     $project: {
+      //       _id: 0,
+      //       period: "$_id",
+      //       comunityBettingData: 1,
+      //       totalUniqueUsers: { $size: "$totalUniqueUsers" }, // Include total unique user count
+      //     },
+      //   },
+      //   {
+      //     $sort: { period: -1 },
+      //   },
+      // ]);
+
+      // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
+      //   const getCommunityUser = await CommunityBetting.aggregate([
+      //     {
+      //       $match: {
+      //         gameId: new mongoose.Types.ObjectId(gameId),
+      //         period: Number(result.period)
+      //       }
+      //     },
+      //     {
+      //       $group: {
+      //         _id: "$userId",
+      //         totalUser: { $sum: 1 }
+      //       }
+      //     },
+      //     {
+      //       $group: {
+      //         _id: null,
+      //         totalUsers: { $sum: 1 }
+      //       }
+      //     },
+      //     {
+      //       $project: {
+      //         _id: 0,
+      //         totalUsers: 1
+      //       }
+      //     }
+      //   ])
+      //   return {
+      //     period: result.period,
+      //     totalUsers: getCommunityUser[0].totalUsers,
+      //     comunityBettingData: result.comunityBettingData
+      //   }
+      // }))
+
+
+      const aggregationResult = await CommunityBetting.aggregate([
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
-            period: { $nin: isWinTruePeriodsforCommunityBetting },
-          },
-        },
-        {
-          $lookup: {
-            from: "communitybettings",
-            localField: "period",
-            foreignField: "period",
-            as: "communitybettingsData",
-          },
-        },
-        {
-          $unwind: "$communitybettingsData",
+            is_deleted: 0,
+          }
         },
         {
           $lookup: {
             from: "users",
-            localField: "communitybettingsData.userId",
+            localField: "userId",
             foreignField: "_id",
-            as: "usersData",
-          },
+            as: "userData"
+          }
+        },
+        {
+          $unwind: {
+            path: "$userData",
+            preserveNullAndEmptyArrays: true // Preserve the documents even if the lookup finds no match
+          }
         },
         {
           $group: {
-            _id: {
-              period: "$period",
-              periodId: "$_id",
-              userId: "$communitybettingsData.userId",
-            },
-            anyWinTrue: { $max: "$communitybettingsData.isWin" },
-            totalBetAmount: { $sum: "$communitybettingsData.betAmount" },
-            usersData: { $first: "$usersData" },
-          },
-        },
-        {
-          $match: {
-            anyWinTrue: { $ne: true },
-          },
+            _id: { period: "$period", userId: "$userId" },
+            userEmail: { $first: "$userData.email" },
+            userName: { $first: "$userData.fullName" },
+            betAmount: { $sum: "$betAmount" },
+          }
         },
         {
           $group: {
             _id: "$_id.period",
-            periodId: { $first: "$_id.periodId" },
+            totalBetAmount: { $sum: "$betAmount" },
+            totalUsers: { $sum: 1 },
             comunityBettingData: {
               $push: {
-                userEmail: { $arrayElemAt: ["$usersData.email", 0] },
-                userName: { $arrayElemAt: ["$usersData.fullName", 0] },
+                userEmail: { $ifNull: ["$userEmail", ""] }, // Provide default value if null
+                userName: { $ifNull: ["$userName", ""] }, // Provide default value if null
                 userId: "$_id.userId",
-                betAmount: "$totalBetAmount",
-              },
-            },
-            totalUniqueUsers: { $addToSet: "$_id.userId" }, // Count total unique users
-          },
+                betAmount: "$betAmount",
+              }
+            }
+          }
         },
         {
           $project: {
             _id: 0,
             period: "$_id",
+            totalBetAmount: 1,
+            totalUsers: 1,
             comunityBettingData: 1,
-            totalUniqueUsers: { $size: "$totalUniqueUsers" }, // Include total unique user count
-          },
+          }
         },
         {
           $sort: { period: -1 },
-        },
+        }
       ]);
 
-      battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-        const getCommunityUser = await CommunityBetting.aggregate([
-          {
-            $match: {
-              gameId: new mongoose.Types.ObjectId(gameId),
-              period: Number(result.period)
-            }
-          },
-          {
-            $group: {
-              _id: "$userId",
-              totalUser: { $sum: 1 }
-            }
-          },
-          {
-            $group: {
-              _id: null,
-              totalUsers: { $sum: 1 }
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              totalUsers: 1
-            }
-          }
-        ])
-        return {
-          period: result.period,
-          totalUsers: getCommunityUser[0].totalUsers,
-          comunityBettingData: result.comunityBettingData
-        }
-      }))
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.GAME_PERIOD_GET,
+        aggregationResult
+      );
 
     } else if (gameType === "penaltyBetting") {
       battingAggregationResult = await Period.aggregate([
@@ -3030,3 +3096,82 @@ export const getAllGamePeriodData = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
+
+export const getCommunityGameperiod = async (req, res) => {
+  const { gameId, gameType } = req.params;
+  const { periodFor } = req.query;
+
+  try {
+    const aggregationResult = await CommunityBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          is_deleted: 0,
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userData"
+        }
+      },
+      {
+        $unwind: {
+          path: "$userData",
+          preserveNullAndEmptyArrays: true // Preserve the documents even if the lookup finds no match
+        }
+      },
+      {
+        $group: {
+          _id: { period: "$period", userId: "$userId" },
+          userEmail: { $first: "$userData.email" },
+          userName: { $first: "$userData.fullName" },
+          betAmount: { $sum: "$betAmount" },
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.period",
+          totalBetAmount: { $sum: "$betAmount" },
+          totalUsers: { $sum: 1 },
+          comunityBettingData: {
+            $push: {
+              userEmail: { $ifNull: ["$userEmail", ""] }, // Provide default value if null
+              userName: { $ifNull: ["$userName", ""] }, // Provide default value if null
+              userId: "$_id.userId",
+              betAmount: "$betAmount",
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          period: "$_id",
+          totalBetAmount: 1,
+          totalUsers: 1,
+          comunityBettingData: 1,
+        }
+      },
+      {
+        $sort: { period: -1 },
+      }
+    ]);
+
+    const response = {
+      status: 200,
+      message: "Get game period.",
+      data: aggregationResult,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Failed to get community game period data", error);
+    res.status(500).send("Internal server error");
+  }
+};
+

@@ -136,12 +136,44 @@ export const addEditCommunityBets = async (req, res) => {
 //   }
 // };
 
+// export const getLoginUserCommunityBets = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const fetchBets = async (model) => {
+//       return model.find({
+//         userId: req.user,
+//         gameId,
+//         createdAt: { $gte: twentyFourHoursAgo },
+//         is_deleted: 0,
+//       })
+//         .populate("userId", "fullName profile email")
+//         .populate("gameId", "gameName gameImage gameMode")
+//         .sort({ period: -1 });
+//     };
+//     const communityBets = await fetchBets(CommunityBetting);
+//     const communityBetsNew = await fetchBets(CommunityBettingNew);
+
+//     // Combine the bets from both collections
+//     const allBets = [...communityBets, ...communityBetsNew];
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.COMMUNITY_BET_GET,
+//       allBets
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+
 export const getLoginUserCommunityBets = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    // Function to fetch bets from a given model
     const fetchBets = async (model) => {
       return model.find({
         userId: req.user,
@@ -149,21 +181,19 @@ export const getLoginUserCommunityBets = async (req, res) => {
         createdAt: { $gte: twentyFourHoursAgo },
         is_deleted: 0,
       })
-        .populate("userId", "fullName profile email")
-        .populate("gameId", "gameName gameImage gameMode")
-        .sort({ period: -1 });
+        .populate("userId", "fullName profile email") // Consider if all fields are needed
+        .populate("gameId", "gameName gameImage gameMode") // Consider if all fields are needed
+        .sort({ period: -1 })
+        .lean(); // Use lean() for faster execution
     };
 
-    // Fetch bets from both the CommunityBetting and CommunityBettingNew collections
-    const communityBets = await fetchBets(CommunityBetting);
-    const communityBetsNew = await fetchBets(CommunityBettingNew);
+    // Execute fetchBets in parallel
+    const [communityBets, communityBetsNew] = await Promise.all([
+      fetchBets(CommunityBetting),
+      fetchBets(CommunityBettingNew),
+    ]);
 
-    // Combine the bets from both collections
     const allBets = [...communityBets, ...communityBetsNew];
-
-    // Optionally, you might want to sort the combined bets array again if necessary
-    // For example, if the sort criteria is based on a field present in the documents
-    // allBets.sort((a, b) => b.period - a.period); // Assuming 'period' is a sortable field
 
     return sendResponse(
       res,
@@ -175,6 +205,7 @@ export const getLoginUserCommunityBets = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 
 //#endregion
 

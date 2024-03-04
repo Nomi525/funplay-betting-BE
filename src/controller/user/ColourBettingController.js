@@ -1096,70 +1096,171 @@ export const getAllGamePeriod = async (req, res) => {
 //   }
 // };
 
+//export const getByIdGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const userId = req.user
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     // Function to fetch ColourBetting or ColourBettingNew documents
+//     const fetchColourBettingDocs = async (model, userId, gameId, second, twentyFourHoursAgo) => {
+//       return model.find({
+//         userId: new mongoose.Types.ObjectId(userId),
+//         gameId: new mongoose.Types.ObjectId(gameId),
+//         selectedTime: second,
+//         createdAt: { $gte: twentyFourHoursAgo },
+//         is_deleted: 0,
+//       }).lean();
+//     };
+
+//     // Fetch documents from both ColourBetting and ColourBettingNew
+//     const colourBettingDocs = await fetchColourBettingDocs(ColourBetting, req.user, gameId, second, twentyFourHoursAgo);
+//     const colourBettingNewDocs = await fetchColourBettingDocs(ColourBettingNew, req.user, gameId, second, twentyFourHoursAgo);
+
+//     // Combine documents from both models
+//     const allColourBettingDocs = [...colourBettingDocs, ...colourBettingNewDocs];
+//     //console.log(allColourBettingDocs, "allcolurbettingsS")
+//     // Function to fetch Period or PeriodNew documents
+//     const fetchPeriodDocs = async (model, periodIds, gameId) => {
+//       return model.find({ period: { $in: periodIds }, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
+//     };
+
+//     // Fetch and combine period documents from both models
+//     const periodIds = allColourBettingDocs.map(doc => doc.period);
+//     const periodDocs = await fetchPeriodDocs(Period, periodIds, gameId);
+//     const periodNewDocs = await fetchPeriodDocs(PeriodNew, periodIds, gameId);
+//     const allPeriodDocs = [...periodDocs, ...periodNewDocs];
+//     // console.log(allPeriodDocs, "allperiodcocd")
+//     // Map allPeriodDocs by period for quick lookup
+//     const periodMap = {};
+//     allPeriodDocs.forEach(doc => {
+//       periodMap[doc.period] = doc;
+//     });
+
+//     const game = await Game.findOne({ _id: gameId })
+
+//     // Format the allColourBettingDocs with period details from periodMap
+//     const result = allColourBettingDocs.map(doc => {
+//       const periodData = periodMap[doc.period];
+//       return {
+//         period: doc.period,
+//         price: doc.betAmount,
+//         colourName: doc.colourName.charAt(0).toUpperCase() + doc.colourName.slice(1),
+//         isWin: doc.isWin,
+//         status: doc.status,
+//         date: periodData.date,
+//         startTime: periodData.startTime,
+//         endTime: periodData.endTime,
+//         periodFor: periodData.periodFor,
+//         createdAt: periodData.createdAt,
+//         betCreatedAt: doc.createdAt,
+//         winningAmount: game.winningCoin
+//       };
+//     }).filter(doc => doc.periodFor === second)
+//       .sort((a, b) => b.betCreatedAt - a.betCreatedAt);
+//     console.log(result, "fff result ")
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+// export const getByIdGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const userId = req.user;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+
+//     const fetchDocs = async () => {
+//       const conditions = {
+//         userId: new mongoose.Types.ObjectId(userId),
+//         gameId: new mongoose.Types.ObjectId(gameId),
+//         selectedTime: second,
+//         createdAt: { $gte: twentyFourHoursAgo },
+//         is_deleted: 0,
+//       };
+
+
+//       const [colourBettingDocs, colourBettingNewDocs] = await Promise.all([
+//         ColourBetting.find(conditions).lean(),
+//         ColourBettingNew.find(conditions).lean(),
+//       ]);
+
+//       return [...colourBettingDocs, ...colourBettingNewDocs];
+//     };
+
+//     const [allColourBettingDocs, game] = await Promise.all([
+//       fetchDocs(),
+//       Game.findOne({ _id: gameId }),
+//     ]);
+
+//     // Format the documents for the response
+//     const result = allColourBettingDocs.map(doc => ({
+//       colourName: doc.colourName.charAt(0).toUpperCase() + doc.colourName.slice(1),
+//       price: doc.betAmount,
+//       isWin: doc.isWin,
+//       status: doc.status,
+//       betCreatedAt: doc.createdAt,
+//       period: doc.period,
+//       winningAmount: game.winningCoin,
+//       periodFor: doc.selectedTime
+//     })).sort((a, b) => b.betCreatedAt - a.betCreatedAt);
+
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getByIdGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
-    const userId = req.user
+    const userId = req.user;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    // Function to fetch ColourBetting or ColourBettingNew documents
-    const fetchColourBettingDocs = async (model, userId, gameId, second, twentyFourHoursAgo) => {
-      return model.find({
-        userId: new mongoose.Types.ObjectId(userId),
-        gameId: new mongoose.Types.ObjectId(gameId),
-        selectedTime: second,
-        createdAt: { $gte: twentyFourHoursAgo },
-        is_deleted: 0,
-      }).lean();
-    };
+    // Create a base aggregation pipeline
+    const basePipeline = [
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          gameId: new mongoose.Types.ObjectId(gameId),
+          selectedTime: second,
+          createdAt: { $gte: twentyFourHoursAgo },
+          is_deleted: 0,
+        },
+      },
+      {
+        $project: {
+          colourName: { $concat: [{ $toUpper: { $substrCP: ["$colourName", 0, 1] } }, { $substrCP: ["$colourName", 1, { $subtract: [{ $strLenCP: "$colourName" }, 1] }] }] },
+          price: "$betAmount",
+          isWin: 1,
+          status: 1,
+          betCreatedAt: "$createdAt",
+          period: 1,
+          periodFor: "$selectedTime",
+        },
+      },
+      { $sort: { betCreatedAt: -1 } },
+    ];
 
-    // Fetch documents from both ColourBetting and ColourBettingNew
-    const colourBettingDocs = await fetchColourBettingDocs(ColourBetting, req.user, gameId, second, twentyFourHoursAgo);
-    const colourBettingNewDocs = await fetchColourBettingDocs(ColourBettingNew, req.user, gameId, second, twentyFourHoursAgo);
+    // Aggregate documents from ColourBetting and ColourBettingNew collections
+    const colourBettingDocs = await ColourBetting.aggregate(basePipeline);
+    const colourBettingNewDocs = await ColourBettingNew.aggregate(basePipeline);
 
-    // Combine documents from both models
+    // Combine results from both collections
     const allColourBettingDocs = [...colourBettingDocs, ...colourBettingNewDocs];
-    //console.log(allColourBettingDocs, "allcolurbettingsS")
-    // Function to fetch Period or PeriodNew documents
-    const fetchPeriodDocs = async (model, periodIds, gameId) => {
-      return model.find({ period: { $in: periodIds }, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
-    };
 
-    // Fetch and combine period documents from both models
-    const periodIds = allColourBettingDocs.map(doc => doc.period);
-    const periodDocs = await fetchPeriodDocs(Period, periodIds, gameId);
-    const periodNewDocs = await fetchPeriodDocs(PeriodNew, periodIds, gameId);
-    const allPeriodDocs = [...periodDocs, ...periodNewDocs];
-    // console.log(allPeriodDocs, "allperiodcocd")
-    // Map allPeriodDocs by period for quick lookup
-    const periodMap = {};
-    allPeriodDocs.forEach(doc => {
-      periodMap[doc.period] = doc;
-    });
+    const game = await Game.findOne({ _id: gameId });
 
-    const game = await Game.findOne({ _id: gameId })
+    // Add the winningAmount to each document
+    const result = allColourBettingDocs.map(doc => ({
+      ...doc,
+      winningAmount: game.winningCoin,
+    }));
 
-    // Format the allColourBettingDocs with period details from periodMap
-    const result = allColourBettingDocs.map(doc => {
-      const periodData = periodMap[doc.period];
-      return {
-        period: doc.period,
-        price: doc.betAmount,
-        colourName: doc.colourName.charAt(0).toUpperCase() + doc.colourName.slice(1),
-        isWin: doc.isWin,
-        status: doc.status,
-        date: periodData.date,
-        startTime: periodData.startTime,
-        endTime: periodData.endTime,
-        periodFor: periodData.periodFor,
-        createdAt: periodData.createdAt,
-        betCreatedAt: doc.createdAt,
-        winningAmount: game.winningCoin
-      };
-    }).filter(doc => doc.periodFor === second)
-      .sort((a, b) => b.betCreatedAt - a.betCreatedAt);
-    console.log(result, "fff result ")
     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
   } catch (error) {
     return handleErrorResponse(res, error);

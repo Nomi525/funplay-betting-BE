@@ -126,6 +126,7 @@ import {
   getSingleGameRules,
   gameRuleDelete,
   getAllGamePeriodSelectedTimeList,
+  getCommunityGameperiod,
 } from "./controller/admin/GameController.js";
 // import {
 //   addEditPrivacyPolicy,
@@ -414,8 +415,9 @@ import { FaintCurrency } from "./models/FaintCurrency.js"
 import { Withdrawal } from "./models/Withdrawal.js";
 import { transferAllData, transferData } from "./controller/admin/TransferData.js";
 // import { addFaintCurrency } from "./controller/admin/FaintCurrency.js";
-import {getUserNotifications} from "./controller/user/UserNotificationController.js"
+import { getUserNotifications } from "./controller/user/UserNotificationController.js"
 export {
+  getCommunityGameperiod,
   transferAllData, transferData,
   totalCoin,
   capitalizeFirstLetter,
