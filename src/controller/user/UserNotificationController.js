@@ -12,6 +12,7 @@ Socket.on("connection", (sockets) => {
   sockets.on("new-notification", (user) => {
     console.log("new-notification")
     Socket.emit("new-notification");
+    // sockets.in(user).emit("new-notification");
   });
 });
 
