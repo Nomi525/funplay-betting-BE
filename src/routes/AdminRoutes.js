@@ -248,7 +248,7 @@ adminRoutes.post("/currency-convert", allCurrencyConverter);
 // Currency Coin Routes
 adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
 adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
-adminRoutes.get(
+adminRoutes.get( 
   "/get-single-currency-coin/:currencyCoinId",
   Auth,
   getSingleCurrencyCoin
