@@ -36,6 +36,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
     try {
       const id = req.params.id;
       const { status, rejectReason } = req.body;
+      const withdrawalApproveImg = req.withdrawalApproveImgUrl
       const getSingle = await Withdrawal.findById(id);
       const checkCurrency = await CurrencyCoin.find({ is_deleted :0, currencyName : getSingle.currency});
       const checkCoins = checkCurrency[0].coin;
@@ -46,7 +47,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
       if (status === "Approved" && getSingle.status !== "Approved") {
         const updatedStatus = await Withdrawal.updateOne(
           { _id: id },
-          { $set: { status: "Approved" } }
+          { $set: { status: "Approved", withdrawalApproveImg } }
         );
         const notificationData = {
           userId: getSingle.userId,
