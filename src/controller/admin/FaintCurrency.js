@@ -6,11 +6,11 @@ export const addFaintCurrency = async (req, res) => {
         if (checkUserWallet.length) {
             const existFantCurrency = await FaintCurrency.find({ userId: req.user, status: "Pending" })
             if (!existFantCurrency.length) {
-            const { amount, UTRId, UPIMethod, status, rejectReason, rejectScreenShort } = req.body;
+            const { amount, UTRId, UPIMethod, status, rejectReason, rejectScreenShort, mobileNumber } = req.body;
             const transactionScreenShort = req.transactionScreenShortUrl;
 
             let addFaintCurrency = new FaintCurrency({
-                userId: req.user, amount: amount, UTRId: UTRId, transactionScreenShort: transactionScreenShort, UPIMethod: UPIMethod, status: status, rejectReason: rejectReason, rejectScreenShort: rejectScreenShort
+                userId: req.user, amount: amount, UTRId: UTRId,mobileNumber, transactionScreenShort: transactionScreenShort, UPIMethod: UPIMethod, status: status, rejectReason: rejectReason, rejectScreenShort: rejectScreenShort
             });
             let FaintCurrencyData = await addFaintCurrency.save();
             if (FaintCurrencyData) {
