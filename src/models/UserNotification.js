@@ -24,7 +24,7 @@ const userNotificationSchema = mongoose.Schema({
     },
     is_viewed: {
         type: Boolean,
-        defauls: false
+        default: false
     }
 }, { timestamps: true });
 
