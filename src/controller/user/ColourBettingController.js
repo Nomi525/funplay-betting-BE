@@ -785,6 +785,7 @@ export const getAllGamePeriod = async (req, res) => {
       is_deleted: 0,
     });
 
+
     // Group by 'period' manually
     const groupedByPeriod = colourBettings.reduce((acc, cur) => {
       const period = cur.period.toString(); // Assuming period is an ObjectId or similar

@@ -70,6 +70,17 @@ cron.schedule('0 */4 * * *', () => {
   transferAllData();
 });
 
+
+// cron.schedule('* * * * *', () => {
+//   console.log('Running data transfer job every minute');
+//   transferData();
+// });
+
+// cron.schedule('* * * * *', () => {
+//   console.log('Running data transfer job every minute');
+//   transferAllData();
+// });
+
 const appServer = server.listen(process.env.PORT, () => {
   dbConnection();
   console.log(`server running on port: ${process.env.PORT}`);
