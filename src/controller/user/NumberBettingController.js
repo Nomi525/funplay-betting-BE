@@ -2725,7 +2725,7 @@ export const createAllGameWinnerFromCronJob = async (req, res) => {
         findGame.gameName == "3 Color Betting"
       ) {
 
-        console.log("2 colour betting ")
+
         const gameType =
           findGame.gameName == "2 Color Betting"
             ? "2colorBetting"
