@@ -67,6 +67,11 @@ const withdrawalSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
+    withdrawalApproveImg:{
+        type: String,
+        required: false,
+        default: 0
+    },
 }, { timestamps: true });
 
 const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);

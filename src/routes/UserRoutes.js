@@ -80,6 +80,7 @@ import {
   getAllBettingHistory,
   uploadImage,
   getSlotsBookedByPeriod,
+  deleteAllUserNotifications
 } from "./../index.js";
 import {getUserNotifications} from "../controller/user/UserNotificationController.js"
 
@@ -260,6 +261,7 @@ userRoutes.post('/remove-bankDetail', Auth, deleteBankDetail)
 userRoutes.get('/get-user-faint-currency', Auth, getUserFaintCurrency)
 userRoutes.get('/get-user-withdrawal-currency', Auth, getUserWithdrawalRequest)
 userRoutes.get('/get-notifications', Auth, getUserNotifications)
+userRoutes.post('/delete-notifications', Auth, deleteAllUserNotifications)
 
 
 
