@@ -1,5 +1,5 @@
 import { UserNotification } from "../../models/UserNotification.js";
-import { StatusCodes, handleErrorResponse, sendResponse } from "../../index.js";
+import { ResponseMessage, StatusCodes, handleErrorResponse, sendResponse } from "../../index.js";
 import { Socket } from "../../config/Socket.config.js";
 Socket.on("connection", (sockets) => {
   console.log("notification Socket connected");
@@ -18,7 +18,7 @@ Socket.on("connection", (sockets) => {
 
 export const getUserNotifications = async (req, res) => {
   try {
-    const getData = await UserNotification.find({ userId: req.user })
+    const getData = await UserNotification.find({ userId: req.user, is_deleted: false })
       //   .populate("userId", "fullName currency")
       .sort({ createdAt: -1 });
     if (getData) {
@@ -40,3 +40,25 @@ export const getUserNotifications = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
+export const deleteAllUserNotifications = async (req, res) => {
+  try {
+    const deletedNotification = await UserNotification.updateMany({ userId: req.user }, {is_deleted: true});
+    if(deletedNotification){
+      return sendResponse(
+        res,
+        StatusCodes.OK,
+        ResponseMessage.NOTIFICATION_DELETED
+      );
+    }else{
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        ResponseMessage.NOTIFICATION_NOT_DELETED
+      );
+    }
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
