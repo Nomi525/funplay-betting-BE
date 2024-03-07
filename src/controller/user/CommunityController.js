@@ -15,6 +15,7 @@ import {
   sendResponse,
   checkDecimalValueGreaterThanOrEqual,
 } from "../../index.js";
+import { CommunityBettingNew } from "../../models/CommunityBetting.js";
 
 //#region Add edit community betting
 export const addEditCommunityBets = async (req, res) => {
@@ -111,29 +112,101 @@ export const addEditCommunityBets = async (req, res) => {
 //#endregion
 
 //#region Get login user community bet
+// export const getLoginUserCommunityBets = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const getLoginUserBet = await CommunityBetting.find({
+//       userId: req.user,
+//       gameId,
+//       createdAt: { $gte: twentyFourHoursAgo },
+//       is_deleted: 0,
+//     })
+//       .populate("userId", "fullName profile email")
+//       .populate("gameId", "gameName gameImage gameMode")
+//       .sort({ period: -1 });
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.COMMUNITY_BET_GET,
+//       getLoginUserBet
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+// export const getLoginUserCommunityBets = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const fetchBets = async (model) => {
+//       return model.find({
+//         userId: req.user,
+//         gameId,
+//         createdAt: { $gte: twentyFourHoursAgo },
+//         is_deleted: 0,
+//       })
+//         .populate("userId", "fullName profile email")
+//         .populate("gameId", "gameName gameImage gameMode")
+//         .sort({ period: -1 });
+//     };
+//     const communityBets = await fetchBets(CommunityBetting);
+//     const communityBetsNew = await fetchBets(CommunityBettingNew);
+
+//     // Combine the bets from both collections
+//     const allBets = [...communityBets, ...communityBetsNew];
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.COMMUNITY_BET_GET,
+//       allBets
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+
 export const getLoginUserCommunityBets = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const getLoginUserBet = await CommunityBetting.find({
-      userId: req.user,
-      gameId,
-      createdAt: { $gte: twentyFourHoursAgo },
-      is_deleted: 0,
-    })
-      .populate("userId", "fullName profile email")
-      .populate("gameId", "gameName gameImage gameMode")
-      .sort({ period: -1 });
+
+    const fetchBets = async (model) => {
+      return model.find({
+        userId: req.user,
+        gameId,
+        createdAt: { $gte: twentyFourHoursAgo },
+        is_deleted: 0,
+      })
+        .populate("userId", "fullName profile email") // Consider if all fields are needed
+        .populate("gameId", "gameName gameImage gameMode") // Consider if all fields are needed
+        .sort({ period: -1 })
+        .lean(); // Use lean() for faster execution
+    };
+
+    // Execute fetchBets in parallel
+    const [communityBets, communityBetsNew] = await Promise.all([
+      fetchBets(CommunityBetting),
+      fetchBets(CommunityBettingNew),
+    ]);
+
+    const allBets = [...communityBets, ...communityBetsNew];
+
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.COMMUNITY_BET_GET,
-      getLoginUserBet
+      allBets
     );
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
+
+
 //#endregion
 
 //#region Get all live community bets
@@ -329,17 +402,17 @@ export const getAllCommunityGamePeriod = async (req, res) => {
 
 
 export const getSlotsBookedByPeriod = async (req, res) => {
-  const {periodId} = req.body;
-  try{
-      const slotBooked = await CommunityBetting.find({period: periodId}).countDocuments();
-      return sendResponse(
-        res,
-        StatusCodes.OK,
-        ResponseMessage.SLOTS_BOOKED_IN_COMMUNITY_BETTING,
-        {slotBooked}
-      );
+  const { periodId } = req.body;
+  try {
+    const slotBooked = await CommunityBetting.find({ period: periodId }).countDocuments();
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.SLOTS_BOOKED_IN_COMMUNITY_BETTING,
+      { slotBooked }
+    );
 
-  }catch(error){
+  } catch (error) {
     return handleErrorResponse(res, error);
   }
 

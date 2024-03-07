@@ -264,18 +264,18 @@ const ResponseMessage = {
   UPIID_OR_CODE_UPDATED: 'UPI ID or QR Code updated successfully',
   UPIID_QR_CODE_ADDED: "UPI ID or QR Code added successfully",
   UPI_OR_CODE_FETCHED: "UPI OR Code fetched successfully",
-  GET_All_BETTING_HISTORY : "get all betting history successfully",
+  GET_All_BETTING_HISTORY: "get all betting history successfully",
 
-  ADD_FAINT_CURRENCY  : "Deposit request created successfully",
-  GET_All_FAINT_CURRENCY : "get all deposit request successfully",
-  STATUS_APPROVED : "deposit request status approved successully",
-  STATUS_REJECT : "deposit request status reject successfully",
+  ADD_FAINT_CURRENCY: "Deposit request created successfully",
+  GET_All_FAINT_CURRENCY: "get all deposit request successfully",
+  STATUS_APPROVED: "deposit request status approved successully",
+  STATUS_REJECT: "deposit request status reject successfully",
   INVALID_STATUS: "invalid status",
   ALREADY_APPROVED: "deposit request status already approved",
-  ALREADY_REJECTED:"deposit request status already rejected",
+  ALREADY_REJECTED: "deposit request status already rejected",
   ALREADY_PENDING: "Already deposit request in pending",
   GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully",
-  SLOTS_BOOKED_IN_COMMUNITY_BETTING : "Slots fetched",
+  SLOTS_BOOKED_IN_COMMUNITY_BETTING: "Slots fetched",
   NOTIFICATION_NOT_DELETED: "Failed to delete notification"
 };
 

@@ -12,7 +12,7 @@ const faintCurrencySchema = new mongoose.Schema(
       required: false,
     },
     UTRId: {
-      type: Number,
+      type: String,
       required: false,
     },
     transactionScreenShort: {

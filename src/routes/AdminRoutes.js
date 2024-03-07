@@ -97,7 +97,7 @@ import {
   getAllSubAdmin,
   declareWinnerOfPenaltyBetting,
   declareWinnerOfCardBetting,
-  getAllGamePeriodSelectedTimeList, addupdateUPiorQr
+  getAllGamePeriodSelectedTimeList, addupdateUPiorQr, getCommunityGameperiod
 
 } from "./../index.js";
 const adminRoutes = express.Router();
@@ -248,7 +248,7 @@ adminRoutes.post("/currency-convert", allCurrencyConverter);
 // Currency Coin Routes
 adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
 adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
-adminRoutes.get( 
+adminRoutes.get(
   "/get-single-currency-coin/:currencyCoinId",
   Auth,
   getSingleCurrencyCoin
@@ -290,14 +290,15 @@ adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData)
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
 
-adminRoutes.post('/change-status-faint-currency' ,  Upload, changeStatusOfFaintCurrency)
-adminRoutes.get('/get-all-faint-currency',Auth, getAllFaintCurrency)
+adminRoutes.post('/change-status-faint-currency', Upload, changeStatusOfFaintCurrency)
+adminRoutes.get('/get-all-faint-currency', Auth, getAllFaintCurrency)
 
-adminRoutes.get('/get-single-withdrawal-request/:id',Auth, getUserWithdrawalRequest);
-adminRoutes.get('/get-all-request-withdrawal',Auth, getAllUserWithdrawalRequest);
-adminRoutes.post('/accept-reject-withdrawal-request/:id',Auth, Upload,  approveRejectWithdrawalRequest);
+adminRoutes.get('/get-single-withdrawal-request/:id', Auth, getUserWithdrawalRequest);
+adminRoutes.get('/get-all-request-withdrawal', Auth, getAllUserWithdrawalRequest);
+adminRoutes.post('/accept-reject-withdrawal-request/:id', Auth, Upload, approveRejectWithdrawalRequest);
 
 
 
 export { adminRoutes };
 
+adminRoutes.get("/get-all-community-periods/:gameType/:gameId", getCommunityGameperiod);
