@@ -1,4 +1,5 @@
 import { getTransactionList, getwithdrwalcheck, topAllPlayers, topWeeklyPlayers } from "../controller/admin/AdminController.js";
+import { addEditBankDetail, getBankDetail } from "../controller/admin/BankController.js";
 import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
 import { addUPIMethod, changeStatusOfUPIMethod, deleteUPIMethod, getUPIMethod } from "../controller/admin/UPIController.js";
@@ -306,6 +307,9 @@ adminRoutes.post('/add-upi-method', Auth, Upload, addUPIMethod);
 adminRoutes.get('/get-all-upi-method', Auth, getUPIMethod)
 adminRoutes.post('/upi-status-update', Auth, changeStatusOfUPIMethod)
 adminRoutes.post('/upi-method-delete', Auth, deleteUPIMethod)
+
+adminRoutes.post('/add-edit-bank-detail', Auth, addEditBankDetail);
+adminRoutes.get('/get-all-bank-detail', Auth, getBankDetail)
 
 
 export { adminRoutes };
