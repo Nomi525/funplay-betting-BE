@@ -520,7 +520,7 @@ export const userDepositeWithdrawalHistory = async (req, res) => {
 
 export const withdrawalUserRequest = async (req, res) => {
   try {
-    const { withdrawalAmount, type, walletAddress, tokenName } = req.body;
+    const { withdrawalAmount, type, walletAddress, tokenName, bankAccount, paymentMethod, upiId } = req.body;
     const findUser = await User.find({ _id: req.user });
 
     const checkCurrency = await CurrencyCoin.find({ is_deleted: 0, currencyName: findUser[0].currency });
@@ -546,7 +546,8 @@ export const withdrawalUserRequest = async (req, res) => {
                   name: findUser[0].findUser,
                   requestedAmount: withdrawalAmount,
                   type: type,
-                  currency: findUser[0].currency
+                  currency: findUser[0].currency,
+                  bankAccount, paymentMethod, upiId
                 },
                 Withdrawal
               );
@@ -561,7 +562,7 @@ export const withdrawalUserRequest = async (req, res) => {
           return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
         }
       } else if (type == "Crypto Currency") {
-        if (withdrawalAmount >= adminwithdrawalAmount) {
+        // if (withdrawalAmount >= adminwithdrawalAmount) {
           if (convertcurrency >= withdrawalAmount) {
             const findUserRequest = await Withdrawal.find({ userId: req.user, status: "Pending" })
             if (!findUserRequest.length) {
@@ -592,9 +593,9 @@ export const withdrawalUserRequest = async (req, res) => {
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
           }
-        } else {
-          return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
-        }
+        // } else {
+        //   return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
+        // }
       } else {
         return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid type", []);
       }
