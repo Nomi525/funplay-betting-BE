@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Socket } from "../../config/Socket.config.js";
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
     getAllData, getAllDataCount, passwordCompare, jwt, generateOtp, User, AdminSetting, ReferralWork,
@@ -20,7 +21,7 @@ export const adminLogin = async (req, res) => {
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
-            console.log(findAdmin,"ff");
+            console.log(findAdmin, "ff");
             if (findAdmin.role.Role_type == "Sub Admin") {
                 if (!findAdmin.isActive) {
                     return sendResponse(
@@ -577,12 +578,12 @@ const filterWeeklyData = async (data) => {
             } else {
                 aggregatedData[key] = {
                     gameType: item.gameId,
-                    gameName: item.gameName, 
+                    gameName: item.gameName,
                     email: item.email,
                     userId: item.userId,
                     fullName: item.fullName,
-                    isWin : item.isWin, 
-                    betAmount: item.betAmount   
+                    isWin: item.isWin,
+                    betAmount: item.betAmount
                 };
             }
         }
@@ -592,34 +593,34 @@ const filterWeeklyData = async (data) => {
 
 export const topWeeklyPlayers = async (req, res) => {
     try {
-        const findPlayer = await ColourBetting.find({isWin:true});
+        const findPlayer = await ColourBetting.find({ isWin: true });
         const weeklyDataColourBetting = await filterWeeklyData(findPlayer);
 
-        const findPlayerNew = await ColourBettingNew.find({isWin:true});
+        const findPlayerNew = await ColourBettingNew.find({ isWin: true });
         const weeklyDataColorBettingNew = await filterWeeklyData(findPlayerNew);
 
-        const findNumberPlayer = await NumberBetting.find({isWin:true});
+        const findNumberPlayer = await NumberBetting.find({ isWin: true });
         const weeklyDataNumberBetting = await filterWeeklyData(findNumberPlayer);
 
-        const findNumberPlayerNew = await NumberBettingNew.find({isWin:true});
+        const findNumberPlayerNew = await NumberBettingNew.find({ isWin: true });
         const weeklyDataNumberBettingNew = await filterWeeklyData(findNumberPlayerNew);
 
-        const findCardPlayer = await CardBetting.find({isWin:true});
+        const findCardPlayer = await CardBetting.find({ isWin: true });
         const weeklyDataCardBetting = await filterWeeklyData(findCardPlayer);
 
-        const findCardPlayerNew = await CardBettingNew.find({isWin:true});
+        const findCardPlayerNew = await CardBettingNew.find({ isWin: true });
         const weeklyDataCardBettingNew = await filterWeeklyData(findCardPlayerNew);
 
-        const findPenaltyPlayer = await PenaltyBetting.find({isWin:true});
+        const findPenaltyPlayer = await PenaltyBetting.find({ isWin: true });
         const weeklyDataPenaltyBetting = await filterWeeklyData(findPenaltyPlayer);
 
-        const findPenaltyPlayerNew = await PenaltyBettingNew.find({isWin:true});
+        const findPenaltyPlayerNew = await PenaltyBettingNew.find({ isWin: true });
         const weeklyDataPenaltyBettingNew = await filterWeeklyData(findPenaltyPlayerNew);
 
-        const findCommunityPlayer = await CommunityBetting.find({isWin:true});
+        const findCommunityPlayer = await CommunityBetting.find({ isWin: true });
         const weeklyDataCommunityPlayer = await filterWeeklyData(findCommunityPlayer);
 
-        const findCommunityPlayerNew = await CommunityBettingNew.find({isWin:true});
+        const findCommunityPlayerNew = await CommunityBettingNew.find({ isWin: true });
         const weeklyDataCommunityPlayerNew = await filterWeeklyData(findCommunityPlayerNew);
 
         const combinedWeeklyData = [...weeklyDataColourBetting, ...weeklyDataColorBettingNew, ...weeklyDataNumberBetting, ...weeklyDataNumberBettingNew, ...weeklyDataCardBetting, ...weeklyDataCardBettingNew, ...weeklyDataPenaltyBetting, ...weeklyDataPenaltyBettingNew, ...weeklyDataCommunityPlayer, ...weeklyDataCommunityPlayerNew];
@@ -690,34 +691,34 @@ const filterAllData = async (data) => {
 
 export const topAllPlayers = async (req, res) => {
     try {
-        const findPlayer = await ColourBetting.find({isWin:true});
+        const findPlayer = await ColourBetting.find({ isWin: true });
         const weeklyDataColourBetting = await filterWeeklyData(findPlayer);
 
-        const findPlayerNew = await ColourBettingNew.find({isWin:true});
+        const findPlayerNew = await ColourBettingNew.find({ isWin: true });
         const weeklyDataColorBettingNew = await filterWeeklyData(findPlayerNew);
 
-        const findNumberPlayer = await NumberBetting.find({isWin:true});
+        const findNumberPlayer = await NumberBetting.find({ isWin: true });
         const weeklyDataNumberBetting = await filterAllData(findNumberPlayer);
 
-        const findNumberPlayerNew = await NumberBettingNew.find({isWin:true});
+        const findNumberPlayerNew = await NumberBettingNew.find({ isWin: true });
         const weeklyDataNumberBettingNew = await filterAllData(findNumberPlayerNew);
 
-        const findCardPlayer = await CardBetting.find({isWin:true});
+        const findCardPlayer = await CardBetting.find({ isWin: true });
         const weeklyDataCardBetting = await filterAllData(findCardPlayer);
 
-        const findCardPlayerNew = await CardBettingNew.find({isWin:true});
+        const findCardPlayerNew = await CardBettingNew.find({ isWin: true });
         const weeklyDataCardBettingNew = await filterAllData(findCardPlayerNew);
 
-        const findPenaltyPlayer = await PenaltyBetting.find({isWin:true});
+        const findPenaltyPlayer = await PenaltyBetting.find({ isWin: true });
         const weeklyDataPenaltyBetting = await filterAllData(findPenaltyPlayer);
 
-        const findPenaltyPlayerNew = await PenaltyBettingNew.find({isWin:true});
+        const findPenaltyPlayerNew = await PenaltyBettingNew.find({ isWin: true });
         const weeklyDataPenaltyBettingNew = await filterAllData(findPenaltyPlayerNew);
 
-        const findCommunityPlayer = await CommunityBetting.find({isWin:true});
+        const findCommunityPlayer = await CommunityBetting.find({ isWin: true });
         const weeklyDataCommunityPlayer = await filterAllData(findCommunityPlayer);
 
-        const findCommunityPlayerNew = await CommunityBettingNew.find({isWin:true});
+        const findCommunityPlayerNew = await CommunityBettingNew.find({ isWin: true });
         const weeklyDataCommunityPlayerNew = await filterAllData(findCommunityPlayerNew);
 
         const combinedWeeklyData = [...weeklyDataColourBetting, ...weeklyDataColorBettingNew, ...weeklyDataNumberBetting, ...weeklyDataNumberBettingNew, ...weeklyDataCardBetting, ...weeklyDataCardBettingNew, ...weeklyDataPenaltyBetting, ...weeklyDataPenaltyBettingNew, ...weeklyDataCommunityPlayer, ...weeklyDataCommunityPlayerNew];
@@ -747,6 +748,67 @@ export const topAllPlayers = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 };
+
+
+// Socket.on("connection", (socket) => {
+//     socket.on("createColourBet", async (data) => {
+//         let message = "connected for live bets "
+//         socket.emit("response", message)
+//     })
+
+// })
+
+
+Socket.on("connection", (socket) => {
+    socket.on("createColourBet", async (data) => {
+        let liveBetData;
+
+        try {
+            const colorBetting = await ColourBetting.find();
+            const colorBettingNew = await ColourBettingNew.find();
+
+            const allBets = [...colorBetting, ...colorBettingNew];
+            console.log(allBets, 'kk');
+// console.log(data.createdAt, "timedata");
+const data = {
+    createdAt: "2024-03-07T10:58:57.373Z",
+}; console.log(data, "ddd");
+            // Assuming data.createdAt is a valid date object
+            const createdAtTimestamp = moment(data.createdAt);
+            console.log(createdAtTimestamp,"currentyah");
+
+            // Get the current timestamp
+            const currentTimestamp = moment();
+
+            // Calculate the difference in minutes between the current time and the createdAt time
+            const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
+            console.log(timeDifferenceInMinutes,"hh");
+            const liveBetThresholdInMinutes = 60;
+
+            // Check if the bet is live based on the time difference
+            const isLiveBet = timeDifferenceInMinutes <= liveBetThresholdInMinutes;
+            console.log(isLiveBet, "isLiveBet");
+
+            if (isLiveBet) {
+                liveBetData = data;
+                console.log(liveBetData,"liveBetDataddd");
+                let message = "Connected for live bets";
+                socket.emit("response", { message, liveBetData });
+            } else {
+                let message = "Bet is not live anymore";
+                socket.emit("response", { message });
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            let message = "Error fetching data";
+            socket.emit("response", { message });
+        }
+    });
+});
+
+
+
+
 
 
 
