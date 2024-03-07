@@ -62,7 +62,7 @@ var upload = multer({ storage }).fields([
         name: "withdrawalApproveImg",
         maxCount: 1,
     },
-    
+
 ]);
 
 export default function (req, res, next) {
@@ -97,7 +97,7 @@ export default function (req, res, next) {
 
                 var rejectScreenShort = req.files.rejectScreenShort ? req.files.rejectScreenShort[0].filename : "";
                 req.rejectScreenShortUrl = rejectScreenShort;
-                
+
                 var withdrawalApproveImg = req.files.withdrawalApproveImg ? req.files.withdrawalApproveImg[0].filename : "";
                 req.withdrawalApproveImgUrl = withdrawalApproveImg;
                 next();

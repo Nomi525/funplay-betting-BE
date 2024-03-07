@@ -827,7 +827,7 @@ export const getAllGamePeriod = async (req, res) => {
     // Filter by 'second' if necessary (the periodFor match)
     const filteredResults = results.filter(r => r.periodFor === second);
 
-
+    filteredResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return sendResponse(
       res,
       StatusCodes.OK,

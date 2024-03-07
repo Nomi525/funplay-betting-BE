@@ -24,6 +24,7 @@ import {
   capitalizeFirstLetter,
   Period
 } from "../../index.js";
+import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 
 //#region Add penalty Betting
 export const addPenaltyBet = async (req, res) => {
@@ -117,18 +118,123 @@ export const addPenaltyBet = async (req, res) => {
 //#endregion
 
 
+// export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const game = await Game.findById(gameId);
+
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     const getGamePeriodById = await PenaltyBetting.aggregate([
+//       {
+//         $match: {
+//           userId: new mongoose.Types.ObjectId(req.user),
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           selectedTime: second,
+//           createdAt: { $gte: twentyFourHoursAgo },
+//           is_deleted: 0,
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "periods",
+//           localField: "period",
+//           foreignField: "period",
+//           as: "periodData",
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           price: "$betAmount",
+//           // betSide: 1,
+//           betSide: {
+//             $concat: [
+//               { $toUpper: { $substrCP: ["$betSide", 0, 1] } },
+//               {
+//                 $substrCP: [
+//                   "$betSide",
+//                   1,
+//                   { $subtract: [{ $strLenCP: "$betSide" }, 1] },
+//                 ],
+//               },
+//             ],
+//           },
+//           period: 1,
+//           isWin: 1,
+//           status: 1,
+//           createdAt: 1,
+//           periodData: {
+//             $filter: {
+//               input: "$periodData",
+//               as: "pd",
+//               cond: {
+//                 $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
+//               },
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $unwind: "$periodData",
+//       },
+//       {
+//         $project: {
+//           period: 1,
+//           price: 1,
+//           betSide: 1,
+//           isWin: 1,
+//           status: 1,
+//           date: "$periodData.date",
+//           startTime: "$periodData.startTime",
+//           endTime: "$periodData.endTime",
+//           periodFor: "$periodData.periodFor",
+//           createdAt: "$periodData.createdAt",
+//           betCreatedAt: "$createdAt",
+//           winningAmount: { $literal: game.winningCoin },
+//         },
+//       },
+//       {
+//         $match: {
+//           periodFor: second,
+//         },
+//       },
+//       {
+//         $sort: {
+//           betCreatedAt: -1,
+//         },
+//       },
+//       // {
+//       //     $match: {
+//       //         status: { $in: ["fail", "pending", "successfully"] }
+//       //     }
+//       // }
+//     ]);
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       getGamePeriodById
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
-    const game = await Game.findById(gameId);
-
+    const userId = req.user;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const game = await Game.findOne({ _id: gameId });
 
-    const getGamePeriodById = await PenaltyBetting.aggregate([
+    // Create a base aggregation pipeline
+    const basePipeline = [
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(req.user),
+          userId: new mongoose.Types.ObjectId(userId),
           gameId: new mongoose.Types.ObjectId(gameId),
           selectedTime: second,
           createdAt: { $gte: twentyFourHoursAgo },
@@ -136,91 +242,49 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "periods",
-          localField: "period",
-          foreignField: "period",
-          as: "periodData",
-        },
-      },
-      {
         $project: {
-          _id: 0,
           price: "$betAmount",
-          // betSide: 1,
-          betSide: {
-            $concat: [
-              { $toUpper: { $substrCP: ["$betSide", 0, 1] } },
-              {
-                $substrCP: [
-                  "$betSide",
-                  1,
-                  { $subtract: [{ $strLenCP: "$betSide" }, 1] },
-                ],
-              },
-            ],
-          },
-          period: 1,
+          betSide: 1, // Use the field directly since it doesn't need transformation
           isWin: 1,
           status: 1,
-          createdAt: 1,
-          periodData: {
-            $filter: {
-              input: "$periodData",
-              as: "pd",
-              cond: {
-                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
-              },
-            },
-          },
-        },
-      },
-      {
-        $unwind: "$periodData",
-      },
-      {
-        $project: {
-          period: 1,
-          price: 1,
-          betSide: 1,
-          isWin: 1,
-          status: 1,
-          date: "$periodData.date",
-          startTime: "$periodData.startTime",
-          endTime: "$periodData.endTime",
-          periodFor: "$periodData.periodFor",
-          createdAt: "$periodData.createdAt",
           betCreatedAt: "$createdAt",
-          winningAmount: { $literal: game.winningCoin },
+          // Assuming these fields can be populated or calculated directly
+          period: 1, // Placeholder, adjust based on your data model
+          date: "$createdAt", // Example, adjust as necessary
+          startTime: 1, // Placeholder, adjust based on your data model
+          endTime: 1, // Placeholder, adjust based on your data model
+          periodFor: "$selectedTime", // Or however you determine this value
         },
       },
+      { $sort: { betCreatedAt: -1 } },
       {
-        $match: {
-          periodFor: second,
+        $addFields: {
+          winningAmount: game.winningCoin,
         },
       },
-      {
-        $sort: {
-          betCreatedAt: -1,
-        },
-      },
-      // {
-      //     $match: {
-      //         status: { $in: ["fail", "pending", "successfully"] }
-      //     }
-      // }
-    ]);
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      getGamePeriodById
-    );
+    ];
+
+    // Aggregate documents from PenaltyBetting and PenaltyBettingNew collections
+    const penaltyBettingDocs = await PenaltyBetting.aggregate(basePipeline);
+    const penaltyBettingNewDocs = await PenaltyBettingNew.aggregate(basePipeline);
+
+    // Combine results from both collections
+    const allPenaltyBettingDocs = [...penaltyBettingDocs, ...penaltyBettingNewDocs];
+
+    // Format and send the response
+    res.status(200).json({
+      status: 200,
+      message: "Get game period.",
+      data: allPenaltyBettingDocs,
+    });
   } catch (error) {
-    return handleErrorResponse(res, error);
+    res.status(500).json({
+      status: 500,
+      message: "An error occurred.",
+      error: error.message,
+    });
   }
 };
-
 
 //#region Get All Penalty Betting Period
 // export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
@@ -361,7 +425,7 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
       selectedTime: second,
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
-    });
+    })
     // Step 2: Manually group by period
     let groupedByPeriod = {};
     penaltyBettings.forEach((bet) => {
