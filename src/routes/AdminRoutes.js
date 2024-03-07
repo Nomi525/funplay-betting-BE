@@ -1,7 +1,7 @@
 import { getTransactionList, getwithdrwalcheck, topAllPlayers, topWeeklyPlayers } from "../controller/admin/AdminController.js";
 import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
-import { addUPIMethod, getUPIMethod } from "../controller/admin/UPIController.js";
+import { addUPIMethod, changeStatusOfUPIMethod, deleteUPIMethod, getUPIMethod } from "../controller/admin/UPIController.js";
 import { approveRejectWithdrawalRequest, getAllUserWithdrawalRequest, getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
 import { UPIMethod } from "../models/UPIMethod.js";
 import {
@@ -304,6 +304,8 @@ adminRoutes.get('/top-all-player', Auth, topAllPlayers)
 
 adminRoutes.post('/add-upi-method', Auth, Upload, addUPIMethod);
 adminRoutes.get('/get-all-upi-method', Auth, getUPIMethod)
+adminRoutes.post('/upi-status-update', Auth, changeStatusOfUPIMethod)
+adminRoutes.post('/upi-method-delete', Auth, deleteUPIMethod)
 
 
 export { adminRoutes };

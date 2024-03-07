@@ -276,7 +276,12 @@ const ResponseMessage = {
   ALREADY_PENDING: "Already deposit request in pending",
   GET_SINGLE_BETTING_HISTORY: "get single betting history fetch successfully",
   SLOTS_BOOKED_IN_COMMUNITY_BETTING: "Slots fetched",
-  NOTIFICATION_NOT_DELETED: "Failed to delete notification"
+  NOTIFICATION_NOT_DELETED: "Failed to delete notification",
+  UPI_ACTIVATED: "UPI method activated successfully",
+  UPI_DEACTIVATED: "UPI method deactivated successfully",
+  UPI_NOT_EXIST: "Invalid upi method",
+  UPI_METHOD_DELETED: "UPI id deleted successfully.",
+  UPI_METHOD_NOT_FOUND: "UPI method not found.",
 };
 
 export { ResponseMessage };
