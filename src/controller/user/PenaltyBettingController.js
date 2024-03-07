@@ -22,7 +22,9 @@ import {
   getRandomElement,
   getRandomNumberExcluding,
   capitalizeFirstLetter,
+  Period
 } from "../../index.js";
+import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 
 //#region Add penalty Betting
 export const addPenaltyBet = async (req, res) => {
@@ -115,19 +117,124 @@ export const addPenaltyBet = async (req, res) => {
 };
 //#endregion
 
-//#region Get By Id Penalty Betting Period
+
+// export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const game = await Game.findById(gameId);
+
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     const getGamePeriodById = await PenaltyBetting.aggregate([
+//       {
+//         $match: {
+//           userId: new mongoose.Types.ObjectId(req.user),
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           selectedTime: second,
+//           createdAt: { $gte: twentyFourHoursAgo },
+//           is_deleted: 0,
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "periods",
+//           localField: "period",
+//           foreignField: "period",
+//           as: "periodData",
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           price: "$betAmount",
+//           // betSide: 1,
+//           betSide: {
+//             $concat: [
+//               { $toUpper: { $substrCP: ["$betSide", 0, 1] } },
+//               {
+//                 $substrCP: [
+//                   "$betSide",
+//                   1,
+//                   { $subtract: [{ $strLenCP: "$betSide" }, 1] },
+//                 ],
+//               },
+//             ],
+//           },
+//           period: 1,
+//           isWin: 1,
+//           status: 1,
+//           createdAt: 1,
+//           periodData: {
+//             $filter: {
+//               input: "$periodData",
+//               as: "pd",
+//               cond: {
+//                 $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
+//               },
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $unwind: "$periodData",
+//       },
+//       {
+//         $project: {
+//           period: 1,
+//           price: 1,
+//           betSide: 1,
+//           isWin: 1,
+//           status: 1,
+//           date: "$periodData.date",
+//           startTime: "$periodData.startTime",
+//           endTime: "$periodData.endTime",
+//           periodFor: "$periodData.periodFor",
+//           createdAt: "$periodData.createdAt",
+//           betCreatedAt: "$createdAt",
+//           winningAmount: { $literal: game.winningCoin },
+//         },
+//       },
+//       {
+//         $match: {
+//           periodFor: second,
+//         },
+//       },
+//       {
+//         $sort: {
+//           betCreatedAt: -1,
+//         },
+//       },
+//       // {
+//       //     $match: {
+//       //         status: { $in: ["fail", "pending", "successfully"] }
+//       //     }
+//       // }
+//     ]);
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       getGamePeriodById
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
-    const game = await Game.findById(gameId);
-
+    const userId = req.user;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    console.log(twentyFourHoursAgo,"hhh");
-    const getGamePeriodById = await PenaltyBetting.aggregate([
+    const game = await Game.findOne({ _id: gameId });
+
+    // Create a base aggregation pipeline
+    const basePipeline = [
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(req.user),
+          userId: new mongoose.Types.ObjectId(userId),
           gameId: new mongoose.Types.ObjectId(gameId),
           selectedTime: second,
           createdAt: { $gte: twentyFourHoursAgo },
@@ -135,209 +242,244 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "periods",
-          localField: "period",
-          foreignField: "period",
-          as: "periodData",
-        },
-      },
-      {
         $project: {
-          _id: 0,
           price: "$betAmount",
-          // betSide: 1,
-          betSide: {
-            $concat: [
-              { $toUpper: { $substrCP: ["$betSide", 0, 1] } },
-              {
-                $substrCP: [
-                  "$betSide",
-                  1,
-                  { $subtract: [{ $strLenCP: "$betSide" }, 1] },
-                ],
-              },
-            ],
-          },
-          period: 1,
+          betSide: 1, // Use the field directly since it doesn't need transformation
           isWin: 1,
           status: 1,
-          createdAt: 1,
-          periodData: {
-            $filter: {
-              input: "$periodData",
-              as: "pd",
-              cond: {
-                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
-              },
-            },
-          },
-        },
-      },
-      {
-        $unwind: "$periodData",
-      },
-      {
-        $project: {
-          period: 1,
-          price: 1,
-          betSide: 1,
-          isWin: 1,
-          status: 1,
-          date: "$periodData.date",
-          startTime: "$periodData.startTime",
-          endTime: "$periodData.endTime",
-          periodFor: "$periodData.periodFor",
-          createdAt: "$periodData.createdAt",
           betCreatedAt: "$createdAt",
-          winningAmount: { $literal: game.winningCoin },
+          // Assuming these fields can be populated or calculated directly
+          period: 1, // Placeholder, adjust based on your data model
+          date: "$createdAt", // Example, adjust as necessary
+          startTime: 1, // Placeholder, adjust based on your data model
+          endTime: 1, // Placeholder, adjust based on your data model
+          periodFor: "$selectedTime", // Or however you determine this value
         },
       },
+      { $sort: { betCreatedAt: -1 } },
       {
-        $match: {
-          periodFor: second,
+        $addFields: {
+          winningAmount: game.winningCoin,
         },
       },
-      {
-        $sort: {
-          betCreatedAt: -1,
-        },
-      },
-      // {
-      //     $match: {
-      //         status: { $in: ["fail", "pending", "successfully"] }
-      //     }
-      // }
-    ]);
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      getGamePeriodById
-    );
+    ];
+
+    // Aggregate documents from PenaltyBetting and PenaltyBettingNew collections
+    const penaltyBettingDocs = await PenaltyBetting.aggregate(basePipeline);
+    const penaltyBettingNewDocs = await PenaltyBettingNew.aggregate(basePipeline);
+
+    // Combine results from both collections
+    const allPenaltyBettingDocs = [...penaltyBettingDocs, ...penaltyBettingNewDocs];
+
+    // Format and send the response
+    res.status(200).json({
+      status: 200,
+      message: "Get game period.",
+      data: allPenaltyBettingDocs,
+    });
   } catch (error) {
-    return handleErrorResponse(res, error);
+    res.status(500).json({
+      status: 500,
+      message: "An error occurred.",
+      error: error.message,
+    });
   }
 };
-//#endregion
 
 //#region Get All Penalty Betting Period
+// export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const getPenaltyBettingPeriods = await PenaltyBetting.aggregate([
+//       {
+//         $match: {
+//           gameId: new mongoose.Types.ObjectId(gameId),
+//           selectedTime: second,
+//           createdAt: { $gte: twentyFourHoursAgo },
+//           is_deleted: 0,
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$period",
+//           gameId: { $first: "$gameId" },
+//           totalUsers: { $sum: 1 },
+//           betAmount: { $sum: "$betAmount" },
+//           winBetSide: {
+//             $max: {
+//               $cond: [{ $eq: ["$isWin", true] }, "$betSide", null],
+//             },
+//           },
+//           status: {
+//             $max: {
+//               $cond: {
+//                 if: { $in: ["$status", ["successfully"]] },
+//                 then: "successfully",
+//                 else: {
+//                   $cond: {
+//                     if: { $in: ["$status", ["Pending"]] },
+//                     then: "pending",
+//                     else: {
+//                       $cond: {
+//                         if: { $in: ["$status", ["fail"]] },
+//                         then: "fail",
+//                         else: null,
+//                       },
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//           period: { $first: "$period" },
+//         },
+//       },
+//       {
+//         $sort: {
+//           period: -1,
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "periods",
+//           localField: "period",
+//           foreignField: "period",
+//           as: "periodData",
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           gameId: 1,
+//           totalUsers: 1,
+//           price: "$betAmount",
+//           period: 1,
+//           winBetSide: 1,
+//           status: 1,
+//           periodData: {
+//             $filter: {
+//               input: "$periodData",
+//               as: "pd",
+//               cond: {
+//                 $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
+//               },
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $unwind: "$periodData",
+//       },
+//       {
+//         $project: {
+//           gameId: 1,
+//           totalUsers: 1,
+//           winBetSide: 1,
+//           period: 1,
+//           price: 1,
+//           status: 1,
+//           date: "$periodData.date",
+//           startTime: "$periodData.startTime",
+//           endTime: "$periodData.endTime",
+//           periodFor: "$periodData.periodFor",
+//           createdAt: "$periodData.createdAt",
+//         },
+//       },
+//       {
+//         $match: {
+//           periodFor: second,
+//         },
+//       },
+//       // {
+//       //     $match: {
+//       //         status: { $ne: null }
+//       //     }
+//       // }
+//     ]);
+
+//     console.log(getPenaltyBettingPeriods, "getPenaltyBettingPeriods")
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       ResponseMessage.GAME_PERIOD_GET,
+//       getPenaltyBettingPeriods
+//     );
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+
 export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
   try {
+
     const { gameId } = req.params;
     const { second } = req.query;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const getPenaltyBettingPeriods = await PenaltyBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          selectedTime: second,
-          createdAt: { $gte: twentyFourHoursAgo },
-          is_deleted: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$period",
-          gameId: { $first: "$gameId" },
-          totalUsers: { $sum: 1 },
-          betAmount: { $sum: "$betAmount" },
-          winBetSide: {
-            $max: {
-              $cond: [{ $eq: ["$isWin", true] }, "$betSide", null],
-            },
-          },
-          status: {
-            $max: {
-              $cond: {
-                if: { $in: ["$status", ["successfully"]] },
-                then: "successfully",
-                else: {
-                  $cond: {
-                    if: { $in: ["$status", ["Pending"]] },
-                    then: "pending",
-                    else: {
-                      $cond: {
-                        if: { $in: ["$status", ["fail"]] },
-                        then: "fail",
-                        else: null,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          period: { $first: "$period" },
-        },
-      },
-      {
-        $sort: {
-          period: -1,
-        },
-      },
-      {
-        $lookup: {
-          from: "periods",
-          localField: "period",
-          foreignField: "period",
-          as: "periodData",
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          gameId: 1,
-          totalUsers: 1,
-          price: "$betAmount",
-          period: 1,
-          winBetSide: 1,
-          status: 1,
-          periodData: {
-            $filter: {
-              input: "$periodData",
-              as: "pd",
-              cond: {
-                $eq: ["$$pd.gameId", new mongoose.Types.ObjectId(gameId)],
-              },
-            },
-          },
-        },
-      },
-      {
-        $unwind: "$periodData",
-      },
-      {
-        $project: {
-          gameId: 1,
-          totalUsers: 1,
-          winBetSide: 1,
-          period: 1,
-          price: 1,
-          status: 1,
-          date: "$periodData.date",
-          startTime: "$periodData.startTime",
-          endTime: "$periodData.endTime",
-          periodFor: "$periodData.periodFor",
-          createdAt: "$periodData.createdAt",
-        },
-      },
-      {
-        $match: {
-          periodFor: second,
-        },
-      },
-      // {
-      //     $match: {
-      //         status: { $ne: null }
-      //     }
-      // }
-    ]);
+
+    // Step 1: Fetch relevant PenaltyBetting documents
+    const penaltyBettings = await PenaltyBetting.find({
+      gameId: new mongoose.Types.ObjectId(gameId),
+      selectedTime: second,
+      createdAt: { $gte: twentyFourHoursAgo },
+      is_deleted: 0,
+    })
+    // Step 2: Manually group by period
+    let groupedByPeriod = {};
+    penaltyBettings.forEach((bet) => {
+      const period = bet.period;
+      if (!groupedByPeriod[period]) {
+        groupedByPeriod[period] = {
+          gameId: bet.gameId,
+          totalUsers: 0,
+          betAmount: 0,
+          winBetSide: null,
+          status: null,
+          period: bet.period,
+        };
+      }
+      groupedByPeriod[period].totalUsers += 1;
+      groupedByPeriod[period].betAmount += bet.betAmount;
+      if (bet.isWin && (groupedByPeriod[period].winBetSide === null || groupedByPeriod[period].winBetSide === bet.betSide)) {
+        groupedByPeriod[period].winBetSide = bet.betSide;
+      }
+      if (["successfully", "Pending", "fail"].includes(bet.status) && (groupedByPeriod[period].status === null || bet.status === "successfully")) {
+        groupedByPeriod[period].status = bet.status;
+      }
+    });
+
+    // Step 3: Fetch and attach period data
+    const periods = await Period.find({
+      gameId: new mongoose.Types.ObjectId(gameId),
+      periodFor: second,
+    });
+
+    let result = [];
+    periods.forEach((period) => {
+      const periodData = groupedByPeriod[period.period];
+      if (periodData) {
+        result.push({
+          ...periodData,
+          date: period.date,
+          startTime: period.startTime,
+          endTime: period.endTime,
+          periodFor: period.periodFor,
+          createdAt: period.createdAt,
+        });
+      }
+    });
+
+    // Step 4: Sort by period in descending order
+    result.sort((a, b) => b.period - a.period);
+
+
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.GAME_PERIOD_GET,
-      getPenaltyBettingPeriods
+      result
     );
   } catch (error) {
     return handleErrorResponse(res, error);

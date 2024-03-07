@@ -146,7 +146,7 @@ export const connectToWallet = async (req, res) => {
     }
 
     if (existingUser) {
-      console.log(req.body, "hii222");
+
       await User.updateOne(
         {
           email: lowercasedEmail,
@@ -412,7 +412,7 @@ export const userSignUpSignInOtp = async (req, res) => {
       return sendResponse(res, StatusCodes.CREATED, message, userData);
     }
   } catch (error) {
-    console.log(error, "hh");
+
     return handleErrorResponse(res, error);
   }
 };
@@ -927,7 +927,7 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
-    console.log(req.body,"hh");
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
     if (checkEmailValue) {
@@ -1046,7 +1046,7 @@ export const singupFromEmailPassword = async (req, res) => {
         let referCode = referralCode(8);
         let findReferralUser = null;
         // For Referral Code
-        console.log(referralByCode,"jjj");
+        console.log(referralByCode, "jjj");
         if (referralByCode) {
           findReferralUser = await getSingleData(
             { referralCode: referralByCode, is_deleted: 0 },
@@ -1078,14 +1078,14 @@ export const singupFromEmailPassword = async (req, res) => {
         );
         if (findReferralUser) {
           const referralUserData = {
-              userId: findReferralUser._id,
-              referralUser: createUser._id,
-              referralByCode: referralByCode || null,
+            userId: findReferralUser._id,
+            referralUser: createUser._id,
+            referralByCode: referralByCode || null,
           };
-  
+
           const referralUserInstance = new ReferralUser(referralUserData);
           await referralUserInstance.save();
-      }
+        }
         if (createUser) {
           await createReward(
             createUser._id,
@@ -1604,7 +1604,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        [] 
+        []
       );
     }
 
@@ -1631,8 +1631,6 @@ export const editProfile = async (req, res) => {
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
-   
-    
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
     }
@@ -1649,7 +1647,7 @@ export const editProfile = async (req, res) => {
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
-    
+
       }
     }
 
@@ -1685,7 +1683,7 @@ export const editProfile = async (req, res) => {
           },
           User
         );
-      
+
         if (checkMobileNumber) {
           return sendResponse(
             res,
@@ -1697,7 +1695,7 @@ export const editProfile = async (req, res) => {
         updateData.mobileNumber = req.body.mobileNumber;
       }
     }
-    
+
 
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
@@ -1727,7 +1725,7 @@ export const editProfile = async (req, res) => {
 //       { _id: req.user, is_deleted: 0 },
 //       User
 //     );
-    
+
 //     if (!findData) {
 //       return sendResponse(
 //         res,
@@ -2474,7 +2472,7 @@ export const userGetCMSDetail = async (req, res) => {
 export const deleteBankDetail = async (req, res) => {
   try {
     const userId = req.user;
-    const bankDetailIdToRemove = req.body.bankDetailId; 
+    const bankDetailIdToRemove = req.body.bankDetailId;
 
     const updatedUser = await User.findOneAndUpdate(
       { _id: userId },

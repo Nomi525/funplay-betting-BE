@@ -1,7 +1,10 @@
-import { getTransactionList, getwithdrwalcheck } from "../controller/admin/AdminController.js";
+import { getTransactionList, getwithdrwalcheck, topAllPlayers, topWeeklyPlayers } from "../controller/admin/AdminController.js";
+import { addEditBankDetail, getBankDetail } from "../controller/admin/BankController.js";
 import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
+import { addUPIMethod, changeStatusOfUPIMethod, deleteUPIMethod, getUPIMethod } from "../controller/admin/UPIController.js";
 import { approveRejectWithdrawalRequest, getAllUserWithdrawalRequest, getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
+import { UPIMethod } from "../models/UPIMethod.js";
 import {
   Auth,
   Upload,
@@ -97,7 +100,7 @@ import {
   getAllSubAdmin,
   declareWinnerOfPenaltyBetting,
   declareWinnerOfCardBetting,
-  getAllGamePeriodSelectedTimeList, addupdateUPiorQr
+  getAllGamePeriodSelectedTimeList, addupdateUPiorQr, getCommunityGameperiod
 
 } from "./../index.js";
 const adminRoutes = express.Router();
@@ -248,7 +251,7 @@ adminRoutes.post("/currency-convert", allCurrencyConverter);
 // Currency Coin Routes
 adminRoutes.post("/add-edit-currency-coin", Auth, addEditCurrencyCoin);
 adminRoutes.get("/get-all-currency-coin", Auth, getAllCurrencyCoin);
-adminRoutes.get( 
+adminRoutes.get(
   "/get-single-currency-coin/:currencyCoinId",
   Auth,
   getSingleCurrencyCoin
@@ -290,13 +293,27 @@ adminRoutes.get("/get-all-game-periods/:gameType/:gameId", getAllGamePeriodData)
 adminRoutes.get("/get-all-game-period-selected-time/:gameType/:gameId", Auth, getAllGamePeriodSelectedTimeList);
 adminRoutes.post("/add-update-qr-upi", Upload, addupdateUPiorQr)
 
-adminRoutes.post('/change-status-faint-currency' ,  Upload, changeStatusOfFaintCurrency)
-adminRoutes.get('/get-all-faint-currency',Auth, getAllFaintCurrency)
+adminRoutes.post('/change-status-faint-currency', Upload, changeStatusOfFaintCurrency)
+adminRoutes.get('/get-all-faint-currency', Auth, getAllFaintCurrency)
 
-adminRoutes.get('/get-single-withdrawal-request/:id',Auth, getUserWithdrawalRequest);
-adminRoutes.get('/get-all-request-withdrawal',Auth, getAllUserWithdrawalRequest);
-adminRoutes.post('/accept-reject-withdrawal-request/:id',Auth, Upload,  approveRejectWithdrawalRequest);
+adminRoutes.get('/get-single-withdrawal-request/:id', Auth, getUserWithdrawalRequest);
+adminRoutes.get('/get-all-request-withdrawal', Auth, getAllUserWithdrawalRequest);
+adminRoutes.post('/accept-reject-withdrawal-request/:id', Auth, Upload, approveRejectWithdrawalRequest);
+adminRoutes.get("/get-all-community-periods/:gameType/:gameId", getCommunityGameperiod);
+adminRoutes.get('/top-player', Auth, topWeeklyPlayers)
+adminRoutes.get('/top-all-player', Auth, topAllPlayers)
+
+adminRoutes.post('/add-upi-method', Auth, Upload, addUPIMethod);
+adminRoutes.get('/get-all-upi-method', Auth, getUPIMethod)
+adminRoutes.post('/upi-status-update', Auth, changeStatusOfUPIMethod)
+adminRoutes.post('/upi-method-delete', Auth, deleteUPIMethod)
+
+adminRoutes.post('/add-edit-bank-detail', Auth, addEditBankDetail);
+adminRoutes.get('/get-all-bank-detail', Auth, getBankDetail)
+
 
 
 export { adminRoutes };
+
+
 
