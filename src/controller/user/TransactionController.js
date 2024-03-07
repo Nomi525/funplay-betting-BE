@@ -554,6 +554,7 @@ export const withdrawalUserRequest = async (req, res) => {
 
               return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is send to admin", createSubadmin);
             }
+            
             return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
@@ -592,7 +593,7 @@ export const withdrawalUserRequest = async (req, res) => {
             return sendResponse(res, StatusCodes.CONFLICT, "Already previous request is pending", []);
           } else {
             return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
-          }
+          } 
         // } else {
         //   return sendResponse(res, StatusCodes.BAD_REQUEST, `Minimum withdrawl amount is ${adminwithdrawalAmount}`, []);
         // }
@@ -607,3 +608,5 @@ export const withdrawalUserRequest = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
