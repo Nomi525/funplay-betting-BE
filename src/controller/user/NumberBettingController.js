@@ -839,9 +839,11 @@ export const getAllNumberGamePeriod = async (req, res) => {
         result.createdAt = periodData.createdAt;
       }
     }
-
+    // const filteredResults = results.filter(r => r.periodFor === second);
+    
+    results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     // Sort by period descending
-    results.sort((a, b) => b.period - a.period);
+    // results.sort((a, b) => b.period - a.period);
 
     // Optionally filter out entries with null status or winNumber here if needed
 

@@ -30,6 +30,11 @@ import {
   Game,
   axios
 } from "../../index.js";
+import { NumberBettingNew } from "../../models/NumberBetting.js";
+import { ColourBettingNew } from "../../models/ColourBetting.js";
+import { CommunityBettingNew } from "../../models/CommunityBetting.js";
+import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
+import { CardBettingNew } from "../../models/CardBetting.js";
 
 // export const userDashboard = async (req, res) => {
 //   try {
@@ -330,60 +335,114 @@ export const userDashboard = async (req, res) => {
     // Execute independent tasks in parallel
     const [
       numberBettingForUser,
+      numberBettingForUserNew,
       colourBettingForUser,
+      colourBettingForUserNew,
       communityBettingForUser,
+      communityBettingForUserNew,
       penaltyBettingForUser,
+      penaltyBettingForUserNew,
       cardBettingForUser,
+      cardBettingForUserNew,
       numberBetting,
+      numberBettingNew,
       colourBetting,
+      colourBettingNew,
       communityBetting,
+      communityBettingNew,
       penaltyBetting,
+      penaltyBettingNew,
       cardBetting,
+      cardBettingNew
     ] = await Promise.all([
       getBettingData(NumberBetting, findUser._id),
+      getBettingData(NumberBettingNew, findUser._id),
       getBettingData(ColourBetting, findUser._id),
+      getBettingData(ColourBettingNew, findUser._id),
       getBettingData(CommunityBetting, findUser._id),
+      getBettingData(CommunityBettingNew, findUser._id),
       getBettingData(PenaltyBetting, findUser._id),
+      getBettingData(PenaltyBettingNew, findUser._id),
       getBettingData(CardBetting, findUser._id),
+      getBettingData(CardBettingNew, findUser._id),
       getAllBettingData(NumberBetting),
+      getAllBettingData(NumberBettingNew),
       getAllBettingData(ColourBetting),
+      getAllBettingData(ColourBettingNew),
       getAllBettingData(CommunityBetting),
+      getAllBettingData(CommunityBettingNew),
       getAllBettingData(PenaltyBetting),
+      getAllBettingData(PenaltyBettingNew),
       getAllBettingData(CardBetting),
+      getAllBettingData(CardBettingNew),
     ]);
+    
 
     const totalUserswhoPlacedBidsin24Hrs =
       numberBettingForUser.length +
+      numberBettingForUserNew.length +
       colourBettingForUser.length +
+      colourBettingForUserNew.length +
       communityBettingForUser.length +
+      communityBettingForUserNew.length +
       penaltyBettingForUser.length +
-      cardBettingForUser.length;
+      penaltyBettingForUserNew.length +
+      cardBettingForUser.length +
+      cardBettingForUserNew.length;
 
     const totalBidin24Hrs =
       numberBetting.length +
+      numberBettingNew.length +
       colourBetting.length +
+      colourBettingNew.length +
       communityBetting.length +
+      communityBettingNew.length +
       penaltyBetting.length +
-      cardBetting.length;
+      penaltyBettingNew.length +
+      cardBetting.length +
+      cardBettingNew.length;
 
     const numberBettingWinningAmount =
       calculateWinningAmount(numberBettingForUser);
+
+      const numberBettingWinningAmountNew =
+      calculateWinningAmount(numberBettingForUserNew);
+
     const colourBettingWinningAmount =
       calculateWinningAmount(colourBettingForUser);
-    const communityBettingWinningAmount = calculateWinningAmount(
-      communityBettingForUser
-    );
-    const penaltyBettingWinningAmount = calculateWinningAmount(
-      penaltyBettingForUser
-    );
-    const cardBettingWinningAmount = calculateWinningAmount(cardBettingForUser);
+
+      const colourBettingWinningAmountNew =
+      calculateWinningAmount(colourBettingForUserNew);
+
+    const communityBettingWinningAmount = 
+    calculateWinningAmount(communityBettingForUser);
+
+    const communityBettingWinningAmountNew = 
+    calculateWinningAmount(communityBettingForUserNew);
+
+    const penaltyBettingWinningAmount = 
+    calculateWinningAmount(penaltyBettingForUser);
+
+    const penaltyBettingWinningAmountNew = 
+    calculateWinningAmount(penaltyBettingForUserNew);
+
+    const cardBettingWinningAmount = 
+    calculateWinningAmount(cardBettingForUser);
+
+    const cardBettingWinningAmountNew = 
+    calculateWinningAmount(cardBettingForUserNew);
 
     const totalWinningAmountin24Hrs =
       numberBettingWinningAmount +
+      numberBettingWinningAmountNew +
+      colourBettingWinningAmountNew +
       colourBettingWinningAmount +
       communityBettingWinningAmount +
+      communityBettingWinningAmountNew +
       penaltyBettingWinningAmount +
-      cardBettingWinningAmount;
+      penaltyBettingWinningAmountNew +
+      cardBettingWinningAmount +
+      cardBettingWinningAmountNew;
 
     const totalReferralCount = await ReferralUser.countDocuments({
       userId: findUser._id,
@@ -424,10 +483,15 @@ export const userDashboard1 = async (req, res) => {
       findUser,
       [
         numberBettingForUser,
+        numberBettingForUserNew,
         colourBettingForUser,
+        colourBettingForUserNew,
         communityBettingForUser,
+        communityBettingForUserNew,
         penaltyBettingForUser,
+        penaltyBettingForUserNew,
         cardBettingForUser,
+        cardBettingForUserNew,
         transactions,
         transactionDeposite,
       ],
@@ -435,10 +499,15 @@ export const userDashboard1 = async (req, res) => {
       findUserPromise,
       Promise.all([
         getBettingData(NumberBetting, req.user),
+        getBettingData(NumberBettingNew, req.user),
         getBettingData(ColourBetting, req.user),
+        getBettingData(ColourBettingNew, req.user),
         getBettingData(CommunityBetting, req.user),
+        getBettingData(CommunityBettingNew, req.user),
         getBettingData(PenaltyBetting, req.user),
+        getBettingData(PenaltyBettingNew, req.user),
         getBettingData(CardBetting, req.user),
+        getBettingData(CardBettingNew, req.user),
         getAllData({ userId: req.user, is_deleted: 0 }, TransactionHistory),
         getSingleData({ userId: req.user, is_deleted: 0 }, NewTransaction),
       ]),
@@ -465,24 +534,39 @@ export const userDashboard1 = async (req, res) => {
 
     const [
       totalNumberBettingReward,
+      totalNumberBettingRewardNew,
       totalColourBettingReward,
+      totalColourBettingRewardNew,
       totalCommunityBettingReward,
+      totalCommunityBettingRewardNew,
       totalPenaltyBettingReward,
+      totalPenaltyBettingRewardNew,
       totalCardBettingReward,
+      totalCardBettingRewardNew
     ] = await Promise.all([
       calculateTotalBettingReward(numberBettingForUser),
+      calculateTotalBettingReward(numberBettingForUserNew),
       calculateTotalBettingReward(colourBettingForUser),
+      calculateTotalBettingReward(colourBettingForUserNew),
       calculateTotalBettingReward(communityBettingForUser),
+      calculateTotalBettingReward(communityBettingForUserNew),
       calculateTotalBettingReward(penaltyBettingForUser),
+      calculateTotalBettingReward(penaltyBettingForUserNew),
       calculateTotalBettingReward(cardBettingForUser),
+      calculateTotalBettingReward(cardBettingForUserNew)
     ]);
 
     const totalReward =
       totalNumberBettingReward +
+      totalNumberBettingRewardNew +
       totalColourBettingReward +
+      totalColourBettingRewardNew +
       totalCommunityBettingReward +
+      totalCommunityBettingRewardNew +
       totalPenaltyBettingReward +
-      totalCardBettingReward;
+      totalPenaltyBettingRewardNew +
+      totalCardBettingReward +
+      totalCardBettingRewardNew;
 
     const totalWithdrawal = transactions.filter(
       (tran) => tran.type === "withdrawal"
