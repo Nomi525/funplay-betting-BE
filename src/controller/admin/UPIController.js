@@ -5,22 +5,18 @@ export const addUPIMethod = async (req, res) => {
     try {
         let id = req.body.id;
         if (id) {
-            const logo = req.logo;
-            const QRCode = req.QRCode;
+           
             const findUPI = await UPIMethod.find({ methodName: req.body.methodName , _id:{$ne:id}, is_deleted:0})
             if (findUPI.length) {
                 return sendResponse(res, StatusCodes.CONFLICT, "UPI method already exist", []);
             }
-
-            const updateUPIData = await UPIMethod.updateOne({_id:id},{
-                $set: {
-                    logo: logo,
-                    QRCode: QRCode,
-                    methodName: req.body.methodName,
-                    UPIId: req.body.UPIId
-                },
-            });
-            return sendResponse(res, StatusCodes.OK, "upadate upi method successfully", updateUPIData);
+            const findUPII = await getSingleData({ _id: req.body.id }, UPIMethod)
+                if (findUPII) {
+                    req.body.logo = req.logo.length ? req.logo : req.body.logo;
+                    req.body.QRCode = req.QRCode.length ? req.QRCode : req.body.QRCode;
+                    const updatedUPI = await dataUpdated({ _id: req.body.id }, req.body, UPIMethod)
+                    return sendResponse(res, StatusCodes.OK, "upadate upi method successfully", updatedUPI);
+                } 
         } else {
             const logo = req.logo;
             const QRCode = req.QRCode;
@@ -62,7 +58,7 @@ export const getUPIMethod = async (req, res) => {
 export const changeStatusOfUPIMethod = async (req, res) => {
     try {
       const { id } = req.body;
-      const findUPI = await getSingleData({ _id: id }, UPIMethod);
+      const findUPI = await getSingleData({ _id: id, is_deleted:0 }, UPIMethod);
       if (findUPI) {
         var responseMessage;
         if (findUPI.isActive) {
