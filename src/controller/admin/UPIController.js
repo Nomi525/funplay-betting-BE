@@ -44,10 +44,9 @@ export const addUPIMethod = async (req, res) => {
     }
 };
 
-
 export const getUPIMethod = async (req, res) => {
     try {
-        const getAllData = await UPIMethod.find()
+        const getAllData = await UPIMethod.find({is_deleted:0})
 
         return sendResponse(
             res,
@@ -88,7 +87,7 @@ export const changeStatusOfUPIMethod = async (req, res) => {
       return handleErrorResponse(res, err);
     }
   };
-  
+
   export const deleteUPIMethod = async (req, res) => {
     try {
       const { id } = req.body;
