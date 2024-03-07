@@ -3,7 +3,7 @@ import { createError, sendResponse, StatusCodes, ResponseMessage, handleErrorRes
 
 export const addUPIMethod = async (req, res) => {
     try {
-        let id = req.query.id;
+        let id = req.body.id;
         if (id) {
             const logo = req.logo;
             const QRCode = req.QRCode;
