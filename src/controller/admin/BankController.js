@@ -3,9 +3,9 @@ import { Bank } from "../../models/Bank.js";
 
 export const addEditBankDetail = async (req, res) => {
     try {
-        let id = req.query.id;
+        let id = req.body.id;
         if (id) {
-            const findBank = await Bank.find({ accountNumber: req.body.accountNumber })
+            const findBank = await Bank.find({ accountNumber: req.body.accountNumber ,_id:{$ne:id}})
             if (findBank.length) {
                 return sendResponse(res, StatusCodes.CONFLICT, "bank already exist", []);
             }

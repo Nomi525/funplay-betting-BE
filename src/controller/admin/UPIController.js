@@ -7,7 +7,7 @@ export const addUPIMethod = async (req, res) => {
         if (id) {
             const logo = req.logo;
             const QRCode = req.QRCode;
-            const findUPI = await UPIMethod.find({ methodName: req.body.methodName })
+            const findUPI = await UPIMethod.find({ methodName: req.body.methodName , _id:{$ne:id}, is_deleted:0})
             if (findUPI.length) {
                 return sendResponse(res, StatusCodes.CONFLICT, "UPI method already exist", []);
             }
@@ -24,7 +24,7 @@ export const addUPIMethod = async (req, res) => {
         } else {
             const logo = req.logo;
             const QRCode = req.QRCode;
-            const findUPI = await UPIMethod.find({ methodName: req.body.methodName })
+            const findUPI = await UPIMethod.find({ methodName: req.body.methodName, is_deleted:0 })
             if (findUPI.length) {
                 return sendResponse(res, StatusCodes.CONFLICT, "UPI method already exist", []);
             }
