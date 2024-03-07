@@ -1,4 +1,4 @@
-import moment from "moment";
+
 import { Socket } from "../../config/Socket.config.js";
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
@@ -10,6 +10,7 @@ import { NumberBettingNew } from "../../models/NumberBetting.js";
 import { CardBettingNew } from "../../models/CardBetting.js";
 import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 import { CommunityBettingNew } from "../../models/CommunityBetting.js";
+import moment from "moment-timezone"
 
 //#region admin login
 export const adminLogin = async (req, res) => {
@@ -759,43 +760,39 @@ export const topAllPlayers = async (req, res) => {
 // })
 
 
+
 Socket.on("connection", (socket) => {
     socket.on("createColourBet", async (data) => {
-        let liveBetData;
+        let liveBets = [];
 
         try {
             const colorBetting = await ColourBetting.find();
             const colorBettingNew = await ColourBettingNew.find();
-
             const allBets = [...colorBetting, ...colorBettingNew];
-            console.log(allBets, 'kk');
-// console.log(data.createdAt, "timedata");
-const data = {
-    createdAt: "2024-03-07T10:58:57.373Z",
-}; console.log(data, "ddd");
-            // Assuming data.createdAt is a valid date object
-            const createdAtTimestamp = moment(data.createdAt);
-            console.log(createdAtTimestamp,"currentyah");
 
-            // Get the current timestamp
-            const currentTimestamp = moment();
+            const currentTimestamp = moment().tz('Asia/Kolkata'); 
+            console.log(currentTimestamp, "hh");
 
-            // Calculate the difference in minutes between the current time and the createdAt time
-            const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
-            console.log(timeDifferenceInMinutes,"hh");
-            const liveBetThresholdInMinutes = 60;
+            for (const bet of allBets) {
+                if (bet.userId === null) {
+                    continue;
+                }
 
-            // Check if the bet is live based on the time difference
-            const isLiveBet = timeDifferenceInMinutes <= liveBetThresholdInMinutes;
-            console.log(isLiveBet, "isLiveBet");
+                const createdAtTimestamp = moment(bet.createdAt);
+                const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
+                const liveBetThresholdInMinutes = 15;
 
-            if (isLiveBet) {
-                liveBetData = data;
-                console.log(liveBetData,"liveBetDataddd");
+                if (timeDifferenceInMinutes <= liveBetThresholdInMinutes) {
+                    liveBets.push(bet);
+                }
+            }
+
+            if (liveBets.length > 0) {
+                console.log(liveBets, "liveBetsArray");
                 let message = "Connected for live bets";
-                socket.emit("response", { message, liveBetData });
+                socket.emit("response", { message, liveBets });
             } else {
-                let message = "Bet is not live anymore";
+                let message = "No live bets found in the last 15 minutes";
                 socket.emit("response", { message });
             }
         } catch (error) {
@@ -805,6 +802,7 @@ const data = {
         }
     });
 });
+
 
 
 
