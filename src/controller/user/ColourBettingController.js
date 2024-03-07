@@ -767,7 +767,6 @@ export const getSingleGameWiseWinner = async (req, res) => {
 
 
 export const getAllGamePeriod = async (req, res) => {
-
   try {
     const { gameId } = req.params;
     const { second } = req.query;
@@ -783,7 +782,7 @@ export const getAllGamePeriod = async (req, res) => {
         $lt: currentDateOnServer,
       },
       is_deleted: 0,
-    });
+    }).limit(30); 
 
 
     // Group by 'period' manually
@@ -823,9 +822,13 @@ export const getAllGamePeriod = async (req, res) => {
         result.createdAt = periodData.createdAt;
       }
     }
+  
 
     // Filter by 'second' if necessary (the periodFor match)
     const filteredResults = results.filter(r => r.periodFor === second);
+
+    filteredResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
 
 
     return sendResponse(
@@ -835,6 +838,7 @@ export const getAllGamePeriod = async (req, res) => {
       filteredResults
     );
   } catch (error) {
+    console.log(error,"hh");
     return handleErrorResponse(res, error);
   }
 };
