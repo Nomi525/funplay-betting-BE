@@ -322,6 +322,7 @@ export const userDashboard = async (req, res) => {
       { _id: req.user, is_deleted: 0 },
       User
     );
+    console.log(findUser,"hh");
 
     if (!findUser) {
       return sendResponse(
@@ -463,6 +464,13 @@ export const userDashboard = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+function calculateTotalBettingReward(bettingData) {
+  return bettingData.reduce(
+    (total, data) => Number(total) + Number(data.rewardAmount),
+    0
+  );
+}
 
 export const userDashboard1 = async (req, res) => {
   try {
@@ -646,6 +654,8 @@ export const userDashboard1 = async (req, res) => {
         }),
       ]);
 
+      
+
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -674,12 +684,7 @@ export const userDashboard1 = async (req, res) => {
   }
 };
 
-function calculateTotalBettingReward(bettingData) {
-  return bettingData.reduce(
-    (total, data) => Number(total) + Number(data.rewardAmount),
-    0
-  );
-}
+
 
 
 export const topWeeklyMonthlyPlayers = async (req, res) => {

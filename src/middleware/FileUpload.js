@@ -57,6 +57,7 @@ var upload = multer({ storage }).fields([
     {
         name: "rejectScreenShort",
         maxCount: 1,
+<<<<<<< HEAD
     },
     {
         name: "withdrawalApproveImg",
@@ -71,6 +72,11 @@ var upload = multer({ storage }).fields([
         maxCount: 1,
     },
 
+=======
+    }
+    
+    
+>>>>>>> f67cc89aed47b491778b71198846e6444bf8cc59
 ]);
 
 
@@ -107,14 +113,6 @@ export default function (req, res, next) {
                 var rejectScreenShort = req.files.rejectScreenShort ? req.files.rejectScreenShort[0].filename : "";
                 req.rejectScreenShortUrl = rejectScreenShort;
 
-                var withdrawalApproveImg = req.files.withdrawalApproveImg ? req.files.withdrawalApproveImg[0].filename : "";
-                req.withdrawalApproveImgUrl = withdrawalApproveImg;
-
-                var logo = req.files.logo ? req.files.logo[0].filename : "";
-                req.logo = logo;
-
-                var QRCode = req.files.QRCode ? req.files.QRCode[0].filename : "";
-                req.QRCode = QRCode;
 
                 next();
             } else {

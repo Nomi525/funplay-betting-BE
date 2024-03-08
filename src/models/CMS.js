@@ -37,7 +37,7 @@ const cmsSchema = new mongoose.Schema(
             }, title: {
                 type: String,
                 require: false,
-            },
+            }
         },
         deletedStatus: {
             type: Number,
