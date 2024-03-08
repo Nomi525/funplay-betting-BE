@@ -85,10 +85,9 @@ export const addCardBet = async (req, res) => {
     );
 
     if (createCardBet) {
-      checkBalance.totalCoin = minusLargeSmallValue(
-        checkBalance.totalCoin,
-        betAmount
-      );
+      if (checkBalance.totalCoin > 0 && checkBalance.totalCoin > betAmount) {
+        checkBalance.totalCoin = Number(checkBalance.totalCoin) - Number(betAmount)
+      }
       if (parseFloat(checkBalance.betAmount)) {
         checkBalance.betAmount = plusLargeSmallValue(
           checkBalance.betAmount,

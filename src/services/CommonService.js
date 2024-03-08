@@ -949,8 +949,8 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                       if (findUser) {
                         console.log(findUser.betAmount, "1");
                         let rewardAmount =
-                          total = findUser.betAmount + findUser.betAmount * winningCoin;
-                        console.log(total, "total")
+                          findUser.betAmount + findUser.betAmount * winningCoin;
+
                         await PenaltyBetting.updateOne(
                           {
                             userId,

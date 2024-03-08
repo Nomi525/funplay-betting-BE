@@ -782,9 +782,9 @@ export const getAllGamePeriod = async (req, res) => {
         $lt: currentDateOnServer,
       },
       is_deleted: 0,
-    }).limit(30);
+    })
 
-
+    console.log(colourBettings, "coloyedfgd")
     // Group by 'period' manually
     const groupedByPeriod = colourBettings.reduce((acc, cur) => {
       const period = cur.period.toString(); // Assuming period is an ObjectId or similar
@@ -825,8 +825,8 @@ export const getAllGamePeriod = async (req, res) => {
 
 
     // Filter by 'second' if necessary (the periodFor match)
-    const filteredResults = results.filter(r => r.periodFor === second);
-
+    const filteredResults = results.filter(r => r.periodFor == second);
+    console.log(filteredResults, "filteredResults")
     filteredResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return sendResponse(
       res,
