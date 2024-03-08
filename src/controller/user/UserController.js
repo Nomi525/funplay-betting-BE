@@ -26,6 +26,7 @@ import {
   AdminSetting,
   createReward,
   Rating,
+  ColourBetting,
 } from "../../.././src/index.js";
 
 // export const userSignup = async (req, res) => {
@@ -2496,3 +2497,32 @@ export const deleteBankDetail = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
+export const findUserBet = async (req, res) => {
+  try {
+    const userId = req.user;
+
+    const findUser = await ColourBetting.find({
+    userId:userId
+  });
+  console.log(findUser,"data");
+
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: StatusCodes.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: 'get user bet data',
+      data: findUser,
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+

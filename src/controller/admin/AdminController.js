@@ -767,8 +767,12 @@ Socket.on("connection", (socket) => {
 
         try {
             const colorBetting = await ColourBetting.find();
-            const colorBettingNew = await ColourBettingNew.find();
-            const allBets = [...colorBetting, ...colorBettingNew];
+            const numberBetting = await NumberBetting.find();
+            const cardBetting = await CardBetting.find();
+            const penaltyBetting = await PenaltyBetting.find();
+            const communityBetting = await CommunityBetting.find();
+
+            const allBets = [...colorBetting, ...numberBetting, ...cardBetting, ...penaltyBetting, ...communityBetting];
 
             const currentTimestamp = moment().tz('Asia/Kolkata'); 
             console.log(currentTimestamp, "hh");

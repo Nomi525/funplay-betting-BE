@@ -1,5 +1,5 @@
 import { socketRoute } from "../config/Socket.config.js";
-import { deleteBankDetail, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
+import { deleteBankDetail, findUserBet, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
   Upload,
@@ -89,7 +89,7 @@ import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/Fain
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
 import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
 import { getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
-import { getUPIData } from "../controller/user/UPIController.js";
+import { getBankDetail, getUPIData } from "../controller/user/UPIController.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -265,6 +265,10 @@ userRoutes.get('/get-notifications', Auth, getUserNotifications)
 userRoutes.post('/delete-notifications', Auth, deleteAllUserNotifications)
 
 userRoutes.get('/get-all-upi', Auth, getUPIData)
+userRoutes.get('/find-all-user-bet', Auth, findUserBet)
+userRoutes.get('/get-bank-for-deposit', Auth, getBankDetail)
+
+
 
 
 export { userRoutes };

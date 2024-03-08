@@ -22,3 +22,18 @@ export const getUPIData = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
+
+
+export const getBankDetail = async (req, res) => {
+    try {
+        const getAllData = await Bank.find()
+        return sendResponse(
+            res,
+            StatusCodes.OK,
+            "get all bank detail successfully",
+            getAllData
+        );
+    } catch (error) {
+        return handleErrorResponse(res, error);
+    }
+}
