@@ -57,26 +57,9 @@ var upload = multer({ storage }).fields([
     {
         name: "rejectScreenShort",
         maxCount: 1,
-<<<<<<< HEAD
-    },
-    {
-        name: "withdrawalApproveImg",
-        maxCount: 1,
-    },
-    {
-        name: "logo",
-        maxCount: 1,
-    },
-    {
-        name: "QRCode",
-        maxCount: 1,
-    },
-
-=======
     }
     
     
->>>>>>> f67cc89aed47b491778b71198846e6444bf8cc59
 ]);
 
 
