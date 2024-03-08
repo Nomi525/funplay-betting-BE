@@ -766,142 +766,143 @@ export const getSingleGameWiseWinner = async (req, res) => {
 
 
 
-export const getAllGamePeriod = async (req, res) => {
-  try {
-    const { gameId } = req.params;
-    const { second } = req.query;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const currentDateOnServer = new Date();
-
-    // First, find all ColourBetting documents within the last 24 hours and other conditions
-    const colourBettings = await ColourBetting.find({
-      gameId: new mongoose.Types.ObjectId(gameId),
-      selectedTime: second,
-      createdAt: {
-        $gte: twentyFourHoursAgo,
-        $lt: currentDateOnServer,
-      },
-      is_deleted: 0,
-    })
-
-    console.log(colourBettings, "coloyedfgd")
-    // Group by 'period' manually
-    const groupedByPeriod = colourBettings.reduce((acc, cur) => {
-      const period = cur.period.toString(); // Assuming period is an ObjectId or similar
-      if (!acc[period]) {
-        acc[period] = {
-          gameId: cur.gameId,
-          totalUsers: 0,
-          betAmount: 0,
-          winColour: null,
-          period: cur.period,
-        };
-      }
-      acc[period].totalUsers += 1;
-      acc[period].betAmount += cur.betAmount;
-      if (cur.isWin) {
-        acc[period].winColour = cur.colourName;
-      }
-      return acc;
-    }, {});
-
-    // Convert groupedByPeriod to array
-    const results = Object.values(groupedByPeriod);
-
-    // Manual join with 'periods' collection
-    for (const result of results) {
-      const periodData = await Period.findOne({
-        period: result.period,
-        gameId: new mongoose.Types.ObjectId(gameId),
-      });
-      if (periodData) {
-        result.date = periodData.date;
-        result.startTime = periodData.startTime;
-        result.endTime = periodData.endTime;
-        result.periodFor = periodData.periodFor;
-        result.createdAt = periodData.createdAt;
-      }
-    }
-
-
-    // Filter by 'second' if necessary (the periodFor match)
-    const filteredResults = results.filter(r => r.periodFor == second);
-    console.log(filteredResults, "filteredResults")
-    filteredResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      filteredResults
-    );
-  } catch (error) {
-    console.log(error, "hh");
-    return handleErrorResponse(res, error);
-  }
-};
-
-
 // export const getAllGamePeriod = async (req, res) => {
 //   try {
 //     const { gameId } = req.params;
+//     const { second } = req.query;
 //     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 //     const currentDateOnServer = new Date();
-//     const last24HoursDateOnServer = new Date(currentDateOnServer - 24 * 60 * 60 * 1000);
-//     const aggregationResult = await ColourBetting.aggregate([
-//       {
-//         $match: {
-//           gameId: new mongoose.Types.ObjectId(gameId),
-//           // createdAt: { $gte: twentyFourHoursAgo },
-//           createdAt: {
-//             $gte: last24HoursDateOnServer,
-//             $lt: currentDateOnServer,
-//           },
-//           is_deleted: 0,
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: "$period",
-//           totalUsers: { $sum: 1 },
-//           betAmount: { $sum: "$betAmount" },
-//           winColour: {
-//             $max: {
-//               $cond: [
-//                 { $eq: ['$isWin', true] },
-//                 "$colourName",
-//                 null
-//               ]
-//             }
-//           },
-//           period: { $first: '$period' }
-//         }
-//       },
-//       {
-//         $sort: {
-//           period: -1
-//         }
-//       },
-//       {
-//         $project: {
-//           _id: 0,
-//           totalUsers: 1,
-//           price: "$betAmount",
-//           period: 1,
-//           winColour: 1,
-//         },
-//       }
-//     ]);
 
+//     // First, find all ColourBetting documents within the last 24 hours and other conditions
+//     const colourBettings = await ColourBetting.find({
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       selectedTime: second,
+//       createdAt: {
+//         $gte: twentyFourHoursAgo,
+//         $lt: currentDateOnServer,
+//       },
+//       is_deleted: 0,
+//     })
+
+
+//     // Group by 'period' manually
+//     const groupedByPeriod = colourBettings.reduce((acc, cur) => {
+//       const period = cur.period.toString(); // Assuming period is an ObjectId or similar
+//       if (!acc[period]) {
+//         acc[period] = {
+//           gameId: cur.gameId,
+//           totalUsers: 0,
+//           betAmount: 0,
+//           winColour: null,
+//           period: cur.period,
+//         };
+//       }
+//       acc[period].totalUsers += 1;
+//       acc[period].betAmount += cur.betAmount;
+//       if (cur.isWin) {
+//         acc[period].winColour = cur.colourName;
+//       }
+//       return acc;
+//     }, {});
+
+//     // Convert groupedByPeriod to array
+//     const results = Object.values(groupedByPeriod);
+
+//     // Manual join with 'periods' collection
+//     for (const result of results) {
+//       const periodData = await Period.findOne({
+//         period: result.period,
+//         gameId: new mongoose.Types.ObjectId(gameId),
+//       });
+//       console.log(periodData, "periisdfss")
+//       if (periodData) {
+//         result.date = periodData.date;
+//         result.startTime = periodData.startTime;
+//         result.endTime = periodData.endTime;
+//         result.periodFor = periodData.periodFor;
+//         result.createdAt = periodData.createdAt;
+//       }
+//     }
+
+
+//     // Filter by 'second' if necessary (the periodFor match)
+//     const filteredResults = results.filter(r => r.periodFor == second);
+
+//     filteredResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 //     return sendResponse(
 //       res,
 //       StatusCodes.OK,
 //       ResponseMessage.GAME_PERIOD_GET,
-//       aggregationResult
+//       filteredResults
 //     );
 //   } catch (error) {
+//     console.log(error, "hh");
 //     return handleErrorResponse(res, error);
 //   }
 // };
+
+
+export const getAllGamePeriod = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const currentDateOnServer = new Date();
+    const last24HoursDateOnServer = new Date(currentDateOnServer - 24 * 60 * 60 * 1000);
+    const aggregationResult = await ColourBetting.aggregate([
+      {
+        $match: {
+          gameId: new mongoose.Types.ObjectId(gameId),
+          // createdAt: { $gte: twentyFourHoursAgo },
+          createdAt: {
+            $gte: last24HoursDateOnServer,
+            $lt: currentDateOnServer,
+          },
+          is_deleted: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$period",
+          totalUsers: { $sum: 1 },
+          betAmount: { $sum: "$betAmount" },
+          winColour: {
+            $max: {
+              $cond: [
+                { $eq: ['$isWin', true] },
+                "$colourName",
+                null
+              ]
+            }
+          },
+          period: { $first: '$period' }
+        }
+      },
+      {
+        $sort: {
+          period: -1
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalUsers: 1,
+          price: "$betAmount",
+          period: 1,
+          winColour: 1,
+        },
+      }
+    ]);
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      aggregationResult
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
 
 // export const getAllGamePeriod = async (req, res) => {
 //   try {
