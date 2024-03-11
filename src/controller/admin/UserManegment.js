@@ -692,12 +692,20 @@ export const getUserTransationData = async (req, res) => {
       select: 'fullName currency email'
     }).sort({ createdAt: -1 });
 
-    const getAllWithdrawalData = await Withdrawal.find({userId:req.body.userId}).populate({
+    const getAllWithdrawalData = await Withdrawal.find({ userId: req.body.userId })
+    .populate({
       path: 'userId',
       select: 'fullName currency email'
-    }).sort({ createdAt: -1 });
+    })
+    .sort({ createdAt: -1 });
+  
+  const modifiedWithdrawalData = getAllWithdrawalData.map(withdrawal => {
+    const { requestedAmount, ...rest } = withdrawal.toObject();
+    return { amount: requestedAmount, ...rest };
+  });
+  
 
-   const data = [...getAllDepositData,...getAllWithdrawalData]
+   const data = [...getAllDepositData,...modifiedWithdrawalData]
     return sendResponse(
       res,
       StatusCodes.OK,
