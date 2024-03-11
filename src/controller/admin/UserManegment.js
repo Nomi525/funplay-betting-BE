@@ -744,3 +744,24 @@ export const getUserWalletInfo = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 }
+
+export const getUserGameInfo = async (req, res) => {
+  try {
+    const getAllDepositData = await NewTransaction.find({userId:req.body.userId}); 
+    const getAllDepositData1= await FaintCurrency.find({userId:req.body.userId, status: 'Approved'});
+    const deposit = getAllDepositData1.reduce((total, deposit) => total + deposit.amount, 0);
+    const walletAddress = getAllDepositData[0].ethereumWalletAddress[0];
+    const TotalCoin = getAllDepositData[0].totalCoin;
+    const TotalDeposit = deposit;
+    const data = {walletAddress: walletAddress, TotalCoin: TotalCoin, TotalDeposit:TotalDeposit}
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "get all user Wallet Info",
+      data
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}

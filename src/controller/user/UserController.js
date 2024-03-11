@@ -1612,7 +1612,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        []
+        [] 
       );
     }
 
@@ -1639,6 +1639,8 @@ export const editProfile = async (req, res) => {
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
+   
+    
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
     }
@@ -1655,7 +1657,7 @@ export const editProfile = async (req, res) => {
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
-
+    
       }
     }
 
@@ -1691,7 +1693,7 @@ export const editProfile = async (req, res) => {
           },
           User
         );
-
+      
         if (checkMobileNumber) {
           return sendResponse(
             res,
@@ -1703,7 +1705,7 @@ export const editProfile = async (req, res) => {
         updateData.mobileNumber = req.body.mobileNumber;
       }
     }
-
+    
 
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
@@ -1723,7 +1725,6 @@ export const editProfile = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 
 
 
