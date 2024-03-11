@@ -298,7 +298,7 @@ adminRoutes.get('/get-all-faint-currency', Auth, getAllFaintCurrency)
 
 adminRoutes.get('/get-single-withdrawal-request/:id', Auth, getUserWithdrawalRequest);
 adminRoutes.get('/get-all-request-withdrawal', Auth, getAllUserWithdrawalRequest);
-adminRoutes.post('/accept-reject-withdrawal-request/:id', Auth, Upload, approveRejectWithdrawalRequest);
+adminRoutes.post('/accept-reject-withdrawal-req/:id', Auth, Upload, approveRejectWithdrawalRequest);
 adminRoutes.get("/get-all-community-periods/:gameType/:gameId", getCommunityGameperiod);
 adminRoutes.get('/top-player', Auth, topWeeklyPlayers)
 adminRoutes.get('/top-all-player', Auth, topAllPlayers)

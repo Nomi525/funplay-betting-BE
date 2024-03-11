@@ -27,7 +27,14 @@ import {
   createReward,
   Rating,
   ColourBetting,
+  CardBetting,
+  PenaltyBetting,
+  NumberBetting,
 } from "../../.././src/index.js";
+import { CardBettingNew } from "../../models/CardBetting.js";
+import { ColourBettingNew } from "../../models/ColourBetting.js";
+import { NumberBettingNew } from "../../models/NumberBetting.js";
+import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 
 // export const userSignup = async (req, res) => {
 //   try {
@@ -2503,23 +2510,47 @@ export const findUserBet = async (req, res) => {
   try {
     const userId = req.user;
 
-    const findUser = await ColourBetting.find({
-    userId:userId
-  });
-  console.log(findUser,"data");
+    const findColorBettingUse = await ColourBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findColorBettingUserNew = await ColourBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
 
+    const findCardUser = await CardBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findCardBettingUserNew = await CardBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
 
-    if (!updatedUser) {
-      return res.status(404).json({
-        status: StatusCodes.NOT_FOUND,
-        message: 'User not found',
-      });
-    }
+    const findPenltybettingUser = await PenaltyBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findPenltybettingUserNew = await PenaltyBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+    const findNumberbettingUser = await NumberBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findNumberbettingUserNew = await NumberBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+    const findCommunitybettingUser = await NumberBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findNCommunitybettingUserNew = await NumberBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+   let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew ]
 
     return res.status(200).json({
       status: StatusCodes.OK,
       message: 'get user bet data',
-      data: findUser,
+      data: findData,
     });
   } catch (error) {
     return handleErrorResponse(res, error);
