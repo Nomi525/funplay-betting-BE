@@ -19,6 +19,7 @@ export const adminLogin = async (req, res) => {
             email: req.body.email,
             is_deleted: 0,
         }).populate("role");
+        console.log(findAdmin,"Data");
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
@@ -864,7 +865,7 @@ Socket.on("connection", (socket) => {
 
                 const createdAtTimestamp = moment(bet.createdAt);
                 const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
-                const liveBetThresholdInMinutes = 15;
+                const liveBetThresholdInMinutes = 1;
 
                 if (timeDifferenceInMinutes <= liveBetThresholdInMinutes) {
                     liveBets.push(bet);
@@ -876,7 +877,7 @@ Socket.on("connection", (socket) => {
                 let message = "Connected for live bets";
                 socket.emit("response", { message, liveBets });
             } else {
-                let message = "No live bets found in the last 15 minutes";
+                let message = "No live bets found in the last 1 minutes";
                 socket.emit("response", { message });
             }
         } catch (error) {

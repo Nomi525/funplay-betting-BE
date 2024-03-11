@@ -269,7 +269,5 @@ userRoutes.get('/find-all-user-bet', Auth, findUserBet)
 userRoutes.get('/get-bank-for-deposit', Auth, getBankDetail)
 
 
-
-
 export { userRoutes };
 

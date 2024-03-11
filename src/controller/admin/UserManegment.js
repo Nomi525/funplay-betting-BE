@@ -2,7 +2,7 @@ import {
   ResponseMessage, StatusCodes, sendResponse,
   getSingleData, getAllData, handleErrorResponse, User, dataUpdated,
   NewTransaction, WithdrawalRequest, TransactionHistory, currencyConverter, ReferralUser,
-  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin, CardBetting, PenaltyBetting, CommunityBetting
+  GameHistory, mongoose, plusLargeSmallValue, minusLargeSmallValue, ColourBetting, NumberBetting, CurrencyCoin, CardBetting, PenaltyBetting, CommunityBetting, FaintCurrency, Withdrawal
 } from "../../index.js";
 
 export const adminEditUser = async (req, res) => {
@@ -685,3 +685,62 @@ export const getAllBettingHistory = async (req, res) => {
   }
 }
 
+export const getUserTransationData = async (req, res) => {
+  try {
+    const getAllDepositData = await FaintCurrency.find({userId:req.body.userId}).populate({
+      path: 'userId',
+      select: 'fullName currency email'
+    }).sort({ createdAt: -1 });
+
+    const getAllWithdrawalData = await Withdrawal.find({userId:req.body.userId}).populate({
+      path: 'userId',
+      select: 'fullName currency email'
+    }).sort({ createdAt: -1 });
+
+   const data = [...getAllDepositData,...getAllWithdrawalData]
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "get all user transation data",
+      data
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+
+export const getUserBankInfo = async (req, res) => {
+  try {
+    const getAllDepositData = await User.find({_id:req.body.userId})
+    const bankData = getAllDepositData[0].bankDetails;
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "get all user bank info",
+      bankData
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
+
+export const getUserWalletInfo = async (req, res) => {
+  try {
+    const getAllDepositData = await NewTransaction.find({userId:req.body.userId}); 
+    const getAllDepositData1= await FaintCurrency.find({userId:req.body.userId, status: 'Approved'});
+    const deposit = getAllDepositData1.reduce((total, deposit) => total + deposit.amount, 0);
+    const walletAddress = getAllDepositData[0].ethereumWalletAddress[0];
+    const TotalCoin = getAllDepositData[0].totalCoin;
+    const TotalDeposit = deposit;
+    const data = {walletAddress: walletAddress, TotalCoin: TotalCoin, TotalDeposit:TotalDeposit}
+
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "get all user Wallet Info",
+      data
+    );
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
