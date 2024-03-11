@@ -3,7 +3,7 @@ import { addEditBankDetail, getBankDetail } from "../controller/admin/BankContro
 import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
 import { addUPIMethod, changeStatusOfUPIMethod, deleteUPIMethod, getUPIMethod } from "../controller/admin/UPIController.js";
-import { getUserBankInfo, getUserGameInfo, getUserTransationData, getUserWalletInfo } from "../controller/admin/UserManegment.js";
+import { getUserBankInfo, getUserGameInfo, getUserReferralInfo, getUserTransationData, getUserWalletInfo } from "../controller/admin/UserManegment.js";
 import { approveRejectWithdrawalRequest, getAllUserWithdrawalRequest, getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
 import { UPIMethod } from "../models/UPIMethod.js";
 import {
@@ -316,6 +316,7 @@ adminRoutes.post('/get-User-Transation-Data', Auth, getUserTransationData)
 adminRoutes.post('/get-User-bank-Data', Auth, getUserBankInfo)
 adminRoutes.post('/get-User-wallet-Data', Auth, getUserWalletInfo)
 adminRoutes.post('/get-User-game-Data', Auth, getUserGameInfo)
+adminRoutes.post('/get-User-referral-Data', Auth, getUserReferralInfo)
 
 
 

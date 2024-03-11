@@ -789,3 +789,19 @@ export const getUserGameInfo = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 }
+
+export const getUserReferralInfo = async (req, res) => {
+  try {
+const userData =  await User.find({_id : req.body.userId});
+const referCodeUsed =  await User.find({ referralByCode: userData[0].referralCode});
+return sendResponse(
+  res,
+  StatusCodes.OK,
+  "Get all refer code used",
+  referCodeUsed
+);
+
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+}
