@@ -227,6 +227,7 @@ const getUniqueUserCounts = async () => {
     model.aggregate([
       {
         $match: {
+          userId: { $ne: null },
           createdAt: { $gte: oneDayAgo },
           is_deleted: 0,
         },

@@ -847,11 +847,11 @@ Socket.on("connection", (socket) => {
         let liveBets = [];
 
         try {
-            const colorBetting = await ColourBetting.find();
-            const numberBetting = await NumberBetting.find();
-            const cardBetting = await CardBetting.find();
-            const penaltyBetting = await PenaltyBetting.find();
-            const communityBetting = await CommunityBetting.find();
+            const colorBetting = await ColourBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameName' });
+            const numberBetting = await NumberBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameName' });
+            const cardBetting = await CardBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameName' });
+            const penaltyBetting = await PenaltyBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameName' });
+            const communityBetting = await CommunityBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameName' });
 
             const allBets = [...colorBetting, ...numberBetting, ...cardBetting, ...penaltyBetting, ...communityBetting];
 
