@@ -21,7 +21,7 @@ export const adminLogin = async (req, res) => {
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
-            console.log(findAdmin, "ff");
+
             if (findAdmin.role.Role_type == "Sub Admin") {
                 if (!findAdmin.isActive) {
                     return sendResponse(
@@ -77,7 +77,7 @@ export const adminLogin = async (req, res) => {
             );
         }
     } catch (error) {
-        console.log("error", error);
+
         return handleErrorResponse(res, error);
     }
 };
@@ -768,21 +768,21 @@ Socket.on("connection", (socket) => {
             const colorBettingNew = await ColourBettingNew.find();
 
             const allBets = [...colorBetting, ...colorBettingNew];
-            console.log(allBets, 'kk');
-// console.log(data.createdAt, "timedata");
-const data = {
-    createdAt: "2024-03-07T10:58:57.373Z",
-}; console.log(data, "ddd");
+
+            // console.log(data.createdAt, "timedata");
+            const data = {
+                createdAt: "2024-03-07T10:58:57.373Z",
+            };
             // Assuming data.createdAt is a valid date object
             const createdAtTimestamp = moment(data.createdAt);
-            console.log(createdAtTimestamp,"currentyah");
+            console.log(createdAtTimestamp, "currentyah");
 
             // Get the current timestamp
             const currentTimestamp = moment();
 
             // Calculate the difference in minutes between the current time and the createdAt time
             const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
-            console.log(timeDifferenceInMinutes,"hh");
+            console.log(timeDifferenceInMinutes, "hh");
             const liveBetThresholdInMinutes = 60;
 
             // Check if the bet is live based on the time difference
@@ -791,7 +791,7 @@ const data = {
 
             if (isLiveBet) {
                 liveBetData = data;
-                console.log(liveBetData,"liveBetDataddd");
+                console.log(liveBetData, "liveBetDataddd");
                 let message = "Connected for live bets";
                 socket.emit("response", { message, liveBetData });
             } else {
