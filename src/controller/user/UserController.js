@@ -26,7 +26,15 @@ import {
   AdminSetting,
   createReward,
   Rating,
+  ColourBetting,
+  CardBetting,
+  PenaltyBetting,
+  NumberBetting,
 } from "../../.././src/index.js";
+import { CardBettingNew } from "../../models/CardBetting.js";
+import { ColourBettingNew } from "../../models/ColourBetting.js";
+import { NumberBettingNew } from "../../models/NumberBetting.js";
+import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 
 // export const userSignup = async (req, res) => {
 //   try {
@@ -1604,7 +1612,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        []
+        [] 
       );
     }
 
@@ -1631,6 +1639,8 @@ export const editProfile = async (req, res) => {
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
+   
+    
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
     }
@@ -1647,7 +1657,7 @@ export const editProfile = async (req, res) => {
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
-
+    
       }
     }
 
@@ -1683,7 +1693,7 @@ export const editProfile = async (req, res) => {
           },
           User
         );
-
+      
         if (checkMobileNumber) {
           return sendResponse(
             res,
@@ -1695,7 +1705,7 @@ export const editProfile = async (req, res) => {
         updateData.mobileNumber = req.body.mobileNumber;
       }
     }
-
+    
 
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
@@ -1715,7 +1725,6 @@ export const editProfile = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 
 
 
@@ -2496,3 +2505,56 @@ export const deleteBankDetail = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
+export const findUserBet = async (req, res) => {
+  try {
+    const userId = req.user;
+
+    const findColorBettingUse = await ColourBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findColorBettingUserNew = await ColourBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+    const findCardUser = await CardBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findCardBettingUserNew = await CardBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+    const findPenltybettingUser = await PenaltyBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findPenltybettingUserNew = await PenaltyBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+    const findNumberbettingUser = await NumberBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findNumberbettingUserNew = await NumberBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+    const findCommunitybettingUser = await NumberBetting.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+    const findNCommunitybettingUserNew = await NumberBettingNew.find({
+      userId: userId
+    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+
+   let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew ]
+
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: 'get user bet data',
+      data: findData,
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+

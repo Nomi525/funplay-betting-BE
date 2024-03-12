@@ -1,4 +1,4 @@
-import moment from "moment";
+
 import { Socket } from "../../config/Socket.config.js";
 import {
     ejs, ResponseMessage, StatusCodes, Admin, createError, sendResponse, sendMail, dataCreate, dataUpdated, getSingleData,
@@ -10,6 +10,7 @@ import { NumberBettingNew } from "../../models/NumberBetting.js";
 import { CardBettingNew } from "../../models/CardBetting.js";
 import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 import { CommunityBettingNew } from "../../models/CommunityBetting.js";
+import moment from "moment-timezone"
 
 //#region admin login
 export const adminLogin = async (req, res) => {
@@ -18,10 +19,11 @@ export const adminLogin = async (req, res) => {
             email: req.body.email,
             is_deleted: 0,
         }).populate("role");
+        console.log(findAdmin, "Data");
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
-            console.log(findAdmin, "ff");
+
             if (findAdmin.role.Role_type == "Sub Admin") {
                 if (!findAdmin.isActive) {
                     return sendResponse(
@@ -77,7 +79,7 @@ export const adminLogin = async (req, res) => {
             );
         }
     } catch (error) {
-        console.log("error", error);
+
         return handleErrorResponse(res, error);
     }
 };
@@ -549,253 +551,333 @@ export const getUpiQr = async (req, res) => {
 //     }
 // };
 
-
-const filterWeeklyData = async (data) => {
-    const currentDate = moment();
-    const aggregatedData = {};
-
-    await ColourBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await ColourBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CardBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CardBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await PenaltyBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await PenaltyBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await NumberBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await NumberBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CommunityBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CommunityBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-
-    data.forEach(item => {
-        const isUserIdNotNull = item.userId !== null;
-        const itemCreatedAt = moment(item.createdAt);
-        const isInSameWeek = itemCreatedAt.isSame(currentDate, 'week');
-
-        if (isUserIdNotNull && isInSameWeek) {
-            const key = `${item.userId}-${item.gameId}`;
-
-            if (aggregatedData[key]) {
-                aggregatedData[key].betAmount += item.betAmount;
-            } else {
-                aggregatedData[key] = {
-                    gameType: item.gameId,
-                    gameName: item.gameName,
-                    email: item.email,
-                    userId: item.userId,
-                    fullName: item.fullName,
-                    isWin: item.isWin,
-                    betAmount: item.betAmount
-                };
-            }
-        }
-    });
-    return Object.values(aggregatedData);
-};
-
 export const topWeeklyPlayers = async (req, res) => {
     try {
-        const findPlayer = await ColourBetting.find({ isWin: true });
-        const weeklyDataColourBetting = await filterWeeklyData(findPlayer);
+        const aggregationPipeline = [
 
-        const findPlayerNew = await ColourBettingNew.find({ isWin: true });
-        const weeklyDataColorBettingNew = await filterWeeklyData(findPlayerNew);
+            {
+                $lookup: {
+                    from: 'games',
+                    localField: 'gameId',
+                    foreignField: '_id',
+                    as: 'gameType'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
 
-        const findNumberPlayer = await NumberBetting.find({ isWin: true });
-        const weeklyDataNumberBetting = await filterWeeklyData(findNumberPlayer);
+            {
+                $match: {
+                    userId: { $ne: null },
+                    isWin: true,
+                    createdAt: {
+                        $gte: moment().startOf('week').toDate(),
+                        $lt: moment().endOf('week').toDate()
+                    }
+                }
+            },
 
-        const findNumberPlayerNew = await NumberBettingNew.find({ isWin: true });
-        const weeklyDataNumberBettingNew = await filterWeeklyData(findNumberPlayerNew);
 
-        const findCardPlayer = await CardBetting.find({ isWin: true });
-        const weeklyDataCardBetting = await filterWeeklyData(findCardPlayer);
+            {
+                $group: {
+                    _id: { userId: '$userId', gameId: '$gameId' },
+                    gameType: { $first: { $arrayElemAt: ['$gameType', 0] } },
+                    user: { $first: { $arrayElemAt: ['$user', 0] } },
+                    isWin: { $first: '$isWin' },
+                    betAmount: { $sum: '$betAmount' }
+                }
+            },
 
-        const findCardPlayerNew = await CardBettingNew.find({ isWin: true });
-        const weeklyDataCardBettingNew = await filterWeeklyData(findCardPlayerNew);
 
-        const findPenaltyPlayer = await PenaltyBetting.find({ isWin: true });
-        const weeklyDataPenaltyBetting = await filterWeeklyData(findPenaltyPlayer);
+            {
+                $project: {
+                    _id: 0,
+                    gameType: {
+                        _id: '$gameType._id',
+                        gameName: '$gameType.gameName'
+                    },
+                    userId: {
+                        _id: '$user._id',
+                        email: '$user.email',
+                        fullName: '$user.fullName'
+                    },
+                    isWin: 1,
+                    betAmount: 1
+                }
+            },
+            { $sort: { betAmount: -1 } },
+            { $limit: 5 }
+        ];
 
-        const findPenaltyPlayerNew = await PenaltyBettingNew.find({ isWin: true });
-        const weeklyDataPenaltyBettingNew = await filterWeeklyData(findPenaltyPlayerNew);
+        const topColorPlayers = await ColourBetting.aggregate(aggregationPipeline);
+        const topColorPlayersNew = await ColourBettingNew.aggregate(aggregationPipeline);
 
-        const findCommunityPlayer = await CommunityBetting.find({ isWin: true });
-        const weeklyDataCommunityPlayer = await filterWeeklyData(findCommunityPlayer);
+        const topNumberPlayers = await NumberBetting.aggregate(aggregationPipeline);
+        const topNumberPlayersNew = await NumberBettingNew.aggregate(aggregationPipeline);
 
-        const findCommunityPlayerNew = await CommunityBettingNew.find({ isWin: true });
-        const weeklyDataCommunityPlayerNew = await filterWeeklyData(findCommunityPlayerNew);
+        const topCardPlayers = await CardBetting.aggregate(aggregationPipeline);
+        const topCardPlayersNew = await CardBettingNew.aggregate(aggregationPipeline);
 
-        const combinedWeeklyData = [...weeklyDataColourBetting, ...weeklyDataColorBettingNew, ...weeklyDataNumberBetting, ...weeklyDataNumberBettingNew, ...weeklyDataCardBetting, ...weeklyDataCardBettingNew, ...weeklyDataPenaltyBetting, ...weeklyDataPenaltyBettingNew, ...weeklyDataCommunityPlayer, ...weeklyDataCommunityPlayerNew];
+        const topPenultyPlayers = await PenaltyBetting.aggregate(aggregationPipeline);
+        const topPenultyPlayersNew = await PenaltyBettingNew.aggregate(aggregationPipeline);
 
-        const groupedData = combinedWeeklyData.reduce((acc, player) => {
-            const key = player.userId;
-            if (acc[key]) {
-                acc[key].betAmount += player.betAmount;
-            } else {
-                acc[key] = { ...player };
-            }
-            return acc;
-        }, {});
+        const topCommunityPlayers = await CommunityBetting.aggregate(aggregationPipeline);
+        const topCommunityPlayersNew = await CommunityBettingNew.aggregate(aggregationPipeline);
 
-        const topPlayers = Object.values(groupedData);
-        topPlayers.sort((a, b) => b.betAmount - a.betAmount);
+        const TopPlayerData = [...topColorPlayers, ...topColorPlayersNew, ...topNumberPlayers, ...topNumberPlayersNew, ...topCardPlayers, topCardPlayersNew, ...topPenultyPlayers, ...topPenultyPlayersNew, ...topCommunityPlayers, topCommunityPlayersNew]
+        const filteredTopPlayerData = TopPlayerData.filter(item => Array.isArray(item) ? item.length > 0 : true);
 
-        const top5Players = topPlayers.slice(0, 5);
+        filteredTopPlayerData.sort((a, b) => b.betAmount - a.betAmount);
 
         return sendResponse(
             res,
             StatusCodes.OK,
             "Get top weekly player successfully",
-            top5Players
+            filteredTopPlayerData
         );
     } catch (error) {
         return handleErrorResponse(res, error);
     }
 };
 
-const filterAllData = async (data) => {
-    const aggregatedData = {};
 
-    await ColourBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await ColourBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CardBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CardBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await PenaltyBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await PenaltyBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await NumberBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await NumberBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CommunityBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
-    await CommunityBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+// const filterAllData = async (data) => {
+//     const aggregatedData = {};
 
-    data.forEach(item => {
-        const isUserIdNotNull = item.userId !== null;
+//     await ColourBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await ColourBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await CardBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await CardBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await PenaltyBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await PenaltyBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await NumberBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await NumberBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await CommunityBetting.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
+//     await CommunityBettingNew.populate(data, { path: 'userId gameId', select: 'fullName email gameName' });
 
-        if (isUserIdNotNull) {
-            const key = `${item.userId}-${item.gameId}`;
+//     data.forEach(item => {
+//         const isUserIdNotNull = item.userId !== null;
 
-            if (aggregatedData[key]) {
-                aggregatedData[key].betAmount += item.betAmount;
-            } else {
-                aggregatedData[key] = {
-                    gameType: item.gameId,
-                    gameName: item.gameName,
-                    userId: item.userId,
-                    fullName: item.fullName,
-                    isWin: item.isWin,
-                    betAmount: item.betAmount,
-                };
-            }
-        }
-    });
-    return Object.values(aggregatedData);
-};
+//         if (isUserIdNotNull) {
+//             const key = `${item.userId}-${item.gameId}`;
 
+//             if (aggregatedData[key]) {
+//                 aggregatedData[key].betAmount += item.betAmount;
+//             } else {
+//                 aggregatedData[key] = {
+//                     gameType: item.gameId,
+//                     gameName: item.gameName,
+//                     userId: item.userId,
+//                     fullName: item.fullName,
+//                     isWin: item.isWin,
+//                     betAmount: item.betAmount,
+//                 };
+//             }
+//         }
+//     });
+//     return Object.values(aggregatedData);
+// };
+
+
+// export const topAllPlayers = async (req, res) => {
+//     try {
+//         const findPlayer = await ColourBetting.find({ isWin: true });
+//         const weeklyDataColourBetting = await filterWeeklyData(findPlayer);
+
+//         const findPlayerNew = await ColourBettingNew.find({ isWin: true });
+//         const weeklyDataColorBettingNew = await filterWeeklyData(findPlayerNew);
+
+//         const findNumberPlayer = await NumberBetting.find({ isWin: true });
+//         const weeklyDataNumberBetting = await filterAllData(findNumberPlayer);
+
+//         const findNumberPlayerNew = await NumberBettingNew.find({ isWin: true });
+//         const weeklyDataNumberBettingNew = await filterAllData(findNumberPlayerNew);
+
+//         const findCardPlayer = await CardBetting.find({ isWin: true });
+//         const weeklyDataCardBetting = await filterAllData(findCardPlayer);
+
+//         const findCardPlayerNew = await CardBettingNew.find({ isWin: true });
+//         const weeklyDataCardBettingNew = await filterAllData(findCardPlayerNew);
+
+//         const findPenaltyPlayer = await PenaltyBetting.find({ isWin: true });
+//         const weeklyDataPenaltyBetting = await filterAllData(findPenaltyPlayer);
+
+//         const findPenaltyPlayerNew = await PenaltyBettingNew.find({ isWin: true });
+//         const weeklyDataPenaltyBettingNew = await filterAllData(findPenaltyPlayerNew);
+
+//         const findCommunityPlayer = await CommunityBetting.find({ isWin: true });
+//         const weeklyDataCommunityPlayer = await filterAllData(findCommunityPlayer);
+
+//         const findCommunityPlayerNew = await CommunityBettingNew.find({ isWin: true });
+//         const weeklyDataCommunityPlayerNew = await filterAllData(findCommunityPlayerNew);
+
+//         const combinedWeeklyData = [...weeklyDataColourBetting, ...weeklyDataColorBettingNew, ...weeklyDataNumberBetting, ...weeklyDataNumberBettingNew, ...weeklyDataCardBetting, ...weeklyDataCardBettingNew, ...weeklyDataPenaltyBetting, ...weeklyDataPenaltyBettingNew, ...weeklyDataCommunityPlayer, ...weeklyDataCommunityPlayerNew];
+
+//         const groupedData = combinedWeeklyData.reduce((acc, player) => {
+//             const key = player.userId;
+//             if (acc[key]) {
+//                 acc[key].betAmount += player.betAmount;
+//             } else {
+//                 acc[key] = { ...player };
+//             }
+//             return acc;
+//         }, {});
+
+//         const topPlayers = Object.values(groupedData);
+//         topPlayers.sort((a, b) => b.betAmount - a.betAmount);
+
+//         const top5Players = topPlayers.slice(0, 5);
+
+//         return sendResponse(
+//             res,
+//             StatusCodes.OK,
+//             "Get top weekly player successfully",
+//             top5Players
+//         );
+//     } catch (error) {
+//         return handleErrorResponse(res, error);
+//     }
+// };
+
+
+// // Socket.on("connection", (socket) => {
+// //     socket.on("createColourBet", async (data) => {
+// //         let message = "connected for live bets "
+// //         socket.emit("response", message)
+// //     })
+
+// // })
 
 export const topAllPlayers = async (req, res) => {
     try {
-        const findPlayer = await ColourBetting.find({ isWin: true });
-        const weeklyDataColourBetting = await filterWeeklyData(findPlayer);
+        const aggregationPipeline = [
+            {
+                $lookup: {
+                    from: 'games',
+                    localField: 'gameId',
+                    foreignField: '_id',
+                    as: 'gameType'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $match: {
+                    userId: { $ne: null },
+                    isWin: true,
+                    createdAt: {
+                        $gte: moment().startOf('week').toDate(),
+                        $lt: moment().endOf('week').toDate()
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { userId: '$userId', gameId: '$gameId' },
+                    gameType: { $first: { $arrayElemAt: ['$gameType', 0] } },
+                    user: { $first: { $arrayElemAt: ['$user', 0] } },
+                    isWin: { $first: '$isWin' },
+                    betAmount: { $sum: '$betAmount' }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    gameType: {
+                        _id: '$gameType._id',
+                        gameName: '$gameType.gameName'
+                    },
+                    userId: {
+                        _id: '$user._id',
+                        email: '$user.email',
+                        fullName: '$user.fullName'
+                    },
+                    isWin: 1,
+                    betAmount: 1
+                }
+            },
+            { $sort: { betAmount: -1 } },
+            { $limit: 5 }
+        ];
 
-        const findPlayerNew = await ColourBettingNew.find({ isWin: true });
-        const weeklyDataColorBettingNew = await filterWeeklyData(findPlayerNew);
+        const topColorPlayers = await ColourBetting.aggregate(aggregationPipeline);
+        const topColorPlayersNew = await ColourBettingNew.aggregate(aggregationPipeline);
 
-        const findNumberPlayer = await NumberBetting.find({ isWin: true });
-        const weeklyDataNumberBetting = await filterAllData(findNumberPlayer);
+        const topNumberPlayers = await NumberBetting.aggregate(aggregationPipeline);
+        const topNumberPlayersNew = await NumberBettingNew.aggregate(aggregationPipeline);
 
-        const findNumberPlayerNew = await NumberBettingNew.find({ isWin: true });
-        const weeklyDataNumberBettingNew = await filterAllData(findNumberPlayerNew);
+        const topCardPlayers = await CardBetting.aggregate(aggregationPipeline);
+        const topCardPlayersNew = await CardBettingNew.aggregate(aggregationPipeline);
 
-        const findCardPlayer = await CardBetting.find({ isWin: true });
-        const weeklyDataCardBetting = await filterAllData(findCardPlayer);
+        const topPenultyPlayers = await PenaltyBetting.aggregate(aggregationPipeline);
+        const topPenultyPlayersNew = await PenaltyBettingNew.aggregate(aggregationPipeline);
 
-        const findCardPlayerNew = await CardBettingNew.find({ isWin: true });
-        const weeklyDataCardBettingNew = await filterAllData(findCardPlayerNew);
+        const topCommunityPlayers = await CommunityBetting.aggregate(aggregationPipeline);
+        const topCommunityPlayersNew = await CommunityBettingNew.aggregate(aggregationPipeline);
 
-        const findPenaltyPlayer = await PenaltyBetting.find({ isWin: true });
-        const weeklyDataPenaltyBetting = await filterAllData(findPenaltyPlayer);
-
-        const findPenaltyPlayerNew = await PenaltyBettingNew.find({ isWin: true });
-        const weeklyDataPenaltyBettingNew = await filterAllData(findPenaltyPlayerNew);
-
-        const findCommunityPlayer = await CommunityBetting.find({ isWin: true });
-        const weeklyDataCommunityPlayer = await filterAllData(findCommunityPlayer);
-
-        const findCommunityPlayerNew = await CommunityBettingNew.find({ isWin: true });
-        const weeklyDataCommunityPlayerNew = await filterAllData(findCommunityPlayerNew);
-
-        const combinedWeeklyData = [...weeklyDataColourBetting, ...weeklyDataColorBettingNew, ...weeklyDataNumberBetting, ...weeklyDataNumberBettingNew, ...weeklyDataCardBetting, ...weeklyDataCardBettingNew, ...weeklyDataPenaltyBetting, ...weeklyDataPenaltyBettingNew, ...weeklyDataCommunityPlayer, ...weeklyDataCommunityPlayerNew];
-
-        const groupedData = combinedWeeklyData.reduce((acc, player) => {
-            const key = player.userId;
-            if (acc[key]) {
-                acc[key].betAmount += player.betAmount;
-            } else {
-                acc[key] = { ...player };
-            }
-            return acc;
-        }, {});
-
-        const topPlayers = Object.values(groupedData);
-        topPlayers.sort((a, b) => b.betAmount - a.betAmount);
-
-        const top5Players = topPlayers.slice(0, 5);
+        const TopPlayerData = [...topColorPlayers, ...topColorPlayersNew, ...topNumberPlayers, ...topNumberPlayersNew, ...topCardPlayers, topCardPlayersNew, ...topPenultyPlayers, ...topPenultyPlayersNew, ...topCommunityPlayers, topCommunityPlayersNew]
+        const filteredTopPlayerData = TopPlayerData.filter(item => Array.isArray(item) ? item.length > 0 : true);
+        filteredTopPlayerData.sort((a, b) => b.betAmount - a.betAmount);
 
         return sendResponse(
             res,
             StatusCodes.OK,
-            "Get top weekly player successfully",
-            top5Players
+            "Get top all player successfully",
+            filteredTopPlayerData
         );
     } catch (error) {
         return handleErrorResponse(res, error);
     }
 };
 
-
-// Socket.on("connection", (socket) => {
-//     socket.on("createColourBet", async (data) => {
-//         let message = "connected for live bets "
-//         socket.emit("response", message)
-//     })
-
-// })
-
-
 Socket.on("connection", (socket) => {
     socket.on("createColourBet", async (data) => {
-        let liveBetData;
+        let liveBets = [];
 
         try {
             const colorBetting = await ColourBetting.find();
-            const colorBettingNew = await ColourBettingNew.find();
+            const numberBetting = await NumberBetting.find();
+            const cardBetting = await CardBetting.find();
+            const penaltyBetting = await PenaltyBetting.find();
+            const communityBetting = await CommunityBetting.find();
 
-            const allBets = [...colorBetting, ...colorBettingNew];
-            console.log(allBets, 'kk');
-// console.log(data.createdAt, "timedata");
-const data = {
-    createdAt: "2024-03-07T10:58:57.373Z",
-}; console.log(data, "ddd");
-            // Assuming data.createdAt is a valid date object
-            const createdAtTimestamp = moment(data.createdAt);
-            console.log(createdAtTimestamp,"currentyah");
+            const allBets = [...colorBetting, ...numberBetting, ...cardBetting, ...penaltyBetting, ...communityBetting];
 
-            // Get the current timestamp
-            const currentTimestamp = moment();
+            const currentTimestamp = moment().tz('Asia/Kolkata');
+            console.log(currentTimestamp, "hh");
 
-            // Calculate the difference in minutes between the current time and the createdAt time
-            const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
-            console.log(timeDifferenceInMinutes,"hh");
-            const liveBetThresholdInMinutes = 60;
+            for (const bet of allBets) {
+                if (bet.userId === null) {
+                    continue;
+                }
 
-            // Check if the bet is live based on the time difference
-            const isLiveBet = timeDifferenceInMinutes <= liveBetThresholdInMinutes;
-            console.log(isLiveBet, "isLiveBet");
+                const createdAtTimestamp = moment(bet.createdAt);
+                const timeDifferenceInMinutes = currentTimestamp.diff(createdAtTimestamp, 'minutes');
+                const liveBetThresholdInMinutes = 1;
 
-            if (isLiveBet) {
-                liveBetData = data;
-                console.log(liveBetData,"liveBetDataddd");
+                if (timeDifferenceInMinutes <= liveBetThresholdInMinutes) {
+                    liveBets.push(bet);
+                }
+            }
+
+            if (liveBets.length > 0) {
+                console.log(liveBets, "liveBetsArray");
                 let message = "Connected for live bets";
-                socket.emit("response", { message, liveBetData });
+                socket.emit("response", { message, liveBets });
             } else {
-                let message = "Bet is not live anymore";
+                let message = "No live bets found in the last 1 minutes";
                 socket.emit("response", { message });
             }
         } catch (error) {
@@ -805,6 +887,7 @@ const data = {
         }
     });
 });
+
 
 
 
