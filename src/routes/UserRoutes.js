@@ -1,5 +1,5 @@
 import { socketRoute } from "../config/Socket.config.js";
-import { deleteBankDetail, findUserBet, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
+import { deleteBankDetail, findUserBet, findUserLooseBet, findUserWinBet, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
   Upload,
@@ -267,6 +267,8 @@ userRoutes.post('/delete-notifications', Auth, deleteAllUserNotifications)
 userRoutes.get('/get-all-upi', Auth, getUPIData)
 userRoutes.get('/find-all-user-bet', Auth, findUserBet)
 userRoutes.get('/get-bank-for-deposit', Auth, getBankDetail)
+userRoutes.get('/total-win-bet', Auth, findUserWinBet)
+userRoutes.get('/total-loose-bet', Auth, findUserLooseBet)
 
 
 export { userRoutes };
