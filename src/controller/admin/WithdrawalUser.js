@@ -52,7 +52,8 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
         const notificationData = {
           userId: getSingle.userId,
           title: "Withdrawal request approved",
-          description: `Request for withdrawal amount ${getSingle.requestedAmount} accepted.`
+          description: `Request for withdrawal amount ${getSingle.requestedAmount} accepted.`,
+          image: withdrawalApproveImg
       }
         const newNotification = await UserNotification.create(notificationData);  
         return sendResponse(res, StatusCodes.OK, "Withdrawal request accepted successfully", updatedStatus);

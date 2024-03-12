@@ -82,7 +82,7 @@ import {
   getSlotsBookedByPeriod,
   deleteAllUserNotifications
 } from "./../index.js";
-import {getUserNotifications} from "../controller/user/UserNotificationController.js"
+import { getUserNotifications } from "../controller/user/UserNotificationController.js"
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
