@@ -34,7 +34,6 @@ export const getBankDetail = async (req, res) => {
             getAllData
         );
     } catch (error) {
-        console.log(error, "resolve ");
         return handleErrorResponse(res, error);
     }
 }
