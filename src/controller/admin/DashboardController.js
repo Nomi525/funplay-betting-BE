@@ -1,3 +1,4 @@
+import moment from "moment";
 import {
   ResponseMessage,
   StatusCodes,
@@ -19,6 +20,8 @@ import {
   CommunityBetting,
   PenaltyBetting,
   CardBetting,
+  FaintCurrency,
+  Withdrawal,
 } from "../../index.js";
 import { CardBettingNew } from "../../models/CardBetting.js";
 import { ColourBettingNew } from "../../models/ColourBetting.js";
@@ -304,7 +307,11 @@ export const adminDashboard = async (req, res) => {
     });
 
     // const totalTransaction = await getAllDataCount({ is_deleted: 0 }, NewTransaction);
-    const totalTransaction = await TransactionHistory.find({ is_deleted: 0 });
+    // const totalTransaction = await TransactionHistory.find({ is_deleted: 0 });
+    const TransactionData = await FaintCurrency.find({is_deleted:0}).count();
+    const TransactionData1 = await Withdrawal.find({is_deleted:0}).count();
+    
+    const totalTransaction = TransactionData + TransactionData1;
     // const totalNonDepositUser = totalUsers - depositeData.length;
     const totalZeroDepositUser = totalUsers - depositeData.length;
     const totalUserIn24Hours = await User.find({
@@ -559,6 +566,31 @@ export const adminDashboard = async (req, res) => {
 
     const total = sumResult.length > 0 ? sumResult[0].totalTokenDollorValue : 0;
 
+    
+    const depositData = await FaintCurrency.aggregate([
+      {
+          $match: {
+              is_deleted: 0,
+              status: 'Approved',
+              createdAt: { $gte: twentyFourHoursAgo }
+          }
+      },
+      {
+          $group: {
+              _id: "$userId",
+              count: { $sum: 1 }
+          }
+      },
+      {
+          $count: "totalUsers"
+      }
+  ]);
+  const totalUser = depositData.length > 0 ? depositData[0].totalUsers : 0;
+  console.log(totalUser, "totalUsers");
+
+
+
+
     const allBetin24hrs = await getUniqueUserCounts();
 
     return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, {
@@ -571,8 +603,8 @@ export const adminDashboard = async (req, res) => {
       totalDepositUser: depositeData.length,
       totalZeroDepositUser,
       totalZeroDepositUserIn24Hours,
-      totalTransaction: totalTransaction.length,
-      totaldepositIn24Hours: total,
+      totalTransaction: totalTransaction,
+      totaldepositIn24Hours: totalUser,
       totalDistributedAmountInLastMonth: totalWinningAmountLastMonth,
       totalDistributedToday: total,
       allUserPlacedBetIn24Hours: allBetin24hrs.totalUniqueUsers,
