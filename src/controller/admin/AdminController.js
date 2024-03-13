@@ -585,7 +585,8 @@ export const topWeeklyPlayers = async (req, res) => {
                     email: { $arrayElemAt: ['$user.email', 0] },
                     fullName: { $arrayElemAt: ['$user.fullName', 0] },
                     totalBetAmount: 1,
-                    wins: 1
+                    wins: 1,
+                    profile: { $arrayElemAt: ['$user.profile', 0] }
                 }
             },
             {
@@ -594,6 +595,7 @@ export const topWeeklyPlayers = async (req, res) => {
                     email: { $first: "$email" },
                     fullName: { $first: "$fullName" },
                     totalBetAmount: { $sum: "$totalBetAmount" },
+                    profile : {$first: "$profile"},
                     wins: { $sum: "$wins" }
                 }
             },
@@ -782,7 +784,8 @@ export const topAllPlayers = async (req, res) => {
                     email: { $arrayElemAt: ['$user.email', 0] },
                     fullName: { $arrayElemAt: ['$user.fullName', 0] },
                     totalBetAmount: 1,
-                    wins: 1
+                    wins: 1,
+                    profile: { $arrayElemAt: ['$user.profile', 0] }
                 }
             },
             {
@@ -791,6 +794,7 @@ export const topAllPlayers = async (req, res) => {
                     email: { $first: "$email" },
                     fullName: { $first: "$fullName" },
                     totalBetAmount: { $sum: "$totalBetAmount" },
+                    profile: { $first: "$profile" }, 
                     wins: { $sum: "$wins" }
                 }
             },
