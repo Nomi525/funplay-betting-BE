@@ -22,6 +22,7 @@ import {
   CardBetting,
   FaintCurrency,
   Withdrawal,
+  CurrencyCoin,
 } from "../../index.js";
 import { CardBettingNew } from "../../models/CardBetting.js";
 import { ColourBettingNew } from "../../models/ColourBetting.js";
@@ -268,10 +269,13 @@ const getUniqueUserCounts = async () => {
       if (result.length > 0) {
         totalUniqueUsers += result[0].uniqueUsersCount;
         totalBetCount += result[0].totalBetCount;
+        console.log(totalUniqueUsers, "Unique");
+        console.log(totalBetCount, "betCount");
       }
     });
 
     return { totalUniqueUsers, totalBetCount };
+
   } catch (error) {
     console.error(
       "Error fetching unique user counts and total bet counts:",
@@ -289,11 +293,20 @@ export const adminDashboard = async (req, res) => {
       User
     );
     const depositeData = await NewTransaction.find({});
+    const totalCoins = depositeData.map(obj => obj.totalCoin);
+    const totalSum = totalCoins.reduce((acc, val) => acc + val, 0);
+
+    console.log(totalSum);
+    const currencyCoin = await CurrencyCoin.find({ currencyName: "USD", is_deleted: 0 })
+    console.log(currencyCoin[0].coin, "jj");
+    const coinn = currencyCoin[0].coin
+    const totalDeposit = totalSum / coinn;
+
     // const totalDeposit = depositeData.reduce((data, dis) => data + dis.tokenDollorValue, 0);
-    const totalDeposit = depositeData.reduce(
-      (data, dis) => plusLargeSmallValue(data, dis.tokenDollorValue),
-      0
-    );
+    // const totalDeposit = depositeData.reduce(
+    //   (data, dis) => plusLargeSmallValue(data, dis.tokenDollorValue),
+    //   0
+    // );
     let totalDeactivatedUsers = await getAllDataCount(
       { $or: [{ is_deleted: 1 }, { isActive: false }] },
       User
@@ -308,9 +321,9 @@ export const adminDashboard = async (req, res) => {
 
     // const totalTransaction = await getAllDataCount({ is_deleted: 0 }, NewTransaction);
     // const totalTransaction = await TransactionHistory.find({ is_deleted: 0 });
-    const TransactionData = await FaintCurrency.find({is_deleted:0}).count();
-    const TransactionData1 = await Withdrawal.find({is_deleted:0}).count();
-    
+    const TransactionData = await FaintCurrency.find({ is_deleted: 0 }).count();
+    const TransactionData1 = await Withdrawal.find({ is_deleted: 0 }).count();
+
     const totalTransaction = TransactionData + TransactionData1;
     // const totalNonDepositUser = totalUsers - depositeData.length;
     const totalZeroDepositUser = totalUsers - depositeData.length;
@@ -335,7 +348,7 @@ export const adminDashboard = async (req, res) => {
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
     });
-    
+
     const numberBettingForUserNew = await NumberBettingNew.find({
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
@@ -376,7 +389,7 @@ export const adminDashboard = async (req, res) => {
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
     });
-    
+
     const cardBettingForUserNew = await CardBettingNew.find({
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
@@ -401,7 +414,7 @@ export const adminDashboard = async (req, res) => {
       (total, data) => Number(total) + Number(data.rewardAmount),
       0
     );
-    
+
     let communityBettingWinningAmount = communityBettingForUser.reduce(
       (total, data) => Number(total) + Number(data.rewardAmount),
       0
@@ -411,7 +424,7 @@ export const adminDashboard = async (req, res) => {
       (total, data) => Number(total) + Number(data.rewardAmount),
       0
     );
-    
+
     let penaltyBettingWinningAmount = penaltyBettingForUser.reduce(
       (total, data) => Number(total) + Number(data.rewardAmount),
       0
@@ -421,7 +434,7 @@ export const adminDashboard = async (req, res) => {
       (total, data) => Number(total) + Number(data.rewardAmount),
       0
     );
-    
+
 
     let cardBettingWinningAmount = cardBettingForUser.reduce(
       (total, data) => Number(total) + Number(data.rewardAmount),
@@ -432,9 +445,9 @@ export const adminDashboard = async (req, res) => {
       (total, data) => Number(total) + Number(data.rewardAmount),
       0
     );
-    
+
     const totalWinningAmountin24Hrs =
-      numberBettingWinningAmount + 
+      numberBettingWinningAmount +
       numberBettingWinningAmountNew +
       colourBettingWinningAmount +
       colourBettingWinningAmountNew +
@@ -495,7 +508,7 @@ export const adminDashboard = async (req, res) => {
       0
     );
     let numberBettingWinningAmount1New = numberBettingForUser1New.reduce(
-      (total, data) => Number(total) + Number(data.rewardAmount), 
+      (total, data) => Number(total) + Number(data.rewardAmount),
       0
     );
 
@@ -566,32 +579,35 @@ export const adminDashboard = async (req, res) => {
 
     const total = sumResult.length > 0 ? sumResult[0].totalTokenDollorValue : 0;
 
-    
+
     const depositData = await FaintCurrency.aggregate([
       {
-          $match: {
-              is_deleted: 0,
-              status: 'Approved',
-              createdAt: { $gte: twentyFourHoursAgo }
-          }
+        $match: {
+          is_deleted: 0,
+          status: 'Approved',
+          createdAt: { $gte: twentyFourHoursAgo }
+        }
       },
       {
-          $group: {
-              _id: "$userId",
-              count: { $sum: 1 }
-          }
+        $group: {
+          _id: "$userId",
+          count: { $sum: 1 }
+        }
       },
       {
-          $count: "totalUsers"
+        $count: "totalUsers"
       }
-  ]);
-  const totalUser = depositData.length > 0 ? depositData[0].totalUsers : 0;
-  console.log(totalUser, "totalUsers");
+    ]);
+    const totalUser = depositData.length > 0 ? depositData[0].totalUsers : 0;
+    console.log(totalUser, "totalUsers");
 
 
 
 
     const allBetin24hrs = await getUniqueUserCounts();
+
+    const WithdrawalData = await Withdrawal.find({ is_deleted: 0 }).count()
+    console.log(WithdrawalData, "jj");
 
     return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, {
       totalUsers,
@@ -609,6 +625,7 @@ export const adminDashboard = async (req, res) => {
       totalDistributedToday: total,
       allUserPlacedBetIn24Hours: allBetin24hrs.totalUniqueUsers,
       totalBetInPast24hrs: allBetin24hrs.totalBetCount,
+      totalWithdrawalRequests: WithdrawalData
     });
   } catch (error) {
     console.log(error);
