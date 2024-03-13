@@ -28,7 +28,9 @@ import {
   calculateAllGameReward,
   getAllBids,
   Game,
-  axios
+  axios,
+  FaintCurrency,
+  Withdrawal
 } from "../../index.js";
 import { NumberBettingNew } from "../../models/NumberBetting.js";
 import { ColourBettingNew } from "../../models/ColourBetting.js";
@@ -377,7 +379,7 @@ export const userDashboard = async (req, res) => {
       getAllBettingData(CardBetting),
       getAllBettingData(CardBettingNew),
     ]);
-    
+
 
     const totalUserswhoPlacedBidsin24Hrs =
       numberBettingForUser.length +
@@ -406,32 +408,32 @@ export const userDashboard = async (req, res) => {
     const numberBettingWinningAmount =
       calculateWinningAmount(numberBettingForUser);
 
-      const numberBettingWinningAmountNew =
+    const numberBettingWinningAmountNew =
       calculateWinningAmount(numberBettingForUserNew);
 
     const colourBettingWinningAmount =
       calculateWinningAmount(colourBettingForUser);
 
-      const colourBettingWinningAmountNew =
+    const colourBettingWinningAmountNew =
       calculateWinningAmount(colourBettingForUserNew);
 
-    const communityBettingWinningAmount = 
-    calculateWinningAmount(communityBettingForUser);
+    const communityBettingWinningAmount =
+      calculateWinningAmount(communityBettingForUser);
 
-    const communityBettingWinningAmountNew = 
-    calculateWinningAmount(communityBettingForUserNew);
+    const communityBettingWinningAmountNew =
+      calculateWinningAmount(communityBettingForUserNew);
 
-    const penaltyBettingWinningAmount = 
-    calculateWinningAmount(penaltyBettingForUser);
+    const penaltyBettingWinningAmount =
+      calculateWinningAmount(penaltyBettingForUser);
 
-    const penaltyBettingWinningAmountNew = 
-    calculateWinningAmount(penaltyBettingForUserNew);
+    const penaltyBettingWinningAmountNew =
+      calculateWinningAmount(penaltyBettingForUserNew);
 
-    const cardBettingWinningAmount = 
-    calculateWinningAmount(cardBettingForUser);
+    const cardBettingWinningAmount =
+      calculateWinningAmount(cardBettingForUser);
 
-    const cardBettingWinningAmountNew = 
-    calculateWinningAmount(cardBettingForUserNew);
+    const cardBettingWinningAmountNew =
+      calculateWinningAmount(cardBettingForUserNew);
 
     const totalWinningAmountin24Hrs =
       numberBettingWinningAmount +
@@ -445,9 +447,9 @@ export const userDashboard = async (req, res) => {
       cardBettingWinningAmount +
       cardBettingWinningAmountNew;
 
-    const totalReferralCount = await ReferralUser.countDocuments({
-      userId: findUser._id,
-    });
+    const totalReferralCount = await ReferralUser.find({
+      userId: req.user,
+    }).count();
 
     return sendResponse(
       res,
@@ -589,6 +591,13 @@ export const userDashboard1 = async (req, res) => {
       (total, data) => plusLargeSmallValue(total, data.tokenDollorValue),
       0
     );
+    const faintCurrency = await FaintCurrency.find({ userId: req.user, status: 'Approved' })
+    console.log(faintCurrency, "data");
+    let totalAmount = 0;
+
+    for (const currency of faintCurrency) {
+      totalAmount += currency.amount;
+    }
 
     let totalBalance = 0;
     let totalDepositeBalance = 0;
@@ -654,6 +663,10 @@ export const userDashboard1 = async (req, res) => {
         }),
       ]);
 
+      const TransactionData = await FaintCurrency.find({ userId: req.user }).count();
+      const TransactionData1 = await Withdrawal.find({ userId: req.user }).count();
+      
+      const totalTAmount = TransactionData + TransactionData1;
       
 
     return sendResponse(
@@ -661,7 +674,7 @@ export const userDashboard1 = async (req, res) => {
       StatusCodes.OK,
       ResponseMessage.DASHBOARD_DATA_GET,
       {
-        totalTransaction: transactions.length,
+        totalTransaction: totalTAmount,
         totalOneDayReward,
         totalOneWeekReward,
         totalOneMonthReward,
@@ -670,10 +683,7 @@ export const userDashboard1 = async (req, res) => {
         totalCoin,
         currency: findUser.currency || "USD",
         convertedCoin,
-        totalDepositAmount: minusLargeSmallValue(
-          totalDepositAmount,
-          totalWithdrawalAmount
-        ),
+        totalDepositAmount: totalAmount,
         totalReward,
         walletDetails: findUser.wallet,
       }

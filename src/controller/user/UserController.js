@@ -2558,3 +2558,104 @@ export const findUserBet = async (req, res) => {
   }
 };
 
+export const findUserWinBet = async (req, res) => {
+  try {
+    const userId = req.user;
+
+    const findColorBettingUse = await ColourBetting.find({
+      userId: userId, isWin: true
+    }).count()
+    const findColorBettingUserNew = await ColourBettingNew.find({
+      userId: userId, isWin: true
+    }).count()
+
+    const findCardUser = await CardBetting.find({
+      userId: userId, isWin: true
+    }).count()
+    const findCardBettingUserNew = await CardBettingNew.find({
+      userId: userId, isWin: true
+    }).count()
+
+    const findPenltybettingUser = await PenaltyBetting.find({
+      userId: userId, isWin: true
+    }).count()
+    const findPenltybettingUserNew = await PenaltyBettingNew.find({
+      userId: userId, isWin: true
+    }).count()
+
+    const findNumberbettingUser = await NumberBetting.find({
+      userId: userId, isWin: true
+    }).count()
+    const findNumberbettingUserNew = await NumberBettingNew.find({
+      userId: userId, isWin: true
+    }).count()
+
+    const findCommunitybettingUser = await NumberBetting.find({
+      userId: userId,isWin: true
+    }).count()
+    const findNCommunitybettingUserNew = await NumberBettingNew.find({
+      userId: userId, isWin: true
+    }).count()
+
+   let findData = findColorBettingUse + findColorBettingUserNew + findCardUser + findCardBettingUserNew + findCardBettingUserNew + findPenltybettingUser + findPenltybettingUserNew + findNumberbettingUser + findNumberbettingUserNew + findCommunitybettingUser + findNCommunitybettingUserNew 
+
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: 'get user bet data',
+      data: findData,
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
+
+export const findUserLooseBet = async (req, res) => {
+  try {
+    const userId = req.user;
+
+    const findColorBettingUse = await ColourBetting.find({
+      userId: userId, isWin: false, status: { $ne: "pending" }
+    }).count()
+    const findColorBettingUserNew = await ColourBettingNew.find({
+      userId: userId, isWin: false, status: { $ne: "pending" }
+    }).count()
+
+    const findCardUser = await CardBetting.find({
+      userId: userId, isWin: false, status: { $ne: "pending" }
+    }).count()
+    const findCardBettingUserNew = await CardBettingNew.find({
+      userId: userId,  isWin: false, status: { $ne: "pending" }
+    }).count()
+
+    const findPenltybettingUser = await PenaltyBetting.find({
+      userId: userId, isWin: false, status: { $ne: "pending" }
+    }).count()
+    const findPenltybettingUserNew = await PenaltyBettingNew.find({
+      userId: userId,  isWin: false, status: { $ne: "pending" }
+    }).count()
+
+    const findNumberbettingUser = await NumberBetting.find({
+      userId: userId,  isWin: false, status: { $ne: "pending" }
+    }).count()
+    const findNumberbettingUserNew = await NumberBettingNew.find({
+      userId: userId,  isWin: false, status: { $ne: "pending" }
+    }).count()
+
+    const findCommunitybettingUser = await NumberBetting.find({
+      userId: userId, isWin: false, status: { $ne: "pending" }
+    }).count()
+    const findNCommunitybettingUserNew = await NumberBettingNew.find({
+      userId: userId,  isWin: false, status: { $ne: "pending" }
+    }).count()
+
+   let findData = findColorBettingUse + findColorBettingUserNew + findCardUser + findCardBettingUserNew + findCardBettingUserNew + findPenltybettingUser + findPenltybettingUserNew + findNumberbettingUser + findNumberbettingUserNew + findCommunitybettingUser + findNCommunitybettingUserNew 
+
+    return res.status(200).json({
+      status: StatusCodes.OK,
+      message: 'get user bet data',
+      data: findData,
+    });
+  } catch (error) {
+    return handleErrorResponse(res, error);
+  }
+};
