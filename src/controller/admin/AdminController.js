@@ -554,24 +554,6 @@ export const getUpiQr = async (req, res) => {
 export const topWeeklyPlayers = async (req, res) => {
     try {
         const aggregationPipeline = [
-
-            {
-                $lookup: {
-                    from: 'games',
-                    localField: 'gameId',
-                    foreignField: '_id',
-                    as: 'gameType'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'user'
-                }
-            },
-
             {
                 $match: {
                     userId: { $ne: null },
@@ -582,69 +564,85 @@ export const topWeeklyPlayers = async (req, res) => {
                     }
                 }
             },
-
-
             {
                 $group: {
-                    _id: { userId: '$userId', gameId: '$gameId' },
-                    gameType: { $first: { $arrayElemAt: ['$gameType', 0] } },
-                    user: { $first: { $arrayElemAt: ['$user', 0] } },
-                    isWin: { $first: '$isWin' },
-                    betAmount: { $sum: '$betAmount' }
+                    _id: '$userId',
+                    totalBetAmount: { $sum: '$betAmount' },
+                    wins: { $sum: 1 }
                 }
             },
-
-
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
             {
                 $project: {
-                    _id: 0,
-                    gameType: {
-                        _id: '$gameType._id',
-                        gameName: '$gameType.gameName'
-                    },
-                    userId: {
-                        _id: '$user._id',
-                        email: '$user.email',
-                        fullName: '$user.fullName'
-                    },
-                    isWin: 1,
-                    betAmount: 1
+                    _id: 1,
+                    email: { $arrayElemAt: ['$user.email', 0] },
+                    fullName: { $arrayElemAt: ['$user.fullName', 0] },
+                    totalBetAmount: 1,
+                    wins: 1
                 }
             },
-            { $sort: { betAmount: -1 } },
-            { $limit: 5 }
+            {
+                $group: {
+                    _id: "$_id",
+                    email: { $first: "$email" },
+                    fullName: { $first: "$fullName" },
+                    totalBetAmount: { $sum: "$totalBetAmount" },
+                    wins: { $sum: "$wins" }
+                }
+            },
+            {
+                $sort: { totalBetAmount: -1 }
+            },
+            {
+                $limit: 5
+            }
         ];
 
-        const topColorPlayers = await ColourBetting.aggregate(aggregationPipeline);
-        const topColorPlayersNew = await ColourBettingNew.aggregate(aggregationPipeline);
+        const collections = [ColourBetting, ColourBettingNew, NumberBetting, NumberBettingNew, CardBetting, CardBettingNew, PenaltyBetting, PenaltyBettingNew, CommunityBetting, CommunityBettingNew];
 
-        const topNumberPlayers = await NumberBetting.aggregate(aggregationPipeline);
-        const topNumberPlayersNew = await NumberBettingNew.aggregate(aggregationPipeline);
+        let combinedResults = [];
 
-        const topCardPlayers = await CardBetting.aggregate(aggregationPipeline);
-        const topCardPlayersNew = await CardBettingNew.aggregate(aggregationPipeline);
+        for (const collection of collections) {
+            const results = await collection.aggregate(aggregationPipeline);
+            combinedResults = combinedResults.concat(results);
+        }
 
-        const topPenultyPlayers = await PenaltyBetting.aggregate(aggregationPipeline);
-        const topPenultyPlayersNew = await PenaltyBettingNew.aggregate(aggregationPipeline);
+        const userMap = new Map();
+        combinedResults.forEach(player => {
+            const key = player.userId || player.email;
+            if (!userMap.has(key)) {
+                userMap.set(key, player);
+            } else {
+                const existingPlayer = userMap.get(key);
+                existingPlayer.totalBetAmount += player.totalBetAmount;
+                existingPlayer.wins += player.wins;
+            }
+        });
 
-        const topCommunityPlayers = await CommunityBetting.aggregate(aggregationPipeline);
-        const topCommunityPlayersNew = await CommunityBettingNew.aggregate(aggregationPipeline);
+        const uniquePlayers = Array.from(userMap.values());
 
-        const TopPlayerData = [...topColorPlayers, ...topColorPlayersNew, ...topNumberPlayers, ...topNumberPlayersNew, ...topCardPlayers, topCardPlayersNew, ...topPenultyPlayers, ...topPenultyPlayersNew, ...topCommunityPlayers, topCommunityPlayersNew]
-        const filteredTopPlayerData = TopPlayerData.filter(item => Array.isArray(item) ? item.length > 0 : true);
+        uniquePlayers.sort((a, b) => b.totalBetAmount - a.totalBetAmount);
 
-        filteredTopPlayerData.sort((a, b) => b.betAmount - a.betAmount);
-
+        const topPlayers = uniquePlayers.slice(0, 5);
         return sendResponse(
             res,
             StatusCodes.OK,
-            "Get top weekly player successfully",
-            filteredTopPlayerData
+            "Get top weekly players successfully",
+            topPlayers 
         );
     } catch (error) {
         return handleErrorResponse(res, error);
     }
 };
+
+
 
 
 // const filterAllData = async (data) => {
@@ -758,85 +756,84 @@ export const topAllPlayers = async (req, res) => {
     try {
         const aggregationPipeline = [
             {
-                $lookup: {
-                    from: 'games',
-                    localField: 'gameId',
-                    foreignField: '_id',
-                    as: 'gameType'
+                $match: {
+                    userId: { $ne: null },
+                    isWin: true,
+                }
+            },
+            {
+                $group: {
+                    _id: '$userId',
+                    totalBetAmount: { $sum: '$betAmount' },
+                    wins: { $sum: 1 }
                 }
             },
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'userId',
+                    localField: '_id',
                     foreignField: '_id',
                     as: 'user'
                 }
             },
             {
-                $match: {
-                    userId: { $ne: null },
-                    isWin: true,
-                    createdAt: {
-                        $gte: moment().startOf('week').toDate(),
-                        $lt: moment().endOf('week').toDate()
-                    }
+                $project: {
+                    _id: 1,
+                    email: { $arrayElemAt: ['$user.email', 0] },
+                    fullName: { $arrayElemAt: ['$user.fullName', 0] },
+                    totalBetAmount: 1,
+                    wins: 1
                 }
             },
             {
                 $group: {
-                    _id: { userId: '$userId', gameId: '$gameId' },
-                    gameType: { $first: { $arrayElemAt: ['$gameType', 0] } },
-                    user: { $first: { $arrayElemAt: ['$user', 0] } },
-                    isWin: { $first: '$isWin' },
-                    betAmount: { $sum: '$betAmount' }
+                    _id: "$_id",
+                    email: { $first: "$email" },
+                    fullName: { $first: "$fullName" },
+                    totalBetAmount: { $sum: "$totalBetAmount" },
+                    wins: { $sum: "$wins" }
                 }
             },
             {
-                $project: {
-                    _id: 0,
-                    gameType: {
-                        _id: '$gameType._id',
-                        gameName: '$gameType.gameName',
-
-                    },
-                    userId: {
-                        _id: '$user._id',
-                        email: '$user.email',
-                        fullName: '$user.fullName'
-                    },
-                    isWin: 1,
-                    betAmount: 1
-                }
+                $sort: { totalBetAmount: -1 }
             },
-            { $sort: { betAmount: -1 } },
-            { $limit: 5 }
+            {
+                $limit: 5
+            }
         ];
 
-        const topColorPlayers = await ColourBetting.aggregate(aggregationPipeline);
-        const topColorPlayersNew = await ColourBettingNew.aggregate(aggregationPipeline);
+        const collections = [ColourBetting, ColourBettingNew, NumberBetting, NumberBettingNew, CardBetting, CardBettingNew, PenaltyBetting, PenaltyBettingNew, CommunityBetting, CommunityBettingNew];
 
-        const topNumberPlayers = await NumberBetting.aggregate(aggregationPipeline);
-        const topNumberPlayersNew = await NumberBettingNew.aggregate(aggregationPipeline);
+        let combinedResults = [];
 
-        const topCardPlayers = await CardBetting.aggregate(aggregationPipeline);
-        const topCardPlayersNew = await CardBettingNew.aggregate(aggregationPipeline);
+        for (const collection of collections) {
+            const results = await collection.aggregate(aggregationPipeline);
+            combinedResults = combinedResults.concat(results);
+        }
 
-        const topPenultyPlayers = await PenaltyBetting.aggregate(aggregationPipeline);
-        const topPenultyPlayersNew = await PenaltyBettingNew.aggregate(aggregationPipeline);
+        const userMap = new Map();
+        combinedResults.forEach(player => {
+            const key = player.userId || player.email;
+            if (!userMap.has(key)) {
+                userMap.set(key, player);
+            } else {
+                const existingPlayer = userMap.get(key);
+                existingPlayer.totalBetAmount += player.totalBetAmount;
+                existingPlayer.wins += player.wins;
+            }
+        });
 
-        const topCommunityPlayers = await CommunityBetting.aggregate(aggregationPipeline);
-        const topCommunityPlayersNew = await CommunityBettingNew.aggregate(aggregationPipeline);
+        const uniquePlayers = Array.from(userMap.values());
 
-        const TopPlayerData = [...topColorPlayers, ...topColorPlayersNew, ...topNumberPlayers, ...topNumberPlayersNew, ...topCardPlayers, topCardPlayersNew, ...topPenultyPlayers, ...topPenultyPlayersNew, ...topCommunityPlayers, topCommunityPlayersNew]
-        const filteredTopPlayerData = TopPlayerData.filter(item => Array.isArray(item) ? item.length > 0 : true);
-        filteredTopPlayerData.sort((a, b) => b.betAmount - a.betAmount);
+        uniquePlayers.sort((a, b) => b.totalBetAmount - a.totalBetAmount);
+
+        const topPlayers = uniquePlayers.slice(0, 5);
 
         return sendResponse(
             res,
             StatusCodes.OK,
             "Get top all player successfully",
-            filteredTopPlayerData
+            topPlayers
         );
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -848,11 +845,11 @@ Socket.on("connection", (socket) => {
         let liveBets = [];
 
         try {
-            const colorBetting = await ColourBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
-            const numberBetting = await NumberBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
-            const cardBetting = await CardBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
-            const penaltyBetting = await PenaltyBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
-            const communityBetting = await CommunityBetting.find().populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
+            const colorBetting = await ColourBetting.find().sort({ createdAt: -1 }).populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
+            const numberBetting = await NumberBetting.find().sort({ createdAt: -1 }).populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
+            const cardBetting = await CardBetting.find().sort({ createdAt: -1 }).populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
+            const penaltyBetting = await PenaltyBetting.find().sort({ createdAt: -1 }).populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
+            const communityBetting = await CommunityBetting.find().sort({ createdAt: -1 }).populate({ path: 'userId gameId', select: 'fullName email profile gameImage gameName' });
 
             const allBets = [...colorBetting, ...numberBetting, ...cardBetting, ...penaltyBetting, ...communityBetting];
 
@@ -873,6 +870,8 @@ Socket.on("connection", (socket) => {
                 }
             }
 
+            liveBets.sort((a, b) => moment(b.createdAt).diff(moment(a.createdAt)));
+
             if (liveBets.length > 0) {
                 console.log(liveBets, "liveBetsArray");
                 let message = "Connected for live bets";
@@ -888,6 +887,7 @@ Socket.on("connection", (socket) => {
         }
     });
 });
+
 
 
 
