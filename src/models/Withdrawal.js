@@ -72,6 +72,21 @@ const withdrawalSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
+    paymentMethod: {
+        type: String,
+        enum: ["Bank Account", "UPI"],
+        required: false
+    }, 
+    bankAccount:{
+        type: Object,
+        required: false,
+        default: null
+    }, 
+    upiId: {
+        type: String,
+        required: false,
+        default: null
+    }
 }, { timestamps: true });
 
 const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);

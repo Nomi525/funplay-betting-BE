@@ -565,6 +565,9 @@ export const declareColorWinner = async (
 ) => {
   const { _id, gameMode, winningCoin } = game;
   const gameId = _id;
+
+
+
   if (gameMode == "Manual") {
     await ColourBetting.updateMany(
       { gameId, gameType, period, selectedTime },
@@ -574,6 +577,7 @@ export const declareColorWinner = async (
       message: ResponseMessage.WINNER_DECLARE_MANUAL,
     };
   } else {
+
     const checkAlreadyWin = await ColourBetting.find({
       gameId,
       isWin: true,
@@ -703,9 +707,10 @@ export const declareColorWinner = async (
                         is_deleted: 0,
                       });
                       if (findUser) {
-                        console.log(findUser.betAmount, findUser.betAmount, 0);
-                        let rewardAmount = findUser.betAmount + winningCoin;
-                        console.log(rewardAmount, "rewardAmount");
+
+                        console.log(winningCoin, "winning coin 2 colour ")
+                        let rewardAmount = findUser.betAmount * winningCoin + findUser.betAmount;
+
                         await ColourBetting.updateOne(
                           {
                             userId,
@@ -724,11 +729,13 @@ export const declareColorWinner = async (
                           { userId },
                           NewTransaction
                         );
+
                         if (balance) {
                           let winningAmount = Number(rewardAmount);
-                          console.log(winningAmount, "winningAmount");
+
                           balance.totalCoin =
                             Number(balance.totalCoin) + Number(winningAmount);
+                          console.log(balance.totalCoin, " balance.totalCoin")
                           await balance.save();
                         }
                       }
@@ -943,6 +950,7 @@ export const declarePenaltyWinner = async (game, period, selectedTime) => {
                         console.log(findUser.betAmount, "1");
                         let rewardAmount =
                           findUser.betAmount + findUser.betAmount * winningCoin;
+
                         await PenaltyBetting.updateOne(
                           {
                             userId,

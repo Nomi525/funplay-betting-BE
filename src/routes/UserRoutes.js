@@ -82,14 +82,15 @@ import {
   getSlotsBookedByPeriod,
   deleteAllUserNotifications
 } from "./../index.js";
-import {getUserNotifications} from "../controller/user/UserNotificationController.js"
+import { getUserNotifications } from "../controller/user/UserNotificationController.js"
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
 import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
 import { getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
-import { getBankDetail, getUPIData } from "../controller/user/UPIController.js";
+import { getUPIData, getBankDetail } from "../controller/user/UPIController.js";
+// import { gameTimer } from "../controller/user/Gamesocket.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -247,7 +248,8 @@ userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinn
 
 // socketRoute('/number-betting').on('connection', numberBettingSocket)
 // socketRoute('/color-betting').on('connection', colorBettingSocket)
-
+// socketRoute("/game-timer").on('connection', gameTimer)
+// const gameTimer = socketRoute("/game-timer")
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 userRoutes.post('/add-faint-currency', Auth, Upload, addFaintCurrency)
 userRoutes.get("/total-coin", Auth, totalCoin)

@@ -1,5 +1,6 @@
 import { UPIMethod } from "../../models/UPIMethod.js";
 import { createError, sendResponse, StatusCodes, ResponseMessage, handleErrorResponse } from "../../index.js";
+import { Bank } from "../../models/Bank.js";
 
 export const getUPIData = async (req, res) => {
     try {
@@ -22,7 +23,6 @@ export const getUPIData = async (req, res) => {
         return handleErrorResponse(res, error);
     }
 }
-
 
 export const getBankDetail = async (req, res) => {
     try {

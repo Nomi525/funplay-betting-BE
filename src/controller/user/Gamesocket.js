@@ -1,10 +1,11 @@
-// import { Socket } from "../../config/Socket.config.js";
-// import {
-//     User,
-//     handleErrorResponse,
-//     StatusCodes, declareColorWinner, Game, NumberBetting, declareNumberWinner,
-//     ResponseMessage, NewTransaction, ColourBetting, dataCreate, minusLargeSmallValue, plusLargeSmallValue, checkDecimalValueGreaterThanOrEqual
-// } from "../../index.js";
+import { Socket, socketRoute } from "../../config/Socket.config.js";
+import {
+    User,
+    handleErrorResponse,
+    StatusCodes, declareColorWinner, Game, NumberBetting, declareNumberWinner,
+    ResponseMessage, NewTransaction, ColourBetting, dataCreate, minusLargeSmallValue, plusLargeSmallValue, checkDecimalValueGreaterThanOrEqual
+} from "../../index.js";
+// import { gameTimer } from "../../routes/UserRoutes.js";
 
 
 
@@ -169,6 +170,48 @@
 //     })
 
 // };
+
+
+const timers = {}; // This is outside to ensure it's shared globally
+const getTimerSocket = socketRoute("my-socket")
+getTimerSocket.on("connection", (socket) => {
+    console.log("pppp");
+    getTimerSocket.emit("timer", "hii")
+})
+export const gameTimer = (socket) => {
+    // gameTimer.on("connection", (socket) => {
+    console.log("connection");
+
+    socket.on('startTimer', (data) => {
+        const { gameId, duration } = data;
+
+        // Check if the timer already exists and send the current time to the newly joined client
+        if (timers[gameId]) {
+            console.log(`Timer for game ${gameId} is already running. Sending current time to the new client.`);
+            const remainingTime = timers[gameId].remainingTime;
+            socket.emit('timer', { gameId, remainingTime }); // Only emit to the newly joined client
+            return;
+        }
+
+        console.log(`Starting timer for game ${gameId} with duration ${duration} seconds.`);
+
+        // Instead of just storing the duration, store an object containing both the interval ID and the remaining time
+        timers[gameId] = { remainingTime: duration, intervalId: null };
+
+        timers[gameId].intervalId = setInterval(() => {
+            if (timers[gameId].remainingTime > 0) {
+                timers[gameId].remainingTime--;
+                // Emit globally to all clients connected
+                socket.emit('timer', { gameId, remainingTime: timers[gameId].remainingTime });
+            } else {
+                console.log(`Timer for game ${gameId} ended.`);
+                clearInterval(timers[gameId].intervalId);
+                delete timers[gameId]; // Clean up
+            }
+        }, 1000);
+    });
+}
+
 
 
 
