@@ -876,15 +876,15 @@ Socket.on("connection", (socket) => {
             if (liveBets.length > 0) {
                 console.log(liveBets, "liveBetsArray");
                 let message = "Connected for live bets";
-                socket.emit("response", { message, liveBets });
+                Socket.emit("response", { message, liveBets });
             } else {
                 let message = "No live bets found in the last 1 minutes";
-                socket.emit("response", { message });
+                Socket.emit("response", { message });
             }
         } catch (error) {
             console.error("Error fetching data:", error);
             let message = "Error fetching data";
-            socket.emit("response", { message });
+            Socket.emit("response", { message });
         }
     });
 });

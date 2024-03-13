@@ -66,7 +66,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
       if (userTransaction) {
         userTransaction.totalCoin += convertIntoCoin;
         await userTransaction.save();
-        const updatedStatuss = await Withdrawal.updateOne(
+        const updatedStatus = await Withdrawal.updateOne(
           { _id: id },
           { $set: { status: "Rejected", rejectReason: rejectReason } }
         );
