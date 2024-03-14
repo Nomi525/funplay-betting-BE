@@ -23,7 +23,7 @@ import { ResponseMessage } from "../../utils/ResponseMessage.js";
 // });
 
 Socket.on("connection", (sockets) => {
-  console.log("Socket connected");
+
 
   sockets.on("JoinChat", async (room) => {
     sockets.join(room.room_id);

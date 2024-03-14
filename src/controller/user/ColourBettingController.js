@@ -765,144 +765,121 @@ export const getSingleGameWiseWinner = async (req, res) => {
 
 
 
-
 // export const getAllGamePeriod = async (req, res) => {
 //   try {
 //     const { gameId } = req.params;
-//     const { second } = req.query;
-//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-//     const currentDateOnServer = new Date();
+//     const periodInSeconds = req.query.second; // Assuming period is sent as one of ["30", "60", "80", "120", "180"]
 
-//     // First, find all ColourBetting documents within the last 24 hours and other conditions
-//     const colourBettings = await ColourBetting.find({
+//     // Step 1: Retrieve Matching Periods
+//     const matchingPeriods = await Period.find({
 //       gameId: new mongoose.Types.ObjectId(gameId),
-//       selectedTime: second,
-//       createdAt: {
-//         $gte: twentyFourHoursAgo,
-//         $lt: currentDateOnServer,
-//       },
+//       periodFor: periodInSeconds,
 //       is_deleted: 0,
-//     })
+//     }).select('period');
 
-
-//     // Group by 'period' manually
-//     const groupedByPeriod = colourBettings.reduce((acc, cur) => {
-//       const period = cur.period.toString(); // Assuming period is an ObjectId or similar
-//       if (!acc[period]) {
-//         acc[period] = {
-//           gameId: cur.gameId,
-//           totalUsers: 0,
-//           betAmount: 0,
-//           winColour: null,
-//           period: cur.period,
-//         };
-//       }
-//       acc[period].totalUsers += 1;
-//       acc[period].betAmount += cur.betAmount;
-//       if (cur.isWin) {
-//         acc[period].winColour = cur.colourName;
-//       }
-//       return acc;
-//     }, {});
-
-//     // Convert groupedByPeriod to array
-//     const results = Object.values(groupedByPeriod);
-
-//     // Manual join with 'periods' collection
-//     for (const result of results) {
-//       const periodData = await Period.findOne({
-//         period: result.period,
-//         gameId: new mongoose.Types.ObjectId(gameId),
-//       });
-//       console.log(periodData, "periisdfss")
-//       if (periodData) {
-//         result.date = periodData.date;
-//         result.startTime = periodData.startTime;
-//         result.endTime = periodData.endTime;
-//         result.periodFor = periodData.periodFor;
-//         result.createdAt = periodData.createdAt;
-//       }
+//     if (matchingPeriods.length === 0) {
+//       return sendResponse(res, StatusCodes.NOT_FOUND, "No matching periods found.", []);
 //     }
 
+//     const periodIds = matchingPeriods.map(p => p.period);
 
-//     // Filter by 'second' if necessary (the periodFor match)
-//     const filteredResults = results.filter(r => r.periodFor == second);
+//     console.log(periodIds, "ffff")
+//     // Step 2 (Optimized): Find ColourBetting Documents for all periods in one query
+//     const colourBettingResults = await ColourBetting.find({
+//       period: { $in: periodIds.map(period => period.toString()) }, // Use $in to search for multiple values
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       selectedTime: periodInSeconds,
+//       is_deleted: 0,
+//     });
 
-//     filteredResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-//     return sendResponse(
-//       res,
-//       StatusCodes.OK,
-//       ResponseMessage.GAME_PERIOD_GET,
-//       filteredResults
-//     );
+//     console.log(colourBettingResults, "colourBettingResults")
+//     // Process results
+//     let response = colourBettingResults.reduce((acc, current) => {
+//       const periodIndex = acc.findIndex(item => item.period === current.period.toString());
+//       if (periodIndex > -1) {
+//         acc[periodIndex].totalUsers += 1; // Assuming you want to count users
+//         // Additional logic here if necessary, e.g., updating the winColour, price calculations, etc.
+//       } else {
+//         acc.push({
+//           totalUsers: 1,
+//           winColour: current.colourName,
+//           period: current.period.toString(),
+//           price: 0, // Assuming this needs calculation or extraction
+//         });
+//       }
+//       return acc;
+//     }, []);
+
+//     return sendResponse(res, StatusCodes.OK, "Period details fetched successfully", response);
 //   } catch (error) {
-//     console.log(error, "hh");
+//     console.error("Error fetching game periods:", error);
 //     return handleErrorResponse(res, error);
 //   }
 // };
 
-
 export const getAllGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const currentDateOnServer = new Date();
-    const last24HoursDateOnServer = new Date(currentDateOnServer - 24 * 60 * 60 * 1000);
-    const aggregationResult = await ColourBetting.aggregate([
-      {
-        $match: {
-          gameId: new mongoose.Types.ObjectId(gameId),
-          // createdAt: { $gte: twentyFourHoursAgo },
-          createdAt: {
-            $gte: last24HoursDateOnServer,
-            $lt: currentDateOnServer,
-          },
-          is_deleted: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$period",
-          totalUsers: { $sum: 1 },
-          betAmount: { $sum: "$betAmount" },
-          winColour: {
-            $max: {
-              $cond: [
-                { $eq: ['$isWin', true] },
-                "$colourName",
-                null
-              ]
-            }
-          },
-          period: { $first: '$period' }
-        }
-      },
-      {
-        $sort: {
-          period: -1
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalUsers: 1,
-          price: "$betAmount",
-          period: 1,
-          winColour: 1,
-        },
-      }
-    ]);
+    const periodInSeconds = req.query.second; // Assuming period is sent as one of ["30", "60", "80", "120", "180"]
 
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      ResponseMessage.GAME_PERIOD_GET,
-      aggregationResult
-    );
+    // Step 1: Retrieve Matching Periods
+    const matchingPeriods = await Period.find({
+      gameId: new mongoose.Types.ObjectId(gameId),
+      periodFor: periodInSeconds,
+      is_deleted: 0,
+    }).select('period');
+
+    if (matchingPeriods.length === 0) {
+      return sendResponse(res, StatusCodes.NOT_FOUND, "No matching periods found.", []);
+    }
+
+    const periodIds = matchingPeriods.map(p => p.period.toString()); // Ensure periodIds are strings for comparison
+
+    console.log(periodIds, "ffff");
+
+    // Step 2: Find ColourBetting Documents for all periods in one query
+    const colourBettingResults = await ColourBetting.find({
+      period: { $in: periodIds }, // Already strings, no need to map again
+      gameId: new mongoose.Types.ObjectId(gameId),
+      selectedTime: periodInSeconds,
+      is_deleted: 0,
+    });
+
+    console.log(colourBettingResults, "colourBettingResults");
+
+    // Process results
+    let response = periodIds.reduce((acc, periodId) => {
+      // Find all bets for the current period
+      const betsForPeriod = colourBettingResults.filter(bet => bet.period.toString() === periodId);
+
+      if (betsForPeriod.length > 0) {
+        // If there are bets, summarize them
+        const summary = betsForPeriod.reduce((summary, current) => {
+          summary.totalUsers += 1; // Assuming you want to count users
+          // Additional aggregation logic here if necessary
+          return summary;
+        }, { totalUsers: 0, winColour: betsForPeriod[0].colourName, period: periodId, price: 0 }); // Example initial values
+
+        acc.push(summary);
+      } else {
+        // If no bets found, push default data for the period
+        acc.push({
+          totalUsers: 0,
+          winColour: null, // Or any default you see fit
+          period: periodId,
+          price: 0, // Assuming this needs calculation or extraction
+        });
+      }
+      return acc;
+    }, []);
+
+    return sendResponse(res, StatusCodes.OK, "Period details fetched successfully", response);
   } catch (error) {
+    console.error("Error fetching game periods:", error);
     return handleErrorResponse(res, error);
   }
 };
+
 
 // export const getAllGamePeriod = async (req, res) => {
 //   try {

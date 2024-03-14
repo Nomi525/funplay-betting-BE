@@ -2,7 +2,7 @@ import { UserNotification } from "../../models/UserNotification.js";
 import { ResponseMessage, StatusCodes, handleErrorResponse, sendResponse } from "../../index.js";
 import { Socket } from "../../config/Socket.config.js";
 Socket.on("connection", (sockets) => {
-  console.log("notification Socket connected");
+
 
   sockets.on("join-notification-room", async (room) => {
     console.log("join-notification-room", room);
@@ -44,14 +44,14 @@ export const getUserNotifications = async (req, res) => {
 
 export const deleteAllUserNotifications = async (req, res) => {
   try {
-    const deletedNotification = await UserNotification.updateMany({ userId: req.user }, {is_deleted: true});
-    if(deletedNotification){
+    const deletedNotification = await UserNotification.updateMany({ userId: req.user }, { is_deleted: true });
+    if (deletedNotification) {
       return sendResponse(
         res,
         StatusCodes.OK,
         ResponseMessage.NOTIFICATION_DELETED
       );
-    }else{
+    } else {
       return sendResponse(
         res,
         StatusCodes.NOT_FOUND,

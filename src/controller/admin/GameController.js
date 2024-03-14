@@ -2425,34 +2425,34 @@ export const getAllGamePeriodData = async (req, res) => {
     console.log(gameId, gameType, periodFor, "44444")
     let battingAggregationResult;
 
-    // // Find periods with isWin: true in the numberbettings collection
-    // const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct(
-    //   "period",
-    //   { isWin: true }
-    // );
+    // Find periods with isWin: true in the numberbettings collection
+    const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
-    // // Find periods with isWin: true in the colourbettings collection
-    // const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
-    //   "period",
-    //   { isWin: true, selectedTime: periodFor, gameId, gameType }
-    // );
-    // // Find periods with isWin: true in the penaltyBetting collection
-    // const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
-    //   "period",
-    //   { isWin: true, selectedTime: periodFor, gameId }
-    // );
+    // Find periods with isWin: true in the colourbettings collection
+    const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
+      "period",
+      { isWin: true, selectedTime: periodFor, gameId, gameType }
+    );
+    // Find periods with isWin: true in the penaltyBetting collection
+    const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
+      "period",
+      { isWin: true, selectedTime: periodFor, gameId }
+    );
 
-    // // Find periods with isWin: true in the communitybetting collection
-    // const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
-    //   "period",
-    //   { isWin: true }
-    // );
+    // Find periods with isWin: true in the communitybetting collection
+    const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
-    // // Find periods with isWin: true in the cardbetting collection
-    // const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
-    //   "period",
-    //   { isWin: true, selectedTime: periodFor, gameId }
-    // );
+    // Find periods with isWin: true in the cardbetting collection
+    const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
+      "period",
+      { isWin: true, selectedTime: periodFor, gameId }
+    );
 
     if (gameType === "numberBetting") {
       // battingAggregationResult = await Period.aggregate([
@@ -3636,6 +3636,7 @@ export const getAllGamePeriodData = async (req, res) => {
       battingAggregationResult
     );
   } catch (error) {
+    console.log(error, "rrtrtrt")
     return handleErrorResponse(res, error);
   }
 };
