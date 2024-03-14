@@ -138,125 +138,191 @@ import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 //   }
 // };
 
+// export const connectToWallet = async (req, res) => {
+//   try {
+//     const { email, currency, referralByCode, password, wallet } = req.body;
+//     // const walletArray = [JSON.parse(wallet)];
+//     const walletArray = JSON.parse(wallet);
+
+//     const otp = generateOtp();
+//     const lowercasedEmail = email ? email.toLowerCase() : "";
+
+//     let existingUser;
+
+//     if (lowercasedEmail) {
+//       existingUser = await User.findOne({ email: lowercasedEmail });
+//     }
+
+//     if (existingUser) {
+
+//       await User.updateOne(
+//         {
+//           email: lowercasedEmail,
+//           "wallet.walletAddress": walletArray[0]?.walletAddress,
+//         },
+//         {
+//           $set: {
+//             "wallet.$.isConnected": true,
+//             isVerified: true,
+//           },
+//         }
+//       );
+
+//       const payload = {
+//         user: {
+//           id: existingUser._id,
+//         },
+//       };
+//       const token = await genrateToken({ payload });
+
+//       return sendResponse(res, StatusCodes.CREATED, ResponseMessage.LOGIN, {
+//         ...existingUser._doc,
+//         token: token,
+//       });
+//     }
+//     const walletUser = await User.findOne({
+//       "wallet.walletAddress": wallet?.walletAddress,
+//       "wallet.walletType": wallet?.walletType,
+//       "wallet.isConnected": true,
+//     });
+
+//     if (walletUser) {
+//       // Update the existing user's wallet and mark as verified
+//       await User.updateOne(
+//         { "wallet.walletAddress": wallet?.walletAddress },
+//         {
+//           $set: {
+//             "wallet.$.isConnected": true,
+//             isVerified: true,
+//           },
+//         }
+//       );
+
+//       const payload = {
+//         user: {
+//           id: walletUser._id,
+//         },
+//       };
+//       const token = await genrateToken({ payload });
+
+//       return sendResponse(res, StatusCodes.CREATED, ResponseMessage.LOGIN, {
+//         ...walletUser._doc,
+//         token: token,
+//       });
+//     }
+//     console.log(req.body, "hii");
+//     // Create a new user if wallet address doesn't exist
+//     const referCode = referralCode(8);
+//     const newUser = new User({
+//       email: lowercasedEmail,
+//       currency,
+//       password,
+//       wallet: {
+//         walletAddress: wallet?.walletAddress,
+//         walletType: wallet?.walletType,
+//         isConnected: true,
+//       },
+//       isVerified: true,
+//       referralCode: referCode,
+//       otp,
+//     });
+//     await newUser.save();
+//     console.log(newUser, "save");
+//     if (newUser) {
+//       await createReward(
+//         newUser._id,
+//         "Created Reward",
+//         "First time reward from admin side"
+//       );
+//     }
+
+//     const payload = {
+//       user: {
+//         id: newUser._id,
+//       },
+//     };
+//     const token = await genrateToken({ payload });
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.CREATED,
+//       ResponseMessage.WALLET_CONNECT,
+//       {
+//         ...newUser._doc,
+//         token: token,
+//       }
+//     );
+//   } catch (error) {
+//     console.error(error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const connectToWallet = async (req, res) => {
   try {
-    const { email, currency, referralByCode, password, wallet } = req.body;
-    // const walletArray = [JSON.parse(wallet)];
-    const walletArray = JSON.parse(wallet);
+    const { email, currency, referralByCode, password, wallet: walletString } = req.body;
+    const wallet = JSON.parse(walletString); // Assuming you've corrected this on the frontend or middleware
 
-    const otp = generateOtp();
     const lowercasedEmail = email ? email.toLowerCase() : "";
+    let existingUser = lowercasedEmail ? await User.findOne({ email: lowercasedEmail }) : null;
 
-    let existingUser;
-
-    if (lowercasedEmail) {
-      existingUser = await User.findOne({ email: lowercasedEmail });
-    }
+    // For both new and existing users, structure of the wallet data to save/update
+    const walletData = {
+      walletAddress: wallet.walletAddress.address, // Correctly accessing the address
+      walletType: wallet.walletType,
+      isConnected: wallet.walletAddress.isConnected,
+    };
 
     if (existingUser) {
+      // Check if wallet already exists in user's wallet array
+      const walletExists = existingUser.wallet.some(w => w.walletAddress === walletData.walletAddress);
 
-      await User.updateOne(
-        {
-          email: lowercasedEmail,
-          "wallet.walletAddress": walletArray[0]?.walletAddress,
-        },
-        {
-          $set: {
-            "wallet.$.isConnected": true,
-            isVerified: true,
-          },
-        }
-      );
-
-      const payload = {
-        user: {
-          id: existingUser._id,
-        },
-      };
-      const token = await genrateToken({ payload });
-
-      return sendResponse(res, StatusCodes.CREATED, ResponseMessage.LOGIN, {
-        ...existingUser._doc,
-        token: token,
+      if (walletExists) {
+        // Update existing wallet isConnected status
+        await User.updateOne(
+          { "wallet.walletAddress": walletData.walletAddress },
+          { "$set": { "wallet.$.isConnected": walletData.isConnected } }
+        );
+      } else {
+        // Add new wallet to user's wallet array
+        await User.updateOne(
+          { _id: existingUser._id },
+          { "$push": { "wallet": walletData } }
+        );
+      }
+    } else {
+      // Creating a new user with the wallet data
+      const newUser = new User({
+        email: lowercasedEmail,
+        currency,
+        password,
+        wallet: [walletData], // Ensure it's an array containing the walletData object
+        isVerified: true,
+        referralCode: referralCode(8), // Assuming referralCode function generates a new code
       });
-    }
-    const walletUser = await User.findOne({
-      "wallet.walletAddress": wallet?.walletAddress,
-      "wallet.walletType": wallet?.walletType,
-      "wallet.isConnected": true,
-    });
 
-    if (walletUser) {
-      // Update the existing user's wallet and mark as verified
-      await User.updateOne(
-        { "wallet.walletAddress": wallet?.walletAddress },
-        {
-          $set: {
-            "wallet.$.isConnected": true,
-            isVerified: true,
-          },
-        }
-      );
+      await newUser.save();
 
-      const payload = {
-        user: {
-          id: walletUser._id,
-        },
-      };
-      const token = await genrateToken({ payload });
+      // Create reward for the new user (assuming createReward function exists and works correctly)
+      await createReward(newUser._id, "Created Reward", "First time reward from admin side");
 
-      return sendResponse(res, StatusCodes.CREATED, ResponseMessage.LOGIN, {
-        ...walletUser._doc,
-        token: token,
-      });
-    }
-    console.log(req.body, "hii");
-    // Create a new user if wallet address doesn't exist
-    const referCode = referralCode(8);
-    const newUser = new User({
-      email: lowercasedEmail,
-      currency,
-      password,
-      wallet: {
-        walletAddress: wallet?.walletAddress,
-        walletType: wallet?.walletType,
-        isConnected: true,
-      },
-      isVerified: true,
-      referralCode: referCode,
-      otp,
-    });
-    await newUser.save();
-    console.log(newUser, "save");
-    if (newUser) {
-      await createReward(
-        newUser._id,
-        "Created Reward",
-        "First time reward from admin side"
-      );
+      existingUser = newUser; // To reuse the token generation and response logic below
     }
 
-    const payload = {
-      user: {
-        id: newUser._id,
-      },
-    };
+    // Generate token and respond (This part is reused for both new and existing users)
+    const payload = { user: { id: existingUser._id } };
     const token = await genrateToken({ payload });
 
-    return sendResponse(
-      res,
-      StatusCodes.CREATED,
-      ResponseMessage.WALLET_CONNECT,
-      {
-        ...newUser._doc,
-        token: token,
-      }
-    );
+    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WALLET_CONNECT, {
+      ...existingUser._doc,
+      token: token,
+    });
   } catch (error) {
     console.error(error);
     return handleErrorResponse(res, error);
   }
 };
+
 
 export const userSignUpSignInOtp = async (req, res) => {
   try {
@@ -1612,7 +1678,7 @@ export const editProfile = async (req, res) => {
         res,
         StatusCodes.NOT_FOUND,
         ResponseMessage.USER_NOT_FOUND,
-        [] 
+        []
       );
     }
 
@@ -1639,8 +1705,8 @@ export const editProfile = async (req, res) => {
     req.body.profile = req.profileUrl ? req.profileUrl : findData.profile;
 
     let updatedBankDetails = [];
-   
-    
+
+
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
     }
@@ -1657,7 +1723,7 @@ export const editProfile = async (req, res) => {
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
-    
+
       }
     }
 
@@ -1693,7 +1759,7 @@ export const editProfile = async (req, res) => {
           },
           User
         );
-      
+
         if (checkMobileNumber) {
           return sendResponse(
             res,
@@ -1705,7 +1771,7 @@ export const editProfile = async (req, res) => {
         updateData.mobileNumber = req.body.mobileNumber;
       }
     }
-    
+
 
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
@@ -2546,7 +2612,7 @@ export const findUserBet = async (req, res) => {
       userId: userId
     }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
 
-   let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew ]
+    let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew]
 
     return res.status(200).json({
       status: StatusCodes.OK,
@@ -2591,14 +2657,14 @@ export const findUserWinBet = async (req, res) => {
     })
 
     const findCommunitybettingUser = await NumberBetting.find({
-      userId: userId,isWin: true
+      userId: userId, isWin: true
     })
     const findNCommunitybettingUserNew = await NumberBettingNew.find({
       userId: userId, isWin: true
     })
 
-   let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew ]
-   const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
+    let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew]
+    const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
 
     return res.status(200).json({
       status: StatusCodes.OK,
@@ -2625,40 +2691,40 @@ export const findUserLooseBet = async (req, res) => {
       userId: userId, isWin: false, status: { $ne: "pending" }
     })
     const findCardBettingUserNew = await CardBettingNew.find({
-      userId: userId,  isWin: false, status: { $ne: "pending" }
+      userId: userId, isWin: false, status: { $ne: "pending" }
     })
 
     const findPenltybettingUser = await PenaltyBetting.find({
       userId: userId, isWin: false, status: { $ne: "pending" }
     })
     const findPenltybettingUserNew = await PenaltyBettingNew.find({
-      userId: userId,  isWin: false, status: { $ne: "pending" }
+      userId: userId, isWin: false, status: { $ne: "pending" }
     })
 
     const findNumberbettingUser = await NumberBetting.find({
-      userId: userId,  isWin: false, status: { $ne: "pending" }
+      userId: userId, isWin: false, status: { $ne: "pending" }
     })
     const findNumberbettingUserNew = await NumberBettingNew.find({
-      userId: userId,  isWin: false, status: { $ne: "pending" }
+      userId: userId, isWin: false, status: { $ne: "pending" }
     })
 
     const findCommunitybettingUser = await NumberBetting.find({
       userId: userId, isWin: false, status: { $ne: "pending" }
     })
     const findNCommunitybettingUserNew = await NumberBettingNew.find({
-      userId: userId,  isWin: false, status: { $ne: "pending" }
+      userId: userId, isWin: false, status: { $ne: "pending" }
     })
 
-   let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew ]
-console.log(findData,'kk');
-const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
+    let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew]
+    console.log(findData, 'kk');
+    const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
     return res.status(200).json({
       status: StatusCodes.OK,
       message: 'get user bet data',
       data: totalBetAmount,
     });
   } catch (error) {
-    console.log(error,"dd");
+    console.log(error, "dd");
     return handleErrorResponse(res, error);
   }
 };
