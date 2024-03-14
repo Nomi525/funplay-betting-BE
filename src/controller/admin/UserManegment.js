@@ -802,6 +802,7 @@ export const getUserGameInfo = async (req, res) => {
       ...topCommunityPlayers,
       ...topCommunityPlayersNew
     ]
+    TopPlayerData.sort((a, b) => b.createdAt - a.createdAt);
 
     return sendResponse(
       res,
