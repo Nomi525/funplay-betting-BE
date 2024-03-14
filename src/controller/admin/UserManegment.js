@@ -775,20 +775,20 @@ export const getUserWalletInfo = async (req, res) => {
 
 export const getUserGameInfo = async (req, res) => {
   try {
-    const topColorPlayers = await ColourBetting.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topColorPlayersNew = await ColourBettingNew.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topColorPlayers = await ColourBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topColorPlayersNew = await ColourBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topNumberPlayers = await NumberBetting.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topNumberPlayersNew = await NumberBettingNew.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topNumberPlayers = await NumberBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topNumberPlayersNew = await NumberBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topCardPlayers = await CardBetting.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topCardPlayersNew = await CardBettingNew.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCardPlayers = await CardBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCardPlayersNew = await CardBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topPenultyPlayers = await PenaltyBetting.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topPenultyPlayersNew = await PenaltyBettingNew.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topPenultyPlayers = await PenaltyBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topPenultyPlayersNew = await PenaltyBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topCommunityPlayers = await CommunityBetting.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topCommunityPlayersNew = await CommunityBettingNew.find({ userId: req.body.userId, status: { $ne: "pending" } }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCommunityPlayers = await CommunityBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCommunityPlayersNew = await CommunityBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
     const TopPlayerData = [
       ...topColorPlayers,
