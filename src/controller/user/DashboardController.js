@@ -324,7 +324,6 @@ export const userDashboard = async (req, res) => {
       { _id: req.user, is_deleted: 0 },
       User
     );
-    console.log(findUser,"hh");
 
     if (!findUser) {
       return sendResponse(
@@ -474,6 +473,25 @@ function calculateTotalBettingReward(bettingData) {
   );
 }
 
+async function convertEthToCurrency(ethAmount, targetCurrency) {
+  try {
+      const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=${targetCurrency.toLowerCase()}`);
+      const data = await response.json();
+      
+      if (data.ethereum && data.ethereum[targetCurrency.toLowerCase()]) {
+          const ethToCurrencyConversionRate = data.ethereum[targetCurrency.toLowerCase()];
+          const currencyAmount = ethAmount * ethToCurrencyConversionRate;
+          return currencyAmount;
+      } else {
+          throw new Error(`${targetCurrency} conversion rate not available`);
+      }
+  } catch (error) {
+      console.error(`Error fetching ${targetCurrency} conversion rate:`, error);
+      throw error;
+  }
+}
+
+
 export const userDashboard1 = async (req, res) => {
   try {
     const findUserPromise = getSingleData(
@@ -591,13 +609,30 @@ export const userDashboard1 = async (req, res) => {
       (total, data) => plusLargeSmallValue(total, data.tokenDollorValue),
       0
     );
-    const faintCurrency = await FaintCurrency.find({ userId: req.user, status: 'Approved' })
-    console.log(faintCurrency, "data");
+    const faintCurrency = await FaintCurrency.find({ userId: req.user, status: 'Approved' });
     let totalAmount = 0;
 
     for (const currency of faintCurrency) {
-      totalAmount += currency.amount;
+        totalAmount += currency.amount;
     }
+
+    let convIthe = 0;
+    const transactionDeposit = await TransactionHistory.find({ userId: req.user });
+    const findUserPromise1 = await User.find({ _id: req.user, is_deleted: 0 });
+
+    for (const convertetheum of transactionDeposit) {
+        convIthe += convertetheum.tokenAmount;
+    }
+
+    const ethAmount = convIthe;
+    const userCurrency = findUserPromise1[0].currency;
+    const currencyAmount = await convertEthToCurrency(ethAmount, userCurrency);
+
+    // Add currencyAmount to totalAmount
+    totalAmount += currencyAmount;
+
+    console.log("Total Amount:", totalAmount);
+    
 
     let totalBalance = 0;
     let totalDepositeBalance = 0;
@@ -665,8 +700,9 @@ export const userDashboard1 = async (req, res) => {
 
       const TransactionData = await FaintCurrency.find({ userId: req.user }).count();
       const TransactionData1 = await Withdrawal.find({ userId: req.user }).count();
+      const TransactionData2 = await TransactionHistory.find({ userId: req.user }).count();
       
-      const totalTAmount = TransactionData + TransactionData1;
+      const totalTAmount = TransactionData + TransactionData1 + TransactionData2;
       
 
     return sendResponse(
