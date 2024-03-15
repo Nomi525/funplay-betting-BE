@@ -567,43 +567,159 @@ export const updateEmail = async (req, res) => {
   }
 };
 
+// export const checkWalletAddress = async (req, res) => {
+//   try {
+//     let { walletAddress, email, walletType } = req.body;
+//     const queryOjb = {
+//       "wallet.walletAddress": walletAddress,
+//       "wallet.isConnected": true,
+//     };
+//     // if (email) {
+//     //   queryOjb.email = email;
+//     // }
+//     console.log(email, "emailll")
+//     let existingUser = await User.findOne(queryOjb || email);
+//     console.log(existingUser, "user")
+//     if (existingUser) {
+//       const payload = {
+//         user: {
+//           id: existingUser._id,
+//         },
+//       };
+//       const token = await genrateToken({ payload });
+//       existingUser.walletConnected = "Yes";
+//       await existingUser.save();
+//       return sendResponse(res, StatusCodes.OK, "", {
+//         ...existingUser._doc,
+//         token: token,
+//       });
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.USER_NOT_FOUND,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     console.log(error, ":Error");
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+
+// export const checkWalletAddress = async (req, res) => {
+//   try {
+//     const { walletAddress, email } = req.body;
+
+//     // Create an array of conditions for the $or operator
+//     let conditions = [
+//       { "wallet.walletAddress": walletAddress, "wallet.isConnected": true }
+//     ];
+
+//     if (email) {
+//       conditions.push({ email: email }); // Add email as a separate condition if it exists
+//     }
+
+//     console.log(email, "email");
+
+//     // Use the $or operator with the conditions array
+//     let existingUser = await User.findOne({ $or: conditions });
+
+//     console.log(existingUser, "user");
+//     if (existingUser) {
+//       const payload = {
+//         user: {
+//           id: existingUser._id,
+//         },
+//       };
+
+//       const token = await genrateToken({ payload });
+
+//       existingUser.walletConnected = "Yes";
+//       await existingUser.save();
+
+//       return sendResponse(res, StatusCodes.OK, "User found and token generated", {
+//         ...existingUser._doc,
+//         token,
+//       });
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         "User not found",
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     console.log(error, ": Error");
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const checkWalletAddress = async (req, res) => {
   try {
-    let { walletAddress, email, walletType } = req.body;
-    const queryOjb = {
-      "wallet.walletAddress": walletAddress,
-      "wallet.isConnected": true,
-    };
-    if (email) {
-      queryOjb.email = email;
-    }
-    let existingUser = await User.findOne(queryOjb);
+    const { walletAddress, email, mobileNumber } = req.body;
+    console.log(req.body, "ggggg");
+    let existingUser;
+
+    // First, try to find by wallet address and isConnected status
+    existingUser = await User.findOne({
+      'wallet.walletAddress': walletAddress,
+      'wallet.isConnected': true,
+    });
+
+    // If user found by wallet address, no need to check by email or modify user
     if (existingUser) {
-      const payload = {
-        user: {
-          id: existingUser._id,
-        },
-      };
+      const payload = { user: { id: existingUser._id } };
       const token = await genrateToken({ payload });
-      existingUser.walletConnected = "Yes";
-      await existingUser.save();
-      return sendResponse(res, StatusCodes.OK, "", {
-        ...existingUser._doc,
-        token: token,
+
+      return sendResponse(res, StatusCodes.OK, "Success", {
+        ...existingUser.toObject(),
+        token,
       });
-    } else {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.USER_NOT_FOUND,
-        []
-      );
     }
+
+    // If no user found by wallet and an email is provided, search by email
+    if (!existingUser && email || mobileNumber) {
+      existingUser = await User.findOne({
+        $or: [{ email: email }, { mobileNumber: mobileNumber }]
+      });
+
+      if (existingUser) {
+        console.log("hererere");
+
+        // Logic to add or update the wallet
+        if (existingUser.wallet.length > 0) {
+          existingUser.wallet[0].walletAddress = walletAddress;
+          existingUser.wallet[0].isConnected = true;
+          // Optionally set the walletType here if needed
+        } else {
+          existingUser.wallet.push({ walletAddress, isConnected: true }); // Add default walletType if required
+        }
+
+        let savedUser = await existingUser.save();
+        console.log(savedUser, "saveduser");
+
+        // Generate token for the user after updating/adding the wallet address
+        const payload = { user: { id: existingUser._id } };
+        const token = await genrateToken({ payload });
+
+        return sendResponse(res, StatusCodes.OK, "Success", {
+          ...existingUser.toObject(),
+          token,
+        });
+      }
+    }
+
+    // If no user found by either wallet address or email
+    return sendResponse(res, StatusCodes.BAD_REQUEST, "User not found", []);
   } catch (error) {
-    console.log(error, ":Error");
+    console.log(error, ": Error");
     return handleErrorResponse(res, error);
   }
 };
+
 
 export const updateLoginStatus = async (req, res) => {
   try {

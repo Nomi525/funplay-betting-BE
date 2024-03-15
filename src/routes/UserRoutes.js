@@ -249,7 +249,7 @@ userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinn
 // socketRoute('/number-betting').on('connection', numberBettingSocket)
 // socketRoute('/color-betting').on('connection', colorBettingSocket)
 // socketRoute("/game-timer").on('connection', gameTimer)
-// const gameTimer = socketRoute("/game-timer")
+const gameTimer = socketRoute("/game-timer")
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 userRoutes.post('/add-faint-currency', Auth, Upload, addFaintCurrency)
 userRoutes.get("/total-coin", Auth, totalCoin)
