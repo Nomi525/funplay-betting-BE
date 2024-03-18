@@ -150,23 +150,23 @@ export const getAllFaintCurrency = async (req, res) => {
 //         return handleErrorResponse(res, error);
 //     }
 // }
-async function convertEthToCurrency(ethAmount, targetCurrency) {
-    try {
-        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=${targetCurrency.toLowerCase()}`);
-        const data = await response.json();
+// async function convertEthToCurrency(ethAmount, targetCurrency) {
+//     try {
+//         const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=${targetCurrency.toLowerCase()}`);
+//         const data = await response.json();
         
-        if (data.ethereum && data.ethereum[targetCurrency.toLowerCase()]) {
-            const ethToCurrencyConversionRate = data.ethereum[targetCurrency.toLowerCase()];
-            const currencyAmount = ethAmount * ethToCurrencyConversionRate;
-            return currencyAmount;
-        } else {
-            throw new Error(`${targetCurrency} conversion rate not available`);
-        }
-    } catch (error) {
-        console.error(`Error fetching ${targetCurrency} conversion rate:`, error);
-        throw error;
-    }
-  }
+//         if (data.ethereum && data.ethereum[targetCurrency.toLowerCase()]) {
+//             const ethToCurrencyConversionRate = data.ethereum[targetCurrency.toLowerCase()];
+//             const currencyAmount = ethAmount * ethToCurrencyConversionRate;
+//             return currencyAmount;
+//         } else {
+//             throw new Error(`${targetCurrency} conversion rate not available`);
+//         }
+//     } catch (error) {
+//         console.error(`Error fetching ${targetCurrency} conversion rate:`, error);
+//         throw error;
+//     }
+//   }
 
 export const getUserFaintCurrency = async (req, res) => {
     try {
@@ -176,13 +176,34 @@ export const getUserFaintCurrency = async (req, res) => {
           }).sort({ createdAt: -1 });
           
 
-        const getWalletData = await TransactionHistory.find({userId:req.user}).populate({
-            path: 'userId',
-            select: 'fullName currency'
-          }).sort({ createdAt: -1 });
-          
+          const getWalletData = await TransactionHistory.find({ userId: req.user })
+          .populate({
+              path: 'userId',
+              select: 'fullName currency'
+          })
+          .sort({ createdAt: -1 });
+      
+      const plainObjects = getWalletData.map(doc => {
+          const { _id, userId, walletAddress, tokenName, tokenAmount, tokenDollorValue, coin, status, type, is_deleted, createdAt, updatedAt, __v } = doc.toObject();
+          return {
+              _id,
+              userId,
+              walletAddress,
+              tokenName,
+              tokenAmount,
+              tokenDollorValue,
+              coin,
+              status,
+              is_deleted,
+              requestType: type, 
+              type: 'Crypto Currency', 
+              createdAt,
+              updatedAt,
+              __v
+          };
+      });
 
-      const data = [...getFaintData, ...getWalletData]
+      const data = [...getFaintData, ...plainObjects]
 
         return sendResponse(
             res,
