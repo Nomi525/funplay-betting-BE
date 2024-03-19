@@ -835,8 +835,6 @@ export const getAllGamePeriod = async (req, res) => {
 
     const periodIds = matchingPeriods.map(p => p.period.toString()); // Ensure periodIds are strings for comparison
 
-    console.log(periodIds, "ffff");
-
     // Step 2: Find ColourBetting Documents for all periods in one query
     const colourBettingResults = await ColourBetting.find({
       period: { $in: periodIds }, // Already strings, no need to map again
@@ -845,7 +843,6 @@ export const getAllGamePeriod = async (req, res) => {
       is_deleted: 0,
     });
 
-    console.log(colourBettingResults, "colourBettingResults");
 
     // Process results
     let response = periodIds.reduce((acc, periodId) => {
