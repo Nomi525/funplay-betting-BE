@@ -971,7 +971,7 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       selectedTime: periodFor,
       is_deleted: 0,
     }).lean();
-
+console.log(checkAlreadyWin,"Already win ");
     if (checkAlreadyWin.length) {
       return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_WIN, []);
     }
