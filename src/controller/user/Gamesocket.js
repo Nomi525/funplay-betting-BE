@@ -172,12 +172,38 @@ import {
 // };
 
 
-const timers = {}; // This is outside to ensure it's shared globally
-const getTimerSocket = socketRoute("my-socket")
-getTimerSocket.on("connection", (socket) => {
-    console.log("pppp");
-    getTimerSocket.emit("timer", "hii")
-})
+// const timers = {};
+//export const getTimerSocket = socketRoute("my-socket")
+// getTimerSocket.on("connection", (socket) => {
+//     socket.on('startTimer', (data) => {
+//         const room = `${datagameId}${duration}`
+//         socket.join(room)
+//         const { gameId, duration } = data;
+//         if (timers[gameId]) {
+//             console.log(`Timer for game ${gameId} is already running. Sending current time to the new client.`);
+//             const remainingTime = timers[gameId].remainingTime;
+//             getTimerSocket.in(room).emit('timer', { gameId, remainingTime });
+//             return;
+//         }
+
+//         console.log(`Starting timer for game ${gameId} with duration ${duration} seconds.`);
+//         timers[gameId] = { remainingTime: duration, intervalId: null };
+
+//         timers[gameId].intervalId = setInterval(() => {
+//             if (timers[gameId].remainingTime > 0) {
+//                 timers[gameId].remainingTime--;
+//                 // Emit globally to all clients connected
+//                 getTimerSocket.in(room).emit('timer', { gameId, remainingTime: timers[gameId].remainingTime });
+//             } else {
+//                 console.log(`Timer for game ${gameId} ended.`);
+//                 clearInterval(timers[gameId].intervalId);
+//                 delete timers[gameId]; // Clean up
+//             }
+//         }, 1000);
+//     });
+// })
+
+
 export const gameTimer = (socket) => {
     // gameTimer.on("connection", (socket) => {
     console.log("connection");
@@ -218,4 +244,47 @@ export const gameTimer = (socket) => {
 
 
 
+
+
+
+const timers = {};
+export const getTimerSocket = socketRoute("my-socket");
+
+getTimerSocket.on("connection", (socket) => {
+    socket.on('startTimer', (data) => {
+        const { gameId, duration } = data;
+        if (!gameId || duration === undefined) {
+            console.error('Invalid data received for starting the timer');
+            return;
+        }
+
+        // Use both gameId and duration to create a unique identifier for each timer
+        const timerId = `game-${gameId}-duration-${duration}`;
+        socket.join(timerId);
+
+        if (timers[timerId]) {
+            console.log(`Timer with ID ${timerId} is already running. Sending current time to the new client.`);
+            const remainingTime = timers[timerId].remainingTime;
+            getTimerSocket.in(timerId).emit('timer', { gameId, duration, remainingTime });
+            return;
+        }
+
+        console.log(`Starting timer for game ${gameId} with duration ${duration} seconds.`);
+        timers[timerId] = { remainingTime: duration, intervalId: null };
+
+        timers[timerId].intervalId = setInterval(() => {
+            if (timers[timerId].remainingTime > 0) {
+                timers[timerId].remainingTime--;
+                console.log(`Emitting to ${timerId}:`, getTimerSocket.in(timerId));
+
+                getTimerSocket.in(timerId).emit('timer', { gameId, duration, remainingTime: timers[timerId].remainingTime });
+            } else {
+                console.log(`Timer for game ${gameId} with duration ${duration} has ended.`);
+                clearInterval(timers[timerId].intervalId);
+                delete timers[timerId]; // Clean up after the timer ends
+                getTimerSocket.in(timerId).emit('timerEnded', { gameId, duration });
+            }
+        }, 1000);
+    });
+});
 

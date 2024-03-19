@@ -2139,6 +2139,12 @@ export async function createAllGamePeriodFromCronJob() {
           const periodCount = await Period.countDocuments({
             gameId: game._id,
           });
+
+          const periodCount1 = await PeriodNew.countDocuments({
+            gameId: game._id,
+
+          });
+          let finalPeriod = periodCount + periodCount1
           const lastIndex = await Period.findOne({
             gameId: game._id,
             is_deleted: 0,
@@ -2146,9 +2152,9 @@ export async function createAllGamePeriodFromCronJob() {
             .sort({ createdAt: -1 })
             .lean();
 
-          if (periodCount) {
+          if (finalPeriod) {
             period =
-              formattedDate + (periodCount + 1).toString().padStart(3, "0");
+              formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
           } else {
             period = formattedDate + (1).toString().padStart(3, "0");
           }
@@ -2213,10 +2219,16 @@ export async function createAllGamePeriodFromCronJob() {
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
           let period = formattedDate + "000";
+
           const periodCount = await Period.countDocuments({
             gameId: game._id,
-          });
 
+          });
+          const periodCount1 = await PeriodNew.countDocuments({
+            gameId: game._id,
+
+          });
+          let finalPeriod = periodCount + periodCount1
           const lastIndex = await Period.findOne({
             gameId: game._id,
             is_deleted: 0,
@@ -2224,9 +2236,9 @@ export async function createAllGamePeriodFromCronJob() {
             .sort({ createdAt: -1 })
             .lean();
 
-          if (periodCount) {
+          if (finalPeriod) {
             period =
-              formattedDate + (periodCount + 1).toString().padStart(3, "0");
+              formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
           } else {
             period = formattedDate + (1).toString().padStart(3, "0");
           }
@@ -2301,6 +2313,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2309,9 +2326,9 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2388,6 +2405,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2396,9 +2418,9 @@ export async function createAllGamePeriodFromCronJob() {
 
               .sort({ createdAt: -1 })
               .lean();
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2474,6 +2496,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2482,9 +2509,9 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2560,6 +2587,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2568,9 +2600,9 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2637,7 +2669,6 @@ export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
-
     const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
 
     let query = {

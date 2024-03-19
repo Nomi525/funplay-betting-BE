@@ -24,7 +24,9 @@ import {
   capitalizeFirstLetter,
   Period
 } from "../../index.js";
+
 import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
+import { PeriodNew } from "../../models/Period.js";
 
 //#region Add penalty Betting
 export const addPenaltyBet = async (req, res) => {
@@ -486,80 +488,143 @@ export const getByIdGamePeriodOfPenaltyBetting = async (req, res) => {
 //   }
 // };
 
+// export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second } = req.query;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     // Step 1: Fetch relevant periods first
+//     const periods = await Period.find({
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       periodFor: second,
+//     });
+
+//     // Step 2: Fetch PenaltyBetting documents
+//     const penaltyBettings = await PenaltyBetting.find({
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       selectedTime: second,
+//       createdAt: { $gte: twentyFourHoursAgo },
+//       is_deleted: 0,
+//     });
+
+//     // Step 3: Manually group by period
+//     let groupedByPeriod = {};
+//     penaltyBettings.forEach((bet) => {
+//       const period = bet.period;
+//       if (!groupedByPeriod[period]) {
+//         groupedByPeriod[period] = {
+//           totalUsers: 0,
+//           betAmount: 0,
+//           winBetSide: null,
+//           status: null,
+//         };
+//       }
+//       groupedByPeriod[period].totalUsers += 1;
+//       groupedByPeriod[period].betAmount += bet.betAmount;
+//       if (bet.isWin && (groupedByPeriod[period].winBetSide === null || groupedByPeriod[period].winBetSide === bet.betSide)) {
+//         groupedByPeriod[period].winBetSide = bet.betSide;
+//       }
+//       if (["successfully", "Pending", "fail"].includes(bet.status) && (groupedByPeriod[period].status === null || bet.status === "successfully")) {
+//         groupedByPeriod[period].status = bet.status;
+//       }
+//     });
+
+//     // Step 4: Combine period and betting data
+//     let result = periods.map((period) => {
+//       const periodData = groupedByPeriod[period.period] || {};
+//       return {
+//         gameId: new mongoose.Types.ObjectId(gameId),
+//         totalUsers: periodData.totalUsers || 0,
+//         betAmount: periodData.betAmount || 0,
+//         winBetSide: periodData.winBetSide || null,
+//         status: periodData.status || null,
+//         period: period.period,
+//         date: period.date,
+//         startTime: period.startTime,
+//         endTime: period.endTime,
+//         periodFor: period.periodFor,
+//         createdAt: period.createdAt,
+//       };
+//     });
+
+//     // Step 5: Sort by period in descending order
+//     result.sort((a, b) => b.period - a.period);
+
+//     return sendResponse(
+//       res,
+//       StatusCodes.OK,
+//       "Game period details fetched successfully.",
+//       result
+//     );
+//   } catch (error) {
+//     console.error("Error fetching game periods of penalty betting:", error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const { second } = req.query;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const { second, more } = req.query; // Extract 'second' and optionally 'more'
 
-    // Step 1: Fetch relevant periods first
-    const periods = await Period.find({
+    // Determine model based on 'more' parameter
+    const Model = more === 'true' ? PeriodNew : Period;
+
+    // Step 1: Fetch relevant periods
+    const periods = await Model.find({
       gameId: new mongoose.Types.ObjectId(gameId),
       periodFor: second,
     });
 
-    // Step 2: Fetch PenaltyBetting documents
+    if (!periods || periods.length === 0) {
+      return sendResponse(res, StatusCodes.NOT_FOUND, "No periods found.", []);
+    }
+
+    // Step 2: Fetch PenaltyBetting documents within the last 24 hours and not deleted
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const penaltyBettings = await PenaltyBetting.find({
       gameId: new mongoose.Types.ObjectId(gameId),
       selectedTime: second,
-      createdAt: { $gte: twentyFourHoursAgo },
+      //createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
     });
 
-    // Step 3: Manually group by period
-    let groupedByPeriod = {};
-    penaltyBettings.forEach((bet) => {
-      const period = bet.period;
-      if (!groupedByPeriod[period]) {
-        groupedByPeriod[period] = {
-          totalUsers: 0,
-          betAmount: 0,
-          winBetSide: null,
-          status: null,
-        };
+    // Step 3: Group PenaltyBetting documents by period
+    let groupedByPeriod = penaltyBettings.reduce((acc, bet) => {
+      const periodKey = bet.period.toString();
+      if (!acc[periodKey]) {
+        acc[periodKey] = [];
       }
-      groupedByPeriod[period].totalUsers += 1;
-      groupedByPeriod[period].betAmount += bet.betAmount;
-      if (bet.isWin && (groupedByPeriod[period].winBetSide === null || groupedByPeriod[period].winBetSide === bet.betSide)) {
-        groupedByPeriod[period].winBetSide = bet.betSide;
-      }
-      if (["successfully", "Pending", "fail"].includes(bet.status) && (groupedByPeriod[period].status === null || bet.status === "successfully")) {
-        groupedByPeriod[period].status = bet.status;
-      }
-    });
+      acc[periodKey].push(bet);
+      return acc;
+    }, {});
 
-    // Step 4: Combine period and betting data
-    let result = periods.map((period) => {
-      const periodData = groupedByPeriod[period.period] || {};
+    // Step 4: Combine period information with betting data
+    let result = periods.map(period => {
+      const bets = groupedByPeriod[period.period.toString()] || [];
+      const totalUsers = bets.length;
+      const betAmount = bets.reduce((sum, bet) => sum + bet.betAmount, 0);
+      const winBetSides = bets.filter(bet => bet.isWin).map(bet => bet.betSide);
+      // If you want a unique list of winning bet sides:
+      // const uniqueWinBetSides = [...new Set(winBetSides)];
+
       return {
-        gameId: new mongoose.Types.ObjectId(gameId),
-        totalUsers: periodData.totalUsers || 0,
-        betAmount: periodData.betAmount || 0,
-        winBetSide: periodData.winBetSide || null,
-        status: periodData.status || null,
         period: period.period,
-        date: period.date,
-        startTime: period.startTime,
-        endTime: period.endTime,
-        periodFor: period.periodFor,
-        createdAt: period.createdAt,
+        totalUsers: totalUsers,
+        betAmount: betAmount,
+        winBetSides: winBetSides // or uniqueWinBetSides for unique values
       };
     });
 
-    // Step 5: Sort by period in descending order
-    result.sort((a, b) => b.period - a.period);
-
-    return sendResponse(
-      res,
-      StatusCodes.OK,
-      "Game period details fetched successfully.",
-      result
-    );
+    return sendResponse(res, StatusCodes.OK, "Game period details fetched successfully.", result);
   } catch (error) {
     console.error("Error fetching game periods of penalty betting:", error);
     return handleErrorResponse(res, error);
   }
 };
+
+
 
 //#endregion
 
