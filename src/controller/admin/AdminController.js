@@ -19,7 +19,7 @@ export const adminLogin = async (req, res) => {
             email: req.body.email,
             is_deleted: 0,
         }).populate("role");
-        console.log(findAdmin, "Data");
+
         if (findAdmin) {
             findAdmin.isLogin = true;
             await findAdmin.save();
@@ -691,7 +691,7 @@ export const topWeeklyPlayers = async (req, res) => {
                     email: { $first: "$email" },
                     fullName: { $first: "$fullName" },
                     totalBetAmount: { $sum: "$totalBetAmount" },
-                    profile : {$first: "$profile"},
+                    profile: { $first: "$profile" },
                     wins: { $sum: "$wins" }
                 }
             },
@@ -733,7 +733,7 @@ export const topWeeklyPlayers = async (req, res) => {
             res,
             StatusCodes.OK,
             "Get top weekly players successfully",
-            topPlayers 
+            topPlayers
         );
     } catch (error) {
         return handleErrorResponse(res, error);
@@ -890,7 +890,7 @@ export const topAllPlayers = async (req, res) => {
                     email: { $first: "$email" },
                     fullName: { $first: "$fullName" },
                     totalBetAmount: { $sum: "$totalBetAmount" },
-                    profile: { $first: "$profile" }, 
+                    profile: { $first: "$profile" },
                     wins: { $sum: "$wins" }
                 }
             },
@@ -973,7 +973,7 @@ Socket.on("connection", (socket) => {
             liveBets.sort((a, b) => moment(b.createdAt).diff(moment(a.createdAt)));
 
             if (liveBets.length > 0) {
-                console.log(liveBets, "liveBetsArray");
+
                 let message = "Connected for live bets";
                 Socket.emit("response", { message, liveBets });
             } else {
