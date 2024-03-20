@@ -1,6 +1,6 @@
 import { getTransactionList, getwithdrwalcheck, topAllPlayers, topWeeklyPlayers } from "../controller/admin/AdminController.js";
 import { addEditBankDetail, getBankDetail } from "../controller/admin/BankController.js";
-import { changeStatusOfFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
+import { addCreditDebitAmount, changeStatusOfFaintCurrency, editFaintCurrency, getAllFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { getAllGamePeriodData } from "../controller/admin/GameController.js";
 import { addUPIMethod, changeStatusOfUPIMethod, deleteUPIMethod, getUPIMethod } from "../controller/admin/UPIController.js";
 import { getUserBankInfo, getUserGameInfo, getUserReferralInfo, getUserTransationData, getUserWalletInfo } from "../controller/admin/UserManegment.js";
@@ -318,6 +318,9 @@ adminRoutes.post('/get-User-wallet-Data', Auth, getUserWalletInfo)
 adminRoutes.post('/get-User-game-Data', Auth, getUserGameInfo)
 adminRoutes.post('/get-User-referral-Data', Auth, getUserReferralInfo)
 
+
+adminRoutes.post('/edit-User-deposit-amount', editFaintCurrency)
+adminRoutes.post('/add-user-credit-debit', addCreditDebitAmount)
 
 
 

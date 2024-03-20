@@ -30,6 +30,7 @@ import {
         }
       } else {
         const savePermission = await dataCreate(req.body, Permission);
+        console.log(savePermission,"Data");
         if (savePermission) {
           return res.status(201).json({
             status: StatusCodes.CREATED,

@@ -29,6 +29,7 @@ import {
         ipAddress,
         id,
       } = req.body;
+      console.log(req.body,"body");
       // const exitsSubadmin = await Admin.findOne({
       //   email: { $regex: "^" + email + "$", $options: "i" },
       //   is_deleted: 0,
@@ -76,14 +77,17 @@ import {
           },
           Admin
         );
+        console.log(createSubadmin,"before added");
         const subadmin = await createSubadmin.save();
+        console.log(subadmin,"subadmin added");
         delete subadmin.password;
   
         let html = await ejs.renderFile("src/views/Subadmin.ejs", {
           email,
           password,
         });
-        await sendMail(email, "Betting account created", html);
+        const sendEmail = await sendMail(email, "Betting account created", html);
+        
         return sendResponse(
           res,
           StatusCodes.CREATED,
