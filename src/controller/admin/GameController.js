@@ -2422,7 +2422,7 @@ export const getAllGamePeriodData = async (req, res) => {
   try {
     const { gameId, gameType } = req.params;
     const { periodFor } = req.query;
-    console.log(gameId, gameType, periodFor, "44444")
+    console.log(gameId, gameType, periodFor, "betRecord")
     let battingAggregationResult;
 
     // Find periods with isWin: true in the numberbettings collection
@@ -2825,7 +2825,6 @@ export const getAllGamePeriodData = async (req, res) => {
             $sort: { period: -1 },
           },
         ]);
-        console.log(aggregationResult,);
 
         const response = aggregationResult.map(item => {
           const leastBetNumbers = {
@@ -2944,7 +2943,6 @@ export const getAllGamePeriodData = async (req, res) => {
           },
         ]);
 
-        console.log(aggregationResult,);
 
         const response = aggregationResult.map(item => {
           const leastBetNumbers = {
@@ -2976,7 +2974,6 @@ export const getAllGamePeriodData = async (req, res) => {
       battingAggregationResult
     );
   } catch (error) {
-    console.log(error, "rrtrtrt")
     return handleErrorResponse(res, error);
   }
 };

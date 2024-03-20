@@ -954,7 +954,6 @@ Socket.on("connection", (socket) => {
             const allBets = [...colorBetting, ...numberBetting, ...cardBetting, ...penaltyBetting, ...communityBetting];
 
             const currentTimestamp = moment().tz('Asia/Kolkata');
-            console.log(currentTimestamp, "hh");
 
             for (const bet of allBets) {
                 if (bet.userId === null) {

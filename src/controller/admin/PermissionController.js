@@ -30,7 +30,6 @@ import {
         }
       } else {
         const savePermission = await dataCreate(req.body, Permission);
-        console.log(savePermission,"Data");
         if (savePermission) {
           return res.status(201).json({
             status: StatusCodes.CREATED,
@@ -46,7 +45,6 @@ import {
         }
       }
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         message: ResponseMessage.INTERNAL_SERVER_ERROR,

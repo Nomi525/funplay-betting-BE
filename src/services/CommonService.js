@@ -449,7 +449,6 @@ export const declareNumberWinner = async (game, period) => {
                         is_deleted: 0,
                       });
                       if (findUser) {
-                        console.log(findUser.betAmount, "datat");
                         let rewardAmount =
                           findUser.betAmount + findUser.betAmount * winningCoin;
                         await NumberBetting.updateOne(
@@ -1441,7 +1440,6 @@ export const declareCardWinner = async (game, period, selectedTime) => {
                         card: item.card,
                         is_deleted: 0,
                       });
-                      console.log(findUser, "findUser");
                       if (findUser) {
                         let rewardAmount =
                           findUser.betAmount + findUser.betAmount * winningCoin;

@@ -29,7 +29,6 @@ import {
         ipAddress,
         id,
       } = req.body;
-      console.log(req.body,"body");
       // const exitsSubadmin = await Admin.findOne({
       //   email: { $regex: "^" + email + "$", $options: "i" },
       //   is_deleted: 0,
@@ -49,7 +48,6 @@ import {
           { $set: { firstName, lastName, email, role } },
           { new: true }
         );
-        console.log("fdsfds", updateSubAdmin);
         if (updateSubAdmin) {
           return res.status(200).json({
             status: StatusCodes.OK,
@@ -77,9 +75,7 @@ import {
           },
           Admin
         );
-        console.log(createSubadmin,"before added");
         const subadmin = await createSubadmin.save();
-        console.log(subadmin,"subadmin added");
         delete subadmin.password;
   
         let html = await ejs.renderFile("src/views/Subadmin.ejs", {
@@ -96,7 +92,6 @@ import {
         );
       }
     } catch (error) {
-      console.log(error);
       return handleErrorResponse(res, error);
     }
   };

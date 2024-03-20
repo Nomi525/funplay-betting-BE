@@ -335,7 +335,6 @@ export const userSignUpSignInOtp = async (req, res) => {
     if (checkEmailValue) {
       email = email ? email.toLowerCase() : null;
       existingUser = await getSingleData({ email }, User);
-      console.log(existingUser, "sj");
     } else {
       existingUser = await getSingleData({ mobileNumber: email }, User);
 
@@ -478,7 +477,6 @@ export const userSignUpSignInOtp = async (req, res) => {
       }
       let message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_MOBILE;
       if (checkEmailValue) {
-        console.log("add");
         let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
         await sendMail(userData.email, "Verify Otp", mailInfo);
         message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL;
@@ -562,7 +560,6 @@ export const updateEmail = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error, ":Error");
     return handleErrorResponse(res, error);
   }
 };
@@ -660,7 +657,6 @@ export const updateEmail = async (req, res) => {
 export const checkWalletAddress = async (req, res) => {
   try {
     const { walletAddress, email, mobileNumber } = req.body;
-    console.log(req.body, "ggggg");
     let existingUser;
 
     // First, try to find by wallet address and isConnected status
@@ -687,7 +683,6 @@ export const checkWalletAddress = async (req, res) => {
       });
 
       if (existingUser) {
-        console.log("hererere");
 
         // Logic to add or update the wallet
         if (existingUser.wallet.length > 0) {
@@ -699,7 +694,6 @@ export const checkWalletAddress = async (req, res) => {
         }
 
         let savedUser = await existingUser.save();
-        console.log(savedUser, "saveduser");
 
         // Generate token for the user after updating/adding the wallet address
         const payload = { user: { id: existingUser._id } };
@@ -715,7 +709,6 @@ export const checkWalletAddress = async (req, res) => {
     // If no user found by either wallet address or email
     return sendResponse(res, StatusCodes.BAD_REQUEST, "User not found", []);
   } catch (error) {
-    console.log(error, ": Error");
     return handleErrorResponse(res, error);
   }
 };
@@ -1236,7 +1229,6 @@ export const singupFromEmailPassword = async (req, res) => {
         let referCode = referralCode(8);
         let findReferralUser = null;
         // For Referral Code
-        console.log(referralByCode, "jjj");
         if (referralByCode) {
           findReferralUser = await getSingleData(
             { referralCode: referralByCode, is_deleted: 0 },
@@ -2840,7 +2832,7 @@ const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulato
       data: totalBetAmount,
     });
   } catch (error) {
-    console.log(error, "dd");
+    console.log(error, "error");
     return handleErrorResponse(res, error);
   }
 };

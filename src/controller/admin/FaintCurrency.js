@@ -67,7 +67,6 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
                 }
 
                 const userCoin = await NewTransaction.findOne({ userId: findObjectID });
-                console.log(userCoin, "userCoin");
                 if (userCoin) {
                     const updatedFaintCurrency = await FaintCurrency.updateOne(
                         { _id: id },
@@ -116,7 +115,6 @@ export const changeStatusOfFaintCurrency = async (req, res) => {
             );
         }
     } catch (err) {
-        console.log(err, "error");
         return handleErrorResponse(res, err);
     }
 };
@@ -295,7 +293,6 @@ export const addCreditDebitAmount = async (req, res) => {
             const checkCoins = checkCurrency.coin;
             const findObjectID = id.toString();
             const userCoin = await NewTransaction.findOne({ userId: findObjectID });
-            console.log(userCoin, "userCoin");
 
             if (type === "credit") {
                 let addCredit = new FaintCurrency({

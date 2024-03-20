@@ -269,8 +269,6 @@ const getUniqueUserCounts = async () => {
       if (result.length > 0) {
         totalUniqueUsers += result[0].uniqueUsersCount;
         totalBetCount += result[0].totalBetCount;
-        console.log(totalUniqueUsers, "Unique");
-        console.log(totalBetCount, "betCount");
       }
     });
 
@@ -296,9 +294,7 @@ export const adminDashboard = async (req, res) => {
     const totalCoins = depositeData.map(obj => obj.totalCoin);
     const totalSum = totalCoins.reduce((acc, val) => acc + val, 0);
 
-    console.log(totalSum);
-    const currencyCoin = await CurrencyCoin.find({ currencyName: "USD", is_deleted: 0 })
-    console.log(currencyCoin[0].coin, "jj");
+    const currencyCoin = await CurrencyCoin.find({ currencyName: "USD", is_deleted: 0 });
     const coinn = currencyCoin[0].coin
     const totalDeposit = totalSum / coinn;
 
@@ -330,7 +326,6 @@ export const adminDashboard = async (req, res) => {
     const totalUserIn24Hours = await User.find({
       createdAt: { $gte: twentyFourHoursAgo },
     }).select("_id");
-    // console.log(totalUserIn24Hours);
     let totalZeroDepositUserIn24Hours = 0;
     if (totalUserIn24Hours.length) {
       await Promise.all(
@@ -599,7 +594,6 @@ export const adminDashboard = async (req, res) => {
       }
     ]);
     const totalUser = depositData.length > 0 ? depositData[0].totalUsers : 0;
-    console.log(totalUser, "totalUsers");
 
 
 
@@ -607,7 +601,6 @@ export const adminDashboard = async (req, res) => {
     const allBetin24hrs = await getUniqueUserCounts();
 
     const WithdrawalData = await Withdrawal.find({ is_deleted: 0 }).count()
-    console.log(WithdrawalData, "jj");
 
     return sendResponse(res, StatusCodes.OK, ResponseMessage.DATA_GET, {
       totalUsers,
@@ -628,7 +621,6 @@ export const adminDashboard = async (req, res) => {
       totalWithdrawalRequests: WithdrawalData
     });
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };

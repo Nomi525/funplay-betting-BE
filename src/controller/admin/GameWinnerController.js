@@ -590,9 +590,7 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
           is_deleted: 0,
           status: "pending",
         });
-        console.log(winnerUser, "helloo");
         if (winnerUser) {
-          console.log("winnerUser");
           let rewardAmount = winningAmount;
           winnerUser.isWin = true;
           winnerUser.status = "successfully";
@@ -646,7 +644,6 @@ export const declareWinnerOfCommunityBetting = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, "Winner not added", []);
     }
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -727,7 +724,6 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
     // } else {
     for (const findNumberBetting of findNumberBettingArray) {
       if (findNumberBetting instanceof NumberBetting) {
-        console.log("isWin");
         // let rewardAmount = findNumberBetting.betAmount * 0.95;
         let rewardAmount =
           findNumberBetting.betAmount +
@@ -971,7 +967,6 @@ export const declareWinnerOfPenaltyBetting = async (req, res) => {
       selectedTime: periodFor,
       is_deleted: 0,
     }).lean();
-console.log(checkAlreadyWin,"Already win ");
     if (checkAlreadyWin.length) {
       return sendResponse(res, StatusCodes.OK, ResponseMessage.ALREADY_WIN, []);
     }

@@ -69,13 +69,11 @@ export const getAdminSingleUser = async (req, res) => {
   try {
     const { userId } = req.body;
     const findUser = await User.findOne({ _id: userId, is_deleted: 0 });
-    console.log(findUser,"UserData");
     if (findUser) {
       const walletAddress = await NewTransaction.findOne({
         userId: findUser._id,
         is_deleted: 0,
       });
-      console.log(walletAddress,"userwallet");
       const referralUsers = await ReferralUser.find({
         userId: findUser._id,
       }).populate("referralUser");
@@ -107,7 +105,6 @@ export const getAdminSingleUser = async (req, res) => {
       );
     }
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -353,7 +350,6 @@ export const acceptWithdrawalRequest = async (req, res) => {
     await findTransaction.save();
     return sendResponse(res, StatusCodes.OK, requestMessage, []);
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
