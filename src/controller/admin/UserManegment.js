@@ -69,11 +69,13 @@ export const getAdminSingleUser = async (req, res) => {
   try {
     const { userId } = req.body;
     const findUser = await User.findOne({ _id: userId, is_deleted: 0 });
+    console.log(findUser,"UserData");
     if (findUser) {
       const walletAddress = await NewTransaction.findOne({
         userId: findUser._id,
         is_deleted: 0,
       });
+      console.log(walletAddress,"userwallet");
       const referralUsers = await ReferralUser.find({
         userId: findUser._id,
       }).populate("referralUser");
@@ -711,6 +713,7 @@ export const getUserTransationData = async (req, res) => {
   
 
    const data = [...getAllDepositData,...modifiedWithdrawalData]
+   data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return sendResponse(
       res,
       StatusCodes.OK,
