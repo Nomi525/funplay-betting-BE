@@ -1837,7 +1837,7 @@ export const colourBettingWinnerResult = async (req, res) => {
     //   []
     // );
   } catch (error) {
-    console.log("error-ColourBettingController", error);
+
     return handleErrorResponse(res, error);
   }
 };

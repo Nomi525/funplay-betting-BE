@@ -1,9 +1,10 @@
+import moment from "moment";
 import { Socket, socketRoute } from "../../config/Socket.config.js";
 import {
     User,
     handleErrorResponse,
     StatusCodes, declareColorWinner, Game, NumberBetting, declareNumberWinner,
-    ResponseMessage, NewTransaction, ColourBetting, dataCreate, minusLargeSmallValue, plusLargeSmallValue, checkDecimalValueGreaterThanOrEqual
+    ResponseMessage, NewTransaction, ColourBetting, dataCreate, minusLargeSmallValue, plusLargeSmallValue, checkDecimalValueGreaterThanOrEqual, Period
 } from "../../index.js";
 // import { gameTimer } from "../../routes/UserRoutes.js";
 
@@ -247,44 +248,223 @@ export const gameTimer = (socket) => {
 
 
 
+// const timers = {};
+// export const getTimerSocket = socketRoute("my-socket");
+
+// getTimerSocket.on("connection", (socket) => {
+// socket.on('startTimer', (data) => {
+//     const { gameId, duration } = data;
+//     if (!gameId || duration === undefined) {
+//         console.error('Invalid data received for starting the timer');
+//         return;
+//     }
+
+//     // Use both gameId and duration to create a unique identifier for each timer
+//     const timerId = `game-${gameId}-duration-${duration}`;
+//     socket.join(timerId);
+
+//     if (timers[timerId]) {
+//         // console.log(`Timer with ID ${timerId} is already running. Sending current time to the new client.`);
+//         const remainingTime = timers[timerId].remainingTime;
+//         getTimerSocket.in(timerId).emit('timer', { gameId, duration, remainingTime });
+//         return;
+//     }
+
+//     // console.log(`Starting timer for game ${gameId} with duration ${duration} seconds.`);
+//     timers[timerId] = { remainingTime: duration, intervalId: null };
+
+//     timers[timerId].intervalId = setInterval(() => {
+//         if (timers[timerId].remainingTime > 0) {
+//             timers[timerId].remainingTime--;
+//             // console.log(`Emitting to ${timerId}:`, getTimerSocket.in(timerId));
+
+//             getTimerSocket.in(timerId).emit('timer', { gameId, duration, remainingTime: timers[timerId].remainingTime });
+//         } else {
+//             // console.log(`Timer for game ${gameId} with duration ${duration} has ended.`);
+//             clearInterval(timers[timerId].intervalId);
+//             delete timers[timerId]; // Clean up after the timer ends
+//             getTimerSocket.in(timerId).emit('timerEnded', { gameId, duration });
+//         }
+//     }, 1000);
+// });
+// });
+
 const timers = {};
 export const getTimerSocket = socketRoute("my-socket");
-
 getTimerSocket.on("connection", (socket) => {
-    socket.on('startTimer', (data) => {
-        const { gameId, duration } = data;
-        if (!gameId || duration === undefined) {
-            console.error('Invalid data received for starting the timer');
-            return;
-        }
+    console.log('A user connected');
 
-        // Use both gameId and duration to create a unique identifier for each timer
-        const timerId = `game-${gameId}-duration-${duration}`;
-        socket.join(timerId);
+    socket.on('requestPeriod', async ({ gameId, second }) => {
+        const roomName = `game_${gameId}_second_${second}`;
+        socket.join(roomName);
+        console.log(`Socket ${socket.id} joined room ${roomName}`);
+        await fetchAndStartCountdown({ gameId, second, roomName, socket });
+    });
 
-        if (timers[timerId]) {
-            console.log(`Timer with ID ${timerId} is already running. Sending current time to the new client.`);
-            const remainingTime = timers[timerId].remainingTime;
-            getTimerSocket.in(timerId).emit('timer', { gameId, duration, remainingTime });
-            return;
-        }
-
-        console.log(`Starting timer for game ${gameId} with duration ${duration} seconds.`);
-        timers[timerId] = { remainingTime: duration, intervalId: null };
-
-        timers[timerId].intervalId = setInterval(() => {
-            if (timers[timerId].remainingTime > 0) {
-                timers[timerId].remainingTime--;
-                console.log(`Emitting to ${timerId}:`, getTimerSocket.in(timerId));
-
-                getTimerSocket.in(timerId).emit('timer', { gameId, duration, remainingTime: timers[timerId].remainingTime });
-            } else {
-                console.log(`Timer for game ${gameId} with duration ${duration} has ended.`);
-                clearInterval(timers[timerId].intervalId);
-                delete timers[timerId]; // Clean up after the timer ends
-                getTimerSocket.in(timerId).emit('timerEnded', { gameId, duration });
-            }
-        }, 1000);
+    socket.on('disconnect', () => {
+        console.log(`User ${socket.id} disconnected`);
     });
 });
+
+async function fetchAndStartCountdown({ gameId, second, roomName, socket }) {
+    console.log(gameId + ": " + second);
+    try {
+        const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
+
+        let query = {
+            date: moment().format("YYYY-MM-DD"),
+            gameId,
+            is_deleted: 0,
+        };
+
+        if (second) {
+            query.periodFor = second
+        }
+
+        let getGamePeriod = await Period.find(query || game)
+            .sort({ createdAt: -1 })
+            .limit(1)
+            .populate("gameId");
+
+        if (getGamePeriod.length) {
+            let getAllPeriod = getGamePeriod[0];
+            if (moment(getAllPeriod.date).format("YYYY-MM-DD") === moment().format("YYYY-MM-DD") &&
+                moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp) {
+                getAllPeriod.endTime = getAllPeriod.endTime
+                console.log(getAllPeriod.endTime, "after ====")
+                const endTime = moment(getAllPeriod.endTime * 1000);
+                const currentTime = moment().utcOffset("+05:30");
+                const timeDifference = endTime.diff(currentTime, 'seconds');
+
+
+                startCountdown(timeDifference, socket, () => fetchAndStartCountdown({ gameId, second, roomName, socket, }), getAllPeriod, roomName,);
+            }
+        }
+
+    } catch (error) {
+        socket.to(roomName).emit('periodResponse', { status: 'ERROR', message: error.message });
+    }
+}
+
+// function startCountdown(duration, socket, callback, periodData, roomName, adjustment = 0) {
+//     let timer = duration, minutes, seconds;
+//     const countdown = setInterval(() => {
+//         minutes = parseInt(timer / 60, 10);
+//         seconds = parseInt(timer % 60, 10);
+
+//         minutes = minutes < 10 ? "0" + minutes : minutes;
+//         seconds = seconds < 10 ? "0" + seconds : seconds;
+
+//         // Emit to the specific room
+//         getTimerSocket.to(roomName).emit('updateTimer', { minutes, seconds, periodData });
+
+//         if (--timer < 0) {
+//             getTimerSocket.to(roomName).emit('periodEnded', { periodData });
+//             clearInterval(countdown);
+//             callback(); // Call the callback function to fetch the next period and restart the countdown
+//         }
+//     }, 1000);
+// }
+function startCountdown(duration, socket, callback, periodData, roomName,) {
+    let timer = duration;
+    console.log(timer, "timer")
+    // Adjust initial duration if needed
+    const countdown = setInterval(() => {
+        // Emit to the specific room
+        getTimerSocket.to(roomName).emit('updateTimer', { seconds: timer, periodData });
+
+        timer--; // Decrement after emitting to start with the actual duration
+
+        if (timer < 0) {
+            getTimerSocket.to(roomName).emit('periodEnded', { periodData });
+            clearInterval(countdown);
+            callback(); // Call the callback function to fetch the next period and restart the countdown
+        }
+    }, 1000);
+}
+
+
+// getTimerSocket.on("connection", (socket) => {
+//     console.log("Client connected");
+
+//     socket.on("startTimer", async (data) => {
+//         try {
+//             const { gameId, second } = data;
+//             let countdown = second;
+
+//             // Moved the timerId outside of the function scope so it can be cleared on 'stopTimer' or disconnect
+//             let timerId;
+
+//             // Function to perform the required database action
+//             const performAction = async () => {
+//                 const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
+//                 let query = {
+//                     date: moment().format("YYYY-MM-DD"),
+//                     gameId,
+//                     is_deleted: 0,
+//                 };
+
+//                 if (second) {
+//                     query.periodFor = second;
+//                 }
+
+//                 let getGamePeriod = await Period.find(query)
+//                     .sort({ createdAt: -1 })
+//                     .limit(1)
+//                     .populate("gameId");
+
+//                 if (getGamePeriod.length > 0) {
+//                     let getAllPeriod = getGamePeriod[0];
+
+//                     if (
+//                         moment(getAllPeriod.date).format("YYYY-MM-DD") === moment().format("YYYY-MM-DD") &&
+//                         moment(getAllPeriod.gameId.gameTimeTo).unix() > currentTimeAndDateStamp
+//                     ) {
+//                         console.log("getAllPeriod", "789456");
+//                         // Assuming 'res' needs to be defined or replaced as this might not be a direct response from an HTTP request here
+//                         // sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, getAllPeriod);
+//                     }
+//                 }
+//             };
+
+//             // Timer function to emit countdown and perform action when countdown ends
+//             const startCountdown = () => {
+//                 timerId = setInterval(async () => {
+//                     if (countdown > 0) {
+//                         // Emit the current countdown value
+//                         socket.emit("timer", countdown);
+//                         countdown--;
+//                     } else {
+//                         // Countdown has finished, perform the action
+//                         await performAction();
+
+//                         // Optionally, restart the countdown or stop the timer
+//                         clearInterval(timerId);
+//                         // If you want to restart the countdown with the same duration:
+//                         // countdown = second;
+//                         // startCountdown();
+//                     }
+//                 }, 1000); // Decrement every second
+//             };
+
+//             // Start the countdown
+//             startCountdown();
+
+//             // To stop the timer, listen for a "stopTimer" message or handle socket disconnection
+//             socket.on("stopTimer", () => {
+//                 clearInterval(timerId);
+//                 console.log("Timer stopped");
+//             });
+
+//             socket.on("disconnect", () => {
+//                 clearInterval(timerId);
+//                 console.log("Client disconnected, timer stopped");
+//             });
+//         } catch (error) {
+//             console.error("Error in startTimer", error);
+//             socket.emit("error", "An error occurred");
+//         }
+//     });
+// });
+
 

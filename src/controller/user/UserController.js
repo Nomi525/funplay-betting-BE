@@ -2832,7 +2832,7 @@ export const findUserLooseBet = async (req, res) => {
     })
 
     let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew]
-    console.log(findData, 'kk');
+
     const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
     return res.status(200).json({
       status: StatusCodes.OK,

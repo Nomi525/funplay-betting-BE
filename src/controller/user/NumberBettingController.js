@@ -2452,7 +2452,7 @@ export async function createAllGamePeriodFromCronJob() {
                 currentTimeAndDateStamp >= lastIndex.endTime
               ) {
                 if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                  // console.log("3 2 Color Betting");
+                  console.log("3 2 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -2883,21 +2883,27 @@ export const getPeriod = async (req, res) => {
 export const createAllGameWinnerFromCronJob = async (req, res) => {
   try {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
-    let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
+    let currentTimeAndDateStampPlus10Second = moment().unix() + 10
     // console.log('current10Second', currentTimeAndDateStampPlus10Second);
     let findPeriods = await Period.find({
       date: currentDate,
       endTime: Number(currentTimeAndDateStampPlus10Second),
       is_deleted: 0,
     });
+
+
     findPeriods.map(async (findPeriod) => {
       const findGame = await Game.findOne({
         _id: findPeriod.gameId,
         is_deleted: 0,
       }).lean();
+
+
       if (findGame.gameName == "Number Betting") {
         await declareNumberWinner(findGame, findPeriod.period);
       } else if (
+
+
         findGame.gameName == "2 Color Betting" ||
         findGame.gameName == "3 Color Betting"
       ) {

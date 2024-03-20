@@ -324,7 +324,7 @@ export const userDashboard = async (req, res) => {
       { _id: req.user, is_deleted: 0 },
       User
     );
-    console.log(findUser,"hh");
+
 
     if (!findUser) {
       return sendResponse(
@@ -663,11 +663,11 @@ export const userDashboard1 = async (req, res) => {
         }),
       ]);
 
-      const TransactionData = await FaintCurrency.find({ userId: req.user }).count();
-      const TransactionData1 = await Withdrawal.find({ userId: req.user }).count();
-      
-      const totalTAmount = TransactionData + TransactionData1;
-      
+    const TransactionData = await FaintCurrency.find({ userId: req.user }).count();
+    const TransactionData1 = await Withdrawal.find({ userId: req.user }).count();
+
+    const totalTAmount = TransactionData + TransactionData1;
+
 
     return sendResponse(
       res,
