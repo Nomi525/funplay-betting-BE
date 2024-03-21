@@ -575,7 +575,7 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
     const periods = await Model.find({
       gameId: new mongoose.Types.ObjectId(gameId),
       periodFor: second,
-    });
+    }).select('period startTime endTime date').sort("-createdAt")
 
     if (!periods || periods.length === 0) {
       return sendResponse(res, StatusCodes.NOT_FOUND, "No periods found.", []);
@@ -611,6 +611,9 @@ export const getAllGamePeriodOfPenaltyBetting = async (req, res) => {
 
       return {
         period: period.period,
+        endTime: period.endTime,
+        startTime: period.startTime,
+        date: period.date,
         totalUsers: totalUsers,
         betAmount: betAmount,
         winBetSides: winBetSides // or uniqueWinBetSides for unique values
