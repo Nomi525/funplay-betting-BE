@@ -923,11 +923,20 @@ export const getAllGamePeriod = async (req, res) => {
     let response = periodIds.reduce((acc, periodId) => {
       const betsForPeriod = colourBettingResults.filter(bet => bet.period.toString() === periodId);
 
+      // if (betsForPeriod.length > 0) {
+      //   const summary = betsForPeriod.reduce((summary, current) => {
+      //     summary.totalUsers += 1;
+      //     console.log(betsForPeriod, "betsForPeriod")
+      //     return summary;
+      //   }, { totalUsers: 0, winColour: betsForPeriod[0].colourName, period: periodId, price: 0 });
       if (betsForPeriod.length > 0) {
         const summary = betsForPeriod.reduce((summary, current) => {
           summary.totalUsers += 1;
+          if (current.isWin) {
+            summary.winColour = current.colourName; // Set winColour to the winning colour
+          }
           return summary;
-        }, { totalUsers: 0, winColour: betsForPeriod[0].colourName, period: periodId, price: 0 });
+        }, { totalUsers: 0, winColour: '', period: periodId, price: 0 });
 
         acc.push(summary);
       } else {
