@@ -78,7 +78,7 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
           image: withdrawalApproveImg
       }
         const newNotification = await UserNotification.create(notificationData);  
-        return sendResponse(res, StatusCodes.OK, "Withdrawal request accepted successfully", updatedStatus);
+        return sendResponse(res, StatusCodes.OK, "Withdrawal request accepted successfully", updatedStatuss);
       } else if (status === "Rejected" && getSingle.status !== "Rejected") {
         const AddAmount = getSingle.requestedAmount;
         const convertIntoCoin = AddAmount * checkCoins;
@@ -103,8 +103,8 @@ export const approveRejectWithdrawalRequest = async (req, res) => {
         } else {
           return sendResponse(res, StatusCodes.BAD_REQUEST, "User transaction not found", []);
         }
-        const newNotification = await UserNotification.create(notificationData);
-        return sendResponse(res, StatusCodes.OK, "Withdrawal request rejected successfully", updatedStatuss);
+        // const newNotification = await UserNotification.create(notificationData);
+        // return sendResponse(res, StatusCodes.OK, "Withdrawal request rejected successfully", updatedStatuss);
       } else {
         return sendResponse(res, StatusCodes.BAD_REQUEST, "User transaction not found", []);
       }

@@ -310,7 +310,7 @@ export const addCreditDebitAmount = async (req, res) => {
                 const newNotification = await UserNotification.create(notificationData);
                 const CreditData = await addCredit.save();
                 if (CreditData) {
-                    return sendResponse(res, StatusCodes.CREATED,  "credit request created successfully", CreditData);
+                    return sendResponse(res, StatusCodes.CREATED,  "Amount credited successfully", CreditData);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
@@ -342,9 +342,9 @@ export const addCreditDebitAmount = async (req, res) => {
                                 },
                                 Withdrawal
                             );
-                            return sendResponse(res, StatusCodes.CREATED, "Your withdrawal request is sent to admin", createSubadmin);
+                            return sendResponse(res, StatusCodes.CREATED, "Amount debited successfully.", createSubadmin);
                         } else {
-                            return sendResponse(res, StatusCodes.CONFLICT, "There's already a pending withdrawal request", []);
+                            return sendResponse(res, StatusCodes.CONFLICT, "There's already a pending request", []);
                         }
                     } else {
                         return sendResponse(res, StatusCodes.BAD_REQUEST, "Insufficient balance", []);
@@ -356,7 +356,6 @@ export const addCreditDebitAmount = async (req, res) => {
                 return sendResponse(res, StatusCodes.BAD_REQUEST, "Invalid transaction type", []);
             }
         } else {
-            // Create user wallet if it doesn't exist
             let addWallet = new NewTransaction({
                 userId: id,
             });
@@ -369,7 +368,7 @@ export const addCreditDebitAmount = async (req, res) => {
                 });
                 const FaintCurrencyData = await addFaintCurrency.save();
                 if (FaintCurrencyData) {
-                    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.ADD_FAINT_CURRENCY, FaintCurrencyData);
+                    return sendResponse(res, StatusCodes.CREATED, "Amount credited successfully", FaintCurrencyData);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
                 }
