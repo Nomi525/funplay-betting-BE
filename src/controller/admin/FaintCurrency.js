@@ -343,7 +343,7 @@ export const addCreditDebitAmount = async (req, res) => {
                                 Withdrawal
                             );                            
                             const notificationData = {
-                                userId: id,
+                                userId: id, 
                                 title: "Debited by admin",
                                 description: `Administrator has debited ${amount} ${findCoin.currency} from your account.`
                             };
