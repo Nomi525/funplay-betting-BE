@@ -2,8 +2,10 @@ import { UPIMethod } from "../../models/UPIMethod.js";
 import { createError, sendResponse, StatusCodes, ResponseMessage, handleErrorResponse, getSingleData, dataUpdated } from "../../index.js";
 
 export const addUPIMethod = async (req, res) => {
+  console.log("checkHit");
     try {
         let id = req.body.id;
+        console.log(req.body,"body");
         if (id) {
            
             const findUPI = await UPIMethod.find({ methodName: req.body.methodName , _id:{$ne:id}, is_deleted:0})
@@ -18,6 +20,7 @@ export const addUPIMethod = async (req, res) => {
                     return sendResponse(res, StatusCodes.OK, "upadate upi method successfully", updatedUPI);
                 } 
         } else {
+          console.log("heloo");
             const logo = req.logo;
             const QRCode = req.QRCode;
             const findUPI = await UPIMethod.find({ methodName: req.body.methodName, is_deleted:0 })
@@ -36,6 +39,7 @@ export const addUPIMethod = async (req, res) => {
         }
 
     } catch (error) {
+      console.log(error,"hh");
         return handleErrorResponse(res, error);
     }
 };

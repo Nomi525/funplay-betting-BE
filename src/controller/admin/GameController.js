@@ -52,6 +52,7 @@ export const addEditGame = async (req, res) => {
       minSlot,
       maxSlot
     } = req.body;
+    console.log(req.body,"body");
     gameSecond = gameSecond ? gameSecond : [];
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
@@ -116,7 +117,8 @@ export const addEditGame = async (req, res) => {
             entryFee,
             winningCoin,
             minSlot,
-            maxSlot
+            maxSlot,
+            gameTime
           },
           Game
         );
@@ -172,7 +174,8 @@ export const addEditGame = async (req, res) => {
           entryFee,
           winningCoin,
           minSlot,
-          maxSlot
+          maxSlot,
+          gameTime
         },
         Game
       );
@@ -198,6 +201,8 @@ export const addEditGame = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
 //#region game repeat active and deactive
 export const gameIsRepeat = async (req, res) => {
   try {

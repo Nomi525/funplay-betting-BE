@@ -61,6 +61,14 @@ var upload = multer({ storage }).fields([
     {
         name: "withdrawalApproveImg",
         maxCount: 1
+    },
+    {
+        name: "logo",
+        maxCount: 1,
+    },
+    {
+        name: "QRCode",
+        maxCount: 1
     }
     
     
@@ -102,6 +110,12 @@ export default function (req, res, next) {
 
                 var withdrawalApproveImgUrl = req.files.withdrawalApproveImg ? req.files.withdrawalApproveImg[0].filename : "";
                 req.withdrawalApproveImgUrl = withdrawalApproveImgUrl;
+
+                var logo = req.files.logo ? req.files.logo[0].filename : "";
+                req.logo = logo;
+
+                var QRCode = req.files.QRCode ? req.files.QRCode[0].filename : "";
+                req.QRCode = QRCode;
 
 
                 next();
