@@ -304,8 +304,8 @@ export const addCreditDebitAmount = async (req, res) => {
                 await checkUserWallet.save();
                 const notificationData = {
                     userId: id,
-                    title: "Deposit request approved",
-                    description: `Request for deposit amount ${amount} accepted.`
+                    title: "Credit by admin",
+                    description: `Administrator has credited ${amount} ${findCoin.currency} to your account.`
                 };
                 const newNotification = await UserNotification.create(notificationData);
                 const CreditData = await addCredit.save();
@@ -341,7 +341,13 @@ export const addCreditDebitAmount = async (req, res) => {
                                    
                                 },
                                 Withdrawal
-                            );
+                            );                            
+                            const notificationData = {
+                                userId: id,
+                                title: "Debited by admin",
+                                description: `Administrator has debited ${amount} ${findCoin.currency} from your account.`
+                            };
+                            const newNotification = await UserNotification.create(notificationData);
                             return sendResponse(res, StatusCodes.CREATED, "Amount debited successfully.", createSubadmin);
                         } else {
                             return sendResponse(res, StatusCodes.CONFLICT, "There's already a pending request", []);
