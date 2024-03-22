@@ -28,7 +28,9 @@ import {
   calculateAllGameReward,
   getAllBids,
   Game,
-  axios
+  axios,
+  FaintCurrency,
+  Withdrawal
 } from "../../index.js";
 import { NumberBettingNew } from "../../models/NumberBetting.js";
 import { ColourBettingNew } from "../../models/ColourBetting.js";
@@ -317,7 +319,6 @@ const getAllBettingData = async (model) => {
 
 export const userDashboard = async (req, res) => {
   try {
-    console.log("req.user:", req.user);
     const findUser = await getSingleData(
       { _id: req.user, is_deleted: 0 },
       User
@@ -376,7 +377,7 @@ export const userDashboard = async (req, res) => {
       getAllBettingData(CardBetting),
       getAllBettingData(CardBettingNew),
     ]);
-    
+
 
     const totalUserswhoPlacedBidsin24Hrs =
       numberBettingForUser.length +
@@ -405,32 +406,32 @@ export const userDashboard = async (req, res) => {
     const numberBettingWinningAmount =
       calculateWinningAmount(numberBettingForUser);
 
-      const numberBettingWinningAmountNew =
+    const numberBettingWinningAmountNew =
       calculateWinningAmount(numberBettingForUserNew);
 
     const colourBettingWinningAmount =
       calculateWinningAmount(colourBettingForUser);
 
-      const colourBettingWinningAmountNew =
+    const colourBettingWinningAmountNew =
       calculateWinningAmount(colourBettingForUserNew);
 
-    const communityBettingWinningAmount = 
-    calculateWinningAmount(communityBettingForUser);
+    const communityBettingWinningAmount =
+      calculateWinningAmount(communityBettingForUser);
 
-    const communityBettingWinningAmountNew = 
-    calculateWinningAmount(communityBettingForUserNew);
+    const communityBettingWinningAmountNew =
+      calculateWinningAmount(communityBettingForUserNew);
 
-    const penaltyBettingWinningAmount = 
-    calculateWinningAmount(penaltyBettingForUser);
+    const penaltyBettingWinningAmount =
+      calculateWinningAmount(penaltyBettingForUser);
 
-    const penaltyBettingWinningAmountNew = 
-    calculateWinningAmount(penaltyBettingForUserNew);
+    const penaltyBettingWinningAmountNew =
+      calculateWinningAmount(penaltyBettingForUserNew);
 
-    const cardBettingWinningAmount = 
-    calculateWinningAmount(cardBettingForUser);
+    const cardBettingWinningAmount =
+      calculateWinningAmount(cardBettingForUser);
 
-    const cardBettingWinningAmountNew = 
-    calculateWinningAmount(cardBettingForUserNew);
+    const cardBettingWinningAmountNew =
+      calculateWinningAmount(cardBettingForUserNew);
 
     const totalWinningAmountin24Hrs =
       numberBettingWinningAmount +
@@ -444,9 +445,9 @@ export const userDashboard = async (req, res) => {
       cardBettingWinningAmount +
       cardBettingWinningAmountNew;
 
-    const totalReferralCount = await ReferralUser.countDocuments({
-      userId: findUser._id,
-    });
+    const totalReferralCount = await ReferralUser.find({
+      userId: req.user,
+    }).count();
 
     return sendResponse(
       res,
@@ -463,6 +464,32 @@ export const userDashboard = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+function calculateTotalBettingReward(bettingData) {
+  return bettingData.reduce(
+    (total, data) => Number(total) + Number(data.rewardAmount),
+    0
+  );
+}
+
+async function convertEthToCurrency(ethAmount, targetCurrency) {
+  try {
+      const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=${targetCurrency.toLowerCase()}`);
+      const data = await response.json();
+      
+      if (data.ethereum && data.ethereum[targetCurrency.toLowerCase()]) {
+          const ethToCurrencyConversionRate = data.ethereum[targetCurrency.toLowerCase()];
+          const currencyAmount = ethAmount * ethToCurrencyConversionRate;
+          return currencyAmount;
+      } else {
+          throw new Error(`${targetCurrency} conversion rate not available`);
+      }
+  } catch (error) {
+      console.error(`Error fetching ${targetCurrency} conversion rate:`, error);
+      throw error;
+  }
+}
+
 
 export const userDashboard1 = async (req, res) => {
   try {
@@ -581,6 +608,28 @@ export const userDashboard1 = async (req, res) => {
       (total, data) => plusLargeSmallValue(total, data.tokenDollorValue),
       0
     );
+    const faintCurrency = await FaintCurrency.find({ userId: req.user, status: 'Approved' });
+    let totalAmount = 0;
+
+    for (const currency of faintCurrency) {
+        totalAmount += currency.amount;
+    }
+
+    let convIthe = 0;
+    const transactionDeposit = await TransactionHistory.find({ userId: req.user });
+    const findUserPromise1 = await User.find({ _id: req.user, is_deleted: 0 });
+
+    for (const convertetheum of transactionDeposit) {
+        convIthe += convertetheum.tokenAmount;
+    }
+
+    const ethAmount = convIthe;
+    const userCurrency = findUserPromise1[0].currency;
+    const currencyAmount = await convertEthToCurrency(ethAmount, userCurrency);
+
+    // Add currencyAmount to totalAmount
+    totalAmount += currencyAmount;
+    
 
     let totalBalance = 0;
     let totalDepositeBalance = 0;
@@ -599,7 +648,6 @@ export const userDashboard1 = async (req, res) => {
 
 
     for (const bet of numberBettingForUser) {
-      console.log(bet.isWin, "jj");
       if (bet.isWin === true) {
         totalCoin += game[0]?.winningCoin * bet.betAmount;
       } else {
@@ -628,7 +676,6 @@ export const userDashboard1 = async (req, res) => {
     //   console.error("No valid gameIds found.");
     // }
 
-    console.log("Total Coin:", totalCoin);
 
 
     const convertedCoin = totalCoin / coinRate || 0;
@@ -646,12 +693,19 @@ export const userDashboard1 = async (req, res) => {
         }),
       ]);
 
+      const TransactionData = await FaintCurrency.find({ userId: req.user }).count();
+      const TransactionData1 = await Withdrawal.find({ userId: req.user }).count();
+      const TransactionData2 = await TransactionHistory.find({ userId: req.user }).count();
+      
+      const totalTAmount = TransactionData + TransactionData1 + TransactionData2;
+      
+
     return sendResponse(
       res,
       StatusCodes.OK,
       ResponseMessage.DASHBOARD_DATA_GET,
       {
-        totalTransaction: transactions.length,
+        totalTransaction: totalTAmount,
         totalOneDayReward,
         totalOneWeekReward,
         totalOneMonthReward,
@@ -660,26 +714,17 @@ export const userDashboard1 = async (req, res) => {
         totalCoin,
         currency: findUser.currency || "USD",
         convertedCoin,
-        totalDepositAmount: minusLargeSmallValue(
-          totalDepositAmount,
-          totalWithdrawalAmount
-        ),
+        totalDepositAmount: totalAmount,
         totalReward,
         walletDetails: findUser.wallet,
       }
     );
   } catch (error) {
-    console.log(error, "jj");
     return handleErrorResponse(res, error);
   }
 };
 
-function calculateTotalBettingReward(bettingData) {
-  return bettingData.reduce(
-    (total, data) => Number(total) + Number(data.rewardAmount),
-    0
-  );
-}
+
 
 
 export const topWeeklyMonthlyPlayers = async (req, res) => {

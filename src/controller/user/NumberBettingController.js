@@ -779,81 +779,225 @@ export const getNumberGamePeriodById = async (req, res) => {
 //   }
 // };
 
+// export const getAllNumberGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     // Fetch all relevant bets within the last 24 hours for the game
+//     const bets = await NumberBetting.find({
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       createdAt: { $gte: twentyFourHoursAgo },
+//       is_deleted: 0,
+//     }).lean();
+
+//     // Manual grouping and calculations
+//     let periodGroups = {};
+//     bets.forEach(bet => {
+//       const period = bet.period;
+//       if (!periodGroups[period]) {
+//         periodGroups[period] = {
+//           totalUsers: 0,
+//           betAmount: 0,
+//           winNumbers: [],
+//           statuses: [],
+//         };
+//       }
+
+//       periodGroups[period].totalUsers += 1;
+//       periodGroups[period].betAmount += bet.betAmount;
+//       if (bet.isWin) {
+//         periodGroups[period].winNumbers.push(bet.number);
+//       }
+//       periodGroups[period].statuses.push(bet.status);
+//     });
+
+//     // Processing groups to find max winNumber and determine status
+//     Object.keys(periodGroups).forEach(period => {
+//       const group = periodGroups[period];
+//       group.winNumber = group.winNumbers.length ? Math.max(...group.winNumbers) : null;
+//       delete group.winNumbers; // Cleanup
+
+//       const statusPriority = { successfully: 3, pending: 2, fail: 1 };
+//       group.status = group.statuses.reduce((acc, curr) => (statusPriority[curr] > statusPriority[acc] ? curr : acc), 'fail');
+//       delete group.statuses; // Cleanup
+
+//       // Add period directly to the group object
+//       group.period = period;
+//     });
+
+//     // Convert to array
+//     let results = Object.values(periodGroups);
+//     console.log(results, "result ")
+//     // Fetch period data for each group
+//     for (let result of results) {
+//       const periodData = await Period.findOne({ period: result.period, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
+//       if (periodData) {
+//         result.date = periodData.date;
+//         result.startTime = periodData.startTime;
+//         result.endTime = periodData.endTime;
+//         result.createdAt = periodData.createdAt;
+//       }
+//     }
+//     // const filteredResults = results.filter(r => r.periodFor === second);
+
+//     results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+//     // Sort by period descending
+//     // results.sort((a, b) => b.period - a.period);
+
+//     // Optionally filter out entries with null status or winNumber here if needed
+
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, results);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
+// export const getAllNumberGamePeriod = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     // Fetch all relevant bets within the last 24 hours for the game
+//     const bets = await NumberBetting.find({
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       createdAt: { $gte: twentyFourHoursAgo },
+//       is_deleted: 0,
+//     }).lean();
+
+//     // Manual grouping and calculations
+//     let periodGroups = {};
+//     bets.forEach(bet => {
+//       const period = bet.period;
+//       if (!periodGroups[period]) {
+//         periodGroups[period] = {
+//           totalUsers: 0,
+//           betAmount: 0,
+//           winNumbers: [],
+//           statuses: [],
+//         };
+//       }
+
+//       periodGroups[period].totalUsers += 1;
+//       periodGroups[period].betAmount += bet.betAmount;
+//       if (bet.isWin) {
+//         periodGroups[period].winNumbers.push(bet.number);
+//       }
+//       periodGroups[period].statuses.push(bet.status);
+//     });
+
+//     // Processing groups to find max winNumber and determine status
+//     Object.keys(periodGroups).forEach(period => {
+//       const group = periodGroups[period];
+//       group.winNumber = group.winNumbers.length ? Math.max(...group.winNumbers) : null;
+//       delete group.winNumbers; // Cleanup
+
+//       const statusPriority = { successfully: 3, pending: 2, fail: 1 };
+//       group.status = group.statuses.reduce((acc, curr) => (statusPriority[curr] > statusPriority[acc] ? curr : acc), 'fail');
+//       delete group.statuses; // Cleanup
+
+//       // Add period directly to the group object
+//       group.period = period;
+//     });
+
+//     // Convert to array
+//     let results = Object.values(periodGroups);
+
+//     // Temporarily store results that exist in Period collection
+//     let validResults = [];
+
+//     // Fetch period data for each group and filter out non-existing periods
+//     for (let result of results) {
+//       const periodData = await Period.findOne({ period: result.period, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
+//       if (periodData) {
+//         result.date = periodData.date;
+//         result.startTime = periodData.startTime;
+//         result.endTime = periodData.endTime;
+//         result.createdAt = periodData.createdAt;
+//         validResults.push(result); // Only push results that have a matching period in the Period collection
+//       }
+//     }
+
+//     // Sort by creation date descending
+//     validResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+//     // Optionally filter out entries with null status or winNumber here if needed
+
+//     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, validResults);
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const getAllNumberGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    // Fetch all relevant bets within the last 24 hours for the game
+    // Step 1: Fetch periods for the game within the last 24 hours
+    const periods = await Period.find({
+      gameId: new mongoose.Types.ObjectId(gameId),
+      createdAt: { $gte: twentyFourHoursAgo },
+    }).lean();
+
+    // Step 2: Fetch all relevant bets within the last 24 hours for the game
     const bets = await NumberBetting.find({
       gameId: new mongoose.Types.ObjectId(gameId),
       createdAt: { $gte: twentyFourHoursAgo },
       is_deleted: 0,
     }).lean();
 
-    // Manual grouping and calculations
-    let periodGroups = {};
+    // Organize bets by period for easier access
+    let betsByPeriod = {};
     bets.forEach(bet => {
-      const period = bet.period;
-      if (!periodGroups[period]) {
-        periodGroups[period] = {
-          totalUsers: 0,
-          betAmount: 0,
-          winNumbers: [],
-          statuses: [],
-        };
+      const periodKey = bet.period.toString(); // Convert to string for consistency
+      if (!betsByPeriod[periodKey]) {
+        betsByPeriod[periodKey] = [];
       }
-
-      periodGroups[period].totalUsers += 1;
-      periodGroups[period].betAmount += bet.betAmount;
-      if (bet.isWin) {
-        periodGroups[period].winNumbers.push(bet.number);
-      }
-      periodGroups[period].statuses.push(bet.status);
+      betsByPeriod[periodKey].push(bet);
     });
 
-    // Processing groups to find max winNumber and determine status
-    Object.keys(periodGroups).forEach(period => {
-      const group = periodGroups[period];
-      group.winNumber = group.winNumbers.length ? Math.max(...group.winNumbers) : null;
-      delete group.winNumbers; // Cleanup
+    // Step 3: Enrich periods with bet data
+    const enrichedPeriods = periods.map(period => {
+      const periodBets = betsByPeriod[period.period.toString()] || [];
+      let totalUsers = 0;
+      let betAmount = 0;
+      let winNumbers = [];
+      let statuses = [];
 
+      periodBets.forEach(bet => {
+        totalUsers += 1;
+        betAmount += bet.betAmount;
+        if (bet.isWin) winNumbers.push(bet.number);
+        statuses.push(bet.status);
+      });
+
+      // Determine max winNumber and aggregate status
+      const winNumber = winNumbers.length ? Math.max(...winNumbers) : null;
       const statusPriority = { successfully: 3, pending: 2, fail: 1 };
-      group.status = group.statuses.reduce((acc, curr) => (statusPriority[curr] > statusPriority[acc] ? curr : acc), 'fail');
-      delete group.statuses; // Cleanup
+      const status = statuses.reduce((acc, curr) => (statusPriority[curr] > statusPriority[acc] ? curr : acc), 'fail');
 
-      // Add period directly to the group object
-      group.period = period;
+      return {
+        period: period.period,
+        date: period.date,
+        startTime: period.startTime,
+        endTime: period.endTime,
+        createdAt: period.createdAt,
+        totalUsers,
+        betAmount,
+        winNumber,
+        status
+      };
     });
 
-    // Convert to array
-    let results = Object.values(periodGroups);
+    // Sort by creation date descending
+    enrichedPeriods.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // Fetch period data for each group
-    for (let result of results) {
-      const periodData = await Period.findOne({ period: result.period, gameId: new mongoose.Types.ObjectId(gameId) }).lean();
-      if (periodData) {
-        result.date = periodData.date;
-        result.startTime = periodData.startTime;
-        result.endTime = periodData.endTime;
-        result.createdAt = periodData.createdAt;
-      }
-    }
-    // const filteredResults = results.filter(r => r.periodFor === second);
-    
-    results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    // Sort by period descending
-    // results.sort((a, b) => b.period - a.period);
-
-    // Optionally filter out entries with null status or winNumber here if needed
-
-    return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, results);
+    return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, enrichedPeriods);
   } catch (error) {
     return handleErrorResponse(res, error);
   }
 };
-
-
 
 // export const getAllNumberGamePeriod = async (req, res) => {
 //   try {
@@ -1995,6 +2139,12 @@ export async function createAllGamePeriodFromCronJob() {
           const periodCount = await Period.countDocuments({
             gameId: game._id,
           });
+
+          const periodCount1 = await PeriodNew.countDocuments({
+            gameId: game._id,
+
+          });
+          let finalPeriod = periodCount + periodCount1
           const lastIndex = await Period.findOne({
             gameId: game._id,
             is_deleted: 0,
@@ -2002,9 +2152,9 @@ export async function createAllGamePeriodFromCronJob() {
             .sort({ createdAt: -1 })
             .lean();
 
-          if (periodCount) {
+          if (finalPeriod) {
             period =
-              formattedDate + (periodCount + 1).toString().padStart(3, "0");
+              formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
           } else {
             period = formattedDate + (1).toString().padStart(3, "0");
           }
@@ -2069,10 +2219,16 @@ export async function createAllGamePeriodFromCronJob() {
           gameEndTimeStamp > currentTimeAndDateStamp
         ) {
           let period = formattedDate + "000";
+
           const periodCount = await Period.countDocuments({
             gameId: game._id,
-          });
 
+          });
+          const periodCount1 = await PeriodNew.countDocuments({
+            gameId: game._id,
+
+          });
+          let finalPeriod = periodCount + periodCount1
           const lastIndex = await Period.findOne({
             gameId: game._id,
             is_deleted: 0,
@@ -2080,9 +2236,9 @@ export async function createAllGamePeriodFromCronJob() {
             .sort({ createdAt: -1 })
             .lean();
 
-          if (periodCount) {
+          if (finalPeriod) {
             period =
-              formattedDate + (periodCount + 1).toString().padStart(3, "0");
+              formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
           } else {
             period = formattedDate + (1).toString().padStart(3, "0");
           }
@@ -2157,6 +2313,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2165,9 +2326,9 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2244,6 +2405,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2252,9 +2418,9 @@ export async function createAllGamePeriodFromCronJob() {
 
               .sort({ createdAt: -1 })
               .lean();
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2286,7 +2452,7 @@ export async function createAllGamePeriodFromCronJob() {
                 currentTimeAndDateStamp >= lastIndex.endTime
               ) {
                 if (gameEndTimeStamp < gameHoursNextTimeStamp) {
-                  // console.log("3 2 Color Betting");
+                  console.log("3 2 Color Betting");
                   await updateAndCreatePeriod(
                     game._id,
                     dateForPeriod,
@@ -2330,6 +2496,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2338,9 +2509,9 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2416,6 +2587,11 @@ export async function createAllGamePeriodFromCronJob() {
               gameId: game._id,
               periodFor: second,
             });
+            const periodCount1 = await PeriodNew.countDocuments({
+              gameId: game._id,
+              periodFor: second,
+            });
+            let finalPeriod = periodCount + periodCount1
             const lastIndex = await Period.findOne({
               gameId: game._id,
               periodFor: second,
@@ -2424,9 +2600,9 @@ export async function createAllGamePeriodFromCronJob() {
               .sort({ createdAt: -1 })
               .lean();
 
-            if (periodCount) {
+            if (finalPeriod) {
               period =
-                formattedDate + (periodCount + 1).toString().padStart(3, "0");
+                formattedDate + (finalPeriod + 1).toString().padStart(3, "0");
             } else {
               period = formattedDate + (1).toString().padStart(3, "0");
             }
@@ -2493,7 +2669,6 @@ export const getPeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const { second } = req.query;
-
     const currentTimeAndDateStamp = moment().utcOffset("+05:30").unix();
 
     let query = {
@@ -2708,21 +2883,27 @@ export const getPeriod = async (req, res) => {
 export const createAllGameWinnerFromCronJob = async (req, res) => {
   try {
     var currentDate = moment().format("YYYY-MM-DDT00:00:00.000+00:00");
-    let currentTimeAndDateStampPlus10Second = moment().unix() + 10;
+    let currentTimeAndDateStampPlus10Second = moment().unix() + 10
     // console.log('current10Second', currentTimeAndDateStampPlus10Second);
     let findPeriods = await Period.find({
       date: currentDate,
       endTime: Number(currentTimeAndDateStampPlus10Second),
       is_deleted: 0,
     });
+
+
     findPeriods.map(async (findPeriod) => {
       const findGame = await Game.findOne({
         _id: findPeriod.gameId,
         is_deleted: 0,
       }).lean();
+
+
       if (findGame.gameName == "Number Betting") {
         await declareNumberWinner(findGame, findPeriod.period);
       } else if (
+
+
         findGame.gameName == "2 Color Betting" ||
         findGame.gameName == "3 Color Betting"
       ) {

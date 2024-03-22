@@ -23,11 +23,11 @@ import { ResponseMessage } from "../../utils/ResponseMessage.js";
 // });
 
 Socket.on("connection", (sockets) => {
-  console.log("Socket connected");
+
 
   sockets.on("JoinChat", async (room) => {
     sockets.join(room.room_id);
-    let chat = await Chat.findOne({ room_id: room.room_id });
+    let chat = await Chat.findOne({ room_id: room.room_id }).populate("messages.user_id", "fullName profile");
 
     if (chat) {
       Socket.emit("Message", chat.messages);
@@ -35,7 +35,7 @@ Socket.on("connection", (sockets) => {
       let checkUserRegister = await User.findOne({ _id: room.user_id });
 
       if (checkUserRegister) {
-        console.log(checkUserRegister, "zoyaa");
+
         sockets.on("NewMessage", async (data) => {
           // Check if the user is allowed to send messages in this room
           if (sockets.rooms.has(room.room_id)) {
@@ -56,7 +56,7 @@ Socket.on("connection", (sockets) => {
               }
             );
 
-            let res = await Chat.findOne({ room_id: room.room_id });
+            let res = await Chat.findOne({ room_id: room.room_id }).populate("messages.user_id", "fullName profile");
 
             Socket.emit("Message", res.messages);
           } else {

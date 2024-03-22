@@ -266,7 +266,6 @@ export const addNewTransaction = async (req, res) => {
 export const withdrawalRequest = async (req, res) => {
   try {
     const { walletAddress, tokenName, tokenAmount, tetherType } = req.body;
-    console.log(req.user, "hdh");
     const findTransaction = await NewTransaction.findOne({ userId: req.user, $or: [{ bitcoinWalletAddress: walletAddress }, { ethereumWalletAddress: walletAddress }], })
     const USDTPrice = await axios.get('https://api.coincap.io/v2/assets');
     let userCurrency = await User.findOne({ _id: req.user, is_deleted: 0 });
@@ -442,7 +441,6 @@ export const withdrawalRequest = async (req, res) => {
       return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.INSUFFICIENT_BALANCE, [])
     }
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 }

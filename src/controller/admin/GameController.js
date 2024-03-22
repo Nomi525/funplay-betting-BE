@@ -52,6 +52,7 @@ export const addEditGame = async (req, res) => {
       minSlot,
       maxSlot
     } = req.body;
+    console.log(req.body,"body");
     gameSecond = gameSecond ? gameSecond : [];
     let newGameStartDate = moment(gameTimeFrom).format("YYYY-MM-DD");
     let newGameEndDate = moment(gameTimeTo).format("YYYY-MM-DD");
@@ -116,7 +117,8 @@ export const addEditGame = async (req, res) => {
             entryFee,
             winningCoin,
             minSlot,
-            maxSlot
+            maxSlot,
+            gameTime
           },
           Game
         );
@@ -172,7 +174,8 @@ export const addEditGame = async (req, res) => {
           entryFee,
           winningCoin,
           minSlot,
-          maxSlot
+          maxSlot,
+          gameTime
         },
         Game
       );
@@ -198,6 +201,8 @@ export const addEditGame = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
+
 //#region game repeat active and deactive
 export const gameIsRepeat = async (req, res) => {
   try {
@@ -2422,357 +2427,41 @@ export const getAllGamePeriodData = async (req, res) => {
   try {
     const { gameId, gameType } = req.params;
     const { periodFor } = req.query;
-    console.log(gameId, gameType, periodFor, "44444")
+    console.log(gameId, gameType, periodFor, "betRecord")
     let battingAggregationResult;
 
-    // // Find periods with isWin: true in the numberbettings collection
-    // const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct(
-    //   "period",
-    //   { isWin: true }
-    // );
+    // Find periods with isWin: true in the numberbettings collection
+    const isWinTruePeriodsforNumberBetting = await NumberBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
-    // // Find periods with isWin: true in the colourbettings collection
-    // const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
-    //   "period",
-    //   { isWin: true, selectedTime: periodFor, gameId, gameType }
-    // );
-    // // Find periods with isWin: true in the penaltyBetting collection
-    // const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
-    //   "period",
-    //   { isWin: true, selectedTime: periodFor, gameId }
-    // );
+    // Find periods with isWin: true in the colourbettings collection
+    const isWinTruePeriodsforColourBetting = await ColourBetting.distinct(
+      "period",
+      { isWin: true, selectedTime: periodFor, gameId, gameType }
+    );
+    // Find periods with isWin: true in the penaltyBetting collection
+    const isWinTruePeriodsforpenaltyBetting = await PenaltyBetting.distinct(
+      "period",
+      { isWin: true, selectedTime: periodFor, gameId }
+    );
 
-    // // Find periods with isWin: true in the communitybetting collection
-    // const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
-    //   "period",
-    //   { isWin: true }
-    // );
+    // Find periods with isWin: true in the communitybetting collection
+    const isWinTruePeriodsforCommunityBetting = await CommunityBetting.distinct(
+      "period",
+      { isWin: true }
+    );
 
-    // // Find periods with isWin: true in the cardbetting collection
-    // const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
-    //   "period",
-    //   { isWin: true, selectedTime: periodFor, gameId }
-    // );
+    // Find periods with isWin: true in the cardbetting collection
+    const isWinTruePeriodsforCardBetting = await CardBetting.distinct(
+      "period",
+      { isWin: true, selectedTime: periodFor, gameId }
+    );
 
     if (gameType === "numberBetting") {
-      // battingAggregationResult = await Period.aggregate([
-      //   {
-      //     $match: {
-      //       gameId: new mongoose.Types.ObjectId(gameId),
-      //       period: { $nin: isWinTruePeriodsforNumberBetting }, // Exclude periods with isWin: true
-      //     },
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: "numberbettings",
-      //       let: { periodId: "$period" },
-      //       pipeline: [
-      //         {
-      //           $match: {
-      //             $expr: {
-      //               $and: [
-      //                 { $eq: ["$period", "$$periodId"] },
-      //                 { $ne: ["$isWin", true] },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //       ],
-      //       as: "numberBettingsData",
-      //     },
-      //   },
-      //   {
-      //     $unwind: "$numberBettingsData",
-      //   },
-      //   {
-      //     $group: {
-      //       _id: {
-      //         period: "$period",
-      //         number: "$numberBettingsData.number",
-      //         periodId: "$_id",
-      //       },
-      //       anyWinTrue: { $max: "$numberBettingsData.isWin" },
-      //       totalUser: { $addToSet: "$numberBettingsData.userId" },
-      //       totalBetAmount: { $sum: "$numberBettingsData.betAmount" },
-      //     },
-      //   },
-      //   {
-      //     $match: {
-      //       anyWinTrue: { $ne: true },
-      //     },
-      //   },
-      //   {
-      //     $group: {
-      //       _id: "$_id.period",
-      //       numberBettingsData: {
-      //         $push: {
-      //           number: "$_id.number",
-      //           totalUser: { $sum: { $size: "$totalUser" } },
-      //           totalBetAmount: "$totalBetAmount",
-      //         },
-      //       },
-      //     },
-      //   },
-      //   {
-      //     $project: {
-      //       _id: 0,
-      //       period: "$_id",
-      //       periodId: "$periodId",
-      //       numberBettingsData: 1,
-      //     },
-      //   },
-      //   {
-      //     $sort: { period: -1 },
-      //   },
-      // ]);
-      // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-      //   const getNumberUser = await NumberBetting.aggregate([
-      //     {
-      //       $match: {
-      //         gameId: new mongoose.Types.ObjectId(gameId),
-      //         period: Number(result.period)
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: "$userId",
-      //         totalUser: { $sum: 1 }
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: null,
-      //         totalUsers: { $sum: 1 }
-      //       }
-      //     },
-      //     {
-      //       $project: {
-      //         _id: 0,
-      //         totalUsers: 1
-      //       }
-      //     }
-      //   ])
-      //   // console.log(getNumberUser);
-      //   return {
-      //     period: result.period,
-      //     totalUsers: getNumberUser[0].totalUsers,
-      //     numberBettingsData: result.numberBettingsData
-      //   }
-      // }))
-
-      // try {
-      //   const aggregationResult = await NumberBetting.aggregate([
-      //     {
-      //       $match: {
-      //         gameId: new mongoose.Types.ObjectId(gameId),
-      //         is_deleted: 0,
-      //         isWin: false,
-      //         userId: { $ne: null },
-      //       },
-      //     },
-      //     {
-      //       $unionWith: {
-      //         coll: "numberbettingnews", // Adjust the collection name if needed
-      //         pipeline: [
-      //           {
-      //             $match: {
-      //               gameId: new mongoose.Types.ObjectId(gameId),
-      //               is_deleted: 0,
-      //               isWin: false,
-      //               userId: { $ne: null },
-      //             },
-      //           },
-      //         ],
-      //       },
-      //     },
-      //     {
-      //       $lookup: {
-      //         from: "users",
-      //         localField: "userId",
-      //         foreignField: "_id",
-      //         as: "userData"
-      //       },
-      //     },
-      //     {
-      //       $unwind: {
-      //         path: "$userData",
-      //         preserveNullAndEmptyArrays: true,
-      //       },
-      //     },
-      //     {
-      //       $match: {
-      //         "userData._id": { $exists: true },
-      //       },
-      //     },
-      //     {
-      //       $sort: {
-      //         "period": 1,
-      //         "betAmount": 1, // Sorting by betAmount to get the least betAmount first
-      //       },
-      //     },
-      //     {
-      //       $group: {
-      //         _id: { period: "$period", userId: "$userId" },
-      //         userEmail: { $first: "$userData.email" },
-      //         userName: { $first: "$userData.fullName" },
-      //         leastBetAmount: { $first: "$betAmount" },
-      //         numberForLeastBet: { $first: "$number" }, // Using number directly as per your model
-      //         totalBetAmount: { $sum: "$betAmount" }, // Summing up the total bet amount per user per period
-      //         totalUsers: { $sum: 1 },
-      //       },
-      //     },
-      //     {
-      //       $group: {
-      //         _id: "$_id.period",
-      //         totalBetAmount: { $sum: "$totalBetAmount" },
-      //         totalUsers: { $sum: 1 },
-      //         leastBetAmount: { $min: "$leastBetAmount" },
-      //         numberForLeastBet: { $first: "$numberForLeastBet" },
-      //         communityBettingData: {
-      //           $push: {
-      //             userEmail: "$userEmail",
-      //             userName: "$userName",
-      //             userId: "$_id.userId",
-      //             betAmount: "$leastBetAmount",
-      //             betNumber: "$numberForLeastBet",
-      //             userTotalBetAmount: "$totalBetAmount", // Adding the total bet amount per user per period
-      //           },
-      //         },
-      //       },
-      //     },
-      //     {
-      //       $project: {
-      //         _id: 0,
-      //         period: "$_id",
-      //         totalBetAmount: 1,
-      //         totalUsers: 1,
-      //         leastBetAmount: 1,
-      //         numberForLeastBet: 1,
-      //         communityBettingData: 1,
-      //       },
-      //     },
-      //     {
-      //       $sort: { period: -1 },
-      //     },
-      //   ]);
-
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.OK,
-      //     ResponseMessage.GAME_PERIOD_GET,
-      //     aggregationResult
-      //   );
-      // } catch (error) {
-      //   console.error("Failed to get number game period data", error);
-      //   res.status(500).send("Internal server error");
-      // }
-
-      // try {
-      //   const aggregationResult = await NumberBetting.aggregate([
-      //     {
-      //       $match: {
-      //         gameId: new mongoose.Types.ObjectId(gameId),
-      //         is_deleted: 0,
-      //         isWin: false,
-      //         userId: { $ne: null },
-      //       },
-      //     },
-      //     {
-      //       $unionWith: {
-      //         coll: "numberbettingnews",
-      //         pipeline: [
-      //           {
-      //             $match: {
-      //               gameId: new mongoose.Types.ObjectId(gameId),
-      //               is_deleted: 0,
-      //               isWin: false,
-      //               userId: { $ne: null },
-      //             },
-      //           },
-      //         ],
-      //       },
-      //     },
-      //     {
-      //       $lookup: {
-      //         from: "users",
-      //         localField: "userId",
-      //         foreignField: "_id",
-      //         as: "userData"
-      //       },
-      //     },
-      //     {
-      //       $unwind: {
-      //         path: "$userData",
-      //         preserveNullAndEmptyArrays: true,
-      //       },
-      //     },
-      //     {
-      //       $match: {
-      //         "userData._id": { $exists: true },
-      //       },
-      //     },
-      //     {
-      //       $sort: {
-      //         "period": 1,
-      //         "betAmount": 1,
-      //       },
-      //     },
-      //     {
-      //       $group: {
-      //         _id: { period: "$period", number: "$number" },
-      //         totalUser: { $sum: 1 },
-      //         totalBetAmount: { $sum: "$betAmount" },
-      //         number: { $first: "$number" },
-      //       },
-      //     },
-      //     {
-      //       $group: {
-      //         _id: "$_id.period",
-      //         numberBettingsData: {
-      //           $push: {
-      //             number: "$number",
-      //             totalUser: "$totalUser",
-      //             totalBetAmount: "$totalBetAmount",
-      //           },
-      //         },
-      //       },
-      //     },
-      //     {
-      //       $project: {
-      //         _id: 0,
-      //         period: "$_id",
-      //         numberBettingsData: 1,
-      //       },
-      //     },
-      //     {
-      //       $sort: { period: -1 },
-      //     },
-      //   ]);
-
-      //   // Adjusting the structure to match the frontend expectation
-      //   const response = aggregationResult.map(item => {
-      //     return {
-      //       period: item.period,
-      //       totalUsers: item.numberBettingsData.reduce((acc, cur) => acc + cur.totalUser, 0),
-      //       numberBettingsData: item.numberBettingsData,
-      //     };
-      //   });
-
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.OK,
-      //     "Get game period.",
-      //     response
-      //   );
-      // } catch (error) {
-      //   console.error("Failed to get number game period data", error);
-      //   res.status(500).send("Internal server error");
-      // }
-
-
       try {
         const aggregationResult = await NumberBetting.aggregate([
-          // Initial matching stage remains the same
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
@@ -2781,7 +2470,6 @@ export const getAllGamePeriodData = async (req, res) => {
               userId: { $ne: null },
             },
           },
-          // Union with other collection
           {
             $unionWith: {
               coll: "numberbettingnews",
@@ -2797,7 +2485,6 @@ export const getAllGamePeriodData = async (req, res) => {
               ],
             },
           },
-          // Lookup to join with the users collection
           {
             $lookup: {
               from: "users",
@@ -2812,20 +2499,17 @@ export const getAllGamePeriodData = async (req, res) => {
               preserveNullAndEmptyArrays: true,
             },
           },
-          // Ensure there's a userData document
           {
             $match: {
               "userData._id": { $exists: true },
             },
           },
-          // Sorting before grouping to ensure order
           {
             $sort: {
               "period": 1,
-              "betAmount": 1, // Ensuring that we sort by betAmount to easily find the minimum later
+              "betAmount": 1, 
             },
           },
-          // Grouping by period and number
           {
             $group: {
               _id: { period: "$period", number: "$number" },
@@ -2835,11 +2519,10 @@ export const getAllGamePeriodData = async (req, res) => {
               leastBetAmount: { $min: "$betAmount" },
             },
           },
-          // Preparing for the second grouping by period
           {
             $sort: {
               "_id.period": 1,
-              "leastBetAmount": 1, // Ensure sorting so the first document is the one with the least bet amount
+              "leastBetAmount": 1, 
             },
           },
           {
@@ -2853,40 +2536,25 @@ export const getAllGamePeriodData = async (req, res) => {
                   leastBetAmount: "$leastBetAmount",
                 },
               },
-              leastBetAmountOverall: { $first: "$leastBetAmount" }, // Take the first (smallest) bet amount
-              numberWithLeastBetAmountOverall: { $first: "$number" }, // Capture the number associated with the least bet amount
+              leastBetAmountOverall: { $first: "$leastBetAmount" }, 
+              numberWithLeastBetAmountOverall: { $first: "$number" }, 
             },
           },
-          // Final projection
           {
             $project: {
               _id: 0,
               period: "$_id",
               numberBettingsData: 1,
               leastBetAmountOverall: 1,
-              numberWithLeastBetAmountOverall: 1, // Include this in the final projection
+              numberWithLeastBetAmountOverall: 1,
             },
           },
-          // Final sorting by period
           {
             $sort: { period: -1 },
           },
         ]);
 
-        // Adjusting the structure to match the frontend expectation
-        // const response = aggregationResult.map(item => {
-        //   return {
-        //     period: item.period,
-        //     totalUsers: item.numberBettingsData.reduce((acc, cur) => acc + cur.totalUser, 0),
-        //     leastBetAmount: item.leastBetAmountOverall,
-        //     leastBetNumbers: item.numberWithLeastBetAmountOverall,
-        //     numberBettingsData: item.numberBettingsData,
-        //   };
-        // });
-
-        // return sendResponse(res, StatusCodes.OK, "Get game period.", response);
         const response = aggregationResult.map(item => {
-          // Prepare the leastBet object with the desired structure
           const leastBetNumbers = {
             totalBetAmount: item.leastBetAmountOverall,
             number: item.numberWithLeastBetAmountOverall,
@@ -2895,7 +2563,7 @@ export const getAllGamePeriodData = async (req, res) => {
           return {
             period: item.period,
             totalUsers: item.numberBettingsData.reduce((acc, cur) => acc + cur.totalUser, 0),
-            leastBetNumbers: [leastBetNumbers], // Wrap the leastBet object in an array
+            leastBetNumbers: [leastBetNumbers], 
             numberBettingsData: item.numberBettingsData,
           };
         });
@@ -2910,263 +2578,6 @@ export const getAllGamePeriodData = async (req, res) => {
 
 
     } else if (gameType === "3colorBetting" || gameType === "2colorBetting") {
-      // battingAggregationResult = await Period.aggregate([
-      //   {
-      //     $match: {
-      //       gameId: new mongoose.Types.ObjectId(gameId),
-      //       period: { $nin: isWinTruePeriodsforColourBetting }, // Exclude periods with isWin: true
-      //       periodFor: periodFor
-      //     },
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: "colourbettings",
-      //       localField: "period",
-      //       foreignField: "period",
-      //       as: "colourbettingsData",
-      //     },
-      //   },
-      //   {
-      //     $unwind: "$colourbettingsData",
-      //   },
-      //   {
-      //     $match: {
-      //       "colourbettingsData.gameType": gameType,
-      //       "colourbettingsData.selectedTime": periodFor,
-      //     },
-      //   },
-      //   {
-      //     $group: {
-      //       _id: {
-      //         period: "$period",
-      //         colourName: "$colourbettingsData.colourName",
-      //         periodId: "$_id",
-      //       },
-      //       anyWinTrue: { $max: "$colourbettingsData.isWin" },
-      //       totalBetUser: { $addToSet: "$colourbettingsData.userId" },
-      //       totalBetAmount: { $sum: "$colourbettingsData.betAmount" },
-      //     },
-      //   },
-      //   {
-      //     $match: {
-      //       anyWinTrue: { $ne: true },
-      //     },
-      //   },
-      //   {
-      //     $group: {
-      //       _id: "$_id.period",
-      //       colourbettingsData: {
-      //         $push: {
-      //           colourName: "$_id.colourName",
-      //           totalBetUser: { $sum: { $size: "$totalBetUser" } },
-      //           totalBetAmount: "$totalBetAmount",
-      //         },
-      //       },
-      //     },
-      //   },
-      //   {
-      //     $project: {
-      //       _id: 0,
-      //       period: "$_id",
-      //       colourbettingsData: 1,
-      //     },
-      //   },
-      //   {
-      //     $sort: { period: -1 },
-      //   },
-      // ]);
-      // // console.log(battingAggregationResult);
-      // // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-      // //   const getUserColor = await ColourBetting.aggregate([
-      // //     {
-      // //       $match: {
-      // //         gameId: new mongoose.Types.ObjectId(gameId),
-      // //         period: Number(result.period),
-      // //         selectedTime: periodFor,
-      // //         gameType
-      // //       }
-      // //     },
-      // //     {
-      // //       $group: {
-      // //         _id: "$userId",
-      // //         totalUser: { $sum: 1 }
-      // //       }
-      // //     },
-      // //     {
-      // //       $group: {
-      // //         _id: null,
-      // //         totalUsers: { $sum: 1 }
-      // //       }
-      // //     },
-      // //     {
-      // //       $project: {
-      // //         _id: 0,
-      // //         totalUsers: 1
-      // //       }
-      // //     }
-      // //   ])
-      // //   return {
-      // //     period: result.period,
-      // //     totalUsers: getUserColor[0].totalUsers,
-      // //     colourbettingsData: result.colourbettingsData
-      // //   }
-      // // }))
-      // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-      //   const getUserColor = await ColourBetting.aggregate([
-      //     {
-      //       $match: {
-      //         gameId: new mongoose.Types.ObjectId(gameId),
-      //         period: Number(result.period),
-      //         selectedTime: periodFor,
-      //         gameType
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: "$userId",
-      //         totalUser: { $sum: 1 }
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: null,
-      //         totalUsers: { $sum: 1 }
-      //       }
-      //     },
-      //     {
-      //       $project: {
-      //         _id: 0,
-      //         totalUsers: 1
-      //       }
-      //     }
-      //   ]);
-
-      //   // Process the colourbettingsData to find the least bet color and users
-      //   let leastBetAmount = Number.MAX_SAFE_INTEGER;
-      //   let leastBetColourData = null;
-
-      //   result.colourbettingsData.forEach(colourData => {
-      //     if (colourData.totalBetAmount < leastBetAmount) {
-      //       leastBetAmount = colourData.totalBetAmount;
-      //       leastBetColourData = colourData; // Assume this captures the necessary colour and bet data
-      //     }
-      //   });
-
-      //   // Optionally, find all colours with the least bet amount if there could be ties
-      //   const leastBetColours = result.colourbettingsData.filter(colourData => colourData.totalBetAmount === leastBetAmount);
-      //   console.log(leastBetColours, "hfkjdfj")
-      //   return {
-      //     period: result.period,
-      //     totalUsers: getUserColor[0] ? getUserColor[0].totalUsers : 0,
-      //     colourbettingsData: result.colourbettingsData,
-      //     leastBetColours: leastBetColours // Add this to include the least bet color(s) and their details
-      //   };
-      // }));
-      // try {
-      //   const aggregationResult = await ColourBetting.aggregate([
-      //     {
-      //       $match: {
-      //         gameId: new mongoose.Types.ObjectId(gameId),
-      //         is_deleted: 0,
-      //         isWin: false,
-      //         userId: { $ne: null },
-      //       },
-      //     },
-      //     {
-      //       $unionWith: {
-      //         coll: "colourbettingnews",
-      //         pipeline: [
-      //           {
-      //             $match: {
-      //               gameId: new mongoose.Types.ObjectId(gameId),
-      //               is_deleted: 0,
-      //               isWin: false,
-      //               userId: { $ne: null },
-      //             }
-      //           }
-      //         ]
-      //       },
-      //     },
-      //     {
-      //       $lookup: {
-      //         from: "users",
-      //         localField: "userId",
-      //         foreignField: "_id",
-      //         as: "userData"
-      //       },
-      //     },
-      //     {
-      //       $unwind: {
-      //         path: "$userData",
-      //         preserveNullAndEmptyArrays: true,
-      //       },
-      //     },
-      //     {
-      //       $match: {
-      //         "userData._id": { $exists: true },
-      //       },
-      //     },
-      //     {
-      //       $sort: {
-      //         "period": 1, // Ensure sorting by period first
-      //         "betAmount": 1, // Then by betAmount to have the least betAmount first
-      //       },
-      //     },
-      //     {
-      //       $group: {
-      //         _id: { period: "$period", userId: "$userId" },
-      //         userEmail: { $first: "$userData.email" },
-      //         userName: { $first: "$userData.fullName" },
-      //         leastBetAmount: { $first: "$betAmount" },
-      //         colourOfLeastBet: { $first: "$colourName" },
-      //         totalBetAmount: { $sum: "$betAmount" },
-      //         totalUsers: { $sum: 1 },
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: "$_id.period",
-      //         totalBetAmount: { $sum: "$totalBetAmount" },
-      //         totalUsers: { $sum: 1 },
-      //         leastBetAmount: { $min: "$leastBetAmount" },
-      //         colourOfLeastBet: { $first: "$colourOfLeastBet" },
-      //         communityBettingData: {
-      //           $push: {
-      //             userEmail: "$userEmail",
-      //             userName: "$userName",
-      //             userId: "$_id.userId",
-      //             betAmount: "$totalBetAmount",
-      //           }
-      //         }
-      //       }
-      //     },
-      //     {
-      //       $project: {
-      //         _id: 0,
-      //         period: "$_id",
-      //         totalBetAmount: 1,
-      //         totalUsers: 1,
-      //         leastBetAmount: 1,
-      //         colourOfLeastBet: 1,
-      //         communityBettingData: 1,
-      //       }
-      //     },
-      //     {
-      //       $sort: { period: -1 },
-      //     }
-      //   ]);
-
-      //   return sendResponse(
-      //     res,
-      //     StatusCodes.OK,
-      //     ResponseMessage.GAME_PERIOD_GET,
-      //     aggregationResult
-      //   );
-
-      // } catch (error) {
-      //   console.error("Failed to get colour game period data", error);
-      //   res.status(500).send("Internal server error");
-      // }
       try {
         const aggregationResult = await ColourBetting.aggregate([
           {
@@ -3248,124 +2659,18 @@ export const getAllGamePeriodData = async (req, res) => {
 
 
     } else if (gameType === "communityBetting") {
-      // battingAggregationResult = await Period.aggregate([
-      //   {
-      //     $match: {
-      //       gameId: new mongoose.Types.ObjectId(gameId),
-      //       period: { $nin: isWinTruePeriodsforCommunityBetting },
-      //     },
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: "communitybettings",
-      //       localField: "period",
-      //       foreignField: "period",
-      //       as: "communitybettingsData",
-      //     },
-      //   },
-      //   {
-      //     $unwind: "$communitybettingsData",
-      //   },
-      //   {
-      //     $lookup: {
-      //       from: "users",
-      //       localField: "communitybettingsData.userId",
-      //       foreignField: "_id",
-      //       as: "usersData",
-      //     },
-      //   },
-      //   {
-      //     $group: {
-      //       _id: {
-      //         period: "$period",
-      //         periodId: "$_id",
-      //         userId: "$communitybettingsData.userId",
-      //       },
-      //       anyWinTrue: { $max: "$communitybettingsData.isWin" },
-      //       totalBetAmount: { $sum: "$communitybettingsData.betAmount" },
-      //       usersData: { $first: "$usersData" },
-      //     },
-      //   },
-      //   {
-      //     $match: {
-      //       anyWinTrue: { $ne: true },
-      //     },
-      //   },
-      //   {
-      //     $group: {
-      //       _id: "$_id.period",
-      //       periodId: { $first: "$_id.periodId" },
-      //       comunityBettingData: {
-      //         $push: {
-      //           userEmail: { $arrayElemAt: ["$usersData.email", 0] },
-      //           userName: { $arrayElemAt: ["$usersData.fullName", 0] },
-      //           userId: "$_id.userId",
-      //           betAmount: "$totalBetAmount",
-      //         },
-      //       },
-      //       totalUniqueUsers: { $addToSet: "$_id.userId" }, // Count total unique users
-      //     },
-      //   },
-      //   {
-      //     $project: {
-      //       _id: 0,
-      //       period: "$_id",
-      //       comunityBettingData: 1,
-      //       totalUniqueUsers: { $size: "$totalUniqueUsers" }, // Include total unique user count
-      //     },
-      //   },
-      //   {
-      //     $sort: { period: -1 },
-      //   },
-      // ]);
-
-      // battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-      //   const getCommunityUser = await CommunityBetting.aggregate([
-      //     {
-      //       $match: {
-      //         gameId: new mongoose.Types.ObjectId(gameId),
-      //         period: Number(result.period)
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: "$userId",
-      //         totalUser: { $sum: 1 }
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id: null,
-      //         totalUsers: { $sum: 1 }
-      //       }
-      //     },
-      //     {
-      //       $project: {
-      //         _id: 0,
-      //         totalUsers: 1
-      //       }
-      //     }
-      //   ])
-      //   return {
-      //     period: result.period,
-      //     totalUsers: getCommunityUser[0].totalUsers,
-      //     comunityBettingData: result.comunityBettingData
-      //   }
-      // }))
-
-
       const aggregationResult = await CommunityBetting.aggregate([
         {
           $match: {
             gameId: new mongoose.Types.ObjectId(gameId),
             is_deleted: 0,
             isWin: false,
-            userId: { $ne: null } // Exclude documents where userId is null
+            userId: { $ne: null } 
           }
         },
         {
           $unionWith: {
-            coll: "communitybettingnews", // Specify the collection name of CommunityBettingNew
+            coll: "communitybettingnews", 
             pipeline: [
               { $match: { gameId: new mongoose.Types.ObjectId(gameId), is_deleted: 0 } }
             ]
@@ -3382,7 +2687,7 @@ export const getAllGamePeriodData = async (req, res) => {
         {
           $unwind: {
             path: "$userData",
-            preserveNullAndEmptyArrays: true // Preserve the documents even if the lookup finds no match
+            preserveNullAndEmptyArrays: true 
           }
         },
         {
@@ -3400,8 +2705,8 @@ export const getAllGamePeriodData = async (req, res) => {
             totalUsers: { $sum: 1 },
             comunityBettingData: {
               $push: {
-                userEmail: { $ifNull: ["$userEmail", ""] }, // Provide default value if null
-                userName: { $ifNull: ["$userName", ""] }, // Provide default value if null
+                userEmail: { $ifNull: ["$userEmail", ""] },
+                userName: { $ifNull: ["$userName", ""] },
                 userId: "$_id.userId",
                 betAmount: "$betAmount",
               }
@@ -3430,204 +2735,242 @@ export const getAllGamePeriodData = async (req, res) => {
       );
 
     } else if (gameType === "penaltyBetting") {
-      battingAggregationResult = await Period.aggregate([
-        {
-          $match: {
-            gameId: new mongoose.Types.ObjectId(gameId),
-            period: { $nin: isWinTruePeriodsforpenaltyBetting }, // Exclude periods with isWin: true
-            periodFor: periodFor
-          },
-        },
-        {
-          $lookup: {
-            from: "penaltybettings",
-            localField: "period",
-            foreignField: "period",
-            as: "penaltybettingsData",
-          },
-        },
-        {
-          $unwind: "$penaltybettingsData",
-        },
-        {
-          $match: {
-            "penaltybettingsData.selectedTime": periodFor,
-          },
-        },
-        {
-          $group: {
-            _id: {
-              period: "$period",
-              betSide: "$penaltybettingsData.betSide",
-              periodId: "$_id",
-            },
-            anyWinTrue: { $max: "$penaltybettingsData.isWin" },
-            totalUser: { $addToSet: "$penaltybettingsData.userId" },
-            totalBetAmount: { $sum: "$penaltybettingsData.betAmount" },
-          },
-        },
-        {
-          $match: {
-            anyWinTrue: { $ne: true },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id.period",
-            penaltybettingsData: {
-              $push: {
-                betSide: "$_id.betSide",
-                totalUser: { $sum: { $size: "$totalUser" } },
-                totalBetAmount: "$totalBetAmount",
-              },
-            },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            period: "$_id",
-            penaltybettingsData: 1,
-          },
-        },
-        {
-          $sort: { period: -1 },
-        },
-      ]);
-      battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-        const getPenaltyUser = await PenaltyBetting.aggregate([
+     
+      try {
+        const aggregationResult = await PenaltyBetting.aggregate([
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
-              period: Number(result.period),
-              selectedTime: periodFor
-            }
+              is_deleted: 0,
+              isWin: false,
+              userId: { $ne: null },
+            },
+          },
+          {
+            $unionWith: {
+              coll: "penaltybettingnews",
+              pipeline: [
+                {
+                  $match: {
+                    gameId: new mongoose.Types.ObjectId(gameId),
+                    is_deleted: 0,
+                    isWin: false,
+                    userId: { $ne: null },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "userId",
+              foreignField: "_id",
+              as: "userData"
+            },
+          },
+          {
+            $unwind: {
+              path: "$userData",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $match: {
+              "userData._id": { $exists: true },
+            },
+          },
+          {
+            $sort: {
+              "period": 1,
+              "betAmount": 1, 
+            },
           },
           {
             $group: {
-              _id: "$userId",
-              totalUser: { $sum: 1 }
-            }
+              _id: { period: "$period", betSide: "$betSide" },
+              totalUser: { $sum: 1 },
+              totalBetAmount: { $sum: "$betAmount" },
+              betSide: { $first: "$betSide" },
+              leastBetAmount: { $min: "$betAmount" },
+            },
+          },
+          {
+            $sort: {
+              "_id.period": 1,
+              "leastBetAmount": 1, 
+            },
           },
           {
             $group: {
-              _id: null,
-              totalUsers: { $sum: 1 }
-            }
+              _id: "$_id.period",
+              numberBettingsData: {
+                $push: {
+                  betSide: "$betSide",
+                  totalUser: "$totalUser",
+                  totalBetAmount: "$totalBetAmount",
+                  leastBetAmount: "$leastBetAmount",
+                },
+              },
+              leastBetAmountOverall: { $first: "$leastBetAmount" },
+              numberWithLeastBetAmountOverall: { $first: "$betSide" }, 
+            },
           },
           {
             $project: {
               _id: 0,
-              totalUsers: 1
-            }
-          }
-        ])
-        return {
-          period: result.period,
-          totalUsers: getPenaltyUser[0].totalUsers,
-          penaltybettingsData: result.penaltybettingsData
-        }
-      }))
+              period: "$_id",
+              numberBettingsData: 1,
+              leastBetAmountOverall: 1,
+              numberWithLeastBetAmountOverall: 1, 
+            },
+          },
+          
+          {
+            $sort: { period: -1 },
+          },
+        ]);
+
+        const response = aggregationResult.map(item => {
+          const leastBetNumbers = {
+            totalBetAmount: item.leastBetAmountOverall,
+            betSide: item.numberWithLeastBetAmountOverall,
+          };
+
+          return {
+            period: item.period,
+            totalUsers: item.numberBettingsData.reduce((acc, cur) => acc + cur.totalUser, 0),
+            leastBetData: [leastBetNumbers], 
+            penaltybettingsData: item.numberBettingsData
+
+          };
+        });
+
+        return sendResponse(res, StatusCodes.OK, "Get game period.", response);
+
+      } catch (error) {
+        console.error("Failed to get number game period data", error);
+        res.status(500).send("Internal server error");
+      }
 
     } else if (gameType === "cardBetting") {
-      battingAggregationResult = await Period.aggregate([
-        {
-          $match: {
-            gameId: new mongoose.Types.ObjectId(gameId),
-            period: { $nin: isWinTruePeriodsforCardBetting }, // Exclude periods with isWin: true
-            periodFor: periodFor
-          },
-        },
-        {
-          $lookup: {
-            from: "cardbettings",
-            localField: "period",
-            foreignField: "period",
-            as: "cardbettingsData",
-          },
-        },
-        {
-          $unwind: "$cardbettingsData",
-        },
-        {
-          $match: {
-            "cardbettingsData.selectedTime": periodFor,
-          },
-        },
-        {
-          $group: {
-            _id: {
-              period: "$period",
-              card: "$cardbettingsData.card",
-              periodId: "$_id",
-            },
-            anyWinTrue: { $max: "$cardbettingsData.isWin" },
-            totalUser: { $addToSet: "$cardbettingsData.userId" },
-            totalBetAmount: { $sum: "$cardbettingsData.betAmount" },
-          },
-        },
-        {
-          $match: {
-            anyWinTrue: { $ne: true },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id.period",
-            cardbettingsData: {
-              $push: {
-                card: "$_id.card",
-                totalUser: { $sum: { $size: "$totalUser" } },
-                totalBetAmount: "$totalBetAmount",
-              },
-            },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            period: "$_id",
-            cardbettingsData: 1,
-          },
-        },
-        {
-          $sort: { period: -1 },
-        },
-      ]);
-      battingAggregationResult = await Promise.all(battingAggregationResult.map(async (result) => {
-        const getCardUser = await CardBetting.aggregate([
+      try {
+        const aggregationResult = await CardBetting.aggregate([
           {
             $match: {
               gameId: new mongoose.Types.ObjectId(gameId),
-              period: Number(result.period),
-              selectedTime: periodFor
-            }
+              is_deleted: 0,
+              isWin: false,
+              userId: { $ne: null },
+            },
+          },
+          {
+            $unionWith: {
+              coll: "cardbettingnews",
+              pipeline: [
+                {
+                  $match: {
+                    gameId: new mongoose.Types.ObjectId(gameId),
+                    is_deleted: 0,
+                    isWin: false,
+                    userId: { $ne: null },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "userId",
+              foreignField: "_id",
+              as: "userData"
+            },
+          },
+          {
+            $unwind: {
+              path: "$userData",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $match: {
+              "userData._id": { $exists: true },
+            },
+          },
+          {
+            $sort: {
+              "period": 1,
+              "betAmount": 1, 
+            },
           },
           {
             $group: {
-              _id: "$userId",
-              totalUser: { $sum: 1 }
-            }
+              _id: { period: "$period", card: "$card" },
+              totalUser: { $sum: 1 },
+              totalBetAmount: { $sum: "$betAmount" },
+              card: { $first: "$card" },
+              leastBetAmount: { $min: "$betAmount" },
+            },
+          },
+          {
+            $sort: {
+              "_id.period": 1,
+              "leastBetAmount": 1, 
+            },
           },
           {
             $group: {
-              _id: null,
-              totalUsers: { $sum: 1 }
-            }
+              _id: "$_id.period",
+              numberBettingsData: {
+                $push: {
+                  card: "$card",
+                  totalUser: "$totalUser",
+                  totalBetAmount: "$totalBetAmount",
+                  leastBetAmount: "$leastBetAmount",
+                },
+              },
+              leastBetAmountOverall: { $first: "$leastBetAmount" }, 
+              numberWithLeastBetAmountOverall: { $first: "$card" }, 
+            },
           },
           {
             $project: {
               _id: 0,
-              totalUsers: 1
-            }
-          }
-        ])
-        return {
-          period: result.period,
-          totalUsers: getCardUser[0].totalUsers,
-          cardBettingsData: result.cardbettingsData
-        }
-      }))
+              period: "$_id",
+              numberBettingsData: 1,
+              leastBetAmountOverall: 1,
+              numberWithLeastBetAmountOverall: 1, 
+            },
+          },
+          {
+            $sort: { period: -1 },
+          },
+        ]);
+
+
+        const response = aggregationResult.map(item => {
+          const leastBetNumbers = {
+            totalBetAmount: item.leastBetAmountOverall,
+            card: item.numberWithLeastBetAmountOverall,
+          };
+
+          return {
+            period: item.period,
+            totalUsers: item.numberBettingsData.reduce((acc, cur) => acc + cur.totalUser, 0),
+            leastBetCards: [leastBetNumbers],
+            cardBettingsData: item.numberBettingsData
+
+          };
+        });
+
+        return sendResponse(res, StatusCodes.OK, "Get game period.", response);
+
+      } catch (error) {
+        console.error("Failed to get number game period data", error);
+        res.status(500).send("Internal server error");
+      }
+    
     }
     return sendResponse(
       res,
@@ -3639,8 +2982,6 @@ export const getAllGamePeriodData = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
-
 
 // export const getCommunityGameperiod = async (req, res) => {
 //   const { gameId, gameType } = req.params;
@@ -3837,9 +3178,6 @@ export const getAllGamePeriodData = async (req, res) => {
 //   }
 // };
 
-
-
-
 export const getCommunityGameperiod = async (req, res) => {
   const { gameId } = req.params;
 
@@ -3855,7 +3193,7 @@ export const getCommunityGameperiod = async (req, res) => {
       },
       {
         $unionWith: {
-          coll: "numberbettingnews", // Adjust the collection name if needed
+          coll: "numberbettingnews", 
           pipeline: [
             {
               $match: {

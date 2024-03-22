@@ -51,6 +51,7 @@ const withdrawalSchema = new mongoose.Schema({
     },
     requestType: {
         type: String,
+        enum:  ["Withdrawal", "debit"],
         default: 'Withdrawal'
     },
     currency: {

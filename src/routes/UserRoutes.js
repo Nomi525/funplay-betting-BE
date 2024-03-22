@@ -1,5 +1,5 @@
 import { socketRoute } from "../config/Socket.config.js";
-import { deleteBankDetail, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
+import { deleteBankDetail, findUserBet, findUserLooseBet, findUserWinBet, updateEmail, userCheckEmail } from "../controller/user/UserController.js";
 import {
   Auth,
   Upload,
@@ -82,14 +82,16 @@ import {
   getSlotsBookedByPeriod,
   deleteAllUserNotifications
 } from "./../index.js";
-import {getUserNotifications} from "../controller/user/UserNotificationController.js"
+import { getUserNotifications } from "../controller/user/UserNotificationController.js"
 
 // import { numberBettingSocket, colorBettingSocket } from "../controller/user/Gamesocket.js";
 import { addFaintCurrency, getUserFaintCurrency } from "../controller/admin/FaintCurrency.js";
 import { totalCoin, userDashboard1 } from "../controller/user/DashboardController.js";
 import { withdrawalUserRequest } from "../controller/user/TransactionController.js";
 import { getUserWithdrawalRequest } from "../controller/admin/WithdrawalUser.js";
-import { getUPIData } from "../controller/user/UPIController.js";
+import { getUPIData, getBankDetail } from "../controller/user/UPIController.js";
+import { gameTimer, getTimerSocket } from "../controller/user/Gamesocket.js";
+// import { gameTimer } from "../controller/user/Gamesocket.js";
 const userRoutes = express.Router();
 userRoutes.post("/signup-signin-otp", userSignUpSignInOtp);
 userRoutes.post("/signup-signin-with-wallet", connectToWallet);
@@ -247,7 +249,8 @@ userRoutes.get('/get-card-betting-winner/:gameId/:period', Auth, cardBettingWinn
 
 // socketRoute('/number-betting').on('connection', numberBettingSocket)
 // socketRoute('/color-betting').on('connection', colorBettingSocket)
-
+socketRoute("/game-timer").on('connection', gameTimer)
+// const gameTimer = socketRoute("/game-timer", getTimerSocket)
 userRoutes.get('/get-all-betting-history', getAllBettingHistory)
 userRoutes.post('/add-faint-currency', Auth, Upload, addFaintCurrency)
 userRoutes.get("/total-coin", Auth, totalCoin)
@@ -265,6 +268,10 @@ userRoutes.get('/get-notifications', Auth, getUserNotifications)
 userRoutes.post('/delete-notifications', Auth, deleteAllUserNotifications)
 
 userRoutes.get('/get-all-upi', Auth, getUPIData)
+userRoutes.get('/find-all-user-bet', Auth, findUserBet)
+userRoutes.get('/get-bank-for-deposit', Auth, getBankDetail)
+userRoutes.get('/total-win-bet', Auth, findUserWinBet)
+userRoutes.get('/total-loose-bet', Auth, findUserLooseBet)
 
 
 export { userRoutes };

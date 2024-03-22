@@ -45,7 +45,6 @@ import {
         }
       }
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         message: ResponseMessage.INTERNAL_SERVER_ERROR,

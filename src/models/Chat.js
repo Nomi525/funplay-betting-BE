@@ -10,7 +10,7 @@ const chatSchema = new mongoose.Schema(
         from: String,
         message: String,
         image: String,
-        user_id: { type: mongoose.Schema.Types.ObjectId, required: false },
+        user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
         time: { type: Date, default: Date.now },
       },
     ],
