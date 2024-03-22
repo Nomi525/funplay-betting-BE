@@ -13,6 +13,7 @@ import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 export const adminEditUser = async (req, res) => {
   try {
     const { userId, fullName, userName, email } = req.body;
+    
     const findUser = await getSingleData({ _id: userId }, User);
     if (findUser) {
       const profile = req.profileUrl ? req.profileUrl : findUser.profile;
@@ -84,7 +85,7 @@ export const getAdminSingleUser = async (req, res) => {
           : 0;
       }
       // Add Coin Harsh Sir code
-      const currency = await CurrencyCoin.findOne({ currencyName: findUser.currency });
+      const currency = await CurrencyCoin.findOne({ currencyName: findUser.currency, is_deleted: 0 });
       const coinRate = currency?.coin;
       let totalCoin = walletAddress ? walletAddress.totalCoin : 0
       let convertedCoin = walletAddress ? walletAddress.totalCoin / coinRate : 0;
@@ -105,7 +106,6 @@ export const getAdminSingleUser = async (req, res) => {
       );
     }
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -351,7 +351,6 @@ export const acceptWithdrawalRequest = async (req, res) => {
     await findTransaction.save();
     return sendResponse(res, StatusCodes.OK, requestMessage, []);
   } catch (error) {
-    console.log(error);
     return handleErrorResponse(res, error);
   }
 };
@@ -652,7 +651,7 @@ export const getAllBettingHistory = async (req, res) => {
         isWin: item?.isWin,
         createdAt: item?.createdAt
       })).filter(item => Object.values(item).some(val => val !== undefined && val !== null));
-      
+
 
       return sendResponse(
         res,
@@ -670,7 +669,7 @@ export const getAllBettingHistory = async (req, res) => {
 
     const formattedBettingHistory = allBettingHistory.map(item => ({
       gameId: item.gameId,
-      gameName:item.gameName,
+      gameName: item.gameName,
       userId: item?.userId,
       fullName: item?.fullName,
       betAmount: item.betAmount,
@@ -692,25 +691,27 @@ export const getAllBettingHistory = async (req, res) => {
 
 export const getUserTransationData = async (req, res) => {
   try {
-    const getAllDepositData = await FaintCurrency.find({userId:req.body.userId}).populate({
+    const getAllDepositData = await FaintCurrency.find({ userId: req.body.userId }).populate({
       path: 'userId',
       select: 'fullName currency email'
     }).sort({ createdAt: -1 });
 
     const getAllWithdrawalData = await Withdrawal.find({ userId: req.body.userId })
-    .populate({
-      path: 'userId',
-      select: 'fullName currency email'
-    })
-    .sort({ createdAt: -1 });
-  
-  const modifiedWithdrawalData = getAllWithdrawalData.map(withdrawal => {
-    const { requestedAmount, ...rest } = withdrawal.toObject();
-    return { amount: requestedAmount, ...rest };
-  });
-  
+      .populate({
+        path: 'userId',
+        select: 'fullName currency email'
+      })
+      .sort({ createdAt: -1 });
 
-   const data = [...getAllDepositData,...modifiedWithdrawalData]
+    const modifiedWithdrawalData = getAllWithdrawalData.map(withdrawal => {
+      const { requestedAmount, ...rest } = withdrawal.toObject();
+      return { amount: requestedAmount, ...rest };
+    });
+
+
+    const data = [...getAllDepositData, ...modifiedWithdrawalData]
+
+    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return sendResponse(
       res,
       StatusCodes.OK,
@@ -724,7 +725,7 @@ export const getUserTransationData = async (req, res) => {
 
 export const getUserBankInfo = async (req, res) => {
   try {
-    const getAllDepositData = await User.find({_id:req.body.userId})
+    const getAllDepositData = await User.find({ _id: req.body.userId })
     const bankData = getAllDepositData[0].bankDetails;
     return sendResponse(
       res,
@@ -775,20 +776,20 @@ export const getUserWalletInfo = async (req, res) => {
 
 export const getUserGameInfo = async (req, res) => {
   try {
-    const topColorPlayers = await ColourBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topColorPlayersNew = await ColourBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topColorPlayers = await ColourBetting.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topColorPlayersNew = await ColourBettingNew.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topNumberPlayers = await NumberBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topNumberPlayersNew = await NumberBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topNumberPlayers = await NumberBetting.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topNumberPlayersNew = await NumberBettingNew.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topCardPlayers = await CardBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topCardPlayersNew = await CardBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCardPlayers = await CardBetting.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCardPlayersNew = await CardBettingNew.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topPenultyPlayers = await PenaltyBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topPenultyPlayersNew = await PenaltyBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topPenultyPlayers = await PenaltyBetting.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topPenultyPlayersNew = await PenaltyBettingNew.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
-    const topCommunityPlayers = await CommunityBetting.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
-    const topCommunityPlayersNew = await CommunityBettingNew.find({ userId: req.body.userId}).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCommunityPlayers = await CommunityBetting.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
+    const topCommunityPlayersNew = await CommunityBettingNew.find({ userId: req.body.userId }).populate({ path: 'userId gameId', select: 'fullName email gameName' });
 
     const TopPlayerData = [
       ...topColorPlayers,
@@ -818,14 +819,14 @@ export const getUserGameInfo = async (req, res) => {
 
 export const getUserReferralInfo = async (req, res) => {
   try {
-const userData =  await User.find({_id : req.body.userId});
-const referCodeUsed =  await User.find({ referralByCode: userData[0].referralCode});
-return sendResponse(
-  res,
-  StatusCodes.OK,
-  "Get all refer code used",
-  referCodeUsed
-);
+    const userData = await User.find({ _id: req.body.userId });
+    const referCodeUsed = await User.find({ referralByCode: userData[0].referralCode });
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "Get all refer code used",
+      referCodeUsed
+    );
 
   } catch (error) {
     return handleErrorResponse(res, error);

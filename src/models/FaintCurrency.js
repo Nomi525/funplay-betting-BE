@@ -32,6 +32,7 @@ const faintCurrencySchema = new mongoose.Schema(
     },
     requestType: {
       type: String,
+      enum: ["Deposit", "credit"],
       default: "Deposit",
     },
     rejectReason: {

@@ -60,13 +60,13 @@ cron.schedule('* * * * * *', () => {
 
 
 
-cron.schedule('0 */4 * * *', () => {
-  console.log('Running data transfer job every 4 hours');
+cron.schedule('0 */2 * * *', () => {
+  console.log('Running data transfer job every 1 hours');
   transferData();
 });
 
-cron.schedule('0 */4 * * *', () => {
-  console.log('Running data transfer job every 4 hours');
+cron.schedule('0 */1 * * *', () => {
+  console.log('Running data transfer job every 1 hours');
   transferAllData();
 });
 

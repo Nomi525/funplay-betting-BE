@@ -25,6 +25,7 @@ import {
   capitalizeFirstLetter, Period
 } from "../../index.js";
 import { CardBettingNew } from "../../models/CardBetting.js";
+import { PeriodNew } from "../../models/Period.js";
 
 
 //#region Add penalty Betting
@@ -568,6 +569,77 @@ export const getAllGamePeriodOfCardBetting = async (req, res) => {
   }
 };
 
+
+// export const getAllGamePeriodOfCardBetting = async (req, res) => {
+//   try {
+//     const { gameId } = req.params;
+//     const { second, more } = req.query;
+//     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+//     let periodsData = [];
+//     const baseQuery = {
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       //createdAt: { $gte: twentyFourHoursAgo },
+//     };
+
+//     // Fetch from Period model
+//     periodsData = await Period.find({
+//       ...baseQuery,
+//       periodFor: second,
+//     });
+
+
+//     // If `more` is "true", also fetch from PeriodNew model and combine the results
+//     if (more === 'true') {
+//       const periodsNewData = await PeriodNew.find({
+//         ...baseQuery,
+//         periodFor: second,
+//       });
+//       periodsData = periodsData.concat(periodsNewData);
+//     }
+//     console.log(periodsData, "periodsData")
+//     const cardBettingMatches = await CardBetting.find({
+//       gameId: new mongoose.Types.ObjectId(gameId),
+//       selectedTime: second,
+//       //  createdAt: { $gte: twentyFourHoursAgo },
+//       is_deleted: 0,
+//     });
+//     console.log(cardBettingMatches, "cardBettingMatches")
+//     const reducedData = cardBettingMatches.reduce((acc, cur) => {
+//       const key = cur.period.toString();
+//       if (!acc[key]) {
+//         acc[key] = {
+//           totalUsers: 1,
+//           betAmount: cur.betAmount,
+//           winCardNumber: cur.winCardNumber,
+//           card: cur.isWin ? cur.card : undefined,
+//         };
+//       } else {
+//         acc[key].totalUsers += 1;
+//         acc[key].betAmount += cur.betAmount;
+//         if (cur.isWin && !acc[key].card) acc[key].card = cur.card;
+//       }
+//       return acc;
+//     }, {});
+//     console.log(reducedData, "reduce datata ")
+//     const mergedData = periodsData.map(period => {
+//       const key = period.period;
+//       const additionalData = reducedData[key] ? {
+//         ...reducedData[key],
+//         period: period.period,
+//         date: period.date,
+//         startTime: period.startTime,
+//         endTime: period.endTime,
+//       } : null;
+//       return additionalData;
+//     }).filter(item => item !== null);
+
+//     return sendResponse(res, StatusCodes.OK, "Game period details fetched successfully.", mergedData);
+//   } catch (error) {
+//     console.error("Error fetching game periods of card betting:", error);
+//     return handleErrorResponse(res, error);
+//   }
+// };
 //#endregion
 
 // // Function to get a random element from an array

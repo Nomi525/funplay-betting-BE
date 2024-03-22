@@ -48,7 +48,6 @@ import {
           { $set: { firstName, lastName, email, role } },
           { new: true }
         );
-        console.log("fdsfds", updateSubAdmin);
         if (updateSubAdmin) {
           return res.status(200).json({
             status: StatusCodes.OK,
@@ -83,7 +82,8 @@ import {
           email,
           password,
         });
-        await sendMail(email, "Betting account created", html);
+        const sendEmail = await sendMail(email, "Betting account created", html);
+        
         return sendResponse(
           res,
           StatusCodes.CREATED,
@@ -92,7 +92,6 @@ import {
         );
       }
     } catch (error) {
-      console.log(error);
       return handleErrorResponse(res, error);
     }
   };

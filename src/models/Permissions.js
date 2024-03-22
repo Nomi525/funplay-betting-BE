@@ -172,6 +172,60 @@ const PermissionSchema = new mongoose.Schema(
         required: false,
       },
     },
+    DepositRequest: {
+      all: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      create: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      update: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      View: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      delete: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+    },
+    BettingRecords:{
+      all: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      create: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      update: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      View: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+      delete: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
+    },
     WinnerDeclaration: {
       all: {
         type: Boolean,
@@ -283,6 +337,33 @@ const PermissionSchema = new mongoose.Schema(
 
     CMS: {
       TermsAndCondition: {
+        all: {
+          type: Boolean,
+          default: false,
+          required: false,
+        },
+        create: {
+          type: Boolean,
+          default: false,
+          required: false,
+        },
+        update: {
+          type: Boolean,
+          default: false,
+          required: false,
+        },
+        View: {
+          type: Boolean,
+          default: false,
+          required: false,
+        },
+        delete: {
+          type: Boolean,
+          default: false,
+          required: false,
+        },
+      },
+      PaymentMethod: {
         all: {
           type: Boolean,
           default: false,

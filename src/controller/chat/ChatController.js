@@ -35,7 +35,7 @@ Socket.on("connection", (sockets) => {
       let checkUserRegister = await User.findOne({ _id: room.user_id });
 
       if (checkUserRegister) {
-        console.log(checkUserRegister, "zoyaa");
+
         sockets.on("NewMessage", async (data) => {
           // Check if the user is allowed to send messages in this room
           if (sockets.rooms.has(room.room_id)) {

@@ -61,9 +61,9 @@ export const allBannerGet = async (req, res) => {
 
 export const deleteBanner = async (req, res) => {
     try {
-        if (req.admin || req.user) {
+        if (req.admin) {
             const { bannerId } = req.body;
-            const createdBy = req.user ? req.user : req.admin;
+            const createdBy = req.admin;
             const deleteBanner = await dataUpdated({ _id: bannerId, createdBy }, { is_deleted: 1 }, BannerModel);
             if (deleteBanner) {
                 return sendResponse(res, StatusCodes.OK, ResponseMessage.BANNER_DELETED, []);

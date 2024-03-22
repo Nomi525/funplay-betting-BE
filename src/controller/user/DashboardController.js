@@ -319,7 +319,6 @@ const getAllBettingData = async (model) => {
 
 export const userDashboard = async (req, res) => {
   try {
-    console.log("req.user:", req.user);
     const findUser = await getSingleData(
       { _id: req.user, is_deleted: 0 },
       User
@@ -630,8 +629,6 @@ export const userDashboard1 = async (req, res) => {
 
     // Add currencyAmount to totalAmount
     totalAmount += currencyAmount;
-
-    console.log("Total Amount:", totalAmount);
     
 
     let totalBalance = 0;
@@ -651,7 +648,6 @@ export const userDashboard1 = async (req, res) => {
 
 
     for (const bet of numberBettingForUser) {
-      console.log(bet.isWin, "jj");
       if (bet.isWin === true) {
         totalCoin += game[0]?.winningCoin * bet.betAmount;
       } else {
@@ -680,7 +676,6 @@ export const userDashboard1 = async (req, res) => {
     //   console.error("No valid gameIds found.");
     // }
 
-    console.log("Total Coin:", totalCoin);
 
 
     const convertedCoin = totalCoin / coinRate || 0;
@@ -725,7 +720,6 @@ export const userDashboard1 = async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error, "jj");
     return handleErrorResponse(res, error);
   }
 };
