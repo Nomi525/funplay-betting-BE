@@ -309,7 +309,7 @@ export const addCreditDebitAmount = async (req, res) => {
                 };
                 const newNotification = await UserNotification.create(notificationData);
                 const CreditData = await addCredit.save();
-                if (CreditData) {
+                if (CreditData) { 
                     return sendResponse(res, StatusCodes.CREATED,  "Amount credited successfully", CreditData);
                 } else {
                     return sendResponse(res, StatusCodes.BAD_REQUEST, ResponseMessage.BAD_REQUEST, []);
