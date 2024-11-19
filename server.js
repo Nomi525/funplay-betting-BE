@@ -8,7 +8,9 @@ import {
   cron,
   createAllGamePeriodFromCronJob,
   createAllGameWinnerFromCronJob,
-  twelveHourAgoPeriod, transferAllData, transferData,
+  twelveHourAgoPeriod,
+  transferAllData,
+  transferData,
 } from "./src/index.js";
 import { server, app } from "./src/config/Socket.config.js";
 app.use(cors());
@@ -50,26 +52,22 @@ cron.schedule("* * * * * *", () => {
 });
 
 // // cron run for every seconds
-cron.schedule('* * * * * *', () => {
+cron.schedule("* * * * * *", () => {
   createAllGameWinnerFromCronJob();
 });
 // cron.schedule("0 0 * * * *", () => {
 //   twelveHourAgoPeriod();
 // });
 
-
-
-
-cron.schedule('0 */2 * * *', () => {
-  console.log('Running data transfer job every 1 hours');
+cron.schedule("0 */2 * * *", () => {
+  console.log("Running data transfer job every 1 hours");
   transferData();
 });
 
-cron.schedule('0 */1 * * *', () => {
-  console.log('Running data transfer job every 1 hours');
+cron.schedule("0 */1 * * *", () => {
+  console.log("Running data transfer job every 1 hours");
   transferAllData();
 });
-
 
 // cron.schedule('* * * * *', () => {
 //   console.log('Running data transfer job every minute');

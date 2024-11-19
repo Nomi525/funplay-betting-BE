@@ -24,7 +24,6 @@ import {
   getRandomElement,
   capitalizeFirstLetter,
   Period,
-
 } from "../../index.js";
 import { ColourBettingNew } from "../../models/ColourBetting.js";
 import { PeriodNew } from "../../models/Period.js";
@@ -128,10 +127,166 @@ import { PeriodNew } from "../../models/Period.js";
 // };
 
 //#region add Colour Bet
+// export const addColourBet = async (req, res) => {
+//   try {
+//     let { gameId, colourName, betAmount, gameType, period, selectedTime } =
+//       req.body;
+//     if (betAmount < 0) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.VALID_BET_AMOUNT,
+//         []
+//       );
+//     }
+//     const checkBalance = await NewTransaction.findOne({
+//       userId: req.user,
+//       is_deleted: 0,
+//     });
+//     if (!checkBalance) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+//     if (parseInt(checkBalance.totalCoin) < parseInt(betAmount)) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+//     if (
+//       !checkDecimalValueGreaterThanOrEqual(checkBalance.totalCoin, betAmount)
+//     ) {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.INSUFFICIENT_BALANCE,
+//         []
+//       );
+//     }
+
+//     // let alreadyExistBet = await ColourBetting.findOne({
+//     //   userId: req.user,
+//     //   gameId: gameId,
+//     //   gameType,
+//     //   period,
+//     // });
+//     // let createColourBet;
+//     // if (alreadyExistBet) {
+//     //   createColourBet = await dataUpdated(
+//     //     {
+//     //       userId: req.user,
+//     //     },
+//     //     {
+//     //       colourName: colourName,
+//     //       betAmount: parseInt(betAmount),
+//     //     },
+//     //     ColourBetting
+//     //   );
+//     // } else {
+//     //   createColourBet = await dataCreate(
+//     //     {
+//     //       userId: req.user,
+//     //       gameId: gameId,
+//     //       colourName: colourName,
+//     //       betAmount: parseInt(betAmount),
+//     //       gameType,
+//     //       period,
+//     //       selectedTime
+//     //     },
+//     //     ColourBetting
+//     //   );
+//     // }
+
+//     let createColourBet = await dataCreate(
+//       {
+//         userId: req.user,
+//         gameId: gameId,
+//         colourName: colourName,
+//         betAmount: parseInt(betAmount),
+//         gameType,
+//         period,
+//         selectedTime,
+//         status: "pending",
+//       },
+//       ColourBetting
+//     );
+
+//     if (createColourBet) {
+//       checkBalance.totalCoin = minusLargeSmallValue(
+//         checkBalance.totalCoin,
+//         betAmount
+//       );
+//       if (parseFloat(checkBalance.betAmount)) {
+//         checkBalance.betAmount = plusLargeSmallValue(
+//           checkBalance.betAmount,
+//           betAmount
+//         );
+//       } else {
+//         checkBalance.betAmount = betAmount;
+//       }
+//       await checkBalance.save();
+//       return sendResponse(
+//         res,
+//         StatusCodes.CREATED,
+//         ResponseMessage.COLOR_BET_CRATED,
+//         createColourBet
+//       );
+//     } else {
+//       return sendResponse(
+//         res,
+//         StatusCodes.BAD_REQUEST,
+//         ResponseMessage.FAILED_TO_CREATE,
+//         []
+//       );
+//     }
+//   } catch (error) {
+//     return handleErrorResponse(res, error);
+//   }
+// };
+
 export const addColourBet = async (req, res) => {
   try {
-    let { gameId, colourName, betAmount, gameType, period, selectedTime } =
-      req.body;
+    let {
+      gameId,
+      colourName,
+      colourNumber,
+      betAmount,
+      gameType,
+      period,
+      selectedTime,
+      contract = 1, // Default value for contract
+    } = req.body;
+
+    // Validate contract: must be a whole number and not a decimal
+    if (!Number.isInteger(contract) || contract < 1) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "Contract value must be a whole number greater than or equal to 1",
+        []
+      );
+    }
+
+    // Adjust betAmount based on the contract
+    betAmount *= contract;
+
+    // Ensure betAmount cannot be less than 1
+    if (betAmount < 1) {
+      return sendResponse(
+        res,
+        StatusCodes.BAD_REQUEST,
+        "Bet amount cannot be less than 1 after adjustment",
+        []
+      );
+    }
+
+    // Validate betAmount
     if (betAmount < 0) {
       return sendResponse(
         res,
@@ -140,6 +295,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
+
     const checkBalance = await NewTransaction.findOne({
       userId: req.user,
       is_deleted: 0,
@@ -152,6 +308,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
+
     if (parseInt(checkBalance.totalCoin) < parseInt(betAmount)) {
       return sendResponse(
         res,
@@ -160,6 +317,7 @@ export const addColourBet = async (req, res) => {
         []
       );
     }
+
     if (
       !checkDecimalValueGreaterThanOrEqual(checkBalance.totalCoin, betAmount)
     ) {
@@ -171,44 +329,12 @@ export const addColourBet = async (req, res) => {
       );
     }
 
-    // let alreadyExistBet = await ColourBetting.findOne({
-    //   userId: req.user,
-    //   gameId: gameId,
-    //   gameType,
-    //   period,
-    // });
-    // let createColourBet;
-    // if (alreadyExistBet) {
-    //   createColourBet = await dataUpdated(
-    //     {
-    //       userId: req.user,
-    //     },
-    //     {
-    //       colourName: colourName,
-    //       betAmount: parseInt(betAmount),
-    //     },
-    //     ColourBetting
-    //   );
-    // } else {
-    //   createColourBet = await dataCreate(
-    //     {
-    //       userId: req.user,
-    //       gameId: gameId,
-    //       colourName: colourName,
-    //       betAmount: parseInt(betAmount),
-    //       gameType,
-    //       period,
-    //       selectedTime
-    //     },
-    //     ColourBetting
-    //   );
-    // }
-
     let createColourBet = await dataCreate(
       {
         userId: req.user,
         gameId: gameId,
-        colourName: colourName,
+        colourName: colourName ? colourName : null,
+        colourNumber: colourNumber || colourNumber === 0 ? colourNumber : null,
         betAmount: parseInt(betAmount),
         gameType,
         period,
@@ -250,6 +376,7 @@ export const addColourBet = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
+
 //#endregion
 
 //#region Colour betting result api
@@ -279,19 +406,19 @@ export const colourBetResult = async (req, res) => {
         []
       );
     }
-    // Check type for number betting
-    if (gameType == "number" && type == "numberBetting") {
-      const numberBettingResult = await winners(
-        gameType,
-        gameId,
-        period,
-        NumberBetting
-      );
-      if (numberBettingResult.length) {
-        bettingResult = numberBettingResult;
-        message = ResponseMessage.NUMBER_RESULT;
-      }
-    }
+    // // Check type for number betting
+    // if (gameType == "number" && type == "numberBetting") {
+    //   const numberBettingResult = await winners(
+    //     gameType,
+    //     gameId,
+    //     period,
+    //     NumberBetting
+    //   );
+    //   if (numberBettingResult.length) {
+    //     bettingResult = numberBettingResult;
+    //     message = ResponseMessage.NUMBER_RESULT;
+    //   }
+    // }
     // Check type for color betting
     if (type == "colorBetting") {
       if (gameType == "2colorBetting" || gameType == "3colorBetting") {
@@ -763,8 +890,6 @@ export const getSingleGameWiseWinner = async (req, res) => {
 //   }
 // };
 
-
-
 // export const getAllGamePeriod = async (req, res) => {
 //   try {
 //     const { gameId } = req.params;
@@ -835,8 +960,6 @@ export const getSingleGameWiseWinner = async (req, res) => {
 
 //     const periodIds = matchingPeriods.map(p => p.period.toString()); // Ensure periodIds are strings for comparison
 
-
-
 //     // Step 2: Find ColourBetting Documents for all periods in one query
 //     const colourBettingResults = await ColourBetting.find({
 //       period: { $in: periodIds }, // Already strings, no need to map again
@@ -844,8 +967,6 @@ export const getSingleGameWiseWinner = async (req, res) => {
 //       selectedTime: periodInSeconds,
 //       is_deleted: 0,
 //     });
-
-
 
 //     // Process results
 //     let response = periodIds.reduce((acc, periodId) => {
@@ -952,7 +1073,7 @@ export const getAllGamePeriod = async (req, res) => {
   try {
     const { gameId } = req.params;
     const periodInSeconds = req.query.second;
-    const more = req.query.more === 'true';
+    const more = req.query.more === "true";
 
     // Function to fetch periods
     const fetchPeriods = async (Model) => {
@@ -960,7 +1081,7 @@ export const getAllGamePeriod = async (req, res) => {
         gameId: new mongoose.Types.ObjectId(gameId),
         periodFor: periodInSeconds,
         is_deleted: 0,
-      }).select('period startTime endTime date'); // Fetch period along with starttime and endtime
+      }).select("period startTime endTime date"); // Fetch period along with starttime and endtime
     };
 
     // Fetch from Period model
@@ -973,13 +1094,18 @@ export const getAllGamePeriod = async (req, res) => {
     }
 
     if (matchingPeriods.length === 0) {
-      return sendResponse(res, StatusCodes.NOT_FOUND, "No matching periods found", []);
+      return sendResponse(
+        res,
+        StatusCodes.NOT_FOUND,
+        "No matching periods found",
+        []
+      );
     }
 
-    // Deduplicate based on period IDs assuming period is a unique identifier. For more complex deduplication (e.g., considering start/end times), additional logic may be needed.
+    // Deduplicate based on period IDs assuming period is a unique identifier
     const uniquePeriods = matchingPeriods.reduce((acc, current) => {
       const periodId = current.period.toString();
-      if (!acc.some(item => item.period.toString() === periodId)) {
+      if (!acc.some((item) => item.period.toString() === periodId)) {
         acc.push(current);
       }
       return acc;
@@ -987,7 +1113,7 @@ export const getAllGamePeriod = async (req, res) => {
 
     // Assuming ColourBetting schema remains consistent between period and periodNew
     const colourBettingResults = await ColourBetting.find({
-      period: { $in: uniquePeriods.map(p => p.period.toString()) },
+      period: { $in: uniquePeriods.map((p) => p.period.toString()) },
       gameId: new mongoose.Types.ObjectId(gameId),
       selectedTime: periodInSeconds,
       is_deleted: 0,
@@ -995,37 +1121,60 @@ export const getAllGamePeriod = async (req, res) => {
 
     // Process results
     let response = uniquePeriods.map(({ period, startTime, endTime, date }) => {
-      const betsForPeriod = colourBettingResults.filter(bet => bet.period.toString() === period.toString());
+      const betsForPeriod = colourBettingResults.filter(
+        (bet) => bet.period.toString() === period.toString()
+      );
 
       if (betsForPeriod.length > 0) {
-        const summary = betsForPeriod.reduce((summary, current) => {
-          summary.totalUsers += 1;
-          if (current.isWin) {
-            summary.winColour = current.colourName;
+        const summary = betsForPeriod.reduce(
+          (summary, current) => {
+            summary.totalUsers += 1;
+            if (current.isWin) {
+              summary.winColour = current.colourName || summary.winColour;
+              summary.winColourNumber =
+                current.colourNumber || summary.winColourNumber;
+            }
+            return summary;
+          },
+          {
+            totalUsers: 0,
+            winColour: "",
+            winColourNumber: null,
+            period: period.toString(),
+            price: 0,
+            startTime,
+            endTime,
+            date,
           }
-          return summary;
-        }, { totalUsers: 0, winColour: '', period: period.toString(), price: 0, startTime, endTime, date });
+        );
 
         return summary;
       } else {
         return {
           totalUsers: 0,
           winColour: null,
+          winColourNumber: null,
           period: period.toString(),
           price: 0,
           startTime,
           endTime,
-          date
+          date,
         };
       }
     });
 
-    return sendResponse(res, StatusCodes.OK, "Period details fetched successfully", response);
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      "Period details fetched successfully",
+      response
+    );
   } catch (error) {
     console.error("Error fetching game periods:", error);
     return handleErrorResponse(res, error);
   }
 };
+
 // export const getAllGamePeriod = async (req, res) => {
 //   try {
 //     const { gameId } = req.params;
@@ -1214,7 +1363,6 @@ export const getAllGamePeriod = async (req, res) => {
 //     }).filter(doc => doc.periodFor === second) // Filter by second if needed
 //       .sort((a, b) => b.betCreatedAt - a.betCreatedAt); // Sort by betCreatedAt descending
 
-
 //     return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
 //   } catch (error) {
 //     return handleErrorResponse(res, error);
@@ -1297,7 +1445,6 @@ export const getAllGamePeriod = async (req, res) => {
 //     const userId = req.user;
 //     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-
 //     const fetchDocs = async () => {
 //       const conditions = {
 //         userId: new mongoose.Types.ObjectId(userId),
@@ -1306,7 +1453,6 @@ export const getAllGamePeriod = async (req, res) => {
 //         createdAt: { $gte: twentyFourHoursAgo },
 //         is_deleted: 0,
 //       };
-
 
 //       const [colourBettingDocs, colourBettingNewDocs] = await Promise.all([
 //         ColourBetting.find(conditions).lean(),
@@ -1359,7 +1505,31 @@ export const getByIdGamePeriod = async (req, res) => {
       },
       {
         $project: {
-          colourName: { $concat: [{ $toUpper: { $substrCP: ["$colourName", 0, 1] } }, { $substrCP: ["$colourName", 1, { $subtract: [{ $strLenCP: "$colourName" }, 1] }] }] },
+          colourName: {
+            $cond: {
+              if: { $ne: ["$colourName", null] },
+              then: {
+                $concat: [
+                  { $toUpper: { $substrCP: ["$colourName", 0, 1] } },
+                  {
+                    $substrCP: [
+                      "$colourName",
+                      1,
+                      { $subtract: [{ $strLenCP: "$colourName" }, 1] },
+                    ],
+                  },
+                ],
+              },
+              else: null,
+            },
+          },
+          colourNumber: {
+            $cond: {
+              if: { $ne: ["$colourNumber", null] },
+              then: "$colourNumber",
+              else: null,
+            },
+          },
           price: "$betAmount",
           isWin: 1,
           status: 1,
@@ -1376,22 +1546,34 @@ export const getByIdGamePeriod = async (req, res) => {
     const colourBettingNewDocs = await ColourBettingNew.aggregate(basePipeline);
 
     // Combine results from both collections
-    const allColourBettingDocs = [...colourBettingDocs, ...colourBettingNewDocs];
+    const allColourBettingDocs = [
+      ...colourBettingDocs,
+      ...colourBettingNewDocs,
+    ];
 
     const game = await Game.findOne({ _id: gameId });
 
+    if (!game) {
+      return sendResponse(res, StatusCodes.NOT_FOUND, "Game not found", []);
+    }
+
     // Add the winningAmount to each document
-    const result = allColourBettingDocs.map(doc => ({
+    const result = allColourBettingDocs.map((doc) => ({
       ...doc,
       winningAmount: game.winningCoin,
     }));
 
-    return sendResponse(res, StatusCodes.OK, ResponseMessage.GAME_PERIOD_GET, result);
+    return sendResponse(
+      res,
+      StatusCodes.OK,
+      ResponseMessage.GAME_PERIOD_GET,
+      result
+    );
   } catch (error) {
+    console.error("Error in getByIdGamePeriod:", error);
     return handleErrorResponse(res, error);
   }
 };
-
 
 //#endregion
 
@@ -1624,7 +1806,7 @@ export const getCommunityWinList = async (req, res) => {
 // Function to get a random element from an array excluding specified elements
 function getRandomElementExcluding(excludeElements, gameType) {
   let randomElement;
-  let allColors = ["red", "green", "orange"];
+  let allColors = ["red", "green", "violet"];
   if (gameType == "2colorBetting") {
     allColors = ["red", "green"];
   }
@@ -1664,14 +1846,20 @@ export const colourBettingWinnerResult = async (req, res) => {
 
     if (checkAlreadyWin.length) {
       let winColourName = capitalizeFirstLetter(checkAlreadyWin[0].colourName);
+      let winColourNumber = checkAlreadyWin[0].colourNumber;
       return sendResponse(
         res,
         StatusCodes.OK,
-        ResponseMessage.COLOR_WINNER + " " + winColourName,
+        ResponseMessage.COLOR_WINNER +
+          "Color is " +
+          winColourName +
+          " and Number is " +
+          winColourNumber,
         [
           {
             period: checkAlreadyWin[0].period,
             colourName: winColourName,
+            colourNumber: winColourNumber,
             totalBetAmount: checkAlreadyWin.reduce(
               (total, data) => Number(total) + Number(data.betAmount),
               0
@@ -1881,7 +2069,7 @@ export const colourBettingWinnerResult = async (req, res) => {
     //     return sendResponse(res, StatusCodes.OK, ResponseMessage.LOSER, []);
     //   }
     // } else {
-    //   let allColors = ["red", "green", "orange"];
+    //   let allColors = ["red", "green", "violet"];
     //   if (gameType == "2colorBetting") {
     //     allColors = ["red", "green"];
     //   }
@@ -1916,7 +2104,6 @@ export const colourBettingWinnerResult = async (req, res) => {
     //   []
     // );
   } catch (error) {
-
     return handleErrorResponse(res, error);
   }
 };

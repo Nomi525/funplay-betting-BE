@@ -186,7 +186,7 @@ const ResponseMessage = {
   GAME_PERIOD_GET: "Get game period.",
   LOSER: "You are loser",
   NUMBER_WINNER: "Victory Alert! The Winning number is ",
-  COLOR_WINNER: "Victory Alert! The Winning Color is ",
+  COLOR_WINNER: "Victory Alert! The Winning ",
   // PENALTY_WINNER: "Victory Alert! The Winning side is ",
   NUMBER_BET_CRATED: "Bet add successfully",
   COLOR_BET_CRATED: "Bet add successfully",

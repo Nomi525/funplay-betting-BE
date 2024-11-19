@@ -260,11 +260,19 @@ import { PenaltyBettingNew } from "../../models/PenaltyBetting.js";
 
 export const connectToWallet = async (req, res) => {
   try {
-    const { email, currency, referralByCode, password, wallet: walletString } = req.body;
+    const {
+      email,
+      currency,
+      referralByCode,
+      password,
+      wallet: walletString,
+    } = req.body;
     const wallet = JSON.parse(walletString); // Assuming you've corrected this on the frontend or middleware
 
     const lowercasedEmail = email ? email.toLowerCase() : "";
-    let existingUser = lowercasedEmail ? await User.findOne({ email: lowercasedEmail }) : null;
+    let existingUser = lowercasedEmail
+      ? await User.findOne({ email: lowercasedEmail })
+      : null;
 
     // For both new and existing users, structure of the wallet data to save/update
     const walletData = {
@@ -275,19 +283,21 @@ export const connectToWallet = async (req, res) => {
 
     if (existingUser) {
       // Check if wallet already exists in user's wallet array
-      const walletExists = existingUser.wallet.some(w => w.walletAddress === walletData.walletAddress);
+      const walletExists = existingUser.wallet.some(
+        (w) => w.walletAddress === walletData.walletAddress
+      );
 
       if (walletExists) {
         // Update existing wallet isConnected status
         await User.updateOne(
           { "wallet.walletAddress": walletData.walletAddress },
-          { "$set": { "wallet.$.isConnected": walletData.isConnected } }
+          { $set: { "wallet.$.isConnected": walletData.isConnected } }
         );
       } else {
         // Add new wallet to user's wallet array
         await User.updateOne(
           { _id: existingUser._id },
-          { "$push": { "wallet": walletData } }
+          { $push: { wallet: walletData } }
         );
       }
     } else {
@@ -304,7 +314,11 @@ export const connectToWallet = async (req, res) => {
       await newUser.save();
 
       // Create reward for the new user (assuming createReward function exists and works correctly)
-      await createReward(newUser._id, "Created Reward", "First time reward from admin side");
+      await createReward(
+        newUser._id,
+        "Created Reward",
+        "First time reward from admin side"
+      );
 
       existingUser = newUser; // To reuse the token generation and response logic below
     }
@@ -313,40 +327,62 @@ export const connectToWallet = async (req, res) => {
     const payload = { user: { id: existingUser._id } };
     const token = await genrateToken({ payload });
 
-    return sendResponse(res, StatusCodes.CREATED, ResponseMessage.WALLET_CONNECT, {
-      ...existingUser._doc,
-      token: token,
-    });
+    return sendResponse(
+      res,
+      StatusCodes.CREATED,
+      ResponseMessage.WALLET_CONNECT,
+      {
+        ...existingUser._doc,
+        token: token,
+      }
+    );
   } catch (error) {
     console.error(error);
     return handleErrorResponse(res, error);
   }
 };
 
-
 export const userSignUpSignInOtp = async (req, res) => {
   try {
-    let { fullName, email, currency, referralByCode, registerType, type } =
-      req.body;
+    let {
+      fullName,
+      email,
+      password,
+      currency,
+      referralByCode,
+      registerType,
+      type,
+    } = req.body;
     const otp = 4444;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const checkEmailValue = emailRegex.test(email);
+    password = await hashedPassword(password);
     let existingUser;
+    console.log({ email });
+    console.log({ password });
+    console.log({ emailRegex });
+    console.log({ checkEmailValue });
+    console.log({ password });
+
     if (checkEmailValue) {
       email = email ? email.toLowerCase() : null;
+      console.log({ email }, "email");
+
       existingUser = await getSingleData({ email }, User);
+
+      console.log({ existingUser });
     } else {
       existingUser = await getSingleData({ mobileNumber: email }, User);
-
+      console.log({ existingUser }, "else");
     }
-    if (existingUser?.registerType == "Password" && type !== "signup") {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
-        []
-      );
-    }
+    // if (existingUser?.registerType == "Password" && type !== "signup") {
+    //   return sendResponse(
+    //     res,
+    //     StatusCodes.BAD_REQUEST,
+    //     ResponseMessage.REGISTERED_TYPE_NOT_MATCH_FOR_OTP,
+    //     []
+    //   );
+    // }
     if (
       existingUser?.registerType == "OTP" &&
       type == "login" &&
@@ -359,14 +395,14 @@ export const userSignUpSignInOtp = async (req, res) => {
         []
       );
     }
-    if (existingUser?.registerType == "Password" && type == "signup") {
-      return sendResponse(
-        res,
-        StatusCodes.BAD_REQUEST,
-        ResponseMessage.USER_ALREADY_EXIST,
-        []
-      );
-    }
+    // if (existingUser?.registerType == "Password" && type == "signup") {
+    //   return sendResponse(
+    //     res,
+    //     StatusCodes.BAD_REQUEST,
+    //     ResponseMessage.USER_ALREADY_EXIST,
+    //     []
+    //   );
+    // }
     if (!!(email && referralByCode && existingUser)) {
       return sendResponse(
         res,
@@ -412,14 +448,19 @@ export const userSignUpSignInOtp = async (req, res) => {
       let updateOtp;
       let message;
       if (checkEmailValue) {
-        updateOtp = await dataUpdated({ email }, { otp, currency }, User);
-        let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+        console.log(":hedwdsdsd");
+        updateOtp = await dataUpdated(
+          { email },
+          { password, otp, currency },
+          User
+        );
+        // let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
         message = ResponseMessage.ALREADY_REGISTER_VERIFY_EMAIL;
-        await sendMail(existingUser.email, "Verify Otp", mailInfo);
+        // await sendMail(existingUser.email, "Verify Otp", mailInfo);
       } else {
         updateOtp = await dataUpdated(
           { mobileNumber: email },
-          { otp, currency },
+          { password, otp, currency },
           User
         );
         message = ResponseMessage.ALREADY_REGISTER_VERIFY_MOBILE;
@@ -437,6 +478,8 @@ export const userSignUpSignInOtp = async (req, res) => {
       }
       let referCode = referralCode(8);
       let findReferralUser = null;
+      console.log({ referralByCode });
+      console.log({ referCode });
       if (referralByCode) {
         findReferralUser = await User.findOne({ referralCode: referralByCode });
         if (!findReferralUser) {
@@ -450,12 +493,13 @@ export const userSignUpSignInOtp = async (req, res) => {
       }
       const userData = await dataCreate(
         {
-          fullName,
+          fullName: fullName,
           email: checkEmailValue ? email : "",
+          password: password,
           mobileNumber: !checkEmailValue ? email : "",
           currency,
           otp,
-          referralCode: referCode,
+          referralCode: referCode ? referCode : "",
           registerType,
           referralByCode: referralByCode ? referralByCode : null,
         },
@@ -475,16 +519,17 @@ export const userSignUpSignInOtp = async (req, res) => {
           "First time reward from admin side"
         );
       }
+      console.log({ userData }, "userData");
       let message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_MOBILE;
       if (checkEmailValue) {
-        let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
-        await sendMail(userData.email, "Verify Otp", mailInfo);
+        // let mailInfo = await ejs.renderFile("src/views/VerifyOtp.ejs", { otp });
+        // await sendMail(userData.email, "Verify Otp", mailInfo);
         message = ResponseMessage.USER_CREATE_SENT_OTP_ON_YOUR_EMAIL;
       }
       return sendResponse(res, StatusCodes.CREATED, message, userData);
     }
   } catch (error) {
-
+    console.log({ error });
     return handleErrorResponse(res, error);
   }
 };
@@ -604,7 +649,6 @@ export const updateEmail = async (req, res) => {
 //   }
 // };
 
-
 // export const checkWalletAddress = async (req, res) => {
 //   try {
 //     const { walletAddress, email } = req.body;
@@ -661,12 +705,21 @@ export const checkWalletAddress = async (req, res) => {
 
     // First, try to find by wallet address and isConnected status
     existingUser = await User.findOne({
-      'wallet.walletAddress': walletAddress,
-      'wallet.isConnected': true,
+      // email: email,
+      // mobileNumber: mobileNumber,
+      "wallet.walletAddress": walletAddress,
+      "wallet.isConnected": true,
     });
+
+    console.log({ walletAddress }, "walletAddress");
+    console.log({ email }, "email");
+    console.log({ mobileNumber }, "mobileNumber");
+    console.log({ existingUser }, "existingUser 1");
 
     // If user found by wallet address, no need to check by email or modify user
     if (existingUser) {
+      console.log({ existingUser }, "existingUser else");
+
       const payload = { user: { id: existingUser._id } };
       const token = await genrateToken({ payload });
 
@@ -677,12 +730,25 @@ export const checkWalletAddress = async (req, res) => {
     }
 
     // If no user found by wallet and an email is provided, search by email
-    if (!existingUser && email || mobileNumber) {
-      existingUser = await User.findOne({
-        $or: [{ email: email }, { mobileNumber: mobileNumber }]
-      });
+    if ((!existingUser && email) || mobileNumber) {
+      console.log({ email }, "email if");
+      console.log({ mobileNumber }, "mobileNumber if");
+
+      let query = {};
+
+      if (email && mobileNumber) {
+        query = { email: email, mobileNumber: mobileNumber };
+      } else if (email) {
+        query = { email: email };
+      } else if (mobileNumber) {
+        query = { mobileNumber: mobileNumber };
+      }
+      existingUser = await User.findOne(query);
+
+      console.log({ existingUser }, "existingUser if");
 
       if (existingUser) {
+        console.log({ existingUser }, "existingUser inside if");
 
         // Logic to add or update the wallet
         if (existingUser.wallet.length > 0) {
@@ -690,14 +756,17 @@ export const checkWalletAddress = async (req, res) => {
           existingUser.wallet[0].isConnected = true;
           // Optionally set the walletType here if needed
         } else {
+          console.log({ existingUser }, "existingUser inside else");
           existingUser.wallet.push({ walletAddress, isConnected: true }); // Add default walletType if required
         }
 
         let savedUser = await existingUser.save();
+        console.log({ savedUser }, "savedUser");
 
         // Generate token for the user after updating/adding the wallet address
         const payload = { user: { id: existingUser._id } };
         const token = await genrateToken({ payload });
+        console.log({ existingUser }, "existingUser final");
 
         return sendResponse(res, StatusCodes.OK, "Success", {
           ...existingUser.toObject(),
@@ -712,7 +781,6 @@ export const checkWalletAddress = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
 
 export const updateLoginStatus = async (req, res) => {
   try {
@@ -996,9 +1064,7 @@ export const userCheckEmail = async (req, res) => {
 
     existingUser = await getSingleData(
       {
-        $or: [
-          checkEmailValue ? { email: email } : { mobileNumber: email },
-        ],
+        $or: [checkEmailValue ? { email: email } : { mobileNumber: email }],
       },
       User
     );
@@ -1021,7 +1087,11 @@ export const userCheckEmail = async (req, res) => {
               []
             );
           }
-          if (existingUser && registerType == "Password" && existingUser?.isVerified) {
+          if (
+            existingUser &&
+            registerType == "Password" &&
+            existingUser?.isVerified
+          ) {
             return sendResponse(
               res,
               StatusCodes.BAD_REQUEST,
@@ -1030,7 +1100,6 @@ export const userCheckEmail = async (req, res) => {
             );
           }
         }
-
       }
 
       if (type == "login") {
@@ -1044,7 +1113,8 @@ export const userCheckEmail = async (req, res) => {
         }
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null && existingUser.isVerified
+          existingUser.password == null &&
+          existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -1056,7 +1126,8 @@ export const userCheckEmail = async (req, res) => {
 
         if (
           existingUser.registerType == "OTP" &&
-          existingUser.password == null && !existingUser.isVerified
+          existingUser.password == null &&
+          !existingUser.isVerified
         ) {
           return sendResponse(
             res,
@@ -1066,8 +1137,10 @@ export const userCheckEmail = async (req, res) => {
           );
         }
 
-        if (existingUser.registerType == "Password" &&
-          existingUser.password == null) {
+        if (
+          existingUser.registerType == "Password" &&
+          existingUser.password == null
+        ) {
           return sendResponse(
             res,
             StatusCodes.BAD_REQUEST,
@@ -1075,7 +1148,6 @@ export const userCheckEmail = async (req, res) => {
             []
           );
         }
-
       }
       return sendResponse(
         res,
@@ -1084,7 +1156,7 @@ export const userCheckEmail = async (req, res) => {
         existingUser
       );
     } else {
-      console.log("OUT")
+      console.log("OUT");
 
       return sendResponse(
         res,
@@ -1098,7 +1170,6 @@ export const userCheckEmail = async (req, res) => {
   }
 };
 
-
 export const singupFromEmailPassword = async (req, res) => {
   try {
     let {
@@ -1110,6 +1181,8 @@ export const singupFromEmailPassword = async (req, res) => {
       registerType,
       type,
     } = req.body;
+
+    console.log(req.body, "req.body");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
     const checkEmailValue = emailRegex.test(email);
@@ -1781,6 +1854,8 @@ export const editProfile = async (req, res) => {
       User
     );
 
+    console.log({ findData });
+
     if (!findData) {
       return sendResponse(
         res,
@@ -1789,7 +1864,6 @@ export const editProfile = async (req, res) => {
         []
       );
     }
-
 
     if (req.body.email) {
       const checkEmail = await getSingleData(
@@ -1814,14 +1888,15 @@ export const editProfile = async (req, res) => {
 
     let updatedBankDetails = [];
 
-
     if (findData.bankDetails && findData.bankDetails.length > 0) {
       updatedBankDetails = findData.bankDetails;
     }
 
     if (req.body.bankDetails) {
       const newBankDetail = req.body.bankDetails;
-      const existingAccountNumbers = updatedBankDetails.map(bank => bank.accountNumber);
+      const existingAccountNumbers = updatedBankDetails.map(
+        (bank) => bank.accountNumber
+      );
       if (!existingAccountNumbers.includes(newBankDetail.accountNumber)) {
         updatedBankDetails.push(newBankDetail);
       } else {
@@ -1831,7 +1906,6 @@ export const editProfile = async (req, res) => {
           ResponseMessage.BANK_DETAIL_ALREADY_EXIST,
           []
         );
-
       }
     }
 
@@ -1851,10 +1925,10 @@ export const editProfile = async (req, res) => {
         userId: findData._id,
         email: req.body.email,
       });
-      let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
-        objectEncrypt,
-      });
-      await sendMail(req.body.email, "Verify Email", mailInfo);
+      // let mailInfo = await ejs.renderFile("src/views/VerifyEmail.ejs", {
+      //   objectEncrypt,
+      // });
+      // await sendMail(req.body.email, "Verify Email", mailInfo);
     }
     if (req.body.mobileNumber !== undefined) {
       if (req.body.mobileNumber.trim() === "") {
@@ -1880,7 +1954,6 @@ export const editProfile = async (req, res) => {
       }
     }
 
-
     const updateProfile = await dataUpdated(
       { _id: findData._id, is_deleted: 0 },
       updateData,
@@ -1899,8 +1972,6 @@ export const editProfile = async (req, res) => {
     return handleErrorResponse(res, error);
   }
 };
-
-
 
 // export const editProfile = async (req, res) => {
 //   try {
@@ -1958,7 +2029,7 @@ export const editProfile = async (req, res) => {
 
 //     if (req.body.bankDetails && req.body.bankDetails.length > 0) {
 //       req.body.bankDetails = [
-//         ...findData.bankDetails, 
+//         ...findData.bankDetails,
 //         ...req.body.bankDetails,
 //       ];
 //     } else {
@@ -2004,8 +2075,6 @@ export const editProfile = async (req, res) => {
 //     return handleErrorResponse(res, error);
 //   }
 // };
-
-
 
 export const emailVerify = async (req, res) => {
   try {
@@ -2501,9 +2570,9 @@ export const userEditProfile = async (req, res) => {
     let otp = 4444;
     const user = await User.findById(Id);
     if (req.files.profile) {
-      fs.unlink("./public/uploads/" + user.profile, () => { });
+      fs.unlink("./public/uploads/" + user.profile, () => {});
     } else if (req.body.removeProfileUrl) {
-      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => { });
+      fs.unlink("./public/uploads/" + req.body.removeProfileUrl, () => {});
       user.profile = "";
       await user.save();
     } else {
@@ -2650,7 +2719,7 @@ export const userGetCMSDetail = async (req, res) => {
 };
 //#endregion
 
-//delete bank detail 
+//delete bank detail
 
 export const deleteBankDetail = async (req, res) => {
   try {
@@ -2666,13 +2735,13 @@ export const deleteBankDetail = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({
         status: StatusCodes.NOT_FOUND,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
     return res.status(200).json({
       status: StatusCodes.OK,
-      message: 'Bank detail deleted successfully',
+      message: "Bank detail deleted successfully",
       data: updatedUser,
     });
   } catch (error) {
@@ -2680,51 +2749,62 @@ export const deleteBankDetail = async (req, res) => {
   }
 };
 
-
 export const findUserBet = async (req, res) => {
   try {
     const userId = req.user;
 
     const findColorBettingUse = await ColourBetting.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
     const findColorBettingUserNew = await ColourBettingNew.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
 
     const findCardUser = await CardBetting.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
     const findCardBettingUserNew = await CardBettingNew.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
 
     const findPenltybettingUser = await PenaltyBetting.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
     const findPenltybettingUserNew = await PenaltyBettingNew.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
 
     const findNumberbettingUser = await NumberBetting.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
     const findNumberbettingUserNew = await NumberBettingNew.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
 
     const findCommunitybettingUser = await NumberBetting.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
     const findNCommunitybettingUserNew = await NumberBettingNew.find({
-      userId: userId
-    }).populate({ path: 'userId gameId', select: 'fullName  gameName' });
+      userId: userId,
+    }).populate({ path: "userId gameId", select: "fullName  gameName" });
 
-    let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew]
+    let findData = [
+      ...findColorBettingUse,
+      ...findColorBettingUserNew,
+      ...findCardUser,
+      ...findCardBettingUserNew,
+      ...findCardBettingUserNew,
+      ...findPenltybettingUser,
+      ...findPenltybettingUserNew,
+      ...findNumberbettingUser,
+      ...findNumberbettingUserNew,
+      ...findCommunitybettingUser,
+      ...findNCommunitybettingUserNew,
+    ];
 
     return res.status(200).json({
       status: StatusCodes.OK,
-      message: 'get user bet data',
+      message: "get user bet data",
       data: findData,
     });
   } catch (error) {
@@ -2737,46 +2817,71 @@ export const findUserWinBet = async (req, res) => {
     const userId = req.user;
 
     const findColorBettingUse = await ColourBetting.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
     const findColorBettingUserNew = await ColourBettingNew.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
 
     const findCardUser = await CardBetting.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
     const findCardBettingUserNew = await CardBettingNew.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
 
     const findPenltybettingUser = await PenaltyBetting.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
     const findPenltybettingUserNew = await PenaltyBettingNew.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
 
     const findNumberbettingUser = await NumberBetting.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
     const findNumberbettingUserNew = await NumberBettingNew.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
 
     const findCommunitybettingUser = await NumberBetting.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
     const findNCommunitybettingUserNew = await NumberBettingNew.find({
-      userId: userId, isWin: true
-    })
+      userId: userId,
+      isWin: true,
+    });
 
-    let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew]
-    const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
+    let findData = [
+      ...findColorBettingUse,
+      ...findColorBettingUserNew,
+      ...findCardUser,
+      ...findCardBettingUserNew,
+      ...findCardBettingUserNew,
+      ...findPenltybettingUser,
+      ...findPenltybettingUserNew,
+      ...findNumberbettingUser,
+      ...findNumberbettingUserNew,
+      ...findCommunitybettingUser,
+      ...findNCommunitybettingUserNew,
+    ];
+    const totalBetAmount = findData.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.betAmount,
+      0
+    );
 
     return res.status(200).json({
       status: StatusCodes.OK,
-      message: 'get user bet data',
+      message: "get user bet data",
       data: totalBetAmount,
     });
   } catch (error) {
@@ -2789,46 +2894,81 @@ export const findUserLooseBet = async (req, res) => {
     const userId = req.user;
 
     const findColorBettingUse = await ColourBetting.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
     const findColorBettingUserNew = await ColourBettingNew.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
 
     const findCardUser = await CardBetting.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
     const findCardBettingUserNew = await CardBettingNew.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
 
     const findPenltybettingUser = await PenaltyBetting.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
     const findPenltybettingUserNew = await PenaltyBettingNew.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
 
     const findNumberbettingUser = await NumberBetting.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
     const findNumberbettingUserNew = await NumberBettingNew.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
 
     const findCommunitybettingUser = await NumberBetting.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
     const findNCommunitybettingUserNew = await NumberBettingNew.find({
-      userId: userId, isWin: false, status: { $ne: "pending" }
-    })
+      userId: userId,
+      isWin: false,
+      status: { $ne: "pending" },
+    });
 
-   let findData = [...findColorBettingUse, ...findColorBettingUserNew, ...findCardUser, ...findCardBettingUserNew, ...findCardBettingUserNew, ...findPenltybettingUser, ...findPenltybettingUserNew, ...findNumberbettingUser, ...findNumberbettingUserNew, ...findCommunitybettingUser, ...findNCommunitybettingUserNew ]
+    let findData = [
+      ...findColorBettingUse,
+      ...findColorBettingUserNew,
+      ...findCardUser,
+      ...findCardBettingUserNew,
+      ...findCardBettingUserNew,
+      ...findPenltybettingUser,
+      ...findPenltybettingUserNew,
+      ...findNumberbettingUser,
+      ...findNumberbettingUserNew,
+      ...findCommunitybettingUser,
+      ...findNCommunitybettingUserNew,
+    ];
 
-const totalBetAmount = findData.reduce((accumulator, currentValue) => accumulator + currentValue.betAmount, 0);
+    const totalBetAmount = findData.reduce(
+      (accumulator, currentValue) => accumulator + currentValue.betAmount,
+      0
+    );
     return res.status(200).json({
       status: StatusCodes.OK,
-      message: 'get user bet data',
+      message: "get user bet data",
       data: totalBetAmount,
     });
   } catch (error) {

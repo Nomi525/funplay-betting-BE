@@ -47,7 +47,7 @@ export const handleErrorResponse = async (res, error) => {
   return res.status(500).json({
     status: StatusCodes.INTERNAL_SERVER_ERROR,
     message: ResponseMessage.INTERNAL_SERVER_ERROR,
-    data: error.message,
+    data: error,
   });
 };
 
@@ -235,10 +235,9 @@ export const getAllBids = async (bidQuery) => {
   return totalBid;
 };
 
-// Function to get a random element from an array
-export const getRandomElement = (arr) => {
-  return arr[Math.floor(Math.random() * arr.length)];
-};
+// export const getRandomElement = (array) => {
+//   return array[Math.floor(Math.random() * array.length)];
+// };
 
 //#region For numbet betting
 export const getRandomNumberExcluding = (excludeNumbers, min, max) => {
@@ -250,26 +249,40 @@ export const getRandomNumberExcluding = (excludeNumbers, min, max) => {
 };
 
 //#region For color betting
-export const getRandomColorExcluding = (excludeElements, gameType) => {
-  let randomElement;
-  let allColors = ["red", "green", "orange"];
+// export const getRandomColorExcluding = (excludeElements, gameType) => {
+//   let randomElement;
+//   let allColors = ["red", "green", "violet"];
+//   if (gameType == "2colorBetting") {
+//     allColors = ["red", "green"];
+//   }
+//   do {
+//     randomElement = getRandomElement(allColors);
+//   } while (excludeElements.includes(randomElement));
+//   return randomElement;
+// };
+
+export const getRandomPairExcluding = (excludePairs, gameType) => {
+  let randomPair;
+  let allColors = ["red", "green", "violet"];
+  let allNumbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   if (gameType == "2colorBetting") {
     allColors = ["red", "green"];
   }
   do {
-    randomElement = getRandomElement(allColors);
-  } while (excludeElements.includes(randomElement));
-  return randomElement;
-};
-
-//#region For penalty betting
-export const getRandomSideExcluding = (excludeElements) => {
-  let randomElement;
-  let allSides = ["left", "right"];
-  do {
-    randomElement = getRandomElement(allSides);
-  } while (excludeElements.includes(randomElement));
-  return randomElement;
+    let randomColorIndex = Math.floor(Math.random() * allColors.length);
+    let randomNumberIndex = Math.floor(Math.random() * allNumbers.length);
+    randomPair = {
+      colourName: allColors[randomColorIndex],
+      number: allNumbers[randomNumberIndex],
+    };
+  } while (
+    excludePairs.some(
+      (pair) =>
+        pair.colourName === randomPair.colourName &&
+        pair.number === randomPair.number
+    )
+  );
+  return randomPair;
 };
 
 //#region For card betting
@@ -565,8 +578,6 @@ export const declareNumberWinner = async (game, period) => {
 //   const { _id, gameMode, winningCoin } = game;
 //   const gameId = _id;
 
-
-
 //   if (gameMode == "Manual") {
 //     await ColourBetting.updateMany(
 //       { gameId, gameType, period, selectedTime },
@@ -796,7 +807,7 @@ export const declareNumberWinner = async (game, period) => {
 //       }
 //     } else {
 
-//       let allColors = ["red", "green", "orange"];
+//       let allColors = ["red", "green", "violet"];
 //       if (gameType == "2colorBetting") {
 //         allColors = ["red", "green"];
 //       }
@@ -823,271 +834,710 @@ export const declareNumberWinner = async (game, period) => {
 //   }
 // };
 // #endregion
+
+// Function to get a random element from an array
+export const getRandomElement = (arr) => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
+
+export const getRandomNumberForColor = (color) => {
+  switch (color) {
+    case "green":
+      return getRandomElement([1, 3, 7, 9, 5]);
+    case "violet":
+      return getRandomElement([0, 5]);
+    case "red":
+      return getRandomElement([2, 4, 6, 8, 0]);
+    default:
+      return null;
+  }
+};
+
+export const getRemainingRandomOrLeastNumberForColor = (data, color) => {
+  // Find the color object in the data
+  const colorData = data.find((entry) => entry.color === color);
+
+  // Check if colorData exists
+  if (colorData) {
+    // If unUsedColourNumbers is not empty, return a random number from it
+    if (
+      colorData.unUsedColourNumbers &&
+      colorData.unUsedColourNumbers.length > 0
+    ) {
+      return getRandomElement(colorData.unUsedColourNumbers);
+    } else {
+      // If unUsedColourNumbers is empty or null, return totalLeastColourNumber
+      return colorData.totalLeastColourNumber;
+    }
+  } else {
+    // If colorData is not found, return null
+    return null;
+  }
+};
+
+export const getRandomColor = () => {
+  const colors = ["green", "violet", "red"];
+  return getRandomElement(colors);
+};
+
+export const getRemainingRandomColor = (colors) => {
+  const allColors = ["green", "violet", "red"];
+  const usedColors = colors;
+  const remainingColors = allColors.filter(
+    (color) => !usedColors.includes(color)
+  );
+  return getRandomElement(remainingColors);
+};
+
+export const getTotalLeastBetAmountNumber = (winningColor, bets) => {
+  // Filter bets by the winningColor
+  const colorBets = bets.filter((bet) => bet.colourName === winningColor);
+
+  // Group bets by number and calculate total betAmount for each number
+  const numberGroups = {};
+  colorBets.forEach((bet) => {
+    const { colourNumber, betAmount } = bet;
+    if (!numberGroups[colourNumber]) {
+      numberGroups[colourNumber] = 0;
+    }
+    numberGroups[colourNumber] += betAmount;
+  });
+
+  // Find the number with the lowest total betAmount
+  let leastBetAmount = Infinity;
+  let leastBetNumber = null;
+  for (const [number, totalBetAmount] of Object.entries(numberGroups)) {
+    if (totalBetAmount < leastBetAmount) {
+      leastBetAmount = totalBetAmount;
+      leastBetNumber = parseInt(number); // Convert number to integer
+    }
+  }
+
+  return {
+    totalLeastBetAmountNumber: leastBetNumber,
+    getTotalLeastBetAmountNumberValue: leastBetAmount,
+  };
+};
+
+export const updateBetsStatus = async (filter, update) => {
+  await ColourBetting.updateMany(filter, update);
+};
+
+export const winRandomUser = async (data) => {
+  console.log(data);
+  await ColourBetting.create(data);
+};
+
+export const checkBetsDetails = (bets) => {
+  // Check if all bets have the same user ID
+  const userId = bets.length > 0 ? bets[0]?.userId?.toString() : null;
+  console.log({ userId });
+  const sameUserId = bets.every((bet) => {
+    return bet?.userId?.toString() === userId;
+  });
+  console.log({ sameUserId });
+  console.log({ bets }, "log bets 1111");
+
+  // Find and return used colourName for sameUserId
+  // const usedColorNames = sameUserId ? bets.map((bet) => bet.colourName) : [];
+  const usedColorNames = sameUserId
+    ? bets.map((bet) => bet.colourName).filter((color) => color !== null)
+    : [];
+
+  // Find and return used colourName for sameUserId
+  const usedColorNumbers = sameUserId
+    ? bets.map((bet) => bet.colourNumber)
+    : [];
+
+  console.log({ usedColorNames });
+  console.log({ usedColorNumbers });
+
+  // Check if all possible color names and color numbers have been used
+  const colorNames = new Set();
+  const colorNumbers = new Set();
+
+  bets.forEach((bet) => {
+    if (bet.colourName !== null) {
+      colorNames.add(bet.colourName);
+    }
+    colorNumbers.add(bet.colourNumber);
+  });
+
+  const allColorsUsed = ["red", "green", "violet"].every((color) =>
+    colorNames.has(color)
+  );
+  console.log({ allColorsUsed });
+  let allNumbersUsed = true;
+  for (let i = 0; i <= 9; i++) {
+    if (!colorNumbers.has(i)) {
+      allNumbersUsed = false;
+      break;
+    }
+  }
+
+  return {
+    sameUserId: userId === null ? null : sameUserId,
+    usedColorNames: usedColorNames,
+    usedColorNumbers: usedColorNumbers,
+    allColorsUsed: allColorsUsed,
+    allNumbersUsed: allNumbersUsed,
+  };
+};
+
+// const getTotalLeastBetAmountColor = (bets) => {
+//   // Group bets by colourName and calculate total betAmount for each colour
+//   const colorGroups = {};
+//   bets.forEach((bet) => {
+//     const { colourName, betAmount } = bet;
+//     if (colourName !== null) {
+//       if (!colorGroups[colourName]) {
+//         colorGroups[colourName] = 0;
+//       }
+//       colorGroups[colourName] += betAmount;
+//     }
+//   });
+//   console.log({ colorGroups });
+
+//   // Find the color with the lowest total betAmount
+//   let leastBetAmount = Infinity;
+//   let leastBetColor = null;
+//   let isTie = false;
+//   for (const [color, totalBetAmount] of Object.entries(colorGroups)) {
+//     if (totalBetAmount < leastBetAmount) {
+//       leastBetAmount = totalBetAmount;
+//       leastBetColor = color;
+//       isTie = false; // Reset tie flag if a new minimum is found
+//     } else if (totalBetAmount === leastBetAmount && color !== "violet") {
+//       isTie = true; // Set tie flag if there's a tie with a color other than violet
+//     }
+//   }
+//   console.log({ isTie });
+//   // If there's a tie with violet, randomly select one of the tied colors
+//   if (isTie) {
+//     const tiedColors = Object.entries(colorGroups)
+//       .filter(
+//         ([color, totalBetAmount]) =>
+//           totalBetAmount === leastBetAmount && color !== "violet"
+//       )
+//       .map(([color]) => color);
+//     console.log({ tiedColors });
+//     const randomIndex = Math.floor(Math.random() * tiedColors.length);
+//     leastBetColor = tiedColors[randomIndex];
+//   }
+
+//   console.log({ leastBetColor });
+//   console.log({ leastBetAmount });
+
+//   return {
+//     totalLeastBetAmountColor: leastBetColor,
+//     getTotalLeastBetAmountColorValue: leastBetAmount,
+//   };
+// };
+
+const getTotalLeastBetAmountDetails = (bets) => {
+  // Constants for color groups
+  const colorGroups = {
+    green: [1, 3, 7, 9, 5],
+    violet: [0, 5],
+    red: [2, 4, 6, 8, 0],
+  };
+
+  // Initialize objects to store total bet amounts and color numbers
+  const colorTotals = {};
+  const colorNumberSet = {};
+  const colorNumberTotals = {};
+
+  // Iterate through bets data
+  bets.forEach((bet) => {
+    const { colourName, betAmount, colourNumber } = bet;
+
+    // Ensure valid betAmount
+    if (betAmount) {
+      // Check if the bet belongs to any color group
+      Object.keys(colorGroups).forEach((color) => {
+        if (
+          colourName === color ||
+          (colourName === null && colorGroups[color].includes(colourNumber))
+        ) {
+          // Increment total bet amount for the color
+          colorTotals[color] = (colorTotals[color] || 0) + betAmount;
+
+          // Add colourNumber to set for the color
+          if (
+            colourNumber !== null &&
+            colorGroups[color].includes(colourNumber)
+          ) {
+            if (!colorNumberSet[color]) {
+              colorNumberSet[color] = new Set();
+            }
+            colorNumberSet[color].add(colourNumber);
+
+            // Increment total bet amount for the colourNumber
+            colorNumberTotals[colourNumber] =
+              (colorNumberTotals[colourNumber] || 0) + betAmount;
+          }
+        }
+      });
+    }
+  });
+
+  // Initialize array to store color details
+  const colorDetails = [];
+
+  // Iterate through color groups
+  Object.keys(colorGroups).forEach((color) => {
+    // Calculate total least bet amount for the color
+    const totalLeastColourAndNumbersAmount = colorTotals[color] || 0;
+
+    // Calculate total least bet amount for the color
+    let totalLeastColourAmount = 0;
+
+    // Filter out bets without colourName
+    bets.forEach((bet) => {
+      if (bet.colourName === color) {
+        totalLeastColourAmount += bet.betAmount;
+      }
+    });
+
+    // Get total used colour numbers for the color
+    const usedColourNumbers = Array.from(colorNumberSet[color] || []);
+
+    // Calculate remaining unused color numbers
+    const unUsedColourNumbers = colorGroups[color].filter(
+      (number) => !usedColourNumbers.includes(number)
+    );
+
+    // Calculate total least colour number
+    let totalLeastColourNumber = null;
+    let leastNumberAmount = Infinity; // Initialize with infinity to find the minimum
+
+    usedColourNumbers.forEach((number) => {
+      if (colorNumberTotals[number] < leastNumberAmount) {
+        leastNumberAmount = colorNumberTotals[number];
+        totalLeastColourNumber = number;
+      }
+    });
+
+    // Add color details to array
+    colorDetails.push({
+      color,
+      totalLeastColourAmount: totalLeastColourAmount
+        ? totalLeastColourAmount
+        : null,
+      totalLeastNumberAmount:
+        leastNumberAmount === Infinity ? null : leastNumberAmount,
+      usedColourNumbers: usedColourNumbers ? usedColourNumbers : [],
+      unUsedColourNumbers: unUsedColourNumbers ? unUsedColourNumbers : [],
+      totalLeastColourNumber: totalLeastColourNumber,
+      totalLeastColourAndNumbersAmount: totalLeastColourAndNumbersAmount
+        ? totalLeastColourAndNumbersAmount
+        : null,
+    });
+  });
+
+  return colorDetails;
+};
+
+const getWinningColor = (colorDetails) => {
+  // console.log({colorDetails});
+  // Filter out color details with null totalLeastColourAndNumbersAmount
+  const validColorDetails = colorDetails.filter(
+    (detail) => detail.totalLeastColourAndNumbersAmount !== null
+  );
+
+  // console.log(validColorDetails)
+
+  // Find the color with the minimum totalLeastColourAndNumbersAmount
+  const winningColor = validColorDetails.reduce((minColor, color) => {
+    return color.totalLeastColourAndNumbersAmount <
+      minColor.totalLeastColourAndNumbersAmount
+      ? color
+      : minColor;
+  }, validColorDetails[0]);
+
+  // console.log(winningColor)
+
+  return winningColor.color;
+};
+
+export const displayWinnerMessage = async (data) => {
+  return {
+    message: `Victory Alert! The Winning Color is ${data.winningColor} and the Winning Number is ${data.winningColorNumber}`,
+  };
+};
+
 export const declareColorWinner = async (
   game,
   period,
   selectedTime,
   gameType
 ) => {
-  const { _id, gameMode, winningCoin } = game;
+  const { _id, gameMode } = game;
   const gameId = _id;
 
+  let winningColor = null;
+  let winningColorNumber = null;
+  let betResult = null;
+  let winners = null;
+  let losers = null;
 
+  // Get all bets for the period
+  const bets = await ColourBetting.find({
+    gameId,
+    gameType,
+    period: Number(period),
+    selectedTime,
+    is_deleted: 0,
+  });
 
-  if (gameMode == "Manual") {
-    await ColourBetting.updateMany(
-      { gameId, gameType, period, selectedTime },
-      { status: "pending" }
+  betResult = checkBetsDetails(bets);
+  // console.log({ bets });
+  console.log({ betResult });
+
+  if (
+    bets.length > 0 &&
+    betResult.sameUserId === true &&
+    betResult.allColorsUsed === false &&
+    betResult.allNumbersUsed === false
+  ) {
+    // if single user bets found
+    // winningColor = getRandomColor();
+    const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
+    winningColor = getRemainingRandomColor(betResult.usedColorNames);
+    // winningColorNumber = getRandomNumberForColor(winningColor);
+    winningColorNumber = getRemainingRandomOrLeastNumberForColor(
+      getTotalLeastBetAmountData,
+      winningColor
     );
-    return {
-      message: ResponseMessage.WINNER_DECLARE_MANUAL,
-    };
-  } else {
 
-    const checkAlreadyWin = await ColourBetting.find({
-      gameId,
-      // isWin: true,
+    console.log({ bets }, "single user bets");
+    console.log({ winningColor, winningColorNumber }, "single user winner");
+
+    // Update bets status
+    winners = bets.filter(
+      (bet) =>
+        bet.colourName === winningColor ||
+        bet.colourNumber === winningColorNumber
+    );
+    losers = bets.filter(
+      (bet) =>
+        bet.colourName !== winningColor ||
+        bet.colourNumber !== winningColorNumber
+    );
+
+    losers = losers.filter(
+      (loser) => !winners.some((winner) => winner._id === loser._id)
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: winners.map((w) => w._id) },
+      },
+      { status: "successfully", isWin: true }
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: losers.map((l) => l._id) },
+      },
+      { status: "fail", isWin: false }
+    );
+
+    await winRandomUser({
       userId: null,
-      gameType,
-      period: Number(period),
+      period,
       selectedTime,
+      gameId,
+      gameType,
+      colourName: winningColor,
+      colourNumber: winningColorNumber,
+      betAmount: 0,
       is_deleted: 0,
-    }).lean();
-    if (checkAlreadyWin.length) {
-      return {
-        message: ResponseMessage.COLOR_WINNER + checkAlreadyWin[0].colourName,
-      };
-    } else {
-      const totalUserInPeriod = await ColourBetting.aggregate([
-        {
-          $match: {
-            gameId: new mongoose.Types.ObjectId(gameId),
-            gameType,
-            period: Number(period),
-            selectedTime,
-            is_deleted: 0,
-          },
-        },
-        {
-          $group: {
-            _id: "$userId",
-            period: { $first: "$period" },
-            userTotalBets: { $sum: 1 },
-          },
-        },
-      ]);
-      if (totalUserInPeriod.length) {
-        const hasUserTotalBets = totalUserInPeriod.some(
-          (user) => user.userTotalBets >= 1
+      isWin: true,
+      status: "successfully",
+    });
+  } else if (
+    bets.length > 0 &&
+    betResult.sameUserId === true &&
+    betResult.allColorsUsed === true &&
+    betResult.allNumbersUsed === false
+  ) {
+    //
+    // winningColor = getRandomColor();
+    // const { totalLeastBetAmountColor } = getTotalLeastBetAmountColor(bets);
+    const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
+
+    // console.log({getTotalLeastBetAmountData});
+
+    console.log(
+      JSON.stringify(getTotalLeastBetAmountData),
+      "getTotalLeastBetAmountData"
+    );
+    const winningColor = getWinningColor(getTotalLeastBetAmountData);
+    // console.log(JSON.stringify(winningColor), "winningColor");
+
+    // winningColorNumber = getRandomNumberForColor(winningColor);
+    winningColorNumber = getRemainingRandomOrLeastNumberForColor(
+      getTotalLeastBetAmountData,
+      winningColor
+    );
+
+    console.log({ winningColor, winningColorNumber });
+
+    // TODO: NEED TO UPDATE THIS
+    // Update bets status
+    // CHECK DYNAMIC
+    // winners = bets.filter(
+    //   (bet) =>
+    //     bet.colourName === winningColor ||
+    //     bet.colourNumber === winningColorNumber
+    // );
+    // console.log({ winners });
+
+    // // TODO: NEED TO UPDATE THIS
+    // losers = bets.filter(
+    //   (bet) =>
+    //     bet.colourName !== winningColor ||
+    //     bet.colourNumber !== winningColorNumber
+    // );
+    // console.log({ losers });
+
+    let winners = bets.filter((bet) => {
+      if (bet.colourName || bet.colourNumber) {
+        return (
+          bet.colourName === winningColor ||
+          bet.colourNumber === winningColorNumber
         );
-        if (totalUserInPeriod.length >= 1 && hasUserTotalBets) {
-          const getAllColourBets = await ColourBetting.aggregate([
-            {
-              $match: { period: Number(period), selectedTime, gameType },
-            },
-            {
-              $group: {
-                _id: "$colourName",
-                period: { $first: "$period" },
-                totalUser: { $sum: 1 },
-                userIds: { $push: "$userId" },
-                totalBetAmount: { $sum: "$betAmount" },
-              },
-            },
-            {
-              $project: {
-                _id: 0,
-                period: 1,
-                colourName: "$_id",
-                totalUser: 1,
-                userIds: 1,
-                totalBetAmount: 1,
-              },
-            },
-            {
-              $sort: { totalBetAmount: 1 },
-            },
-          ]);
-
-          if (getAllColourBets.length) {
-            const tieColours = getAllColourBets.filter(
-              (item) =>
-                item.totalBetAmount === getAllColourBets[0].totalBetAmount
-            );
-            if (getAllColourBets.length == 1) {
-              console.log(`ramdom win 537 line period is ${period}`);
-              const randomWinColour = getRandomColorExcluding(
-                tieColours.map((item) => item.colourName),
-                gameType
-              );
-              await ColourBetting.create({
-                userId: null,
-                period,
-                selectedTime,
-                gameId,
-                gameType,
-                colourName: randomWinColour,
-                betAmount: 0,
-                is_deleted: 0,
-                isWin: true,
-                status: "successfully",
-              });
-              await ColourBetting.updateMany(
-                {
-                  period,
-                  selectedTime,
-                  gameId,
-                  gameType,
-                  isWin: false,
-                  status: "pending",
-                  is_deleted: 0,
-                },
-                { status: "fail" }
-              );
-              return {
-                message: `Victory Alert! The Winning Color is ${randomWinColour}`,
-              };
-            } else {
-              await Promise.all(
-                getAllColourBets.map(async (item, index) => {
-                  if (index === 0) {
-                    console.log(`auto win 550 line period is ${item}`);
-                    // Handling the winner
-                    console.log(item.userIds, " item.userIds", item);
-                    item.userIds.map(async (userId) => {
-                      console.log(userId, "userId");
-                      console.log(
-                        userId,
-                        gameId,
-                        item.period,
-                        selectedTime,
-                        item.colourName,
-                        "item.colourName"
-                      );
-                      const findUser = await ColourBetting.findOne({
-                        userId,
-                        gameId,
-                        period: item.period,
-                        gameType,
-                        selectedTime,
-                        colourName: item.colourName,
-                        is_deleted: 0,
-                      });
-                      if (findUser) {
-
-                        console.log(winningCoin, "winning coin 2 colour ")
-                        let rewardAmount = findUser.betAmount * winningCoin + findUser.betAmount;
-
-                        await ColourBetting.updateOne(
-                          {
-                            userId,
-                            gameId,
-                            period: item.period,
-                            selectedTime,
-                            gameType,
-                            isWin: false,
-                            status: "pending",
-                            colourName: item.colourName,
-                            is_deleted: 0,
-                          },
-                          { isWin: true, status: "successfully", rewardAmount }
-                        );
-                        const balance = await getSingleData(
-                          { userId },
-                          NewTransaction
-                        );
-
-                        if (balance) {
-                          let winningAmount = Number(rewardAmount);
-
-                          balance.totalCoin =
-                            Number(balance.totalCoin) + Number(winningAmount);
-                          console.log(balance.totalCoin, " balance.totalCoin")
-                          await balance.save();
-                        }
-                      }
-                      // console.log('findUser 563', findUser);
-                    });
-                  } else {
-                    // Handling the losers
-                    item.userIds.map(async (userId) => {
-                      console.log(
-                        `auto loose 569 line period is ${item.period}`
-                      );
-                      // console.log('568 loss');
-                      await ColourBetting.updateOne(
-                        {
-                          userId,
-                          gameId,
-                          period: item.period,
-                          selectedTime,
-                          gameType,
-                          isWin: false,
-                          status: "pending",
-                          colourName: item.colourName,
-                          is_deleted: 0,
-                        },
-                        { status: "fail" }
-                      );
-                    });
-                  }
-                })
-              );
-            }
-            return {
-              message:
-                ResponseMessage.COLOR_WINNER +
-                " testcolor2" +
-                getAllColourBets[0].colourName,
-            };
-          } else {
-            console.log("579 loose");
-            await ColourBetting.updateMany(
-              { gameId, selectedTime, period, gameType },
-              { status: "fail" }
-            );
-            return {
-              message: ResponseMessage.LOSER,
-            };
-          }
-        } else {
-          // console.log('586 loose');
-          await ColourBetting.updateMany(
-            { gameId, selectedTime, period, gameType },
-            { status: "fail" }
-          );
-          return {
-            message: ResponseMessage.LOSER,
-          };
-        }
-      } else {
-
-        let allColors = ["red", "green", "orange"];
-        if (gameType == "2colorBetting") {
-          allColors = ["red", "green"];
-        }
-        let randomIndex = Math.floor(Math.random() * allColors.length);
-        let randomWinColor = allColors[randomIndex];
-        await ColourBetting.create({
-          userId: null,
-          period,
-          selectedTime,
-          gameId,
-          gameType,
-          colourName: randomWinColor,
-          betAmount: 0,
-          is_deleted: 0,
-          isWin: true,
-          status: "successfully",
-        });
-        return {
-          message:
-            ResponseMessage.COLOR_WINNER + " testcolor3" + randomWinColor,
-        };
+      } else if (bet.colourName) {
+        return bet.colourName === winningColor;
+      } else if (bet.colourNumber) {
+        return bet.colourNumber === winningColorNumber;
       }
-    }
+      return false; // If neither colourName nor colourNumber exist
+    });
+
+    let losers = bets.filter((bet) => {
+      if (bet.colourName || bet.colourNumber) {
+        return (
+          bet.colourName !== winningColor ||
+          bet.colourNumber !== winningColorNumber
+        );
+      } else if (bet.colourName) {
+        return bet.colourName !== winningColor;
+      } else if (bet.colourNumber) {
+        return bet.colourNumber !== winningColorNumber;
+      }
+      return false; // If neither colourName nor colourNumber exist
+    });
+
+    losers = losers.filter(
+      (loser) => !winners.some((winner) => winner._id === loser._id)
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: winners.map((w) => w._id) },
+      },
+      { status: "successfully", isWin: true }
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: losers.map((l) => l._id) },
+      },
+      { status: "fail", isWin: false }
+    );
+  } else if (
+    bets.length > 0 &&
+    betResult.sameUserId === true &&
+    betResult.allColorsUsed === false &&
+    betResult.allNumbersUsed === true
+  ) {
+    //
+    // winningColor = getRandomColor();
+    const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
+    winningColor = getRemainingRandomColor(betResult.usedColorNames);
+    // const { totalLeastBetAmountNumber } = getTotalLeastBetAmountNumber(
+    //   winningColor,
+    //   bets
+    // );
+    // winningColorNumber = totalLeastBetAmountNumber;
+
+    winningColorNumber = getRemainingRandomOrLeastNumberForColor(
+      getTotalLeastBetAmountData,
+      winningColor
+    );
+
+    winners = bets.filter(
+      (bet) =>
+        bet.colourName === winningColor ||
+        bet.colourNumber === winningColorNumber
+    );
+    losers = bets.filter(
+      (bet) =>
+        bet.colourName !== winningColor ||
+        bet.colourNumber !== winningColorNumber
+    );
+
+    losers = losers.filter(
+      (loser) => !winners.some((winner) => winner._id === loser._id)
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: winners.map((w) => w._id) },
+      },
+      { status: "successfully", isWin: true }
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: losers.map((l) => l._id) },
+      },
+      { status: "fail", isWin: false }
+    );
+
+    await winRandomUser({
+      userId: null,
+      period,
+      selectedTime,
+      gameId,
+      gameType,
+      colourName: winningColor,
+      colourNumber: winningColorNumber,
+      betAmount: 0,
+      is_deleted: 0,
+      isWin: true,
+      status: "successfully",
+    });
+  } else if (
+    bets.length > 0 &&
+    betResult.sameUserId === true &&
+    betResult.allColorsUsed === true &&
+    betResult.allNumbersUsed === true
+  ) {
+    //
+    // winningColor = getRandomColor();
+    // // winningColor = getRemainingRandomColor(betResult.usedColorNames);
+
+    // const { totalLeastBetAmountNumber: winningColorNumber } =
+    //   getTotalLeastBetAmountNumber(winningColor, bets);
+    const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
+    const winningColor = getWinningColor(getTotalLeastBetAmountData);
+
+    winningColorNumber = getRemainingRandomOrLeastNumberForColor(
+      getTotalLeastBetAmountData,
+      winningColor
+    );
+    winners = bets.filter(
+      (bet) =>
+        bet.colourName === winningColor ||
+        bet.colourNumber === winningColorNumber
+    );
+    losers = bets.filter(
+      (bet) =>
+        bet.colourName !== winningColor ||
+        bet.colourNumber !== winningColorNumber
+    );
+    losers = losers.filter(
+      (loser) => !winners.some((winner) => winner._id === loser._id)
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: winners.map((w) => w._id) },
+      },
+      { status: "successfully", isWin: true }
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: losers.map((l) => l._id) },
+      },
+      { status: "fail", isWin: false }
+    );
+  } else if (bets.length > 0 && betResult.sameUserId === false) {
+    // Multiple User Placed Bets
+    console.log("...........Multiple...........");
+    const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
+    console.log(JSON.stringify(getTotalLeastBetAmountData));
+    // winningColor = getRemainingRandomColor(betResult.usedColorNames);
+    const winningColor = getWinningColor(betResult, getTotalLeastBetAmountData);
+
+    winningColorNumber = getRemainingRandomOrLeastNumberForColor(
+      getTotalLeastBetAmountData,
+      winningColor
+    );
+
+    console.log({ winningColor, winningColorNumber });
+
+    winners = bets.filter(
+      (bet) =>
+        bet.colourName === winningColor ||
+        bet.colourNumber === winningColorNumber
+    );
+    losers = bets.filter(
+      (bet) =>
+        bet.colourName !== winningColor ||
+        bet.colourNumber !== winningColorNumber
+    );
+
+    losers = losers.filter(
+      (loser) => !winners.some((winner) => winner._id === loser._id)
+    );
+
+    console.log({ winners });
+    console.log({ losers });
+
+    await updateBetsStatus(
+      {
+        _id: { $in: winners.map((w) => w._id) },
+      },
+      { status: "successfully", isWin: true }
+    );
+
+    await updateBetsStatus(
+      {
+        _id: { $in: losers.map((l) => l._id) },
+      },
+      { status: "fail", isWin: false }
+    );
+  } else {
+    console.log("Random Null");
+    // If no bets are placed, select a winning color and number randomly
+
+    winningColor = getRandomColor();
+    winningColorNumber = getRandomNumberForColor(winningColor);
+
+    // console.log({ winningColor, winningColorNumber });
+
+    await winRandomUser({
+      userId: null,
+      period,
+      selectedTime,
+      gameId,
+      gameType,
+      colourName: winningColor,
+      colourNumber: winningColorNumber,
+      betAmount: 0,
+      is_deleted: 0,
+      isWin: true,
+      status: "successfully",
+    });
   }
+
+  // Create a new entry for the winning color and number only if no bets are placed or single user placed bets
+  // if (!bets.length) {
+
+  // }
+
+  return displayWinnerMessage({ winningColor, winningColorNumber });
+
+  // return {
+  //   message: `Victory Alert! The Winning Color is ${winningColor} and the Winning Number is ${winningColorNumber}`,
+  // };
 };
+
 //#region For Declare penalty winner
 export const declarePenaltyWinner = async (game, period, selectedTime) => {
   const { _id, gameMode, winningCoin } = game;

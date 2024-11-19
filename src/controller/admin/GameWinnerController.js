@@ -811,7 +811,8 @@ export const declareWinnerOfNumberBetting = async (req, res) => {
 //#region Winner declare of color
 export const declareWinnerOfColorBetting = async (req, res) => {
   try {
-    const { gameId, winnerId, winColour, periodFor } = req.body;
+    const { gameId, winnerId, winColourNumber, winColour, periodFor } =
+      req.body;
     if (!winnerId) {
       return sendResponse(res, StatusCodes.OK, "winnerId is required.", []);
     }
@@ -845,6 +846,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         period: winnerId,
         gameId: gameId,
         colourName: winColour,
+        colourNumber: winColourNumber,
         selectedTime: periodFor,
         is_deleted: 0,
         isWin: false,
@@ -879,7 +881,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
           let gameName =
             findColorBetting.gameType == "2colorBetting"
               ? "2 Color Betting"
-              : "3 Color Betting";
+              : "3 Color Betting"; 
           const userData = await getSingleData(
             { _id: findColorBetting.userId },
             User
@@ -907,6 +909,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         userId: null,
         period: winnerId,
         colourName: winColour,
+        colourNumber: winColourNumber,
         selectedTime: periodFor,
         gameType,
         rewardAmount: 0,
@@ -921,6 +924,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
         gameId,
         period: winnerId,
         colourName: { $ne: winColour },
+        colourNumber: { $ne: winColourNumber },
         selectedTime: periodFor,
         status: "pending",
         is_deleted: 0,

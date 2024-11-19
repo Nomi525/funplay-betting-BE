@@ -1,3 +1,4 @@
+import { validate } from "node-cron";
 import { mongoose } from "../index.js";
 
 const colourBettingSchema = new mongoose.Schema(
@@ -15,6 +16,11 @@ const colourBettingSchema = new mongoose.Schema(
     colourName: {
       type: String,
       required: false,
+    },
+    colourNumber: {
+      type: Number,
+      required: false,
+      default: null,
     },
     betAmount: {
       type: Number,
@@ -71,7 +77,6 @@ const colourBettingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 const colourBettingSchemaNew = new mongoose.Schema(
   {
     userId: {
@@ -87,6 +92,12 @@ const colourBettingSchemaNew = new mongoose.Schema(
     colourName: {
       type: String,
       required: false,
+      default: null,
+    },
+    colourNumber: {
+      type: Number,
+      required: false,
+      default: null,
     },
     betAmount: {
       type: Number,
@@ -143,9 +154,11 @@ const colourBettingSchemaNew = new mongoose.Schema(
   { timestamps: true }
 );
 
-const ColourBettingNew = mongoose.model("ColourBettingNew", colourBettingSchemaNew);
+const ColourBettingNew = mongoose.model(
+  "ColourBettingNew",
+  colourBettingSchemaNew
+);
 
 const ColourBetting = mongoose.model("ColourBetting", colourBettingSchema);
-
 
 export { ColourBetting, ColourBettingNew };
