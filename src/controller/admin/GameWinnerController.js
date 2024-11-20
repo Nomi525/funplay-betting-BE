@@ -83,7 +83,7 @@ export const getAllWinnersUser = async (req, res) => {
         {
           $match: {
             is_deleted: 0,
-            gameType: "3colorBetting",
+            gameType: "Color Prediction",
             status: "pending",
           },
         },
@@ -100,7 +100,7 @@ export const getAllWinnersUser = async (req, res) => {
         },
         {
           $addFields: {
-            gameType: "3colorBetting",
+            gameType: "Color Prediction",
           },
         },
         {
@@ -465,10 +465,10 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
         0
       );
       totalUsers = getAllUsers.length;
-    } else if (gameType === "3colorBetting") {
+    } else if (gameType === "Color Prediction") {
       getAllUsers = await ColourBetting.find({
         is_deleted: 0,
-        gameType: "3colorBetting",
+        gameType: "Color Prediction",
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
@@ -476,7 +476,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       getAllNotWinner = await ColourBetting.find({
         isWin: false,
         is_deleted: 0,
-        gameType: "3colorBetting",
+        gameType: "Color Prediction",
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
@@ -484,7 +484,7 @@ export const getAllUsersAndWinnersCommunityBetting = async (req, res) => {
       getAllWinners = await ColourBetting.find({
         isWin: true,
         is_deleted: 0,
-        gameType: "3colorBetting",
+        gameType: "Color Prediction",
       })
         .populate("userId", "fullName profile email")
         .populate("gameId", "gameName gameImage gameMode")
@@ -881,7 +881,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
           let gameName =
             findColorBetting.gameType == "2colorBetting"
               ? "2 Color Betting"
-              : "3 Color Betting"; 
+              : "Color Prediction";
           const userData = await getSingleData(
             { _id: findColorBetting.userId },
             User
@@ -903,7 +903,7 @@ export const declareWinnerOfColorBetting = async (req, res) => {
       let gameType =
         findGame.gameName == "2 Color Betting"
           ? "2colorBetting"
-          : "3colorBetting";
+          : "Color Prediction";
       const winAdminColor = await ColourBetting.create({
         gameId,
         userId: null,

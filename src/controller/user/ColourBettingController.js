@@ -421,7 +421,7 @@ export const colourBetResult = async (req, res) => {
     // }
     // Check type for color betting
     if (type == "colorBetting") {
-      if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+      if (gameType == "2colorBetting" || gameType == "Color Prediction") {
         const colourBettingResult = await winners(
           gameType,
           gameId,
@@ -493,7 +493,7 @@ async function winners(gameType, gameId, period, model) {
     is_deleted: 0,
   };
 
-  if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+  if (gameType == "2colorBetting" || gameType == "Color Prediction") {
     query.gameType = gameType;
   }
   const bettingResult = await model.aggregate([
@@ -613,7 +613,7 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
                 }
                 if (
                   gameType == "2colorBetting" ||
-                  gameType == "3colorBetting"
+                  gameType == "Color Prediction"
                 ) {
                   await ColourBetting.updateOne(
                     {
@@ -649,7 +649,7 @@ async function winnerDetails(gameType, gameId, period, bettingResult) {
           const winBet = bet.bets.find(
             (item) => bet.winner.toString() == item.userId.toString()
           );
-          if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+          if (gameType == "2colorBetting" || gameType == "Color Prediction") {
             winColour = winBet ? winBet.colourName : "";
           } else {
             winNumber = winBet ? winBet.number : 0;
@@ -1745,7 +1745,7 @@ export const getCommunityWinList = async (req, res) => {
 //                     balance.totalCoin = Number(balance.totalCoin) + Number(winingAmount)
 //                     await balance.save();
 //                     const userData = await getSingleData({ _id: userId }, User)
-//                     let gameName = gameType == "3colorBetting" ? "3 Colour Betting" : "2 Colour Betting"
+//                     let gameName = gameType == "Color Prediction" ? "3 Colour Betting" : "2 Colour Betting"
 //                     let mailInfo = await ejs.renderFile("src/views/GameWinner.ejs", {
 //                       gameName: gameName,
 //                     });
@@ -2007,7 +2007,7 @@ export const colourBettingWinnerResult = async (req, res) => {
     //                       User
     //                     );
     //                     let gameName =
-    //                       gameType == "3colorBetting"
+    //                       gameType == "Color Prediction"
     //                         ? "3 Colour Betting"
     //                         : "2 Colour Betting";
     //                     let mailInfo = await ejs.renderFile(

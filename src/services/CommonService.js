@@ -1181,14 +1181,23 @@ export const declareColorWinner = async (
   let winners = null;
   let losers = null;
 
+  console.log("Game:", game);
+  console.log("Period:", period);
+  console.log("Selected Time:", selectedTime);
+  console.log("Selected Time Type of:", typeof selectedTime);
+  console.log("Game Type:", gameType);
+
   // Get all bets for the period
   const bets = await ColourBetting.find({
     gameId,
     gameType,
+    status: "pending",
     period: Number(period),
-    selectedTime,
+    selectedTime: selectedTime,
     is_deleted: 0,
   });
+
+  console.log(bets, "get bet");
 
   betResult = checkBetsDetails(bets);
   // console.log({ bets });

@@ -994,7 +994,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
   try {
     const { gameType, gameId } = req.params;
     let gameSelectedTimeList = [];
-    if (gameType == "2colorBetting" || gameType == "3colorBetting") {
+    if (gameType == "2colorBetting" || gameType == "Color Prediction") {
       gameSelectedTimeList = await ColourBetting.aggregate([
         {
           $match: {
@@ -1253,7 +1253,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
 
 //      return battingAggregationResult;
 //     }
-//     else if (gameType === "3colorBetting" || gameType === "2colorBetting") {
+//     else if (gameType === "Color Prediction" || gameType === "2colorBetting") {
 //       console.log("hii");
 //       battingAggregationResult = await Period.aggregate([
 //         {
@@ -1952,7 +1952,7 @@ export const getAllGamePeriodSelectedTimeList = async (req, res) => {
 //         }
 //       }))
 
-//     } else if (gameType === "3colorBetting" || gameType === "2colorBetting") {
+//     } else if (gameType === "Color Prediction" || gameType === "2colorBetting") {
 //       battingAggregationResult = await Period.aggregate([
 //         {
 //           $match: {
@@ -2577,7 +2577,7 @@ export const getAllGamePeriodData = async (req, res) => {
 
 
 
-    } else if (gameType === "3colorBetting" || gameType === "2colorBetting") {
+    } else if (gameType === "Color Prediction" || gameType === "2colorBetting") {
       try {
         const aggregationResult = await ColourBetting.aggregate([
           {
