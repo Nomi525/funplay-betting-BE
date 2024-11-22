@@ -1131,8 +1131,13 @@ export const getAllGamePeriod = async (req, res) => {
             summary.totalUsers += 1;
             if (current.isWin) {
               summary.winColour = current.colourName || summary.winColour;
+
+              // Allow 0 as a valid value for winColourNumber
               summary.winColourNumber =
-                current.colourNumber || summary.winColourNumber;
+                current.colourNumber !== null &&
+                current.colourNumber !== undefined
+                  ? current.colourNumber
+                  : summary.winColourNumber;
             }
             return summary;
           },

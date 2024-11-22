@@ -1139,13 +1139,13 @@ const getTotalLeastBetAmountDetails = (bets) => {
 };
 
 const getWinningColor = (colorDetails) => {
-  // console.log({colorDetails});
+  console.log({ colorDetails });
   // Filter out color details with null totalLeastColourAndNumbersAmount
   const validColorDetails = colorDetails.filter(
     (detail) => detail.totalLeastColourAndNumbersAmount !== null
   );
 
-  // console.log(validColorDetails)
+  console.log(validColorDetails, "validColorDetails");
 
   // Find the color with the minimum totalLeastColourAndNumbersAmount
   const winningColor = validColorDetails.reduce((minColor, color) => {
@@ -1155,7 +1155,7 @@ const getWinningColor = (colorDetails) => {
       : minColor;
   }, validColorDetails[0]);
 
-  // console.log(winningColor)
+  console.log(winningColor, "winningColor");
 
   return winningColor.color;
 };
@@ -1432,6 +1432,9 @@ export const declareColorWinner = async (
     // const { totalLeastBetAmountNumber: winningColorNumber } =
     //   getTotalLeastBetAmountNumber(winningColor, bets);
     const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
+
+    console.log(getTotalLeastBetAmountData, "getTotalLeastBetAmountData");
+
     const winningColor = getWinningColor(getTotalLeastBetAmountData);
 
     winningColorNumber = getRemainingRandomOrLeastNumberForColor(
@@ -1469,9 +1472,13 @@ export const declareColorWinner = async (
     // Multiple User Placed Bets
     console.log("...........Multiple...........");
     const getTotalLeastBetAmountData = getTotalLeastBetAmountDetails(bets);
-    console.log(JSON.stringify(getTotalLeastBetAmountData));
+    console.log(
+      JSON.stringify(getTotalLeastBetAmountData),
+      "getTotalLeastBetAmountData"
+    );
     // winningColor = getRemainingRandomColor(betResult.usedColorNames);
-    const winningColor = getWinningColor(betResult, getTotalLeastBetAmountData);
+    // const winningColor = getWinningColor(betResult, getTotalLeastBetAmountData);
+    const winningColor = getWinningColor(getTotalLeastBetAmountData);
 
     winningColorNumber = getRemainingRandomOrLeastNumberForColor(
       getTotalLeastBetAmountData,
